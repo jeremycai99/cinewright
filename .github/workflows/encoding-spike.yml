@@ -1,0 +1,22 @@
+# Temporary (M0.2 Task 9): the encoding spike on a native amd64 runner. Deleted before merge.
+name: encoding-spike
+
+on:
+  pull_request:
+
+permissions:
+  contents: read
+
+jobs:
+  spike:
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      - uses: astral-sh/setup-uv@68559e99cc807c1eb7e9238fd43a15bba460eec2 # v10.3.3
+        with:
+          version-file: pyproject.toml
+      - run: uv sync --locked
+      - run: uv run --locked cinewright-build-image --tag cinewright-render:spike
+      - run: container/spike/encoding-spike.sh cinewright-render:spike "$RUNNER_TEMP/spike" | tee -a "$GITHUB_STEP_SUMMARY"
