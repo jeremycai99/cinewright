@@ -1,0 +1,10 @@
+node_modules/
+dist/
+.venv/
+.cinewright/
+out/
+*.mp4
+*.mov
+*.wav
+.DS_Store
+.superpowers/
