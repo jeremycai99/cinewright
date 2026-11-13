@@ -1,0 +1,129 @@
+# Render smoke test (M0.2, D33): two separate amd64 runners each check the pins, render the
+# hello-world fixture twice and the remote-URL fixture; their hashes must match each other.
+name: render-smoke
+
+on:
+  pull_request:
+    paths:
+      - container/**
+      - tools/**
+      - .dockerignore
+      - .node-version
+      - package.json
+      - pnpm-lock.yaml
+      - pnpm-workspace.yaml
+      - pyproject.toml
+      - uv.lock
+      - tsconfig.base.json
+      - .github/workflows/render-smoke.yml
+  push:
+    branches: [main]
+    paths:
+      - container/**
+      - tools/**
+      - .dockerignore
+      - .node-version
+      - package.json
+      - pnpm-lock.yaml
+      - pnpm-workspace.yaml
+      - pyproject.toml
+      - uv.lock
+      - tsconfig.base.json
+      - .github/workflows/render-smoke.yml
+
+permissions:
+  contents: read
+  packages: read
+
+concurrency:
+  group: render-smoke-${{ github.ref }}
+  cancel-in-progress: ${{ github.event_name == 'pull_request' }}
+
+jobs:
+  smoke:
+    name: smoke-${{ matrix.side }}
+    strategy:
+      fail-fast: false
+      matrix:
+        side: [a, b]
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      - uses: astral-sh/setup-uv@68559e99cc807c1eb7e9238fd43a15bba460eec2 # v10.3.3
+        with:
+          version-file: pyproject.toml
+      - run: uv sync --locked
+      - name: Use the locked image, or build one
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          locked_hash="$(jq -r '.inputs_hash // empty' container/image.lock.json)"
+          tree_hash="$(uv run --locked python -c 'from pathlib import Path; from cinewright_tools.container import inputs_hash; print(inputs_hash(Path(".")))')"
+          if [ -n "$locked_hash" ] && [ "$locked_hash" = "$tree_hash" ]; then
+            image="$(jq -r '.image + "@" + .digest' container/image.lock.json)"
+            echo "$GH_TOKEN" | docker login ghcr.io --username "$GITHUB_ACTOR" --password-stdin
+            docker pull --platform linux/amd64 "$image"
+          else
+            image="cinewright-render:ci"
+            uv run --locked cinewright-build-image --tag "$image"
+          fi
+          echo "IMAGE=$image" >> "$GITHUB_ENV"
+      - run: uv run --locked cinewright-check-pins --image "$IMAGE"
+      - name: Hello world twice, then the remote-URL fixture
+        run: uv run --locked pytest tools/tests/test_container.py -v -k "deterministic or remote"
+        env:
+          CINEWRIGHT_CONTAINER_TESTS: "1"
+          CINEWRIGHT_IMAGE: ${{ env.IMAGE }}
+      - name: Record hashes and CPU
+        run: |
+          uv run --locked cinewright-render-in-container --image "$IMAGE" \
+            --in container/fixtures/hello-world --out "$RUNNER_TEMP/hello"
+          mkdir -p smoke
+          cp "$RUNNER_TEMP/hello/framemd5.txt" "$RUNNER_TEMP/hello/sha256.txt" smoke/
+          { grep -m1 'model name' /proc/cpuinfo; grep -m1 '^flags' /proc/cpuinfo; nproc; } > smoke/cpu.txt
+      - uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
+        with:
+          name: smoke-${{ matrix.side }}
+          path: smoke/
+
+  smoke-compare:
+    needs: smoke
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/download-artifact@9000827ccba6bdab643e8b6fd33ac0654aef8333 # v8.0.2
+        with:
+          pattern: smoke-*
+      - name: Both runners must produce the same frames and bytes
+        run: |
+          echo "runner a: $(cat smoke-a/cpu.txt | head -1), $(sed -n 3p smoke-a/cpu.txt) CPUs"
+          echo "runner b: $(cat smoke-b/cpu.txt | head -1), $(sed -n 3p smoke-b/cpu.txt) CPUs"
+          status=0
+          cmp smoke-a/framemd5.txt smoke-b/framemd5.txt || { echo "::error::framemd5 differs across runners"; status=1; }
+          cmp smoke-a/sha256.txt smoke-b/sha256.txt || { echo "::error::output bytes differ across runners"; status=1; }
+          if [ "$status" -ne 0 ]; then
+            echo "CPU flags, runner a:"; sed -n 2p smoke-a/cpu.txt
+            echo "CPU flags, runner b:"; sed -n 2p smoke-b/cpu.txt
+          fi
+          cat smoke-a/sha256.txt
+          exit "$status"
+
+  image-lock:
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      - uses: astral-sh/setup-uv@68559e99cc807c1eb7e9238fd43a15bba460eec2 # v10.3.3
+        with:
+          version-file: pyproject.toml
+      - run: uv sync --locked
+      - name: Log in to GHCR when an image is locked
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          if [ "$(jq -r '.digest // empty' container/image.lock.json)" != "" ]; then
+            echo "$GH_TOKEN" | docker login ghcr.io --username "$GITHUB_ACTOR" --password-stdin
+          fi
+      - run: uv run --locked cinewright-check-image-lock

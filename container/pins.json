@@ -1,0 +1,12 @@
+{
+  "platform": "linux/amd64",
+  "base_image": "node:24.22.3-trixie-slim@sha256:af02d57b57719b9657a45199a79264a9437940cd55b3c7b3fc99615654f124a0",
+  "debian_snapshot": "20261113T143145Z",
+  "apt": {
+    "ffmpeg": "7:7.1.5-0+deb13u1",
+    "libx264-164": "2:0.164.3108+git31e19f9-2+b1",
+    "python3.13": "3.13.5-2+deb13u5",
+    "fonts-noto-core": "20201225-2"
+  },
+  "chrome_headless_shell": "152.0.7977.30"
+}

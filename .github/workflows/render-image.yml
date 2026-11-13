@@ -1,0 +1,58 @@
+# Builds the render image from the pinned inputs and publishes it to GHCR (M0.2).
+# A follow-up PR records the digest and inputs hash in container/image.lock.json.
+name: render-image
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - container/**
+      - .dockerignore
+      - .node-version
+      - package.json
+      - pnpm-lock.yaml
+      - pnpm-workspace.yaml
+      - tsconfig.base.json
+      - .github/workflows/render-image.yml
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: render-image
+  cancel-in-progress: false
+
+jobs:
+  publish:
+    runs-on: ubuntu-24.04
+    permissions:
+      contents: read
+      packages: write
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      - uses: astral-sh/setup-uv@68559e99cc807c1eb7e9238fd43a15bba460eec2 # v10.3.3
+        with:
+          version-file: pyproject.toml
+      - run: uv sync --locked
+      - name: Log in to GHCR
+        run: echo "$GH_TOKEN" | docker login ghcr.io --username "$GITHUB_ACTOR" --password-stdin
+        env:
+          GH_TOKEN: ${{ github.token }}
+      - name: Build and push
+        run: |
+          image="$(jq -r .image container/image.lock.json)"
+          uv run --locked cinewright-build-image --tag "$image:$GITHUB_SHA" --push
+          digest="$(docker buildx imagetools inspect "$image:$GITHUB_SHA" --format '{{json .Manifest}}' | jq -r .digest)"
+          hash="$(uv run --locked python -c 'from pathlib import Path; from cinewright_tools.container import inputs_hash; print(inputs_hash(Path(".")))')"
+          {
+            echo "## Render image published"
+            echo
+            echo "Record this in \`container/image.lock.json\`:"
+            echo
+            echo '```json'
+            printf '{\n  "image": "%s",\n  "digest": "%s",\n  "inputs_hash": "%s"\n}\n' "$image" "$digest" "$hash"
+            echo '```'
+          } >> "$GITHUB_STEP_SUMMARY"

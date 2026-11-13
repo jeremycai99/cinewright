@@ -1,0 +1,69 @@
+import { mkdtempSync, readFileSync, writeFileSync } from "node:fs";
+import { tmpdir } from "node:os";
+import { join } from "node:path";
+import { describe, expect, it } from "vitest";
+import { parseArgs, UsageError } from "../src/cli.js";
+import { loadSettings } from "../src/settings.js";
+
+const SETTINGS = new URL("../render-settings.json", import.meta.url);
+
+function settingsFile(contents: unknown): string {
+  const path = join(mkdtempSync(join(tmpdir(), "cw-settings-")), "render-settings.json");
+  writeFileSync(path, JSON.stringify(contents));
+  return path;
+}
+
+describe("parseArgs", () => {
+  it("reads --in and --out, defaulting to mp4", () => {
+    expect(parseArgs(["--in", "a", "--out", "b"])).toEqual({
+      input: "a",
+      output: "b",
+      format: "mp4",
+    });
+  });
+
+  it("accepts --format png-sequence", () => {
+    expect(parseArgs(["--in", "a", "--out", "b", "--format", "png-sequence"])).toEqual({
+      input: "a",
+      output: "b",
+      format: "png-sequence",
+    });
+  });
+
+  it("recognises --versions", () => {
+    expect(parseArgs(["--versions"])).toEqual({ versions: true });
+  });
+
+  it("rejects a missing --out", () => {
+    expect(() => parseArgs(["--in", "a"])).toThrow(UsageError);
+  });
+
+  it("rejects an unknown format", () => {
+    expect(() => parseArgs(["--in", "a", "--out", "b", "--format", "gif"])).toThrow(UsageError);
+  });
+});
+
+describe("loadSettings", () => {
+  const valid = JSON.parse(readFileSync(SETTINGS, "utf8")) as Record<string, unknown>;
+
+  it("loads the shipped settings", () => {
+    expect(loadSettings(SETTINGS.pathname).encoder.threads).toBe(1);
+  });
+
+  it("rejects an unknown key", () => {
+    expect(() => loadSettings(settingsFile({ ...valid, turbo: true }))).toThrow(
+      /unknown key "turbo"/,
+    );
+  });
+
+  it("rejects an unknown encoder key", () => {
+    const encoder = { ...(valid.encoder as object), tune: "film" };
+    expect(() => loadSettings(settingsFile({ ...valid, encoder }))).toThrow(
+      /unknown key "encoder.tune"/,
+    );
+  });
+
+  it("rejects strict and best_effort disagreeing", () => {
+    expect(() => loadSettings(settingsFile({ ...valid, best_effort: true }))).toThrow(/strict/);
+  });
+});

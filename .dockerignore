@@ -1,0 +1,13 @@
+# The render image's build context: only what container/Dockerfile copies.
+# Keep in step with INPUT_FILES in tools/src/cinewright_tools/container.py.
+*
+!.node-version
+!package.json
+!pnpm-lock.yaml
+!pnpm-workspace.yaml
+!tsconfig.base.json
+!container/render-runner
+container/render-runner/node_modules
+container/render-runner/dist
+container/render-runner/test
+container/render-runner/*.tsbuildinfo

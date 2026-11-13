@@ -1,0 +1,19 @@
+{
+  "fps": 30,
+  "workers": 1,
+  "browser_gpu": false,
+  "best_effort": false,
+  "strict": true,
+  "frame_format": "png",
+  "encode": "ffmpeg",
+  "encoder": {
+    "codec": "libx264",
+    "pix_fmt": "yuv420p",
+    "preset": "medium",
+    "crf": 18,
+    "keyint": 30,
+    "closed_gop": true,
+    "threads": 1
+  },
+  "low_memory_mode": false
+}
