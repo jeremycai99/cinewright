@@ -1,4 +1,9 @@
 {
   "files": [],
-  "references": [{ "path": "core" }, { "path": "cli" }, { "path": "plugins/sdk-ts" }]
+  "references": [
+    { "path": "core" },
+    { "path": "cli" },
+    { "path": "plugins/sdk-ts" },
+    { "path": "container/render-runner" }
+  ]
 }

@@ -1,6 +1,6 @@
 node_modules/
 dist/
-.venv/
+.venv
 .cinewright/
 out/
 *.mp4
