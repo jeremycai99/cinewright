@@ -274,8 +274,8 @@ def test_required_checks_read_from_ruleset():
 - [ ] **Step 3:** Implement against PyYAML's `safe_load`. Note that YAML parses the key `on` as `True`; read it under both keys.
 - [ ] **Step 4:** Run the tests, then `uv run cinewright-check-workflows .github/workflows .github/rulesets/main.json`. Expected: 7 passed; exit 0 on the repo.
 - [ ] **Step 5:** Add job `workflow-safety` running that command to `checks.yml`, then commit: `git add -A && git commit -m "ci: workflow safety check and required-check ruleset"`.
-- [ ] **Step 6:** With the maintainer's go-ahead, apply the ruleset: `gh api repos/<owner>/cinewright/rulesets -X POST --input .github/rulesets/main.json`. Open PR "M0.3 CI".
-- [ ] **Step 7: Prove the gate.** Open a throwaway PR with a failing unit test, another with a Biome lint error, and another with a stale lockfile. Each shows its check failing and the merge button blocked. Link them, then close them unmerged. If a second account or an org exists, also open a fork PR and confirm the same required checks run with no secrets; otherwise record that `workflow-safety` covers this statically (see Deviation).
+- [ ] **Step 6:** Open PR "M0.3 CI". Applying the ruleset is deferred (decided 2026-11-13: the repository is private on GitHub Free, where the rulesets API returns 403). When the repository goes public or moves to a paid plan, apply it with `gh api repos/jeremycai99/cinewright/rulesets -X POST --input .github/rulesets/main.json`, then show the merge button blocked.
+- [ ] **Step 7: Prove the checks.** Open a throwaway PR with a failing unit test and another with a Biome lint error; each turns `ts` red. M0.1 already showed a stale lockfile failing `ts` and `py`. Link them, then close them unmerged. Merge blocking is shown once the ruleset is applied (Step 6). If a second account or an org exists, also open a fork PR and confirm the same required checks run with no secrets; otherwise record that `workflow-safety` covers this statically (see Deviation).
 - [ ] **Step 8:** Merge after review.
 
 ## Task 6: Render image and pin check (PR M0.2, branch `m0.2-render-container`)
@@ -495,7 +495,7 @@ def test_stale_lock(): assert check_image_lock({"digest": "sha256:a", "inputs_ha
 | M0.2: two runs, then a second machine of the same runner class, give identical `framemd5` and bytes | Tasks 7, 9 and 10 |
 | M0.2: a remote URL fails with a non-zero exit naming the URL | Task 8 |
 | M0.2: the encoding spike is recorded | Task 9 |
-| M0.3: a failing test, a lint error or a stale lockfile cannot merge | Task 5 Step 7 |
+| M0.3: a failing test, a lint error or a stale lockfile turns a required check red; it cannot merge once the ruleset is applied | Task 5 Steps 6–7 |
 | M0.3: fork PRs run the same checks without secrets | Task 5 (statically; see Deviation) |
 
 ## Machine prerequisites
