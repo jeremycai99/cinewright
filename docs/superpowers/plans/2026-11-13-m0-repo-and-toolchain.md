@@ -36,7 +36,7 @@ Versions were read from npm, PyPI, nodejs.org, Docker Hub and sources.debian.org
 
 **Approved 2026-11-13** for execution in the maintainer's Claude Code session, including the deviation below.
 
-**Needs your answer before Task 0 Step 3:** the GitHub owner (personal account or an org) and the visibility. I recommend a **public** repository: standard Actions runners are free for public repos, the render image can be public on GHCR (so fork PRs pull it without credentials), and the project is Apache-2.0 anyway.
+**Owner and visibility (decided 2026-11-13):** `jeremycai99/cinewright`, **private**. Consequences: GitHub Free gives no rulesets or branch protection on private repositories (the API returns 403), so Task 5's ruleset cannot be applied until the repository is public or on GitHub Pro; Actions minutes count against the account's monthly quota; the GHCR image is private, and CI pulls it with `GITHUB_TOKEN` (`packages: read`).
 
 **Deviation (approved):** M0.3's AC asks for a fork PR to be shown. You can't fork a repository into the account that owns it, so Task 5 checks fork safety statically (`cinewright-check-workflows`). A real fork PR is shown only if a second account or an org is available.
 
