@@ -1,0 +1,14 @@
+# Write permissions are fine when the workflow never runs on pull_request.
+name: publish
+on:
+  push:
+    branches: [main]
+permissions:
+  contents: read
+jobs:
+  publish:
+    runs-on: ubuntu-24.04
+    permissions:
+      packages: write
+    steps:
+      - run: echo "${{ secrets.GITHUB_TOKEN }}" > /dev/null
