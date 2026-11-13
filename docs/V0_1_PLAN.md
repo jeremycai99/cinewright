@@ -31,7 +31,7 @@ Items that need a maintainer decision are collected in §Open issues.
 
 ### M0 — Repo and toolchain
 
-Order: M0.0 → M0.1 → M0.2 and M0.3 in either order. Whichever lands second adds the render smoke job. Detailed task plan (approved 2026-11-13): `docs/superpowers/plans/2026-11-13-m0-repo-and-toolchain.md`, which runs M0.1 → M0.3 → M0.2.
+Order: M0.0 → M0.1 → M0.2 and M0.3 in either order. Whichever lands second adds the render smoke job. Detailed task plan (approved 2026-11-13): `docs/plans/m0-repo-and-toolchain.md`, which runs M0.1 → M0.3 → M0.2.
 
 - **M0.0 Prerequisites** (maintainer actions, no PR). Decided 2026-11-13: the repository is hosted on GitHub, CI runs on GitHub Actions, and the CPU render image is published to GHCR. The repository `jeremycai99/cinewright` was created on 2026-11-13 as a **private** repository on GitHub Free, so the GHCR image is private too. GitHub Free does not offer rulesets or branch protection on private repositories; until the repository is public or on a paid plan, M0.3's required checks are a written rule (merge only on green), not an enforced one. Packages use a provisional `@cinewright/*` npm scope until the name is confirmed; nothing is published in v0.1, so a rename stays mechanical. GPU CI is not needed before v0.3.
 - **M0.1 Monorepo scaffold.** pnpm workspaces for TS packages, a uv workspace for Python packages, shared lint/format/test config, Apache-2.0 LICENSE, AGENTS.md, CLAUDE.md, CONTRIBUTING.md. Directories follow AGENTS.md §7, plus a `cli/` package (add it to AGENTS.md §7 and the spec's layout in this PR). The M0 plan names every TS and Python package, including where the generated Python types and the Python plugin SDK live. Create only the packages M1 needs; the rest arrive with their milestones.

@@ -51,4 +51,4 @@ Not blocking M0–M1:
 
 ## Suggested first prompt in Claude Code
 
-> Read AGENTS.md, docs/HANDOFF.md, docs/DESIGN_SPEC.md (especially the Decision log) and docs/V0_1_PLAN.md (approved 2026-11-13, including its M1 conventions). The M0 task plan (`docs/superpowers/plans/2026-11-13-m0-repo-and-toolchain.md`) was approved on 2026-11-13; continue it from the first task whose PR has not merged, or plan the next milestone in detail and wait for my approval before writing code.
+> Read AGENTS.md, docs/HANDOFF.md, docs/DESIGN_SPEC.md (especially the Decision log) and docs/V0_1_PLAN.md (approved 2026-11-13, including its M1 conventions). The M0 task plan (`docs/plans/m0-repo-and-toolchain.md`) was approved on 2026-11-13; continue it from the first task whose PR has not merged, or plan the next milestone in detail and wait for my approval before writing code.

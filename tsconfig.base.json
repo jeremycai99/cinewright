@@ -15,6 +15,7 @@
     "sourceMap": true,
     "skipLibCheck": true,
     "rootDir": "${configDir}/src",
-    "outDir": "${configDir}/dist"
+    "outDir": "${configDir}/dist",
+    "tsBuildInfoFile": "${configDir}/dist/.tsbuildinfo"
   }
 }
