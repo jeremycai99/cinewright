@@ -5,7 +5,7 @@
   "best_effort": false,
   "strict": true,
   "frame_format": "png",
-  "encode": "hyperframes",
+  "encode": "ffmpeg",
   "encoder": {
     "codec": "libx264",
     "pix_fmt": "yuv420p",

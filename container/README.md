@@ -64,6 +64,30 @@ Exit codes: 0 ok, 2 usage or input error, 3 blocked network request, 4 render fa
 | `low_memory_mode` | engine `lowMemoryMode` | |
 | (fixed) | `hdrMode: "force-sdr"`, `chromePath` from `HYPERFRAMES_BROWSER_PATH` | |
 
+## Determinism
+
+D33 requires identical decoded frames and bytes for the same resolved IR, assets, plugin versions and image digest, on any machine of the same runner class. A runner class is CPU architecture, image digest and render settings. CPU core count is not part of it, so the output must not depend on how many cores a machine has.
+
+### Encoding spike (Task 9, 2026-11-13)
+
+`hello-world` was rendered 3 times with each `encode` value, then with Docker CPU quotas of 1 and 2. Hashes are truncated to 16 hex characters.
+
+| Run | CI: ubuntu-24.04, x86_64, 2 CPUs | Local: Apple M2 Max, amd64 under Rosetta, 6 CPUs |
+| --- | --- | --- |
+| `hyperframes` ×3 | framemd5 `0b7b97da3c316091`, bytes `2f17dbcc6d976d49` (all 3 equal) | framemd5 `3aac7b592034e124`, bytes `e79fdc291c39127c` (all 3 equal) |
+| `hyperframes`, `--cpus 1` | framemd5 `0b7b97da3c316091`, bytes `cb0cdcc570a9ec4c` | framemd5 `0b7b97da3c316091`, bytes `cb0cdcc570a9ec4c` |
+| `hyperframes`, `--cpus 2` | framemd5 `0b7b97da3c316091`, bytes `2f17dbcc6d976d49` | framemd5 `0b7b97da3c316091`, bytes `2f17dbcc6d976d49` |
+| `ffmpeg` ×3 | framemd5 `8f6428628e3a8814`, bytes `ba472550545df782` (all 3 equal) | framemd5 `8f6428628e3a8814`, bytes `ba472550545df782` (all 3 equal) |
+| `ffmpeg`, `--cpus 1` | framemd5 `8f6428628e3a8814`, bytes `ba472550545df782` | framemd5 `8f6428628e3a8814`, bytes `ba472550545df782` |
+
+What the spike shows:
+
+- **HyperFrames' own encode is repeatable on one machine, but its output depends on the CPU count.** HyperFrames sets x264 `-threads` from the container's CPU quota. The bytes differ at 1, 2 and 6 CPUs, and the decoded frames differ between 2 and 6. Two amd64 machines with different core counts would disagree, which breaks D33.
+- **The FFmpeg encode does not depend on the CPU count.** HyperFrames writes a PNG sequence and `render-job` encodes it with `-threads 1`, `-filter_threads 1` and bitexact flags. Its bytes are identical at every CPU quota, and identical between the CI runner and an Apple Silicon host running the image under Rosetta. So the captured frames themselves are reproducible across machines.
+- **GOPs are closed and the keyframe interval matches `keyint`.** Both encodes place keyframes at frames 0 and 30 (`keyint` 30 at 30 fps). The FFmpeg encode uses B-frames (`has_b_frames` 2) with `open-gop=0`. `trace_headers` shows exactly 2 IDR slices (NAL type 5), at frames 0 and 30, and 58 non-IDR slices, so segments can be concatenated without re-encoding (M5.1).
+
+**Decision:** `render-settings.json` sets `encode: "ffmpeg"`. `encode: "hyperframes"` stays available for experiments, but baselines never use it.
+
 ## Runner classes
 
 A runner class is CPU architecture + image digest + render settings. Baselines are rendered on `linux/amd64` in CI. On Apple Silicon the amd64 image runs under emulation; those renders prove behaviour, never baselines.
