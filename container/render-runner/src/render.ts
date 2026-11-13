@@ -8,6 +8,8 @@ import {
   createRenderJob,
   executeRenderJob,
   type ProducerLogger,
+  RenderQualityError,
+  type RenderWarning,
   resolveConfig,
 } from "@hyperframes/producer";
 import { type EncoderSettings, hyperframesQuality, type RenderSettings } from "./settings.js";
@@ -83,11 +85,14 @@ export async function render(args: RenderArgs, settings: RenderSettings): Promis
   try {
     await executeRenderJob(job, project, target);
   } catch (error) {
+    const warnings = error instanceof RenderQualityError ? error.warnings : job.warnings;
+    if (reportBlockedRequests(warnings, log)) return EXIT.network;
     log.error("render failed", { error: String(error), failedStage: job.failedStage });
     console.error(`render-job: render failed: ${String(error)}`);
     return EXIT.render;
   }
   if (job.outcome !== "completed") {
+    if (reportBlockedRequests(job.warnings, log)) return EXIT.network;
     log.error("render did not complete cleanly", { outcome: job.outcome, warnings: job.warnings });
     return EXIT.render;
   }
@@ -110,6 +115,23 @@ export async function render(args: RenderArgs, settings: RenderSettings): Promis
   }
   log.info("render-job done", { totalFrames: job.totalFrames });
   return EXIT.ok;
+}
+
+/**
+ * Renders run with the network disabled, so any network URL among the sources that failed
+ * to load is a request the composition was not allowed to make. Prints one line per URL.
+ */
+function reportBlockedRequests(warnings: readonly RenderWarning[], log: ProducerLogger): boolean {
+  const urls = new Set<string>();
+  for (const warning of warnings) {
+    for (const source of warning.details?.sources ?? []) {
+      if (/^(https?|wss?|ftp):\/\//i.test(source)) urls.add(source);
+    }
+  }
+  const sorted = [...urls].sort();
+  for (const url of sorted) console.error(`render-job: blocked network request: ${url}`);
+  if (sorted.length > 0) log.error("blocked network requests", { urls: sorted });
+  return sorted.length > 0;
 }
 
 /** Encode HyperFrames' PNG frames with every encoder setting explicit (`encode: "ffmpeg"`). */

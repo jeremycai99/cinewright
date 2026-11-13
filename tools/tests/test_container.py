@@ -7,7 +7,9 @@ import pytest
 
 from cinewright_tools.container import inputs_hash, main, run_render
 
-HELLO = Path(__file__).resolve().parents[2] / "container/fixtures/hello-world"
+FIXTURES = Path(__file__).resolve().parents[2] / "container/fixtures"
+HELLO = FIXTURES / "hello-world"
+REMOTE = FIXTURES / "remote-url"
 
 
 def test_inputs_hash_is_stable_and_sensitive(tmp_repo: Path) -> None:
@@ -76,3 +78,10 @@ def test_path_with_spaces_and_non_ascii(image: str, tmp_path: Path) -> None:
     plain_result = run_render(image, HELLO, tmp_path / "p")
     assert odd_result.exit_code == plain_result.exit_code == 0, odd_result.stderr
     assert odd_result.framemd5 == plain_result.framemd5
+
+
+@pytest.mark.container
+def test_remote_url_fails_and_names_it(image: str, tmp_path: Path) -> None:
+    r = run_render(image, REMOTE, tmp_path / "o")
+    assert r.exit_code == 3, r.stderr
+    assert "blocked network request: https://example.com/cinewright-network-probe.png" in r.stderr
