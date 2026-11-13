@@ -34,6 +34,36 @@ uv run cinewright-check-pins --image cinewright-render:dev
 
 The image carries the label `org.cinewright.inputs-hash`: a SHA-256 over every file in its build context (`cinewright_tools.container.inputs_hash`). CI uses it to tie a published digest to the inputs it was built from.
 
+## Rendering
+
+```bash
+uv run cinewright-render-in-container --image cinewright-render:dev --in container/fixtures/hello-world --out out/hello
+```
+
+The host runs `docker run --rm --network none --platform linux/amd64` as the host user, with the composition mounted read-only at `/job/in` and the output folder at `/job/out`. Every argument is a list element, never passed through a shell, and the bind mounts are CSV-quoted, so paths with spaces, commas or non-ASCII characters work. Inside the image, `render-job`:
+
+1. Copies `/job/in` to a fixed work folder and adds `vendor/gsap.min.js`.
+2. Calls `@hyperframes/producer`'s `createRenderJob` and `executeRenderJob`, passing every setting explicitly.
+3. Writes `output.mp4` (or `frames/000001.png`…), `framemd5.txt` (`ffmpeg -f framemd5` of the decoded frames), `sha256.txt` and `render-log.jsonl`.
+
+Exit codes: 0 ok, 2 usage or input error, 3 blocked network request, 4 render failure.
+
+### Settings
+
+`render-runner/render-settings.json` holds every render setting. `loadSettings` rejects unknown, missing or inconsistent keys. The encoder values are test settings until delivery profiles own them (M5.3). How each key reaches HyperFrames 0.9.41:
+
+| Key | HyperFrames option | Notes |
+| --- | --- | --- |
+| `fps` | `RenderConfig.fps`, engine `fps` | The engine accepts 24, 25, 30 or 60. |
+| `workers` | `RenderConfig.workers`, engine `concurrency` | |
+| `browser_gpu: false` | `useGpu: false`, engine `browserGpuMode: "software"` (SwiftShader) | HyperFrames forces screenshot capture whenever the GPU mode is software. BeginFrame stalls under CPU raster, so frames are captured by seeking the timeline. |
+| `strict` / `best_effort` | `strictness: "strict"` or `"best-effort"` | The two must be opposites. |
+| `frame_format` | engine `format` (`"png"` or `"jpeg"`) | The capture format of each frame. |
+| `encode: "hyperframes"` | HyperFrames encodes the MP4 | `preset` and `crf` must match a HyperFrames quality level: `standard` is `medium`/18, `draft` is `ultrafast`/28, `high` is `fast`/15. `keyint` becomes `keyframeIntervalSeconds` (`keyint / fps`). GOPs are always closed and output is `yuv420p` (`chromaSubsampling: "420"`). HyperFrames sets x264 `-threads` from the container's CPU quota, not from `threads`. |
+| `encode: "ffmpeg"` | HyperFrames writes a PNG sequence; `render-job` encodes it | Every `encoder` key is passed to `ffmpeg` (`-preset`, `-crf`, `-pix_fmt`, `-g`/`-keyint_min`, `-sc_threshold 0`, `open-gop`, `-threads`), with bitexact flags and no metadata. |
+| `low_memory_mode` | engine `lowMemoryMode` | |
+| (fixed) | `hdrMode: "force-sdr"`, `chromePath` from `HYPERFRAMES_BROWSER_PATH` | |
+
 ## Runner classes
 
 A runner class is CPU architecture + image digest + render settings. Baselines are rendered on `linux/amd64` in CI. On Apple Silicon the amd64 image runs under emulation; those renders prove behaviour, never baselines.

@@ -12,6 +12,9 @@ dev = ["pytest==9.2.0", "ruff==0.17.5"]
 [tool.pytest.ini_options]
 testpaths = ["core/py/tests", "plugins/sdk-py/tests", "tools/tests"]
 addopts = ["--import-mode=importlib"]
+markers = [
+    "container: needs Docker and the render image (runs only with CINEWRIGHT_CONTAINER_TESTS=1)",
+]
 
 [tool.ruff]
 target-version = "py313"
