@@ -21,6 +21,9 @@ extend-exclude = ["**/*.md"]
 [tool.ruff.lint]
 select = ["E", "F", "W", "I", "UP", "B"]
 
+[tool.ruff.lint.isort]
+known-first-party = ["cinewright_ir", "cinewright_plugin_sdk", "cinewright_tools"]
+
 [tool.pyright]
 pythonVersion = "3.13"
 venvPath = "."
