@@ -8,6 +8,7 @@ import {
   createRenderJob,
   executeRenderJob,
   type ProducerLogger,
+  type RenderOutcome,
   RenderQualityError,
   type RenderWarning,
   resolveConfig,
@@ -42,7 +43,7 @@ export async function render(args: RenderArgs, settings: RenderSettings): Promis
 
   const input = resolve(args.input);
   if (!(await isFile(join(input, "index.html")))) {
-    log.error("input has no index.html", { input: args.input });
+    log.error(`input has no index.html: ${args.input}`, { input: args.input });
     return EXIT.input;
   }
 
@@ -78,7 +79,7 @@ export async function render(args: RenderArgs, settings: RenderSettings): Promis
     console.error(`render-job: render failed: ${String(error)}`);
     return EXIT.render;
   }
-  if (job.outcome !== "completed") {
+  if (!outcomeAccepted(job.outcome, settings.strict)) {
     if (reportBlockedRequests(job.warnings, log)) return EXIT.network;
     log.error("render did not complete cleanly", { outcome: job.outcome, warnings: job.warnings });
     return EXIT.render;
@@ -128,6 +129,11 @@ export function jobOptions(settings: RenderSettings, format: "mp4" | "png-sequen
     keyframeIntervalSeconds: settings.encoder.keyint / settings.fps,
     chromaSubsampling: "420" as const,
   };
+}
+
+/** Strict renders accept only a clean outcome; best-effort renders also accept warnings. */
+export function outcomeAccepted(outcome: RenderOutcome | undefined, strict: boolean): boolean {
+  return outcome === "completed" || (!strict && outcome === "completed_with_warnings");
 }
 
 /**
