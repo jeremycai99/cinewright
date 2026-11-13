@@ -1,0 +1,8 @@
+packages:
+  - core
+  - cli
+  - plugins/sdk-ts
+  - container/render-runner
+
+engineStrict: true
+saveExact: true
