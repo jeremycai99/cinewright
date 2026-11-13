@@ -32,7 +32,7 @@ The full table is in the spec's decision log.
 
 Needed during M0 (see `V0_1_PLAN.md` M0.0):
 
-- The GitHub repository `jeremycai99/cinewright` exists (private, created 2026-11-13). Rulesets need the repository public or a paid plan; until then M0.3's required checks are not enforced by GitHub.
+- The GitHub repository `jeremycai99/cinewright` exists (private, created 2026-11-13). Rulesets need the repository public or a paid plan. The maintainer chose to keep it private for now, so M0.3's required checks are not enforced by GitHub; apply `.github/rulesets/main.json` when that changes.
 
 Not blocking M0–M1:
 

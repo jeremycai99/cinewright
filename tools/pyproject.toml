@@ -4,10 +4,13 @@ version = "0.0.0"
 description = "Repository checks and the render-container runner for Cinewright."
 license = "Apache-2.0"
 requires-python = ">=3.13"
-dependencies = []
+dependencies = [
+    "pyyaml==6.0.3",
+]
 
 [project.scripts]
 cinewright-check-boundaries = "cinewright_tools.boundaries:main"
+cinewright-check-workflows = "cinewright_tools.workflows:main"
 
 [build-system]
 requires = ["uv_build==0.13.8"]
