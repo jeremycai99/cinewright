@@ -55,10 +55,10 @@ export async function render(args: RenderArgs, settings: RenderSettings): Promis
 
   const renderFrames = settings.encode === "ffmpeg" || args.format === "png-sequence";
   const target = renderFrames ? frames : join(out, "output.mp4");
-  const quality = hyperframesQuality({ ...settings.encoder, closed_gop: true });
+  const options = jobOptions(settings, renderFrames ? "png-sequence" : "mp4");
   const producerConfig = resolveConfig({
     fps: settings.fps,
-    quality,
+    quality: options.quality,
     format: settings.frame_format,
     concurrency: settings.workers,
     browserGpuMode: settings.browser_gpu ? "hardware" : "software",
@@ -67,20 +67,7 @@ export async function render(args: RenderArgs, settings: RenderSettings): Promis
       ? { chromePath: process.env.HYPERFRAMES_BROWSER_PATH }
       : {}),
   });
-  const job = createRenderJob({
-    fps: settings.fps,
-    quality,
-    format: renderFrames ? "png-sequence" : "mp4",
-    workers: settings.workers,
-    useGpu: settings.browser_gpu,
-    strictness: settings.strict ? "strict" : "best-effort",
-    crf: settings.encoder.crf,
-    keyframeIntervalSeconds: settings.encoder.keyint / settings.fps,
-    chromaSubsampling: "420",
-    hdrMode: "force-sdr",
-    producerConfig,
-    logger: log,
-  });
+  const job = createRenderJob({ ...options, producerConfig, logger: log });
   log.info("render-job start", { format: args.format, settings });
   try {
     await executeRenderJob(job, project, target);
@@ -115,6 +102,32 @@ export async function render(args: RenderArgs, settings: RenderSettings): Promis
   }
   log.info("render-job done", { totalFrames: job.totalFrames });
   return EXIT.ok;
+}
+
+/**
+ * The producer job options for these settings. HyperFrames encodes only when `format` is
+ * `"mp4"`; for a PNG sequence its mp4-only options must be absent (it rejects them).
+ */
+export function jobOptions(settings: RenderSettings, format: "mp4" | "png-sequence") {
+  const common = {
+    fps: settings.fps,
+    workers: settings.workers,
+    useGpu: settings.browser_gpu,
+    strictness: settings.strict ? ("strict" as const) : ("best-effort" as const),
+    hdrMode: "force-sdr" as const,
+  };
+  if (format === "png-sequence") {
+    // Quality only steers HyperFrames' own encoder, which a PNG sequence does not use.
+    return { ...common, format, quality: "standard" as const };
+  }
+  return {
+    ...common,
+    format,
+    quality: hyperframesQuality(settings.encoder),
+    crf: settings.encoder.crf,
+    keyframeIntervalSeconds: settings.encoder.keyint / settings.fps,
+    chromaSubsampling: "420" as const,
+  };
 }
 
 /**

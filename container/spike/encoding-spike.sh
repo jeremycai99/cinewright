@@ -16,14 +16,15 @@ render() { # name encode extra-docker-args...
     --mount "type=bind,source=$repo/container/fixtures/hello-world,target=/job/in,readonly" \
     --mount "type=bind,source=$out/$name,target=/job/out" \
     --mount "type=bind,source=$out/$name.settings.json,target=$target,readonly" \
-    "$image" --in /job/in --out /job/out > "$out/$name.log" 2>&1 || { echo "$name failed"; tail -20 "$out/$name.log"; return 1; }
+    "$image" --in /job/in --out /job/out > "$out/$name.log" 2>&1 \
+    || { printf '| %s | FAILED: %s | | | |\n' "$name" "$(tail -1 "$out/$name.log")"; return 0; }
   local keyframes
-  keyframes=$(docker run --rm --network none --entrypoint ffprobe \
+  keyframes=$(docker run --rm --network none --platform linux/amd64 --entrypoint ffprobe \
     --mount "type=bind,source=$out/$name,target=/v,readonly" "$image" \
     -v error -select_streams v:0 -show_entries frame=key_frame -of csv=p=0 /v/output.mp4 \
     | grep -n '^1' | cut -d: -f1 | awk '{printf "%s%d", sep, $1-1; sep=","}')
   local bframes
-  bframes=$(docker run --rm --network none --entrypoint ffprobe \
+  bframes=$(docker run --rm --network none --platform linux/amd64 --entrypoint ffprobe \
     --mount "type=bind,source=$out/$name,target=/v,readonly" "$image" \
     -v error -select_streams v:0 -show_entries stream=has_b_frames -of csv=p=0 /v/output.mp4)
   printf '| %s | %s | %s | %s | %s |\n' "$name" \
