@@ -115,6 +115,7 @@ These are craft rules, not a style. Packs may change *how* they are met, not *wh
 core/        IR schema, cascade resolver, authorship rules, patch engine
 engine/      workflow runtime, gates, task graph, cost ledger
 agents/      role definitions and prompts (craft principles only)
+cli/         the `cinewright` command-line tool (runs on the host)
 plugins/     first-party providers, backends, critics, exporters
   backend-blender/  GPL-3.0, separate package (see invariant 10)
 packs/       style packs (neutral default + curated set)
@@ -124,6 +125,8 @@ fixtures/
   personal/  maintainer dogfooding (never imported by core)
 eval/        harness, rubrics, human-rating tools, reports
 registry/    delivery profiles, loudness targets, disclosure policies
+container/   pinned render image (Dockerfile, pins) and its render-job entry point
+tools/       repository checks and the render-container runner (Python)
 studio/      web UI
 docs/        spec, guides, plugin authoring
 ```
