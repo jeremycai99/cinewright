@@ -1,5 +1,5 @@
 {
   "image": "ghcr.io/jeremycai99/cinewright-render",
-  "digest": null,
-  "inputs_hash": null
+  "digest": "sha256:08a48730353f6f6739a7d1b5124b6779c3d5e7061c2d4a826364aa7d95eea51f",
+  "inputs_hash": "f96d1ff4865b895ed9ec8e96a7635f1f72d312257f0283765ac536b51068780e"
 }

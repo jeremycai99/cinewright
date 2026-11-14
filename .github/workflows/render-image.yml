@@ -47,12 +47,15 @@ jobs:
           uv run --locked cinewright-build-image --tag "$image:$GITHUB_SHA" --push
           digest="$(docker buildx imagetools inspect "$image:$GITHUB_SHA" --format '{{json .Manifest}}' | jq -r .digest)"
           hash="$(uv run --locked python -c 'from pathlib import Path; from cinewright_tools.container import inputs_hash; print(inputs_hash(Path(".")))')"
+          lock="$(printf '{\n  "image": "%s",\n  "digest": "%s",\n  "inputs_hash": "%s"\n}' "$image" "$digest" "$hash")"
+          # The log copy is readable with `gh run view --log`; the API does not serve job summaries.
+          echo "$lock"
           {
             echo "## Render image published"
             echo
             echo "Record this in \`container/image.lock.json\`:"
             echo
             echo '```json'
-            printf '{\n  "image": "%s",\n  "digest": "%s",\n  "inputs_hash": "%s"\n}\n' "$image" "$digest" "$hash"
+            echo "$lock"
             echo '```'
           } >> "$GITHUB_STEP_SUMMARY"
