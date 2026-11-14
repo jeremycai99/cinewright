@@ -7,6 +7,8 @@ on:
     branches: [main]
     paths:
       - container/**
+      # Recording a digest is not a new input; republishing would only mint an unused image.
+      - "!container/image.lock.json"
       - .dockerignore
       - .node-version
       - package.json
