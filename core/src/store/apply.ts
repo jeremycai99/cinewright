@@ -21,7 +21,7 @@ import type { PatchError } from "./patch.js";
 
 /** The outcome of applying ops to a copy of the IR. */
 export type OpsResult =
-  | { ok: true; ir: InlinedIr; before: Snapshot[]; retired: string[] }
+  | { ok: true; ir: InlinedIr; before: Snapshot[]; opOf: number[]; retired: string[] }
   | { ok: false; errors: PatchError[] };
 
 /** The project's frame rate: every deliverable shares it (D27). */
@@ -100,6 +100,8 @@ function insertIndex(
 export function applyOps(ir: InlinedIr, ops: readonly Op[], author: Author): OpsResult {
   const next = structuredClone(ir);
   const before: Snapshot[] = [];
+  /** The op that took each snapshot, parallel to `before`. */
+  const opOf: number[] = [];
   const state = stateFor(author);
   const fps = projectFps(ir);
   const schemas = inlinedSchemas();
@@ -107,7 +109,9 @@ export function applyOps(ir: InlinedIr, ops: readonly Op[], author: Author): Ops
   for (const [i, op] of ops.entries()) {
     try {
       const index = indexIr(next);
+      const taken = before.length;
       applyOne(op, index);
+      for (let k = taken; k < before.length; k += 1) opOf.push(i);
     } catch (error) {
       if (error instanceof OpError) return { ok: false, errors: [{ op: i, ...error.error }] };
       const pointer = "path" in op && typeof op.path === "string" ? op.path : "";
@@ -138,7 +142,7 @@ export function applyOps(ir: InlinedIr, ops: readonly Op[], author: Author): Ops
   }
   const endIds = entityIds(next);
   const retired = [...startIds].filter((id) => !endIds.has(id)).sort();
-  return { ok: true, ir: next, before, retired };
+  return { ok: true, ir: next, before, opOf, retired };
 
   function applyOne(op: Op, index: Map<string, IrEntity>): void {
     switch (op.op) {

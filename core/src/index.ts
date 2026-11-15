@@ -40,6 +40,7 @@ export { type Conflict, findConflicts } from "./store/conflict.js";
 export { LockTimeoutError, withLock } from "./store/lock.js";
 export { appendLog, type LogEntry, readLog } from "./store/log.js";
 export { type PatchError, validatePatch } from "./store/patch.js";
+export { inScope, type WriteScopes } from "./store/scopes.js";
 export {
   type ApplyResult,
   ProjectLoadError,
