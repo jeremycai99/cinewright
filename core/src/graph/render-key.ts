@@ -88,7 +88,7 @@ export function renderKey(
 ): HashString {
   const index = indexIr(ir);
   const shot = index.get(shotId);
-  if (!shot || shot.kind !== "shot") throw new Error(`no shot ${shotId}`);
+  if (shot?.kind !== "shot") throw new Error(`no shot ${shotId}`);
   const deliverable = (ir.deliverables.value ?? []).find((d) => d.id === deliverableId);
   const profileId = deliverable?.profile.value;
   const profile = profileId ? ir.profiles[profileId] : undefined;
