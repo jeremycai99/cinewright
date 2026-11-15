@@ -239,6 +239,10 @@ describe("a locked entity", () => {
 describe("users and sessions", () => {
   it("set open, agent and user fields to user", async () => {
     const { store } = await agentProject();
+    // Propose-first is on by default (D25); with it off, a session's edit is dictated and applies as user.
+    await as(store, USER, [
+      { op: "set", entity: "demo", path: "/settings/propose_conversational_edits", value: false },
+    ]);
     await as(store, { kind: "session" }, [
       { op: "set", entity: "s01", path: "/intent", value: "dictated" },
     ]);
