@@ -8,8 +8,10 @@ const ROOT = fileURLToPath(new URL("../fixtures/schema/", import.meta.url));
 
 /** Fixture directory name → the document kind its files are validated as. */
 const KINDS: Record<string, DocumentKind> = {
-  project: "project",
+  cast: "cast_member",
   "delivery-profile": "delivery_profile",
+  project: "project",
+  script: "script",
 };
 
 function cases(dir: string, sub: "valid" | "invalid"): string[] {

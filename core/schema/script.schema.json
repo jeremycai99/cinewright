@@ -1,0 +1,211 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://cinewright.invalid/ir/0/script.schema.json",
+  "title": "Script",
+  "description": "The script entity (D26): beats and lines with stable ids. Scenes reference lines by id.",
+  "x-entity": "script",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["id", "origin", "beats"],
+  "properties": {
+    "id": {
+      "$ref": "common.schema.json#/$defs/id"
+    },
+    "origin": {
+      "$ref": "common.schema.json#/$defs/origin"
+    },
+    "locked": {
+      "$ref": "common.schema.json#/$defs/entity_lock"
+    },
+    "beats": {
+      "x-authorable": "list",
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["state"],
+      "properties": {
+        "state": {
+          "$ref": "common.schema.json#/$defs/state"
+        },
+        "value": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/beat"
+          }
+        }
+      }
+    }
+  },
+  "$defs": {
+    "beat": {
+      "title": "Beat",
+      "description": "A beat of the script: a group of lines.",
+      "x-entity": "beat",
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["id", "origin", "summary", "lines"],
+      "properties": {
+        "id": {
+          "$ref": "common.schema.json#/$defs/id"
+        },
+        "origin": {
+          "$ref": "common.schema.json#/$defs/origin"
+        },
+        "locked": {
+          "$ref": "common.schema.json#/$defs/entity_lock"
+        },
+        "summary": {
+          "x-authorable": "field",
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["state"],
+          "properties": {
+            "state": {
+              "$ref": "common.schema.json#/$defs/state"
+            },
+            "value": {
+              "type": "string",
+              "maxLength": 1000
+            }
+          }
+        },
+        "lines": {
+          "x-authorable": "list",
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["state"],
+          "properties": {
+            "state": {
+              "$ref": "common.schema.json#/$defs/state"
+            },
+            "value": {
+              "type": "array",
+              "items": {
+                "$ref": "#/$defs/line"
+              }
+            }
+          }
+        }
+      }
+    },
+    "line": {
+      "title": "Line",
+      "description": "A script line with a stable id (D26). Takes, timing anchors, captions and translations attach to its id.",
+      "x-entity": "line",
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "id",
+        "origin",
+        "text",
+        "direction",
+        "speaker",
+        "on_screen",
+        "lipsync",
+        "on_screen_text"
+      ],
+      "properties": {
+        "id": {
+          "$ref": "common.schema.json#/$defs/id"
+        },
+        "origin": {
+          "$ref": "common.schema.json#/$defs/origin"
+        },
+        "locked": {
+          "$ref": "common.schema.json#/$defs/entity_lock"
+        },
+        "text": {
+          "x-authorable": "field",
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["state"],
+          "properties": {
+            "state": {
+              "$ref": "common.schema.json#/$defs/state"
+            },
+            "value": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 2000
+            }
+          }
+        },
+        "direction": {
+          "description": "Delivery direction, such as audio tags.",
+          "x-authorable": "field",
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["state"],
+          "properties": {
+            "state": {
+              "$ref": "common.schema.json#/$defs/state"
+            },
+            "value": {
+              "type": "string",
+              "maxLength": 500
+            }
+          }
+        },
+        "speaker": {
+          "x-authorable": "field",
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["state"],
+          "properties": {
+            "state": {
+              "$ref": "common.schema.json#/$defs/state"
+            },
+            "value": {
+              "$ref": "common.schema.json#/$defs/id",
+              "x-ref": "cast_member"
+            }
+          }
+        },
+        "on_screen": {
+          "description": "The speaker is visible while delivering the line.",
+          "x-authorable": "field",
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["state"],
+          "properties": {
+            "state": {
+              "$ref": "common.schema.json#/$defs/state"
+            },
+            "value": {
+              "type": "boolean"
+            }
+          }
+        },
+        "lipsync": {
+          "x-authorable": "field",
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["state"],
+          "properties": {
+            "state": {
+              "$ref": "common.schema.json#/$defs/state"
+            },
+            "value": {
+              "type": "boolean"
+            }
+          }
+        },
+        "on_screen_text": {
+          "description": "Text shown on screen with the line.",
+          "x-authorable": "field",
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["state"],
+          "properties": {
+            "state": {
+              "$ref": "common.schema.json#/$defs/state"
+            },
+            "value": {
+              "type": "string",
+              "maxLength": 500
+            }
+          }
+        }
+      }
+    }
+  }
+}

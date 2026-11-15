@@ -14,6 +14,132 @@
       "currency": "USD"
     }
   },
+  "cast": {
+    "state": "user",
+    "value": [
+      {
+        "consent": {
+          "state": "open"
+        },
+        "display_name": {
+          "state": "open"
+        },
+        "id": "narrator",
+        "on_screen": {
+          "state": "user",
+          "value": false
+        },
+        "origin": "user",
+        "performance": {
+          "baseline": {
+            "state": "user",
+            "value": "warm, confident, unhurried"
+          },
+          "pace_wpm": {
+            "state": "user",
+            "value": 150
+          },
+          "tics": {
+            "state": "open"
+          }
+        },
+        "role": {
+          "state": "user",
+          "value": "narrator"
+        },
+        "visual": {
+          "state": "open"
+        },
+        "voice": {
+          "bindings": {
+            "elevenlabs": {
+              "state": "agent",
+              "value": {
+                "model": "eleven_v4",
+                "settings": {
+                  "stability": 0.45
+                },
+                "voice_id": "…"
+              }
+            },
+            "kokoro": {
+              "state": "agent",
+              "value": {
+                "voice": "…"
+              }
+            }
+          },
+          "description": {
+            "state": "user",
+            "value": {
+              "accent": "neutral",
+              "language": "en",
+              "timbre": "warm, mid-low"
+            }
+          },
+          "lexicon": {
+            "Kubernetes": {
+              "state": "user",
+              "value": "KOO-ber-NET-eez"
+            }
+          }
+        }
+      },
+      {
+        "consent": {
+          "state": "user",
+          "value": {
+            "synthetic": true
+          }
+        },
+        "display_name": {
+          "state": "user",
+          "value": "Dr Lin"
+        },
+        "id": "dr_lin",
+        "on_screen": {
+          "state": "user",
+          "value": true
+        },
+        "origin": "user",
+        "performance": {
+          "baseline": {
+            "state": "user",
+            "value": "wry, precise"
+          },
+          "pace_wpm": {
+            "state": "open"
+          },
+          "tics": {
+            "state": "user",
+            "value": ["half-laugh before admissions"]
+          }
+        },
+        "role": {
+          "state": "user",
+          "value": "character"
+        },
+        "visual": {
+          "state": "user",
+          "value": {
+            "sheet": ["dr_lin_sheet_front", "dr_lin_sheet_profile", "dr_lin_sheet_full"],
+            "style": "photoreal",
+            "wardrobe": "navy blazer"
+          }
+        },
+        "voice": {
+          "bindings": {},
+          "description": {
+            "state": "user",
+            "value": {
+              "text": "woman, 40s, dry wit, slight rasp"
+            }
+          },
+          "lexicon": {}
+        }
+      }
+    ]
+  },
   "deliverables": {
     "state": "user",
     "value": [
@@ -142,6 +268,121 @@
     }
   },
   "schema_version": 1,
+  "script": {
+    "beats": {
+      "state": "agent",
+      "value": [
+        {
+          "id": "b01",
+          "lines": {
+            "state": "agent",
+            "value": [
+              {
+                "direction": {
+                  "state": "agent",
+                  "value": "[measured] low, deliberate"
+                },
+                "id": "b01.l01",
+                "lipsync": {
+                  "state": "agent",
+                  "value": false
+                },
+                "on_screen": {
+                  "state": "agent",
+                  "value": false
+                },
+                "on_screen_text": {
+                  "state": "open"
+                },
+                "origin": "agent",
+                "speaker": {
+                  "state": "agent",
+                  "value": "narrator"
+                },
+                "text": {
+                  "state": "agent",
+                  "value": "Every team hits the same wall."
+                }
+              },
+              {
+                "direction": {
+                  "state": "agent",
+                  "value": "[wry] half-laugh"
+                },
+                "id": "b01.l02",
+                "lipsync": {
+                  "state": "agent",
+                  "value": true
+                },
+                "on_screen": {
+                  "state": "agent",
+                  "value": true
+                },
+                "on_screen_text": {
+                  "state": "open"
+                },
+                "origin": "agent",
+                "speaker": {
+                  "state": "agent",
+                  "value": "dr_lin"
+                },
+                "text": {
+                  "state": "agent",
+                  "value": "We rebuilt it three times."
+                }
+              }
+            ]
+          },
+          "origin": "agent",
+          "summary": {
+            "state": "agent",
+            "value": "Every team hits the same wall"
+          }
+        },
+        {
+          "id": "b02",
+          "lines": {
+            "state": "agent",
+            "value": [
+              {
+                "direction": {
+                  "state": "agent",
+                  "value": "[warm] steady"
+                },
+                "id": "b01.l03",
+                "lipsync": {
+                  "state": "agent",
+                  "value": false
+                },
+                "on_screen": {
+                  "state": "agent",
+                  "value": false
+                },
+                "on_screen_text": {
+                  "state": "open"
+                },
+                "origin": "agent",
+                "speaker": {
+                  "state": "agent",
+                  "value": "narrator"
+                },
+                "text": {
+                  "state": "agent",
+                  "value": "Here is what changed."
+                }
+              }
+            ]
+          },
+          "origin": "agent",
+          "summary": {
+            "state": "open"
+          }
+        }
+      ]
+    },
+    "id": "script",
+    "origin": "agent"
+  },
   "sequences": {
     "state": "agent",
     "value": ["seq_intro", "seq_main"]

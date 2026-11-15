@@ -4,11 +4,6 @@
  * Project-unique entity id (convention 9). Immutable and never reused.
  */
 export type Id = string;
-export type AspectClass = "landscape" | "portrait" | "square";
-/**
- * A time or duration in integer frames at the project rate (D27).
- */
-export type Frames = number;
 /**
  * Who inserted the entity: a user (including approved or dictated session edits) or an agent or job. Set by the store.
  */
@@ -18,13 +13,26 @@ export type Origin = "user" | "agent";
  */
 export type EntityLock = true;
 /**
- * SHA-256 over the hash form (IR data) or over the bytes (assets).
- */
-export type Hash = string;
-/**
  * Authorship state of a field or list (D25).
  */
 export type State = "open" | "agent" | "user" | "locked";
+/**
+ * Project-unique entity id (convention 9). Immutable and never reused.
+ */
+export type Id1 = string;
+/**
+ * Project-unique entity id (convention 9). Immutable and never reused.
+ */
+export type Id2 = string;
+export type AspectClass = "landscape" | "portrait" | "square";
+/**
+ * A time or duration in integer frames at the project rate (D27).
+ */
+export type Frames = number;
+/**
+ * SHA-256 over the hash form (IR data) or over the bytes (assets).
+ */
+export type Hash = string;
 /**
  * A literal token value or a reference to another token.
  */
@@ -36,14 +44,120 @@ export type TokenPath = string;
 /**
  * Project-unique entity id (convention 9). Immutable and never reused.
  */
-export type Id1 = string;
+export type Id3 = string;
+/**
+ * Project-unique entity id (convention 9). Immutable and never reused.
+ */
+export type Id4 = string;
 
 /**
  * Every IR document schema; exists only so each type is generated once.
  */
 export interface IrDocuments {
+  cast?: CastMember;
   delivery_profile?: DeliveryProfile;
   project?: Project;
+  script?: Script;
+}
+/**
+ * A narrator or character, defined once and referenced by id (AGENTS.md invariant 4). v0.1 casts only a narrator (checked at intake, M7.1); the schema is ready for more.
+ */
+export interface CastMember {
+  id: Id;
+  origin: Origin;
+  locked?: EntityLock;
+  role: {
+    state: State;
+    value?: "narrator" | "character";
+  };
+  display_name: {
+    state: State;
+    value?: string;
+  };
+  voice: Voice;
+  performance: Performance;
+  on_screen: {
+    state: State;
+    value?: boolean;
+  };
+  visual: {
+    state: State;
+    value?: Visual;
+  };
+  consent: {
+    state: State;
+    value?: Consent;
+  };
+}
+/**
+ * A provider-neutral voice: description and pronunciation lexicon, plus per-provider bindings (D29).
+ */
+export interface Voice {
+  description: {
+    state: State;
+    value?: VoiceDescription;
+  };
+  lexicon: Lexicon;
+  bindings: VoiceBindings;
+}
+export interface VoiceDescription {
+  language?: string;
+  timbre?: string;
+  accent?: string;
+  text?: string;
+}
+/**
+ * Pronunciations, one wrapper per term. Plugins translate them for their provider (D29).
+ */
+export interface Lexicon {
+  [k: string]: {
+    state: State;
+    value?: string;
+  };
+}
+/**
+ * Per-provider voice bindings, keyed by provider id (D29).
+ */
+export interface VoiceBindings {
+  [k: string]: {
+    state: State;
+    value?: VoiceBinding;
+  };
+}
+export interface VoiceBinding {
+  voice_id?: string;
+  voice?: string;
+  model?: string;
+  /**
+   * Provider-specific settings, passed through to the plugin.
+   */
+  settings?: {};
+}
+export interface Performance {
+  baseline: {
+    state: State;
+    value?: string;
+  };
+  pace_wpm: {
+    state: State;
+    value?: number;
+  };
+  tics: {
+    state: State;
+    value?: string[];
+  };
+}
+export interface Visual {
+  sheet: Id1[];
+  wardrobe?: string;
+  style?: string;
+}
+/**
+ * A cloned voice needs a consent record (D18).
+ */
+export interface Consent {
+  synthetic: boolean;
+  record?: Id2;
 }
 /**
  * A delivery profile: a data file, not an IR entity, so it has no wrappers. The project stores a copy and its hash (convention 16).
@@ -131,7 +245,15 @@ export interface Project {
    */
   sequences: {
     state: State;
-    value?: Id1[];
+    value?: Id3[];
+  };
+  script: Script;
+  /**
+   * The cast bible: narrators and characters (D29).
+   */
+  cast: {
+    state: State;
+    value?: CastMember[];
   };
 }
 /**
@@ -203,5 +325,74 @@ export interface Deliverable {
   burn_in_captions: {
     state: State;
     value?: boolean;
+  };
+}
+/**
+ * The script entity (D26): beats and lines with stable ids. Scenes reference lines by id.
+ */
+export interface Script {
+  id: Id;
+  origin: Origin;
+  locked?: EntityLock;
+  beats: {
+    state: State;
+    value?: Beat[];
+  };
+}
+/**
+ * A beat of the script: a group of lines.
+ */
+export interface Beat {
+  id: Id;
+  origin: Origin;
+  locked?: EntityLock;
+  summary: {
+    state: State;
+    value?: string;
+  };
+  lines: {
+    state: State;
+    value?: Line[];
+  };
+}
+/**
+ * A script line with a stable id (D26). Takes, timing anchors, captions and translations attach to its id.
+ */
+export interface Line {
+  id: Id;
+  origin: Origin;
+  locked?: EntityLock;
+  text: {
+    state: State;
+    value?: string;
+  };
+  /**
+   * Delivery direction, such as audio tags.
+   */
+  direction: {
+    state: State;
+    value?: string;
+  };
+  speaker: {
+    state: State;
+    value?: Id4;
+  };
+  /**
+   * The speaker is visible while delivering the line.
+   */
+  on_screen: {
+    state: State;
+    value?: boolean;
+  };
+  lipsync: {
+    state: State;
+    value?: boolean;
+  };
+  /**
+   * Text shown on screen with the line.
+   */
+  on_screen_text: {
+    state: State;
+    value?: string;
   };
 }

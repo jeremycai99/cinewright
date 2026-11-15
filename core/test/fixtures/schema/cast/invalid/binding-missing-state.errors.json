@@ -1,0 +1,7 @@
+[
+  {
+    "entity": "narrator",
+    "pointer": "/voice/bindings/elevenlabs/state",
+    "rule": "schema.required"
+  }
+]

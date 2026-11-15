@@ -1,0 +1,53 @@
+{
+  "consent": {
+    "state": "user",
+    "value": {
+      "synthetic": true
+    }
+  },
+  "display_name": {
+    "state": "user",
+    "value": "Dr Lin"
+  },
+  "id": "dr_lin",
+  "on_screen": {
+    "state": "user",
+    "value": true
+  },
+  "origin": "user",
+  "performance": {
+    "baseline": {
+      "state": "user",
+      "value": "wry, precise"
+    },
+    "pace_wpm": {
+      "state": "open"
+    },
+    "tics": {
+      "state": "user",
+      "value": ["half-laugh before admissions"]
+    }
+  },
+  "role": {
+    "state": "user",
+    "value": "character"
+  },
+  "visual": {
+    "state": "user",
+    "value": {
+      "sheet": ["dr_lin_sheet_front", "dr_lin_sheet_profile", "dr_lin_sheet_full"],
+      "style": "photoreal",
+      "wardrobe": "navy blazer"
+    }
+  },
+  "voice": {
+    "bindings": {},
+    "description": {
+      "state": "user",
+      "value": {
+        "text": "woman, 40s, dry wit, slight rasp"
+      }
+    },
+    "lexicon": {}
+  }
+}

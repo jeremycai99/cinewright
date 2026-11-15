@@ -1,0 +1,7 @@
+[
+  {
+    "entity": "b01",
+    "pointer": "/lines/value/0/id",
+    "rule": "schema.required"
+  }
+]

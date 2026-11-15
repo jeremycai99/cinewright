@@ -1,0 +1,68 @@
+{
+  "consent": {
+    "state": "open"
+  },
+  "display_name": {
+    "state": "open"
+  },
+  "id": "narrator",
+  "on_screen": {
+    "state": "user",
+    "value": false
+  },
+  "origin": "user",
+  "performance": {
+    "baseline": {
+      "state": "user",
+      "value": "warm, confident, unhurried"
+    },
+    "pace_wpm": {
+      "state": "user",
+      "value": 150
+    },
+    "tics": {
+      "state": "open"
+    }
+  },
+  "role": {
+    "state": "user",
+    "value": "extra"
+  },
+  "visual": {
+    "state": "open"
+  },
+  "voice": {
+    "bindings": {
+      "elevenlabs": {
+        "state": "agent",
+        "value": {
+          "model": "eleven_v4",
+          "settings": {
+            "stability": 0.45
+          },
+          "voice_id": "…"
+        }
+      },
+      "kokoro": {
+        "state": "agent",
+        "value": {
+          "voice": "…"
+        }
+      }
+    },
+    "description": {
+      "state": "user",
+      "value": {
+        "accent": "neutral",
+        "language": "en",
+        "timbre": "warm, mid-low"
+      }
+    },
+    "lexicon": {
+      "Kubernetes": {
+        "state": "user",
+        "value": "KOO-ber-NET-eez"
+      }
+    }
+  }
+}

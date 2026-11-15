@@ -1,0 +1,7 @@
+[
+  {
+    "entity": "narrator",
+    "pointer": "/voice/lexicon/Zoë/value",
+    "rule": "schema.type"
+  }
+]

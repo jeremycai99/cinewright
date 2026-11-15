@@ -19,19 +19,33 @@
     "settings",
     "style",
     "deliverables",
-    "sequences"
+    "sequences",
+    "script",
+    "cast"
   ],
   "properties": {
-    "id": { "$ref": "common.schema.json#/$defs/id" },
-    "origin": { "$ref": "common.schema.json#/$defs/origin" },
-    "locked": { "$ref": "common.schema.json#/$defs/entity_lock" },
-    "schema_version": { "const": 1 },
+    "id": {
+      "$ref": "common.schema.json#/$defs/id"
+    },
+    "origin": {
+      "$ref": "common.schema.json#/$defs/origin"
+    },
+    "locked": {
+      "$ref": "common.schema.json#/$defs/entity_lock"
+    },
+    "schema_version": {
+      "const": 1
+    },
     "profiles": {
       "title": "ProfileCopies",
       "description": "Copies of the delivery profiles the deliverables use, keyed by profile id, with the hash of each body (convention 16). Written only by init.",
       "type": "object",
-      "propertyNames": { "$ref": "common.schema.json#/$defs/id" },
-      "additionalProperties": { "$ref": "#/$defs/profile_copy" }
+      "propertyNames": {
+        "$ref": "common.schema.json#/$defs/id"
+      },
+      "additionalProperties": {
+        "$ref": "#/$defs/profile_copy"
+      }
     },
     "title": {
       "x-authorable": "field",
@@ -39,8 +53,14 @@
       "additionalProperties": false,
       "required": ["state"],
       "properties": {
-        "state": { "$ref": "common.schema.json#/$defs/state" },
-        "value": { "type": "string", "minLength": 1, "maxLength": 200 }
+        "state": {
+          "$ref": "common.schema.json#/$defs/state"
+        },
+        "value": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 200
+        }
       }
     },
     "brief": {
@@ -49,8 +69,13 @@
       "additionalProperties": false,
       "required": ["state"],
       "properties": {
-        "state": { "$ref": "common.schema.json#/$defs/state" },
-        "value": { "type": "string", "maxLength": 20000 }
+        "state": {
+          "$ref": "common.schema.json#/$defs/state"
+        },
+        "value": {
+          "type": "string",
+          "maxLength": 20000
+        }
       }
     },
     "autonomy": {
@@ -59,8 +84,12 @@
       "additionalProperties": false,
       "required": ["state"],
       "properties": {
-        "state": { "$ref": "common.schema.json#/$defs/state" },
-        "value": { "enum": ["auto", "guided", "directed", "manual"] }
+        "state": {
+          "$ref": "common.schema.json#/$defs/state"
+        },
+        "value": {
+          "enum": ["auto", "guided", "directed", "manual"]
+        }
       }
     },
     "budget": {
@@ -69,8 +98,12 @@
       "additionalProperties": false,
       "required": ["state"],
       "properties": {
-        "state": { "$ref": "common.schema.json#/$defs/state" },
-        "value": { "$ref": "#/$defs/budget" }
+        "state": {
+          "$ref": "common.schema.json#/$defs/state"
+        },
+        "value": {
+          "$ref": "#/$defs/budget"
+        }
       }
     },
     "policies": {
@@ -79,8 +112,12 @@
       "additionalProperties": false,
       "required": ["state"],
       "properties": {
-        "state": { "$ref": "common.schema.json#/$defs/state" },
-        "value": { "$ref": "#/$defs/policies" }
+        "state": {
+          "$ref": "common.schema.json#/$defs/state"
+        },
+        "value": {
+          "$ref": "#/$defs/policies"
+        }
       }
     },
     "settings": {
@@ -96,8 +133,12 @@
           "additionalProperties": false,
           "required": ["state"],
           "properties": {
-            "state": { "$ref": "common.schema.json#/$defs/state" },
-            "value": { "type": "boolean" }
+            "state": {
+              "$ref": "common.schema.json#/$defs/state"
+            },
+            "value": {
+              "type": "boolean"
+            }
           }
         }
       }
@@ -115,11 +156,17 @@
           "additionalProperties": false,
           "required": ["state"],
           "properties": {
-            "state": { "$ref": "common.schema.json#/$defs/state" },
-            "value": { "$ref": "common.schema.json#/$defs/id" }
+            "state": {
+              "$ref": "common.schema.json#/$defs/state"
+            },
+            "value": {
+              "$ref": "common.schema.json#/$defs/id"
+            }
           }
         },
-        "overrides": { "$ref": "#/$defs/style_overrides" }
+        "overrides": {
+          "$ref": "#/$defs/style_overrides"
+        }
       }
     },
     "deliverables": {
@@ -128,8 +175,15 @@
       "additionalProperties": false,
       "required": ["state"],
       "properties": {
-        "state": { "$ref": "common.schema.json#/$defs/state" },
-        "value": { "type": "array", "items": { "$ref": "#/$defs/deliverable" } }
+        "state": {
+          "$ref": "common.schema.json#/$defs/state"
+        },
+        "value": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/deliverable"
+          }
+        }
       }
     },
     "sequences": {
@@ -139,10 +193,36 @@
       "additionalProperties": false,
       "required": ["state"],
       "properties": {
-        "state": { "$ref": "common.schema.json#/$defs/state" },
+        "state": {
+          "$ref": "common.schema.json#/$defs/state"
+        },
         "value": {
           "type": "array",
-          "items": { "$ref": "common.schema.json#/$defs/id", "x-ref": "sequence" }
+          "items": {
+            "$ref": "common.schema.json#/$defs/id",
+            "x-ref": "sequence"
+          }
+        }
+      }
+    },
+    "script": {
+      "$ref": "script.schema.json"
+    },
+    "cast": {
+      "description": "The cast bible: narrators and characters (D29).",
+      "x-authorable": "list",
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["state"],
+      "properties": {
+        "state": {
+          "$ref": "common.schema.json#/$defs/state"
+        },
+        "value": {
+          "type": "array",
+          "items": {
+            "$ref": "cast.schema.json"
+          }
         }
       }
     }
@@ -154,8 +234,12 @@
       "additionalProperties": false,
       "required": ["hash", "body"],
       "properties": {
-        "hash": { "$ref": "common.schema.json#/$defs/hash" },
-        "body": { "$ref": "delivery-profile.schema.json" }
+        "hash": {
+          "$ref": "common.schema.json#/$defs/hash"
+        },
+        "body": {
+          "$ref": "delivery-profile.schema.json"
+        }
       }
     },
     "budget": {
@@ -164,8 +248,13 @@
       "additionalProperties": false,
       "required": ["currency", "cap"],
       "properties": {
-        "currency": { "const": "USD" },
-        "cap": { "type": "number", "exclusiveMinimum": 0 }
+        "currency": {
+          "const": "USD"
+        },
+        "cap": {
+          "type": "number",
+          "exclusiveMinimum": 0
+        }
       }
     },
     "policies": {
@@ -174,7 +263,9 @@
       "additionalProperties": false,
       "required": ["require_commercial_license"],
       "properties": {
-        "require_commercial_license": { "type": "boolean" }
+        "require_commercial_license": {
+          "type": "boolean"
+        }
       }
     },
     "style_overrides": {
@@ -182,14 +273,20 @@
       "description": "Token overrides at this level, one wrapper per token path (convention 7).",
       "x-authorable": "map",
       "type": "object",
-      "propertyNames": { "$ref": "common.schema.json#/$defs/token_path" },
+      "propertyNames": {
+        "$ref": "common.schema.json#/$defs/token_path"
+      },
       "additionalProperties": {
         "type": "object",
         "additionalProperties": false,
         "required": ["state"],
         "properties": {
-          "state": { "$ref": "common.schema.json#/$defs/state" },
-          "value": { "$ref": "common.schema.json#/$defs/token_value" }
+          "state": {
+            "$ref": "common.schema.json#/$defs/state"
+          },
+          "value": {
+            "$ref": "common.schema.json#/$defs/token_value"
+          }
         }
       }
     },
@@ -201,17 +298,27 @@
       "additionalProperties": false,
       "required": ["id", "origin", "profile", "label", "burn_in_captions"],
       "properties": {
-        "id": { "$ref": "common.schema.json#/$defs/id" },
-        "origin": { "$ref": "common.schema.json#/$defs/origin" },
-        "locked": { "$ref": "common.schema.json#/$defs/entity_lock" },
+        "id": {
+          "$ref": "common.schema.json#/$defs/id"
+        },
+        "origin": {
+          "$ref": "common.schema.json#/$defs/origin"
+        },
+        "locked": {
+          "$ref": "common.schema.json#/$defs/entity_lock"
+        },
         "profile": {
           "x-authorable": "field",
           "type": "object",
           "additionalProperties": false,
           "required": ["state"],
           "properties": {
-            "state": { "$ref": "common.schema.json#/$defs/state" },
-            "value": { "$ref": "common.schema.json#/$defs/id" }
+            "state": {
+              "$ref": "common.schema.json#/$defs/state"
+            },
+            "value": {
+              "$ref": "common.schema.json#/$defs/id"
+            }
           }
         },
         "label": {
@@ -220,8 +327,14 @@
           "additionalProperties": false,
           "required": ["state"],
           "properties": {
-            "state": { "$ref": "common.schema.json#/$defs/state" },
-            "value": { "type": "string", "minLength": 1, "maxLength": 200 }
+            "state": {
+              "$ref": "common.schema.json#/$defs/state"
+            },
+            "value": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 200
+            }
           }
         },
         "burn_in_captions": {
@@ -230,8 +343,12 @@
           "additionalProperties": false,
           "required": ["state"],
           "properties": {
-            "state": { "$ref": "common.schema.json#/$defs/state" },
-            "value": { "type": "boolean" }
+            "state": {
+              "$ref": "common.schema.json#/$defs/state"
+            },
+            "value": {
+              "type": "boolean"
+            }
           }
         }
       }
