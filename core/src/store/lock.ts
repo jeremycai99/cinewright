@@ -1,4 +1,4 @@
-import { mkdir, open, readFile, rm } from "node:fs/promises";
+import { mkdir, open, readFile, rm, stat } from "node:fs/promises";
 import { hostname } from "node:os";
 import { join } from "node:path";
 import { CACHE_DIR } from "../project/layout.js";
@@ -21,6 +21,17 @@ export class LockTimeoutError extends Error {
         ? `the project is locked by process ${holder.pid} on ${holder.host} since ${holder.time}`
         : "the project is locked by another process",
     );
+  }
+}
+
+/** An unreadable lock older than this is stale (its writer died before writing the holder). */
+const UNREADABLE_STALE_MS = 10_000;
+
+async function ageMs(path: string): Promise<number> {
+  try {
+    return Date.now() - (await stat(path)).mtimeMs;
+  } catch {
+    return 0;
   }
 }
 
@@ -66,6 +77,11 @@ export async function withLock<T>(
       if ((error as NodeJS.ErrnoException).code !== "EEXIST") throw error;
       const holder = await readHolder(path);
       if (holder && holder.host === me.host && !alive(holder.pid)) {
+        await rm(path, { force: true });
+        continue;
+      }
+      if (!holder && (await ageMs(path)) > UNREADABLE_STALE_MS) {
+        // A writer died between creating the lock and writing its holder; nobody owns it.
         await rm(path, { force: true });
         continue;
       }
