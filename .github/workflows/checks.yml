@@ -47,6 +47,11 @@ jobs:
       - run: uv run --locked ruff format --check .
       - run: pnpm exec pyright
       - run: uv run --locked pytest
+      # The subprocess plugin host against the Python stub (M1.8b) needs this job's uv environment.
+      - run: pnpm typecheck
+      - run: pnpm --filter @cinewright/plugin-sdk exec vitest run test/host.test.ts
+        env:
+          CINEWRIGHT_PYTHON_PLUGIN_TESTS: "1"
 
   types:
     runs-on: ubuntu-24.04

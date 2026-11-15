@@ -25,7 +25,13 @@ interface Plugin {
 - `call` never throws across the boundary. A failure is a typed `PluginError`: `invalid_request`, `unsupported`, `timeout`, `cancelled`, `rate_limited`, `provider_error` or `internal`, with `retryable`.
 - Aborting the signal must stop the work.
 - An in-process plugin (`runtime.kind: "in_process"`) exports `createPlugin()` from its entry, and `loadPlugin(manifestPath)` loads it.
-- Subprocess plugins (`runtime.kind: "subprocess"`) speak JSON-RPC 2.0 on stdio (M1.8b).
+- Subprocess plugins (`runtime.kind: "subprocess"`) speak JSON-RPC 2.0 on stdio, one message per line (M1.8b). `createSubprocessPlugin(manifest, dir)` wraps one, and `loadPlugin` uses it for subprocess manifests.
+  - **Start:** the host answers `health` within 5 s, or the start fails.
+  - **Cancel:** an aborted call is sent `$/cancel`.
+  - **Timeout:** a call that outlives `callTimeoutMs` is cancelled, given a second, and then the process is killed and the call reports `timeout`.
+  - **Shutdown:** `shutdown`, then `exit`, then SIGTERM, then SIGKILL.
+  - **Cleanup:** the host kills its children when it exits or on SIGINT and SIGTERM. A plugin exits on stdin EOF, which covers a host killed with SIGKILL.
+  - **Python:** the SDK is `plugins/sdk-py` (`cinewright-plugin-sdk`).
 
 ## Conformance kit
 
