@@ -1,0 +1,776 @@
+{
+  "social_portrait": {
+    "demo": {
+      "fields": {},
+      "tokens": {
+        "motion.ease": {
+          "origin": {
+            "entity": "demo",
+            "level": "project"
+          },
+          "value": "cubic-bezier(0.16, 1, 0.3, 1)"
+        },
+        "motion.ease_out_expo": {
+          "origin": {
+            "level": "pack"
+          },
+          "value": "cubic-bezier(0.16, 1, 0.3, 1)"
+        },
+        "palette.accent": {
+          "origin": {
+            "entity": "demo",
+            "level": "project"
+          },
+          "value": "#FF4D2E"
+        },
+        "palette.background": {
+          "origin": {
+            "level": "pack"
+          },
+          "value": "#FFFFFF"
+        },
+        "palette.text": {
+          "origin": {
+            "level": "pack"
+          },
+          "value": "#FFFFFF"
+        },
+        "type.base": {
+          "origin": {
+            "level": "pack"
+          },
+          "value": 16
+        },
+        "type.scale": {
+          "origin": {
+            "entity": "demo",
+            "level": "project"
+          },
+          "value": 1.25
+        }
+      }
+    },
+    "s03.sh01": {
+      "fields": {
+        "/camera": {
+          "tokens": {
+            "motion.ease_out_expo": {
+              "level": "pack"
+            }
+          },
+          "value": {
+            "amount": 0.06,
+            "ease": "cubic-bezier(0.16, 1, 0.3, 1)",
+            "move": "push_in"
+          }
+        },
+        "/layout": {
+          "tokens": {},
+          "value": {
+            "template": "stack/title-top"
+          }
+        }
+      },
+      "tokens": {
+        "motion.ease": {
+          "origin": {
+            "entity": "demo",
+            "level": "project"
+          },
+          "value": "cubic-bezier(0.16, 1, 0.3, 1)"
+        },
+        "motion.ease_out_expo": {
+          "origin": {
+            "level": "pack"
+          },
+          "value": "cubic-bezier(0.16, 1, 0.3, 1)"
+        },
+        "palette.accent": {
+          "origin": {
+            "entity": "s03_the_problem",
+            "level": "scene"
+          },
+          "value": "#FF4D2E"
+        },
+        "palette.background": {
+          "origin": {
+            "level": "pack"
+          },
+          "value": "#FFFFFF"
+        },
+        "palette.text": {
+          "origin": {
+            "level": "pack"
+          },
+          "value": "#FFFFFF"
+        },
+        "type.base": {
+          "origin": {
+            "level": "pack"
+          },
+          "value": 16
+        },
+        "type.scale": {
+          "origin": {
+            "entity": "demo",
+            "level": "project"
+          },
+          "value": 1.25
+        }
+      }
+    },
+    "s03.sh01.bars": {
+      "fields": {},
+      "tokens": {
+        "motion.ease": {
+          "origin": {
+            "entity": "demo",
+            "level": "project"
+          },
+          "value": "cubic-bezier(0.16, 1, 0.3, 1)"
+        },
+        "motion.ease_out_expo": {
+          "origin": {
+            "level": "pack"
+          },
+          "value": "cubic-bezier(0.16, 1, 0.3, 1)"
+        },
+        "palette.accent": {
+          "origin": {
+            "entity": "s03_the_problem",
+            "level": "scene"
+          },
+          "value": "#FF4D2E"
+        },
+        "palette.background": {
+          "origin": {
+            "level": "pack"
+          },
+          "value": "#FFFFFF"
+        },
+        "palette.text": {
+          "origin": {
+            "level": "pack"
+          },
+          "value": "#FFFFFF"
+        },
+        "type.base": {
+          "origin": {
+            "level": "pack"
+          },
+          "value": 16
+        },
+        "type.scale": {
+          "origin": {
+            "entity": "demo",
+            "level": "project"
+          },
+          "value": 1.25
+        }
+      }
+    },
+    "s03.sh01.title": {
+      "fields": {
+        "/layout": {
+          "tokens": {},
+          "value": {
+            "region": "title_top"
+          }
+        },
+        "/props/color": {
+          "tokens": {
+            "palette.accent": {
+              "entity": "s03_the_problem",
+              "level": "scene"
+            }
+          },
+          "value": "#FF4D2E"
+        }
+      },
+      "tokens": {
+        "motion.ease": {
+          "origin": {
+            "entity": "demo",
+            "level": "project"
+          },
+          "value": "cubic-bezier(0.16, 1, 0.3, 1)"
+        },
+        "motion.ease_out_expo": {
+          "origin": {
+            "level": "pack"
+          },
+          "value": "cubic-bezier(0.16, 1, 0.3, 1)"
+        },
+        "palette.accent": {
+          "origin": {
+            "entity": "s03_the_problem",
+            "level": "scene"
+          },
+          "value": "#FF4D2E"
+        },
+        "palette.background": {
+          "origin": {
+            "level": "pack"
+          },
+          "value": "#FFFFFF"
+        },
+        "palette.text": {
+          "origin": {
+            "level": "pack"
+          },
+          "value": "#FFFFFF"
+        },
+        "type.base": {
+          "origin": {
+            "level": "pack"
+          },
+          "value": 16
+        },
+        "type.scale": {
+          "origin": {
+            "entity": "demo",
+            "level": "project"
+          },
+          "value": 1.25
+        }
+      }
+    },
+    "s03.sh02": {
+      "fields": {},
+      "tokens": {
+        "motion.ease": {
+          "origin": {
+            "entity": "demo",
+            "level": "project"
+          },
+          "value": "cubic-bezier(0.16, 1, 0.3, 1)"
+        },
+        "motion.ease_out_expo": {
+          "origin": {
+            "level": "pack"
+          },
+          "value": "cubic-bezier(0.16, 1, 0.3, 1)"
+        },
+        "palette.accent": {
+          "origin": {
+            "entity": "s03_the_problem",
+            "level": "scene"
+          },
+          "value": "#FF4D2E"
+        },
+        "palette.background": {
+          "origin": {
+            "level": "pack"
+          },
+          "value": "#FFFFFF"
+        },
+        "palette.text": {
+          "origin": {
+            "level": "pack"
+          },
+          "value": "#FFFFFF"
+        },
+        "type.base": {
+          "origin": {
+            "level": "pack"
+          },
+          "value": 16
+        },
+        "type.scale": {
+          "origin": {
+            "entity": "demo",
+            "level": "project"
+          },
+          "value": 1.25
+        }
+      }
+    },
+    "s03_the_problem": {
+      "fields": {},
+      "tokens": {
+        "motion.ease": {
+          "origin": {
+            "entity": "demo",
+            "level": "project"
+          },
+          "value": "cubic-bezier(0.16, 1, 0.3, 1)"
+        },
+        "motion.ease_out_expo": {
+          "origin": {
+            "level": "pack"
+          },
+          "value": "cubic-bezier(0.16, 1, 0.3, 1)"
+        },
+        "palette.accent": {
+          "origin": {
+            "entity": "s03_the_problem",
+            "level": "scene"
+          },
+          "value": "#FF4D2E"
+        },
+        "palette.background": {
+          "origin": {
+            "level": "pack"
+          },
+          "value": "#FFFFFF"
+        },
+        "palette.text": {
+          "origin": {
+            "level": "pack"
+          },
+          "value": "#FFFFFF"
+        },
+        "type.base": {
+          "origin": {
+            "level": "pack"
+          },
+          "value": 16
+        },
+        "type.scale": {
+          "origin": {
+            "entity": "demo",
+            "level": "project"
+          },
+          "value": 1.25
+        }
+      }
+    },
+    "seq_main": {
+      "fields": {},
+      "tokens": {
+        "motion.ease": {
+          "origin": {
+            "entity": "demo",
+            "level": "project"
+          },
+          "value": "cubic-bezier(0.16, 1, 0.3, 1)"
+        },
+        "motion.ease_out_expo": {
+          "origin": {
+            "level": "pack"
+          },
+          "value": "cubic-bezier(0.16, 1, 0.3, 1)"
+        },
+        "palette.accent": {
+          "origin": {
+            "entity": "demo",
+            "level": "project"
+          },
+          "value": "#FF4D2E"
+        },
+        "palette.background": {
+          "origin": {
+            "level": "pack"
+          },
+          "value": "#FFFFFF"
+        },
+        "palette.text": {
+          "origin": {
+            "level": "pack"
+          },
+          "value": "#FFFFFF"
+        },
+        "type.base": {
+          "origin": {
+            "level": "pack"
+          },
+          "value": 16
+        },
+        "type.scale": {
+          "origin": {
+            "entity": "demo",
+            "level": "project"
+          },
+          "value": 1.25
+        }
+      }
+    }
+  },
+  "web_landscape": {
+    "demo": {
+      "fields": {},
+      "tokens": {
+        "motion.ease": {
+          "origin": {
+            "entity": "demo",
+            "level": "project"
+          },
+          "value": "cubic-bezier(0.16, 1, 0.3, 1)"
+        },
+        "motion.ease_out_expo": {
+          "origin": {
+            "level": "pack"
+          },
+          "value": "cubic-bezier(0.16, 1, 0.3, 1)"
+        },
+        "palette.accent": {
+          "origin": {
+            "entity": "demo",
+            "level": "project"
+          },
+          "value": "#FF4D2E"
+        },
+        "palette.background": {
+          "origin": {
+            "level": "pack"
+          },
+          "value": "#FFFFFF"
+        },
+        "palette.text": {
+          "origin": {
+            "level": "pack"
+          },
+          "value": "#FFFFFF"
+        },
+        "type.base": {
+          "origin": {
+            "level": "pack"
+          },
+          "value": 16
+        },
+        "type.scale": {
+          "origin": {
+            "entity": "demo",
+            "level": "project"
+          },
+          "value": 1.25
+        }
+      }
+    },
+    "s03.sh01": {
+      "fields": {
+        "/camera": {
+          "tokens": {
+            "motion.ease_out_expo": {
+              "level": "pack"
+            }
+          },
+          "value": {
+            "amount": 0.06,
+            "ease": "cubic-bezier(0.16, 1, 0.3, 1)",
+            "move": "push_in"
+          }
+        },
+        "/layout": {
+          "tokens": {},
+          "value": {
+            "template": "grid.12col/title-left"
+          }
+        }
+      },
+      "tokens": {
+        "motion.ease": {
+          "origin": {
+            "entity": "demo",
+            "level": "project"
+          },
+          "value": "cubic-bezier(0.16, 1, 0.3, 1)"
+        },
+        "motion.ease_out_expo": {
+          "origin": {
+            "level": "pack"
+          },
+          "value": "cubic-bezier(0.16, 1, 0.3, 1)"
+        },
+        "palette.accent": {
+          "origin": {
+            "entity": "s03_the_problem",
+            "level": "scene"
+          },
+          "value": "#FF4D2E"
+        },
+        "palette.background": {
+          "origin": {
+            "level": "pack"
+          },
+          "value": "#FFFFFF"
+        },
+        "palette.text": {
+          "origin": {
+            "level": "pack"
+          },
+          "value": "#FFFFFF"
+        },
+        "type.base": {
+          "origin": {
+            "level": "pack"
+          },
+          "value": 16
+        },
+        "type.scale": {
+          "origin": {
+            "entity": "demo",
+            "level": "project"
+          },
+          "value": 1.25
+        }
+      }
+    },
+    "s03.sh01.bars": {
+      "fields": {},
+      "tokens": {
+        "motion.ease": {
+          "origin": {
+            "entity": "demo",
+            "level": "project"
+          },
+          "value": "cubic-bezier(0.16, 1, 0.3, 1)"
+        },
+        "motion.ease_out_expo": {
+          "origin": {
+            "level": "pack"
+          },
+          "value": "cubic-bezier(0.16, 1, 0.3, 1)"
+        },
+        "palette.accent": {
+          "origin": {
+            "entity": "s03_the_problem",
+            "level": "scene"
+          },
+          "value": "#FF4D2E"
+        },
+        "palette.background": {
+          "origin": {
+            "level": "pack"
+          },
+          "value": "#FFFFFF"
+        },
+        "palette.text": {
+          "origin": {
+            "level": "pack"
+          },
+          "value": "#FFFFFF"
+        },
+        "type.base": {
+          "origin": {
+            "level": "pack"
+          },
+          "value": 16
+        },
+        "type.scale": {
+          "origin": {
+            "entity": "demo",
+            "level": "project"
+          },
+          "value": 1.25
+        }
+      }
+    },
+    "s03.sh01.title": {
+      "fields": {
+        "/layout": {
+          "tokens": {},
+          "value": {
+            "region": "title_left"
+          }
+        },
+        "/props/color": {
+          "tokens": {
+            "palette.accent": {
+              "entity": "s03_the_problem",
+              "level": "scene"
+            }
+          },
+          "value": "#FF4D2E"
+        }
+      },
+      "tokens": {
+        "motion.ease": {
+          "origin": {
+            "entity": "demo",
+            "level": "project"
+          },
+          "value": "cubic-bezier(0.16, 1, 0.3, 1)"
+        },
+        "motion.ease_out_expo": {
+          "origin": {
+            "level": "pack"
+          },
+          "value": "cubic-bezier(0.16, 1, 0.3, 1)"
+        },
+        "palette.accent": {
+          "origin": {
+            "entity": "s03_the_problem",
+            "level": "scene"
+          },
+          "value": "#FF4D2E"
+        },
+        "palette.background": {
+          "origin": {
+            "level": "pack"
+          },
+          "value": "#FFFFFF"
+        },
+        "palette.text": {
+          "origin": {
+            "level": "pack"
+          },
+          "value": "#FFFFFF"
+        },
+        "type.base": {
+          "origin": {
+            "level": "pack"
+          },
+          "value": 16
+        },
+        "type.scale": {
+          "origin": {
+            "entity": "demo",
+            "level": "project"
+          },
+          "value": 1.25
+        }
+      }
+    },
+    "s03.sh02": {
+      "fields": {},
+      "tokens": {
+        "motion.ease": {
+          "origin": {
+            "entity": "demo",
+            "level": "project"
+          },
+          "value": "cubic-bezier(0.16, 1, 0.3, 1)"
+        },
+        "motion.ease_out_expo": {
+          "origin": {
+            "level": "pack"
+          },
+          "value": "cubic-bezier(0.16, 1, 0.3, 1)"
+        },
+        "palette.accent": {
+          "origin": {
+            "entity": "s03_the_problem",
+            "level": "scene"
+          },
+          "value": "#FF4D2E"
+        },
+        "palette.background": {
+          "origin": {
+            "level": "pack"
+          },
+          "value": "#FFFFFF"
+        },
+        "palette.text": {
+          "origin": {
+            "level": "pack"
+          },
+          "value": "#FFFFFF"
+        },
+        "type.base": {
+          "origin": {
+            "level": "pack"
+          },
+          "value": 16
+        },
+        "type.scale": {
+          "origin": {
+            "entity": "demo",
+            "level": "project"
+          },
+          "value": 1.25
+        }
+      }
+    },
+    "s03_the_problem": {
+      "fields": {},
+      "tokens": {
+        "motion.ease": {
+          "origin": {
+            "entity": "demo",
+            "level": "project"
+          },
+          "value": "cubic-bezier(0.16, 1, 0.3, 1)"
+        },
+        "motion.ease_out_expo": {
+          "origin": {
+            "level": "pack"
+          },
+          "value": "cubic-bezier(0.16, 1, 0.3, 1)"
+        },
+        "palette.accent": {
+          "origin": {
+            "entity": "s03_the_problem",
+            "level": "scene"
+          },
+          "value": "#FF4D2E"
+        },
+        "palette.background": {
+          "origin": {
+            "level": "pack"
+          },
+          "value": "#FFFFFF"
+        },
+        "palette.text": {
+          "origin": {
+            "level": "pack"
+          },
+          "value": "#FFFFFF"
+        },
+        "type.base": {
+          "origin": {
+            "level": "pack"
+          },
+          "value": 16
+        },
+        "type.scale": {
+          "origin": {
+            "entity": "demo",
+            "level": "project"
+          },
+          "value": 1.25
+        }
+      }
+    },
+    "seq_main": {
+      "fields": {},
+      "tokens": {
+        "motion.ease": {
+          "origin": {
+            "entity": "demo",
+            "level": "project"
+          },
+          "value": "cubic-bezier(0.16, 1, 0.3, 1)"
+        },
+        "motion.ease_out_expo": {
+          "origin": {
+            "level": "pack"
+          },
+          "value": "cubic-bezier(0.16, 1, 0.3, 1)"
+        },
+        "palette.accent": {
+          "origin": {
+            "entity": "demo",
+            "level": "project"
+          },
+          "value": "#FF4D2E"
+        },
+        "palette.background": {
+          "origin": {
+            "level": "pack"
+          },
+          "value": "#FFFFFF"
+        },
+        "palette.text": {
+          "origin": {
+            "level": "pack"
+          },
+          "value": "#FFFFFF"
+        },
+        "type.base": {
+          "origin": {
+            "level": "pack"
+          },
+          "value": 16
+        },
+        "type.scale": {
+          "origin": {
+            "entity": "demo",
+            "level": "project"
+          },
+          "value": 1.25
+        }
+      }
+    }
+  }
+}

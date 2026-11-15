@@ -1,0 +1,19 @@
+{
+  "motion": {
+    "ease": {
+      "token": "motion.ease_out_expo"
+    },
+    "ease_out_expo": "cubic-bezier(0.16, 1, 0.3, 1)"
+  },
+  "palette": {
+    "accent": "#000000",
+    "background": {
+      "token": "palette.text"
+    },
+    "text": "#FFFFFF"
+  },
+  "type": {
+    "base": 16,
+    "scale": 1.2
+  }
+}

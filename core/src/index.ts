@@ -13,6 +13,15 @@ export {
   CasMissingError,
   resolveAsset,
 } from "./cas/cas.js";
+export {
+  CascadeError,
+  type Origin,
+  type Resolved,
+  type ResolvedField,
+  type ResolvedToken,
+  resolveEntity,
+  type TokenTree,
+} from "./cascade/resolve.js";
 export type * from "./generated/ir.js";
 export { collectEntities, type EntityInfo, entityIndex, locate, walkDocument } from "./ir/index.js";
 export { type InlinedIr, inlineIr, splitIr } from "./ir/inlined.js";

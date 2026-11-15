@@ -245,3 +245,16 @@ A patch is stored as `pending` instead of applied when:
 - authorship blocks one of its ops.
 
 Then `approve(id, user)` applies it as the approving user, so every field it touches becomes `user`. A suggestion applies as `set`. The approval writes an `approved` entry and the applied revision in one transaction. It fails with a conflict when a revision after the patch's base touched the same nodes. `reject(id, user, note?)` records the decision and changes nothing. Only a user approves or rejects, and a decided patch cannot be decided again (`pending.decided`).
+
+## Cascade (M1.3)
+
+`resolveEntity(ir, entityId, deliverableId, pack)` resolves the style cascade for a project, sequence, scene, shot or layer:
+
+- **`tokens`:** every token path, with its value and origin. The origin is `{ level: "pack" }` or `{ level, entity }` for the project, sequence, scene, shot or layer whose `style.overrides` set it. Each level overrides the one above. A token that refers to another (`{ "token": path }`) takes the final value, and its origin is where it was defined.
+- **`fields`:** the entity's own token-bearing fields, with references replaced by values and the origin of every token each one used. Also its `layout` variant for the deliverable's aspect class (D28).
+- **Errors** (`CascadeError`, each naming the entity and field):
+  - a reference to a token nobody defines: `cascade.unresolved_token`;
+  - a cycle: `cascade.token_cycle`;
+  - a layout with variants but none for the deliverable's aspect class: `cascade.layout_variant_missing`. There is no silent fallback.
+
+Only values cascade. Authorship states do not, except that `locked` freezes a subtree (D25). Pack tokens are a plain token tree until the pack format exists (M2.1).
