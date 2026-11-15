@@ -1,0 +1,20 @@
+{
+  "schema_version": 1,
+  "id": "stub",
+  "version": "0.1.0",
+  "kind": "critic",
+  "capabilities": ["add", "echo", "sleep"],
+  "cost_model": {
+    "unit": "free"
+  },
+  "latency_class": "interactive",
+  "secrets": [],
+  "runtime": {
+    "kind": "in_process",
+    "entry": "./index.ts"
+  },
+  "concurrency": {
+    "max_parallel": 4
+  },
+  "rate_limits": []
+}

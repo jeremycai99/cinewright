@@ -229,7 +229,11 @@ importers:
         specifier: 16.0.0
         version: 16.0.0
 
-  plugins/sdk-ts: {}
+  plugins/sdk-ts:
+    dependencies:
+      ajv:
+        specifier: 8.20.0
+        version: 8.20.0
 
 packages:
 
