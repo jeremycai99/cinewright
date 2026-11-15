@@ -21,7 +21,8 @@
     "deliverables",
     "sequences",
     "script",
-    "cast"
+    "cast",
+    "assets"
   ],
   "properties": {
     "id": {
@@ -165,7 +166,7 @@
           }
         },
         "overrides": {
-          "$ref": "#/$defs/style_overrides"
+          "$ref": "style.schema.json#/$defs/overrides"
         }
       }
     },
@@ -225,6 +226,24 @@
           }
         }
       }
+    },
+    "assets": {
+      "description": "The asset registry: every asset the IR references, by content hash (AGENTS.md §6).",
+      "x-authorable": "list",
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["state"],
+      "properties": {
+        "state": {
+          "$ref": "common.schema.json#/$defs/state"
+        },
+        "value": {
+          "type": "array",
+          "items": {
+            "$ref": "asset.schema.json"
+          }
+        }
+      }
     }
   },
   "$defs": {
@@ -265,28 +284,6 @@
       "properties": {
         "require_commercial_license": {
           "type": "boolean"
-        }
-      }
-    },
-    "style_overrides": {
-      "title": "StyleOverrides",
-      "description": "Token overrides at this level, one wrapper per token path (convention 7).",
-      "x-authorable": "map",
-      "type": "object",
-      "propertyNames": {
-        "$ref": "common.schema.json#/$defs/token_path"
-      },
-      "additionalProperties": {
-        "type": "object",
-        "additionalProperties": false,
-        "required": ["state"],
-        "properties": {
-          "state": {
-            "$ref": "common.schema.json#/$defs/state"
-          },
-          "value": {
-            "$ref": "common.schema.json#/$defs/token_value"
-          }
         }
       }
     },

@@ -1,4 +1,54 @@
 {
+  "assets": {
+    "state": "user",
+    "value": [
+      {
+        "bytes": 11,
+        "hash": "sha256:93e2059298db97878d2d42a3ee94c7f9bc9099a6ce744fb2d516aa6f81c0fe16",
+        "id": "dr_lin_sheet_front",
+        "license": {
+          "commercial_use": true,
+          "terms": "Supplied by the project author"
+        },
+        "media_type": "image/png",
+        "origin": "user",
+        "provenance": {
+          "provider": "user_upload"
+        },
+        "role": "reference"
+      },
+      {
+        "bytes": 13,
+        "hash": "sha256:4cd793584e41cc2906c0a4a9c2e1f7d2cf0bf3379dea42b91d7707647286dd61",
+        "id": "dr_lin_sheet_profile",
+        "license": {
+          "commercial_use": true,
+          "terms": "Supplied by the project author"
+        },
+        "media_type": "image/png",
+        "origin": "user",
+        "provenance": {
+          "provider": "user_upload"
+        },
+        "role": "reference"
+      },
+      {
+        "bytes": 10,
+        "hash": "sha256:4d3b68e681b7c5ed00d285d3a223d0a8006ae4f8297bd7d8a66fada4aa00a044",
+        "id": "dr_lin_sheet_full",
+        "license": {
+          "commercial_use": true,
+          "terms": "Supplied by the project author"
+        },
+        "media_type": "image/png",
+        "origin": "user",
+        "provenance": {
+          "provider": "user_upload"
+        },
+        "role": "reference"
+      }
+    ]
+  },
   "autonomy": {
     "state": "user",
     "value": "guided"

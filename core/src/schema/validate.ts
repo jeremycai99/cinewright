@@ -1,16 +1,25 @@
 import { Ajv2020, type ErrorObject, type ValidateFunction } from "ajv/dist/2020.js";
 import { collectEntities, locate } from "../ir/index.js";
-import { wrapperErrors } from "../ir/semantic.js";
+import { type InlinedIr, splitIr } from "../ir/inlined.js";
+import { anchorErrors, crossDocumentErrors, wrapperErrors } from "../ir/semantic.js";
 import { normalizeErrors, type ValidationError } from "./errors.js";
 import { escapeSegment, loadSchemas, type SchemaSet } from "./load.js";
 
-export type DocumentKind = "project" | "delivery_profile" | "script" | "cast_member";
+export type DocumentKind =
+  | "project"
+  | "sequence"
+  | "delivery_profile"
+  | "script"
+  | "cast_member"
+  | "asset";
 
 export const ROOT_FILES: Readonly<Record<DocumentKind, string>> = {
   project: "project.schema.json",
+  sequence: "sequence.schema.json",
   delivery_profile: "delivery-profile.schema.json",
   script: "script.schema.json",
   cast_member: "cast.schema.json",
+  asset: "asset.schema.json",
 };
 
 const SCHEMA_BASE = "https://cinewright.invalid/ir/0/";
@@ -84,5 +93,27 @@ export function validateDocument(
     }
   }
   errors.push(...wrapperErrors(schemas, rootFile, doc));
+  errors.push(...anchorErrors(schemas, rootFile, doc));
+  return normalizeErrors(errors);
+}
+
+/**
+ * Validate the whole IR: the project file and every sequence against their schemas, then the
+ * rules that span documents (unique ids, references, retired ids, profiles, one frame rate).
+ */
+export function validateProject(
+  ir: InlinedIr,
+  options: { retiredIds?: ReadonlySet<string> } = {},
+  schemas: SchemaSet = loadSchemas(),
+): ValidationError[] {
+  const { project, sequences } = splitIr(ir);
+  const docs = [
+    { rootFile: ROOT_FILES.project, doc: project },
+    ...sequences.map((doc) => ({ rootFile: ROOT_FILES.sequence, doc })),
+  ];
+  const errors: ValidationError[] = [];
+  errors.push(...validateDocument("project", project, schemas));
+  for (const sequence of sequences) errors.push(...validateDocument("sequence", sequence, schemas));
+  errors.push(...crossDocumentErrors(schemas, docs, options));
   return normalizeErrors(errors);
 }

@@ -13,26 +13,46 @@ export type Origin = "user" | "agent";
  */
 export type EntityLock = true;
 /**
+ * SHA-256 over the hash form (IR data) or over the bytes (assets).
+ */
+export type Hash = string;
+/**
+ * Project-unique entity id (convention 9). Immutable and never reused.
+ */
+export type Id1 = string;
+/**
+ * An audio offset in integer samples at the profile's sample rate (D27).
+ */
+export type Samples = number;
+/**
  * Authorship state of a field or list (D25).
  */
 export type State = "open" | "agent" | "user" | "locked";
 /**
  * Project-unique entity id (convention 9). Immutable and never reused.
  */
-export type Id1 = string;
+export type Id2 = string;
 /**
  * Project-unique entity id (convention 9). Immutable and never reused.
  */
-export type Id2 = string;
+export type Id3 = string;
 export type AspectClass = "landscape" | "portrait" | "square";
 /**
  * A time or duration in integer frames at the project rate (D27).
  */
 export type Frames = number;
 /**
- * SHA-256 over the hash form (IR data) or over the bytes (assets).
+ * Project-unique entity id (convention 9). Immutable and never reused.
  */
-export type Hash = string;
+export type Id4 = string;
+/**
+ * A signed offset in integer frames.
+ */
+export type FrameOffset = number;
+/**
+ * Any JSON value. An object {"token": path} is a token reference, resolved by the cascade (M1.3).
+ */
+export type JsonValue = string | number | boolean | null | unknown[] | {};
 /**
  * A literal token value or a reference to another token.
  */
@@ -44,20 +64,87 @@ export type TokenPath = string;
 /**
  * Project-unique entity id (convention 9). Immutable and never reused.
  */
-export type Id3 = string;
+export type Id5 = string;
 /**
  * Project-unique entity id (convention 9). Immutable and never reused.
  */
-export type Id4 = string;
+export type Id6 = string;
+/**
+ * Project-unique entity id (convention 9). Immutable and never reused.
+ */
+export type Id7 = string;
+/**
+ * Project-unique entity id (convention 9). Immutable and never reused.
+ */
+export type Id8 = string;
+/**
+ * Project-unique entity id (convention 9). Immutable and never reused.
+ */
+export type Id9 = string;
+/**
+ * Project-unique entity id (convention 9). Immutable and never reused.
+ */
+export type Id10 = string;
+/**
+ * Project-unique entity id (convention 9). Immutable and never reused.
+ */
+export type Id11 = string;
 
 /**
  * Every IR document schema; exists only so each type is generated once.
  */
 export interface IrDocuments {
+  asset?: Asset;
   cast?: CastMember;
   delivery_profile?: DeliveryProfile;
+  layer?: Layer;
   project?: Project;
+  scene?: Scene;
   script?: Script;
+  sequence?: Sequence;
+  shot?: Shot;
+  style?: Style;
+}
+/**
+ * A content-addressed asset (D33). All fields are measured data, so none is authorable; list membership is.
+ */
+export interface Asset {
+  id: Id;
+  origin: Origin;
+  locked?: EntityLock;
+  hash: Hash;
+  media_type: string;
+  bytes: number;
+  role: "take" | "music" | "sfx" | "image" | "video" | "font" | "composition" | "reference" | "consent" | "other";
+  line?: Id1;
+  provenance: Provenance;
+  license: License;
+  /**
+   * Word timestamps in samples (takes only).
+   */
+  words?: WordTiming[];
+}
+/**
+ * Who or what produced the asset (AGENTS.md §6).
+ */
+export interface Provenance {
+  provider: string;
+  model?: string;
+  plan_tier?: string;
+  request_hash?: Hash;
+}
+/**
+ * Output license terms of an asset or plugin.
+ */
+export interface License {
+  terms: string;
+  commercial_use: boolean;
+  attribution?: string;
+}
+export interface WordTiming {
+  text: string;
+  start: Samples;
+  end: Samples;
 }
 /**
  * A narrator or character, defined once and referenced by id (AGENTS.md invariant 4). v0.1 casts only a narrator (checked at intake, M7.1); the schema is ready for more.
@@ -148,7 +235,7 @@ export interface Performance {
   };
 }
 export interface Visual {
-  sheet: Id1[];
+  sheet: Id2[];
   wardrobe?: string;
   style?: string;
 }
@@ -157,7 +244,7 @@ export interface Visual {
  */
 export interface Consent {
   synthetic: boolean;
-  record?: Id2;
+  record?: Id3;
 }
 /**
  * A delivery profile: a data file, not an IR entity, so it has no wrappers. The project stores a copy and its hash (convention 16).
@@ -206,6 +293,97 @@ export interface CaptionRules {
   min_display_frames: Frames;
 }
 /**
+ * One element of a shot (D31): a component with props, token references, motion presets and anchor-relative timing, per aspect class.
+ */
+export interface Layer {
+  id: Id;
+  origin: Origin;
+  locked?: EntityLock;
+  /**
+   * A component id; compilers own the code (D31).
+   */
+  component: {
+    state: State;
+    value?: Id;
+  };
+  motion: {
+    state: State;
+    value?: MotionPreset[];
+  };
+  timing: {
+    state: State;
+    value?: LayerTiming;
+  };
+  props: LayerProps;
+  layout: LayerLayout;
+  style: LevelStyle;
+}
+export interface MotionPreset {
+  preset: Id;
+  /**
+   * Preset parameters; durations in frames.
+   */
+  params?: {};
+}
+/**
+ * Anchor-relative timing (convention 15).
+ */
+export interface LayerTiming {
+  enter: Anchor;
+  exit?: Anchor;
+}
+/**
+ * A timing anchor (convention 15): a line's start, end or word, plus a frame offset. `word` is present exactly when `point` is `word`.
+ */
+export interface Anchor {
+  line: Id4;
+  point: "start" | "end" | "word";
+  word?: number;
+  offset: FrameOffset;
+}
+/**
+ * Component props, one wrapper per prop.
+ */
+export interface LayerProps {
+  [k: string]: {
+    state: State;
+    value?: JsonValue;
+  };
+}
+/**
+ * Placement per aspect class (D28).
+ */
+export interface LayerLayout {
+  [k: string]: {
+    state: State;
+    value?: LayerRegion;
+  };
+}
+export interface LayerRegion {
+  region: string;
+}
+/**
+ * Token overrides at a sequence, scene, shot or layer. Only the project chooses a pack.
+ */
+export interface LevelStyle {
+  overrides: StyleOverrides;
+}
+/**
+ * Token overrides at this level, one wrapper per token path (convention 7).
+ */
+export interface StyleOverrides {
+  [k: string]: {
+    state: State;
+    value?: TokenValue;
+  };
+}
+/**
+ * A reference to a style token, resolved by the cascade (M1.3).
+ */
+export interface TokenRef {
+  token: TokenPath;
+}
+/**
  * The project file, cinewright.json (D40). Sequence bodies live in sequences/<id>.json.
  */
 export interface Project {
@@ -245,7 +423,7 @@ export interface Project {
    */
   sequences: {
     state: State;
-    value?: Id3[];
+    value?: Id5[];
   };
   script: Script;
   /**
@@ -254,6 +432,13 @@ export interface Project {
   cast: {
     state: State;
     value?: CastMember[];
+  };
+  /**
+   * The asset registry: every asset the IR references, by content hash (AGENTS.md §6).
+   */
+  assets: {
+    state: State;
+    value?: Asset[];
   };
 }
 /**
@@ -291,21 +476,6 @@ export interface ProjectStyle {
     value?: Id;
   };
   overrides: StyleOverrides;
-}
-/**
- * Token overrides at this level, one wrapper per token path (convention 7).
- */
-export interface StyleOverrides {
-  [k: string]: {
-    state: State;
-    value?: TokenValue;
-  };
-}
-/**
- * A reference to a style token, resolved by the cascade (M1.3).
- */
-export interface TokenRef {
-  token: TokenPath;
 }
 /**
  * One output of the project, rendered from the shared timeline with one delivery profile (D28).
@@ -375,7 +545,7 @@ export interface Line {
   };
   speaker: {
     state: State;
-    value?: Id4;
+    value?: Id6;
   };
   /**
    * The speaker is visible while delivering the line.
@@ -395,4 +565,169 @@ export interface Line {
     state: State;
     value?: string;
   };
+}
+/**
+ * A scene spec with typed fields (the spec's "What a scene spec holds").
+ */
+export interface Scene {
+  id: Id;
+  origin: Origin;
+  locked?: EntityLock;
+  intent: {
+    state: State;
+    value?: string;
+  };
+  duration: {
+    state: State;
+    value?: SceneDuration;
+  };
+  mood: {
+    state: State;
+    value?: string[];
+  };
+  cast: {
+    state: State;
+    value?: Id7[];
+  };
+  /**
+   * Script lines in this scene, in order (D26).
+   */
+  lines: {
+    state: State;
+    value?: Id8[];
+  };
+  transition_out: {
+    state: State;
+    value?: Transition;
+  };
+  sound: {
+    state: State;
+    value?: SceneSound;
+  };
+  gates: {
+    state: State;
+    value?: ("script" | "storyboard" | "animatic" | "final")[];
+  };
+  style: LevelStyle;
+  shots: {
+    state: State;
+    value?: Shot[];
+  };
+}
+export interface SceneDuration {
+  target: Frames;
+  flex: number;
+  sync: "voiceover" | "music" | "fixed";
+}
+export interface Transition {
+  type: "cut" | "cross_dissolve" | "wipe" | "match_cut";
+  to?: Id9;
+  duration?: Frames;
+  on?: string;
+}
+export interface SceneSound {
+  music_cue?: string;
+  sfx: string[];
+  duck_under_vo_db?: number;
+}
+/**
+ * A shot: backend, framing, camera, layout per aspect class and timing anchors.
+ */
+export interface Shot {
+  id: Id;
+  origin: Origin;
+  locked?: EntityLock;
+  /**
+   * The kind of shot. Which types v0.1 can render is checked at intake (M7.1).
+   */
+  type: {
+    state: State;
+    value?: "motion_graphics" | "generative_footage" | "stock" | "three_d" | "live_action";
+  };
+  backend: {
+    state: State;
+    value?: string;
+  };
+  framing: {
+    state: State;
+    value?: string;
+  };
+  subject: {
+    state: State;
+    value?: Id10;
+  };
+  camera: {
+    state: State;
+    value?: Camera;
+  };
+  duration: {
+    state: State;
+    value?: Frames;
+  };
+  anchors: {
+    state: State;
+    value?: ShotAnchors;
+  };
+  references: {
+    state: State;
+    value?: Id11[];
+  };
+  layout: ShotLayout;
+  style: LevelStyle;
+  layers: {
+    state: State;
+    value?: Layer[];
+  };
+}
+export interface Camera {
+  move: string;
+  ease?: TokenValue;
+  amount?: number;
+}
+export interface ShotAnchors {
+  start: Anchor;
+  end?: Anchor;
+}
+/**
+ * Layout per aspect class (D28).
+ */
+export interface ShotLayout {
+  [k: string]: {
+    state: State;
+    value?: ShotTemplate;
+  };
+}
+export interface ShotTemplate {
+  template: string;
+}
+/**
+ * A sequence (chapter or act), stored as sequences/<id>.json (D40).
+ */
+export interface Sequence {
+  id: Id;
+  origin: Origin;
+  locked?: EntityLock;
+  title: {
+    state: State;
+    value?: string;
+  };
+  mood: {
+    state: State;
+    value?: string[];
+  };
+  music_bed: {
+    state: State;
+    value?: string;
+  };
+  style: LevelStyle;
+  scenes: {
+    state: State;
+    value?: Scene[];
+  };
+}
+/**
+ * Style references shared by every level of the cascade (M1.3). Pack tokens are a plain token tree; the pack format is M2.1.
+ */
+export interface Style {
+  [k: string]: unknown;
 }

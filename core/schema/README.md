@@ -61,6 +61,7 @@ Every entity carries three plain properties:
 | `deliverables` | list | Deliverable |
 | `sequences` | list | sequence ids, in order; each body is `sequences/<id>.json` |
 | `cast` | list | CastMember |
+| `assets` | list | Asset |
 
 Plain: `id`, `origin`, `locked`, `schema_version` (`1`), `script` (the Script entity), `profiles` (profile id → `{ hash, body }`, written only by `init`; convention 16).
 
@@ -107,6 +108,57 @@ Stored-form mapping of the spec's cast example (`core/test/fixtures/schema/cast/
 - `visual.sheet` paths become asset ids.
 - Fields the example leaves out are `open`.
 
+### Sequence, Scene, Shot, Layer (`sequence.schema.json`, `scene.schema.json`, `shot.schema.json`, `layer.schema.json`)
+
+Each sequence is stored as `sequences/<id>.json` (D40). Every level from Sequence down has a plain `style` container whose `overrides` is a map of token path → token value (`style.schema.json`); only the project chooses a pack.
+
+| Entity | Field | Kind | Value |
+| --- | --- | --- | --- |
+| Sequence | `title` | field | string |
+| Sequence | `mood` | field | list of strings |
+| Sequence | `music_bed` | field | string |
+| Sequence | `scenes` | list | Scene |
+| Scene | `intent` | field | string |
+| Scene | `duration` | field | `{ target: frames, flex: 0–1, sync: voiceover · music · fixed }` |
+| Scene | `mood` | field | list of strings |
+| Scene | `cast` | field | list of cast member ids |
+| Scene | `lines` | field | list of line ids, in order (D26) |
+| Scene | `transition_out` | field | `{ type: cut · cross_dissolve · wipe · match_cut, to?: scene id, duration?: frames, on? }` |
+| Scene | `sound` | field | `{ music_cue?, sfx: [string], duck_under_vo_db?: ≤ 0 }` |
+| Scene | `gates` | field | list of `script` · `storyboard` · `animatic` · `final` |
+| Scene | `shots` | list | Shot |
+| Shot | `type` | field | `motion_graphics` · `generative_footage` · `stock` · `three_d` · `live_action` (what v0.1 renders is checked at intake, M7.1) |
+| Shot | `backend` | field | string |
+| Shot | `framing` | field | string |
+| Shot | `subject` | field | cast member id |
+| Shot | `camera` | field | `{ move, ease?: token value, amount? }` |
+| Shot | `duration` | field | frames |
+| Shot | `anchors` | field | `{ start: anchor, end?: anchor }` |
+| Shot | `references` | field | list of asset or cast member ids |
+| Shot | `layout` | map | aspect class → `{ template }` (D28) |
+| Shot | `layers` | list | Layer |
+| Layer | `component` | field | component id (D31) |
+| Layer | `motion` | field | list of `{ preset, params? }` |
+| Layer | `timing` | field | `{ enter: anchor, exit?: anchor }` |
+| Layer | `props` | map | prop name → any JSON value; `{ "token": path }` is a token reference |
+| Layer | `layout` | map | aspect class → `{ region }` |
+
+An anchor (convention 15) is `{ line, point: start · end · word, word?, offset }`, where `offset` is in frames.
+
+### Asset (`asset.schema.json`; items of `project.assets`)
+
+Every asset field is measured data, so none is authorable; only membership of `project.assets` is. Fields: `hash`, `media_type`, `bytes`, `role` (`take` · `music` · `sfx` · `image` · `video` · `font` · `composition` · `reference` · `consent` · `other`), `line` (takes only), `provenance` (`{ provider, model?, plan_tier?, request_hash? }`), `license`, `words` (takes only: `[{ text, start, end }]` in samples).
+
+Stored-form mapping of the spec's scene example (`core/test/fixtures/schema/sequence/valid/spec-scene-example.json`, 30 fps):
+- `duration.target` 18 s becomes 540 frames.
+- `dialogue` becomes `lines` (ids) plus the Line entities in the script.
+- `elements` becomes one Layer per component.
+- `refs: [cast.dr_lin.sheet]` becomes `references: ["dr_lin", "dr_lin_sheet_front"]`.
+- `camera.ease: style.motion.ease_out_expo` becomes `{ "token": "motion.ease_out_expo" }`.
+- `amount: 6%` becomes `0.06`.
+- `style.inherit: pack.editorial` becomes the project's `style.pack`, because only the project chooses a pack.
+- `to: s04` points at a minimal scene `s04`, added so the reference resolves.
+
 ### DeliveryProfile (`delivery-profile.schema.json`)
 
 A data file, not an entity, so it has no wrappers. It holds `schema_version`, `id`, `name`, `frame_rate` (rational), `sample_rate`, `width`, `height`, `aspect_class`, `safe_zones` (`action` and `title` insets as fractions), `loudness` (`integrated_lufs`, `true_peak_dbtp`, `tolerance_lu`) and `captions` (`max_chars_per_line`, `max_lines`, `min_display_frames`).
@@ -124,3 +176,13 @@ Errors are sorted by entity, then pointer, then rule. For a missing or unexpecte
 | --- | --- |
 | `schema.<keyword>` | A JSON Schema keyword failed (`schema.required`, `schema.additionalProperties`, `schema.pattern`, `schema.enum`, `schema.minimum`, `schema.propertyNames`, …). |
 | `wrapper.value_presence` | A wrapper has a `value` while `open`, or none while not `open`. |
+| `anchor.word_presence` | An anchor has `word` without `point: "word"`, or the reverse. |
+| `semantic.duplicate_id` | Two entities share an id (across all kinds). |
+| `semantic.dangling_ref` | An `x-ref` id names no entity. |
+| `semantic.ref_kind` | An `x-ref` id names an entity of another kind. |
+| `semantic.id_reused` | An id that was removed earlier is used again (convention 9). |
+| `semantic.unknown_profile` | A deliverable names a profile that is not in `project.profiles`. |
+| `semantic.profile_hash` | A profile copy's `hash` is not the hash of its `body` (convention 16). |
+| `semantic.frame_rate_mismatch` | The deliverables' profiles have different frame rates (D27). |
+
+`validateDocument(kind, doc)` checks one document: schema, wrappers and anchors. `validateProject(ir, { retiredIds })` checks the whole inlined IR, including every rule above.

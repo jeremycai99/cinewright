@@ -1,0 +1,42 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://cinewright.invalid/ir/0/style.schema.json",
+  "title": "Style",
+  "description": "Style references shared by every level of the cascade (M1.3). Pack tokens are a plain token tree; the pack format is M2.1.",
+  "$defs": {
+    "overrides": {
+      "title": "StyleOverrides",
+      "description": "Token overrides at this level, one wrapper per token path (convention 7).",
+      "x-authorable": "map",
+      "type": "object",
+      "propertyNames": {
+        "$ref": "common.schema.json#/$defs/token_path"
+      },
+      "additionalProperties": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["state"],
+        "properties": {
+          "state": {
+            "$ref": "common.schema.json#/$defs/state"
+          },
+          "value": {
+            "$ref": "common.schema.json#/$defs/token_value"
+          }
+        }
+      }
+    },
+    "level_style": {
+      "description": "Token overrides at a sequence, scene, shot or layer. Only the project chooses a pack.",
+      "title": "LevelStyle",
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["overrides"],
+      "properties": {
+        "overrides": {
+          "$ref": "#/$defs/overrides"
+        }
+      }
+    }
+  }
+}

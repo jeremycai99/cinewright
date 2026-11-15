@@ -1,0 +1,7 @@
+[
+  {
+    "entity": "dr_lin_sheet_front",
+    "pointer": "/hash",
+    "rule": "schema.pattern"
+  }
+]

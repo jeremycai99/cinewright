@@ -1,0 +1,90 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://cinewright.invalid/ir/0/sequence.schema.json",
+  "title": "Sequence",
+  "description": "A sequence (chapter or act), stored as sequences/<id>.json (D40).",
+  "x-entity": "sequence",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["id", "origin", "title", "mood", "music_bed", "style", "scenes"],
+  "properties": {
+    "id": {
+      "$ref": "common.schema.json#/$defs/id"
+    },
+    "origin": {
+      "$ref": "common.schema.json#/$defs/origin"
+    },
+    "locked": {
+      "$ref": "common.schema.json#/$defs/entity_lock"
+    },
+    "title": {
+      "x-authorable": "field",
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["state"],
+      "properties": {
+        "state": {
+          "$ref": "common.schema.json#/$defs/state"
+        },
+        "value": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 200
+        }
+      }
+    },
+    "mood": {
+      "x-authorable": "field",
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["state"],
+      "properties": {
+        "state": {
+          "$ref": "common.schema.json#/$defs/state"
+        },
+        "value": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "minLength": 1
+          }
+        }
+      }
+    },
+    "music_bed": {
+      "x-authorable": "field",
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["state"],
+      "properties": {
+        "state": {
+          "$ref": "common.schema.json#/$defs/state"
+        },
+        "value": {
+          "type": "string",
+          "minLength": 1
+        }
+      }
+    },
+    "style": {
+      "$ref": "style.schema.json#/$defs/level_style"
+    },
+    "scenes": {
+      "x-authorable": "list",
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["state"],
+      "properties": {
+        "state": {
+          "$ref": "common.schema.json#/$defs/state"
+        },
+        "value": {
+          "type": "array",
+          "items": {
+            "$ref": "scene.schema.json"
+          }
+        }
+      }
+    }
+  }
+}

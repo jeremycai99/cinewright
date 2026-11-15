@@ -1,0 +1,166 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://cinewright.invalid/ir/0/layer.schema.json",
+  "title": "Layer",
+  "description": "One element of a shot (D31): a component with props, token references, motion presets and anchor-relative timing, per aspect class.",
+  "x-entity": "layer",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["id", "origin", "component", "motion", "timing", "props", "layout", "style"],
+  "properties": {
+    "id": {
+      "$ref": "common.schema.json#/$defs/id"
+    },
+    "origin": {
+      "$ref": "common.schema.json#/$defs/origin"
+    },
+    "locked": {
+      "$ref": "common.schema.json#/$defs/entity_lock"
+    },
+    "component": {
+      "description": "A component id; compilers own the code (D31).",
+      "x-authorable": "field",
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["state"],
+      "properties": {
+        "state": {
+          "$ref": "common.schema.json#/$defs/state"
+        },
+        "value": {
+          "$ref": "common.schema.json#/$defs/id"
+        }
+      }
+    },
+    "motion": {
+      "x-authorable": "field",
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["state"],
+      "properties": {
+        "state": {
+          "$ref": "common.schema.json#/$defs/state"
+        },
+        "value": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/motion_preset"
+          }
+        }
+      }
+    },
+    "timing": {
+      "x-authorable": "field",
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["state"],
+      "properties": {
+        "state": {
+          "$ref": "common.schema.json#/$defs/state"
+        },
+        "value": {
+          "$ref": "#/$defs/layer_timing"
+        }
+      }
+    },
+    "props": {
+      "$ref": "#/$defs/props"
+    },
+    "layout": {
+      "$ref": "#/$defs/layer_layout"
+    },
+    "style": {
+      "$ref": "style.schema.json#/$defs/level_style"
+    }
+  },
+  "$defs": {
+    "motion_preset": {
+      "title": "MotionPreset",
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["preset"],
+      "properties": {
+        "preset": {
+          "$ref": "common.schema.json#/$defs/id"
+        },
+        "params": {
+          "type": "object",
+          "description": "Preset parameters; durations in frames."
+        }
+      }
+    },
+    "layer_timing": {
+      "description": "Anchor-relative timing (convention 15).",
+      "title": "LayerTiming",
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["enter"],
+      "properties": {
+        "enter": {
+          "$ref": "common.schema.json#/$defs/anchor"
+        },
+        "exit": {
+          "$ref": "common.schema.json#/$defs/anchor"
+        }
+      }
+    },
+    "props": {
+      "title": "LayerProps",
+      "description": "Component props, one wrapper per prop.",
+      "x-authorable": "map",
+      "type": "object",
+      "propertyNames": {
+        "type": "string",
+        "pattern": "^[a-z][a-z0-9_]*$"
+      },
+      "additionalProperties": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["state"],
+        "properties": {
+          "state": {
+            "$ref": "common.schema.json#/$defs/state"
+          },
+          "value": {
+            "description": "Any JSON value. An object {\"token\": path} is a token reference, resolved by the cascade (M1.3).",
+            "$ref": "common.schema.json#/$defs/json_value"
+          }
+        }
+      }
+    },
+    "layer_layout": {
+      "title": "LayerLayout",
+      "description": "Placement per aspect class (D28).",
+      "x-authorable": "map",
+      "type": "object",
+      "propertyNames": {
+        "$ref": "common.schema.json#/$defs/aspect_class"
+      },
+      "additionalProperties": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["state"],
+        "properties": {
+          "state": {
+            "$ref": "common.schema.json#/$defs/state"
+          },
+          "value": {
+            "$ref": "#/$defs/layer_region"
+          }
+        }
+      }
+    },
+    "layer_region": {
+      "title": "LayerRegion",
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["region"],
+      "properties": {
+        "region": {
+          "type": "string",
+          "minLength": 1
+        }
+      }
+    }
+  }
+}

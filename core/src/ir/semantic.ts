@@ -1,12 +1,19 @@
+import { sha256Hash } from "../canonical/hash.js";
 import type { ValidationError } from "../schema/errors.js";
 import type { JsonObject, SchemaSet } from "../schema/load.js";
 import { escapeSegment } from "../schema/load.js";
-import { collectEntities, locate, walkDocument } from "./index.js";
+import { collectEntities, type EntityInfo, locate, walkDocument } from "./index.js";
 
 const STATES = new Set(["open", "agent", "user", "locked"]);
 
 function isObject(value: unknown): value is JsonObject {
   return value !== null && typeof value === "object" && !Array.isArray(value);
+}
+
+/** One document of the IR and the schema file it is validated against. */
+export interface IrDocument {
+  readonly rootFile: string;
+  readonly doc: unknown;
 }
 
 /**
@@ -37,5 +44,131 @@ export function wrapperErrors(
       }
     }
   });
+  return errors;
+}
+
+/** `anchor.word_presence`: an anchor has `word` exactly when its `point` is `word` (convention 15). */
+export function anchorErrors(
+  schemas: SchemaSet,
+  rootFile: string,
+  doc: unknown,
+): ValidationError[] {
+  const entities = collectEntities(schemas, rootFile, doc);
+  const errors: ValidationError[] = [];
+  walkDocument(schemas, rootFile, doc, (node) => {
+    if (node.schema.title !== "Anchor" || !isObject(node.value)) return;
+    if ((node.value.point === "word") !== "word" in node.value) {
+      errors.push({ ...locate(entities, node.pointer), rule: "anchor.word_presence" });
+    }
+  });
+  return errors;
+}
+
+function gcd(a: number, b: number): number {
+  return b === 0 ? a : gcd(b, a % b);
+}
+
+/** A frame rate as a reduced `num/den` string, or null when it is not a valid rational. */
+function rateKey(rate: unknown): string | null {
+  if (!isObject(rate)) return null;
+  const { num, den } = rate;
+  if (
+    !Number.isInteger(num) ||
+    !Number.isInteger(den) ||
+    (num as number) < 1 ||
+    (den as number) < 1
+  )
+    return null;
+  const d = gcd(num as number, den as number);
+  return `${(num as number) / d}/${(den as number) / d}`;
+}
+
+/**
+ * Rules that span the whole IR (M1.1c): unique ids, references that resolve to the right
+ * kind, retired ids, deliverable profiles present and hashed correctly, one frame rate (D27).
+ */
+export function crossDocumentErrors(
+  schemas: SchemaSet,
+  docs: readonly IrDocument[],
+  options: { retiredIds?: ReadonlySet<string> } = {},
+): ValidationError[] {
+  const errors: ValidationError[] = [];
+  const perDoc = docs.map((d) => ({ ...d, entities: collectEntities(schemas, d.rootFile, d.doc) }));
+  const all: EntityInfo[] = perDoc.flatMap((d) => d.entities);
+
+  const counts = new Map<string, number>();
+  for (const entity of all) counts.set(entity.id, (counts.get(entity.id) ?? 0) + 1);
+  for (const [id, count] of counts) {
+    if (count > 1) errors.push({ entity: id, pointer: "", rule: "semantic.duplicate_id" });
+    if (options.retiredIds?.has(id))
+      errors.push({ entity: id, pointer: "", rule: "semantic.id_reused" });
+  }
+
+  const kinds = new Map<string, string>();
+  for (const entity of all) if (!kinds.has(entity.id)) kinds.set(entity.id, entity.kind);
+  for (const { rootFile, doc, entities } of perDoc) {
+    walkDocument(schemas, rootFile, doc, (node) => {
+      const want = node.schema["x-ref"];
+      if (want === undefined || typeof node.value !== "string") return;
+      const allowed = Array.isArray(want) ? (want as string[]) : [want as string];
+      const kind = kinds.get(node.value);
+      if (kind === undefined) {
+        errors.push({ ...locate(entities, node.pointer), rule: "semantic.dangling_ref" });
+      } else if (!allowed.includes(kind)) {
+        errors.push({ ...locate(entities, node.pointer), rule: "semantic.ref_kind" });
+      }
+    });
+  }
+
+  const project = docs.find((d) => d.rootFile === "project.schema.json")?.doc;
+  if (isObject(project)) errors.push(...profileErrors(project));
+  return errors;
+}
+
+function profileErrors(project: JsonObject): ValidationError[] {
+  const errors: ValidationError[] = [];
+  const projectId = typeof project.id === "string" ? project.id : null;
+  const profiles = isObject(project.profiles) ? project.profiles : {};
+  for (const [id, copy] of Object.entries(profiles)) {
+    if (!isObject(copy) || typeof copy.hash !== "string" || !isObject(copy.body)) continue;
+    let actual: string | null = null;
+    try {
+      actual = sha256Hash(copy.body);
+    } catch {
+      actual = null;
+    }
+    if (actual !== copy.hash) {
+      errors.push({
+        entity: projectId,
+        pointer: `/profiles/${escapeSegment(id)}/hash`,
+        rule: "semantic.profile_hash",
+      });
+    }
+  }
+  const deliverables = isObject(project.deliverables) ? project.deliverables.value : undefined;
+  const rates = new Set<string>();
+  for (const deliverable of Array.isArray(deliverables) ? deliverables : []) {
+    if (!isObject(deliverable) || !isObject(deliverable.profile)) continue;
+    const profileId = deliverable.profile.value;
+    if (typeof profileId !== "string") continue;
+    const copy = profiles[profileId];
+    if (!isObject(copy)) {
+      errors.push({
+        entity: typeof deliverable.id === "string" ? deliverable.id : projectId,
+        pointer: "/profile/value",
+        rule: "semantic.unknown_profile",
+      });
+      continue;
+    }
+    const key = isObject(copy.body) ? rateKey(copy.body.frame_rate) : null;
+    if (key) rates.add(key);
+  }
+  if (rates.size > 1) {
+    errors.push({
+      entity: projectId,
+      pointer: "/deliverables",
+      rule: "semantic.frame_rate_mismatch",
+    });
+  }
   return errors;
 }
