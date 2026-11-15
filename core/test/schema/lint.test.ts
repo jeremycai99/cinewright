@@ -155,7 +155,9 @@ describe("schema dialect", () => {
       const branches = node.oneOf;
       if (!Array.isArray(branches)) return;
       const constKeys = branches.map((branch) => {
-        const props = ((branch as JsonObject).properties ?? {}) as JsonObject;
+        let node = branch as JsonObject;
+        if (typeof node.$ref === "string") node = resolveRef(schemas, file, node.$ref).node;
+        const props = (node.properties ?? {}) as JsonObject;
         return new Set(
           Object.entries(props)
             .filter(([, v]) => v !== null && typeof v === "object" && "const" in (v as JsonObject))

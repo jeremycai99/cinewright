@@ -62,6 +62,19 @@ export type TokenValue = string | number | boolean | TokenRef;
  */
 export type TokenPath = string;
 /**
+ * The node before the patch; absent when the node did not exist.
+ */
+export type JsonValue1 = string | number | boolean | null | unknown[] | {};
+/**
+ * Who sends the patch. In v0.1 the caller asserts it (D41).
+ */
+export type Author = UserAuthor | AgentAuthor | JobAuthor | SessionAuthor;
+export type Op = SetOp | UnsetOp | InsertOp | RemoveOp | MoveOp | LockOp | UnlockOp | SuggestOp;
+/**
+ * Any JSON value.
+ */
+export type JsonValue2 = string | number | boolean | null | unknown[] | {};
+/**
  * Project-unique entity id (convention 9). Immutable and never reused.
  */
 export type Id5 = string;
@@ -98,6 +111,14 @@ export interface IrDocuments {
   cast?: CastMember;
   delivery_profile?: DeliveryProfile;
   layer?: Layer;
+  snapshot?: Snapshot;
+  touched?: Touched;
+  init_entry?: InitEntry;
+  applied_entry?: AppliedEntry;
+  pending_entry?: PendingEntry;
+  approved_entry?: ApprovedEntry;
+  rejected_entry?: RejectedEntry;
+  patch?: Patch;
   project?: Project;
   scene?: Scene;
   script?: Script;
@@ -382,6 +403,252 @@ export interface StyleOverrides {
  */
 export interface TokenRef {
   token: TokenPath;
+}
+/**
+ * A node as it was before a patch: a field or list wrapper, a map entry, or an entity's lock.
+ */
+export interface Snapshot {
+  entity: Id;
+  /**
+   * JSON Pointer relative to the entity (RFC 6901).
+   */
+  path: string;
+  before?: JsonValue1;
+}
+export interface Touched {
+  entity: Id;
+  /**
+   * JSON Pointer relative to the entity (RFC 6901).
+   */
+  path: string;
+}
+/**
+ * The project as init created it.
+ */
+export interface InitEntry {
+  kind: "init";
+  seq: number;
+  time: string;
+  session_id: string;
+  author: Author;
+  revision: 0;
+  /**
+   * The inlined IR init created.
+   */
+  ir: {};
+  state_hash: Hash;
+}
+export interface UserAuthor {
+  kind: "user";
+}
+export interface AgentAuthor {
+  kind: "agent";
+  role: Id;
+}
+export interface JobAuthor {
+  kind: "job";
+  name: Id;
+}
+/**
+ * An agent acting directly for the user, such as a coding agent (D25).
+ */
+export interface SessionAuthor {
+  kind: "session";
+}
+/**
+ * An applied patch: a new revision.
+ */
+export interface AppliedEntry {
+  kind: "applied";
+  seq: number;
+  time: string;
+  session_id: string;
+  author: Author;
+  revision: number;
+  base_revision: number;
+  reason: string;
+  ops: Op[];
+  touched: Touched[];
+  before: Snapshot[];
+  /**
+   * Entity ids this patch removed; never reused (convention 9).
+   */
+  retired: Id[];
+  state_hash: Hash;
+  revert_of?: number;
+  /**
+   * The pending patch this applies, after approval.
+   */
+  pending_id?: string;
+  /**
+   * Entity ids a revert brought back; they are no longer retired.
+   */
+  restored?: Id[];
+}
+/**
+ * Set an authorable field or map entry.
+ */
+export interface SetOp {
+  op: "set";
+  entity: Id;
+  /**
+   * JSON Pointer relative to the entity (RFC 6901).
+   */
+  path: string;
+  value: JsonValue2;
+}
+/**
+ * Return a field to open, or remove a map entry.
+ */
+export interface UnsetOp {
+  op: "unset";
+  entity: Id;
+  /**
+   * JSON Pointer relative to the entity (RFC 6901).
+   */
+  path: string;
+}
+/**
+ * Insert an entity into an entity list.
+ */
+export interface InsertOp {
+  op: "insert";
+  entity: Id;
+  /**
+   * JSON Pointer relative to the entity (RFC 6901).
+   */
+  path: string;
+  /**
+   * The new entity, with bare values and its id.
+   */
+  value: {};
+  /**
+   * Insert or move after this item; null means first. Absent on insert means last.
+   */
+  after?: Id | null;
+}
+/**
+ * Remove an entity from its list.
+ */
+export interface RemoveOp {
+  op: "remove";
+  entity: Id;
+}
+/**
+ * Move an entity within its list.
+ */
+export interface MoveOp {
+  op: "move";
+  entity: Id;
+  /**
+   * Insert or move after this item; null means first. Absent on insert means last.
+   */
+  after: Id | null;
+}
+/**
+ * Lock a field, a list, or (without a path) the whole entity (convention 8).
+ */
+export interface LockOp {
+  op: "lock";
+  entity: Id;
+  /**
+   * JSON Pointer relative to the entity (RFC 6901).
+   */
+  path?: string;
+}
+/**
+ * Unlock a field, a list or an entity.
+ */
+export interface UnlockOp {
+  op: "unlock";
+  entity: Id;
+  /**
+   * JSON Pointer relative to the entity (RFC 6901).
+   */
+  path?: string;
+}
+/**
+ * Suggest a value without applying it; stored as pending.
+ */
+export interface SuggestOp {
+  op: "suggest";
+  entity: Id;
+  /**
+   * JSON Pointer relative to the entity (RFC 6901).
+   */
+  path: string;
+  value: JsonValue2;
+  note?: string;
+}
+/**
+ * A patch stored for approval instead of applied (D25, convention 13).
+ */
+export interface PendingEntry {
+  kind: "pending";
+  seq: number;
+  time: string;
+  session_id: string;
+  author: Author;
+  pending_id: string;
+  base_revision: number;
+  reason: string;
+  mode: "apply" | "propose";
+  ops: Op[];
+  decisions?: Decision[];
+  reason_code: "proposed" | "session_propose_first" | "authorship_blocked" | "suggest";
+  blocked?: BlockedOp[];
+}
+/**
+ * A decision-log entry citing the brief, an instruction or a pack rule (AGENTS.md invariant 8).
+ */
+export interface Decision {
+  /**
+   * @minItems 1
+   */
+  ops: [number, ...number[]];
+  choice: string;
+  citations: string[];
+}
+export interface BlockedOp {
+  op: number;
+  rule: string;
+}
+/**
+ * The user approved a pending patch; the applied entry follows.
+ */
+export interface ApprovedEntry {
+  kind: "approved";
+  seq: number;
+  time: string;
+  session_id: string;
+  author: Author;
+  pending_id: string;
+}
+/**
+ * The user rejected a pending patch; nothing changed.
+ */
+export interface RejectedEntry {
+  kind: "rejected";
+  seq: number;
+  time: string;
+  session_id: string;
+  author: Author;
+  pending_id: string;
+  note?: string;
+}
+/**
+ * An IR patch (D30, M1 convention 10). Values are bare: the store adds wrappers and sets each state from the author.
+ */
+export interface Patch {
+  base_revision: number;
+  author: Author;
+  mode: "apply" | "propose";
+  reason: string;
+  /**
+   * @minItems 1
+   */
+  ops: [Op, ...Op[]];
+  decisions?: Decision[];
 }
 /**
  * The project file, cinewright.json (D40). Sequence bodies live in sequences/<id>.json.

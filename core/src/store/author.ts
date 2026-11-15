@@ -1,6 +1,8 @@
-/** Who sends a patch (M1 convention 10). In v0.1 the caller asserts it (D41). */
-export type Author =
-  | { kind: "user" }
-  | { kind: "agent"; role: string }
-  | { kind: "job"; name: string }
-  | { kind: "session" };
+import type { Author } from "../generated/ir.js";
+
+export type { Author };
+
+/** The state an author's writes take (M1 convention 10, D25). */
+export function stateFor(author: Author): "user" | "agent" {
+  return author.kind === "user" || author.kind === "session" ? "user" : "agent";
+}

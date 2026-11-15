@@ -186,3 +186,30 @@ Errors are sorted by entity, then pointer, then rule. For a missing or unexpecte
 | `semantic.frame_rate_mismatch` | The deliverables' profiles have different frame rates (D27). |
 
 `validateDocument(kind, doc)` checks one document: schema, wrappers and anchors. `validateProject(ir, { retiredIds })` checks the whole inlined IR, including every rule above.
+
+## Patches and the patch log
+
+`patch.schema.json` is the wire format every IR write uses (convention 10). Its `author`, `op` and `decision` definitions live in `common.schema.json`, because the log references them too.
+
+- **Bare values:** values are bare. The store wraps them, sets each state from the author (`user` for users and sessions, `agent` for agents and jobs), and fills every field an inserted entity does not give as `open`.
+- **Paths:** a path points at an authorable field, a map entry or an entity list, through plain containers only. It never points inside a wrapped value.
+- **Items:** list items are addressed by id. `remove` and `move` take the item as `entity`. `move` stays within one list.
+- **Times:** a field that holds frames also accepts `"18s"`, `"1500ms"` or `"HH:MM:SS:FF"`, normalized when the op applies.
+- **Suggest:** a patch is all `suggest` ops or none.
+- **Locks:** `lock` needs a value: locking an `open` field is refused. `unlock` returns a field to `user`. An entity lock is stored as `locked: true` on the entity.
+
+`log-entry.schema.json` describes one line of `log/patches.jsonl`, written in the hash form. Its root `oneOf` references the entry kinds in `$defs` (datamodel-code-generator cannot emit a single module for a root-level `oneOf` with inline branches).
+
+| Entry | Written when | Records |
+| --- | --- | --- |
+| `init` | `cinewright init` | Revision 0 and the full IR. |
+| `applied` | A patch or revert creates a new revision. | `before` snapshots of every node it changed, `touched`, `retired` (removed ids) and `restored` (ids a revert brought back). |
+| `pending` | A patch is stored instead of applied: a proposal, a suggestion, or (from M1.2a) an authorship block. | The patch, a `pending_id` and a `reason_code`. |
+| `approved` / `rejected` | The user decides on a pending patch (M1.2b). | The pending id. |
+
+Every entry records `time`, `session_id` and the asserted `author` (D41). A revert is a new revision whose `revert_of` names its target; replaying the log re-applies the target's `before` snapshots. On open, the store:
+1. finishes or discards an interrupted journal (`.cinewright/txn/`);
+2. compares the files' `state_hash` with the last applied entry;
+3. checks that every file is in the stored form.
+
+A file changed outside the store fails to load, naming the file, the entity and the field.

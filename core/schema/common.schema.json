@@ -172,6 +172,281 @@
           "type": "object"
         }
       ]
+    },
+    "author": {
+      "title": "Author",
+      "description": "Who sends the patch. In v0.1 the caller asserts it (D41).",
+      "oneOf": [
+        {
+          "title": "UserAuthor",
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["kind"],
+          "properties": {
+            "kind": {
+              "const": "user"
+            }
+          }
+        },
+        {
+          "title": "AgentAuthor",
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["kind", "role"],
+          "properties": {
+            "kind": {
+              "const": "agent"
+            },
+            "role": {
+              "$ref": "#/$defs/id"
+            }
+          }
+        },
+        {
+          "title": "JobAuthor",
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["kind", "name"],
+          "properties": {
+            "kind": {
+              "const": "job"
+            },
+            "name": {
+              "$ref": "#/$defs/id"
+            }
+          }
+        },
+        {
+          "description": "An agent acting directly for the user, such as a coding agent (D25).",
+          "title": "SessionAuthor",
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["kind"],
+          "properties": {
+            "kind": {
+              "const": "session"
+            }
+          }
+        }
+      ]
+    },
+    "op": {
+      "title": "Op",
+      "oneOf": [
+        {
+          "description": "Set an authorable field or map entry.",
+          "title": "SetOp",
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["op", "entity", "path", "value"],
+          "properties": {
+            "op": {
+              "const": "set"
+            },
+            "entity": {
+              "$ref": "#/$defs/id"
+            },
+            "path": {
+              "type": "string",
+              "pattern": "^(/([^~]|~[01])*)*$",
+              "description": "JSON Pointer relative to the entity (RFC 6901)."
+            },
+            "value": {
+              "$ref": "#/$defs/json_value"
+            }
+          }
+        },
+        {
+          "description": "Return a field to open, or remove a map entry.",
+          "title": "UnsetOp",
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["op", "entity", "path"],
+          "properties": {
+            "op": {
+              "const": "unset"
+            },
+            "entity": {
+              "$ref": "#/$defs/id"
+            },
+            "path": {
+              "type": "string",
+              "pattern": "^(/([^~]|~[01])*)*$",
+              "description": "JSON Pointer relative to the entity (RFC 6901)."
+            }
+          }
+        },
+        {
+          "description": "Insert an entity into an entity list.",
+          "title": "InsertOp",
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["op", "entity", "path", "value"],
+          "properties": {
+            "op": {
+              "const": "insert"
+            },
+            "entity": {
+              "$ref": "#/$defs/id"
+            },
+            "path": {
+              "type": "string",
+              "pattern": "^(/([^~]|~[01])*)*$",
+              "description": "JSON Pointer relative to the entity (RFC 6901)."
+            },
+            "value": {
+              "type": "object",
+              "description": "The new entity, with bare values and its id."
+            },
+            "after": {
+              "description": "Insert or move after this item; null means first. Absent on insert means last.",
+              "anyOf": [
+                {
+                  "$ref": "#/$defs/id"
+                },
+                {
+                  "type": "null"
+                }
+              ]
+            }
+          }
+        },
+        {
+          "description": "Remove an entity from its list.",
+          "title": "RemoveOp",
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["op", "entity"],
+          "properties": {
+            "op": {
+              "const": "remove"
+            },
+            "entity": {
+              "$ref": "#/$defs/id"
+            }
+          }
+        },
+        {
+          "description": "Move an entity within its list.",
+          "title": "MoveOp",
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["op", "entity", "after"],
+          "properties": {
+            "op": {
+              "const": "move"
+            },
+            "entity": {
+              "$ref": "#/$defs/id"
+            },
+            "after": {
+              "description": "Insert or move after this item; null means first. Absent on insert means last.",
+              "anyOf": [
+                {
+                  "$ref": "#/$defs/id"
+                },
+                {
+                  "type": "null"
+                }
+              ]
+            }
+          }
+        },
+        {
+          "description": "Lock a field, a list, or (without a path) the whole entity (convention 8).",
+          "title": "LockOp",
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["op", "entity"],
+          "properties": {
+            "op": {
+              "const": "lock"
+            },
+            "entity": {
+              "$ref": "#/$defs/id"
+            },
+            "path": {
+              "type": "string",
+              "pattern": "^(/([^~]|~[01])*)*$",
+              "description": "JSON Pointer relative to the entity (RFC 6901)."
+            }
+          }
+        },
+        {
+          "description": "Unlock a field, a list or an entity.",
+          "title": "UnlockOp",
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["op", "entity"],
+          "properties": {
+            "op": {
+              "const": "unlock"
+            },
+            "entity": {
+              "$ref": "#/$defs/id"
+            },
+            "path": {
+              "type": "string",
+              "pattern": "^(/([^~]|~[01])*)*$",
+              "description": "JSON Pointer relative to the entity (RFC 6901)."
+            }
+          }
+        },
+        {
+          "description": "Suggest a value without applying it; stored as pending.",
+          "title": "SuggestOp",
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["op", "entity", "path", "value"],
+          "properties": {
+            "op": {
+              "const": "suggest"
+            },
+            "entity": {
+              "$ref": "#/$defs/id"
+            },
+            "path": {
+              "type": "string",
+              "pattern": "^(/([^~]|~[01])*)*$",
+              "description": "JSON Pointer relative to the entity (RFC 6901)."
+            },
+            "value": {
+              "$ref": "#/$defs/json_value"
+            },
+            "note": {
+              "type": "string"
+            }
+          }
+        }
+      ]
+    },
+    "decision": {
+      "description": "A decision-log entry citing the brief, an instruction or a pack rule (AGENTS.md invariant 8).",
+      "title": "Decision",
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["ops", "choice", "citations"],
+      "properties": {
+        "ops": {
+          "type": "array",
+          "minItems": 1,
+          "items": {
+            "type": "integer",
+            "minimum": 0
+          }
+        },
+        "choice": {
+          "type": "string",
+          "minLength": 1
+        },
+        "citations": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "minLength": 1
+          }
+        }
+      }
     }
   }
 }

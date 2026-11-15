@@ -1,29 +1,19 @@
 import { mkdir, open, readFile } from "node:fs/promises";
 import { dirname, join } from "node:path";
-import { type HashString, toHashForm } from "../canonical/hash.js";
-import type { InlinedIr } from "../ir/inlined.js";
+import { toHashForm } from "../canonical/hash.js";
+import type {
+  AppliedEntry,
+  ApprovedEntry,
+  InitEntry,
+  PendingEntry,
+  RejectedEntry,
+} from "../generated/ir.js";
 import { PATCH_LOG } from "../project/layout.js";
-import type { Author } from "./author.js";
 
-/** Fields every patch-log entry carries (M1 convention 12, D41). */
-export interface LogEntryBase {
-  /** 1-based position in the log. */
-  seq: number;
-  kind: string;
-  time: string;
-  session_id: string;
-  author: Author;
-}
+/** One line of `log/patches.jsonl` (M1 convention 12; `log-entry.schema.json`). */
+export type LogEntry = InitEntry | AppliedEntry | PendingEntry | ApprovedEntry | RejectedEntry;
 
-/** The first entry: the project as `init` created it, at revision 0. */
-export interface InitEntry extends LogEntryBase {
-  kind: "init";
-  revision: 0;
-  ir: InlinedIr;
-  state_hash: HashString;
-}
-
-export type LogEntry = InitEntry;
+export type { AppliedEntry, ApprovedEntry, InitEntry, PendingEntry, RejectedEntry };
 
 /** One log line: the entry's hash form, so the log is deterministic. */
 export function logLine(entry: object): string {
@@ -44,7 +34,7 @@ export async function readLog(dir: string, file: string = PATCH_LOG): Promise<Lo
     });
 }
 
-/** Append one entry and fsync. The log is append-only. */
+/** Append one entry and fsync (used by init; the store appends through its journal). */
 export async function appendLog(
   dir: string,
   entry: object,

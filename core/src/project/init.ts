@@ -128,7 +128,7 @@ export async function initProject(
     time: options.now(),
     session_id: options.sessionId,
     author: { kind: "user" },
-    ir,
+    ir: ir as unknown as InitEntry["ir"],
     state_hash: hash,
   };
   await appendLog(dir, entry);

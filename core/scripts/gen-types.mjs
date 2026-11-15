@@ -55,6 +55,14 @@ function stageSchemas(dir) {
   }
   const properties = {};
   for (const name of documentSchemas()) {
+    const schema = JSON.parse(readFileSync(join(SCHEMA_DIR, name), "utf8"));
+    if (Array.isArray(schema.oneOf)) {
+      // datamodel-code-generator cannot emit one module for a root-level oneOf; reference its
+      // $defs branches instead (the root oneOf still validates in Ajv).
+      for (const def of Object.keys(schema.$defs ?? {}))
+        properties[def] = { $ref: `${name}#/$defs/${def}` };
+      continue;
+    }
     properties[name.replace(/\.schema\.json$/, "").replace(/-/g, "_")] = { $ref: name };
   }
   const root = {

@@ -35,8 +35,18 @@ export { normalizeErrors, type ValidationError } from "./schema/errors.js";
 export { type JsonObject, loadSchemas, resolveRef, type SchemaSet } from "./schema/load.js";
 export { type DocumentKind, validateDocument, validateProject } from "./schema/validate.js";
 
-export type { Author } from "./store/author.js";
-export { appendLog, type InitEntry, type LogEntry, readLog } from "./store/log.js";
+export { stateFor } from "./store/author.js";
+export { type Conflict, findConflicts } from "./store/conflict.js";
+export { LockTimeoutError, withLock } from "./store/lock.js";
+export { appendLog, type LogEntry, readLog } from "./store/log.js";
+export { type PatchError, validatePatch } from "./store/patch.js";
+export {
+  type ApplyResult,
+  ProjectLoadError,
+  replayLog,
+  Store,
+  type StoreOptions,
+} from "./store/store.js";
 export { parseTime, TimeError } from "./time.js";
 
 export const VERSION = "0.0.0";
