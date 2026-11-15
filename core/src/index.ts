@@ -23,6 +23,8 @@ export {
   type TokenTree,
 } from "./cascade/resolve.js";
 export type * from "./generated/ir.js";
+export { dependencyGraph, dirtyNodes, type Graph } from "./graph/deps.js";
+export { type RenderInputs, renderKey, unwrap } from "./graph/render-key.js";
 export { collectEntities, type EntityInfo, entityIndex, locate, walkDocument } from "./ir/index.js";
 export { type InlinedIr, inlineIr, splitIr } from "./ir/inlined.js";
 export { anchorErrors, crossDocumentErrors, wrapperErrors } from "./ir/semantic.js";

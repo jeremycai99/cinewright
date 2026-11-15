@@ -1,0 +1,1009 @@
+{
+  "assets": {
+    "state": "user",
+    "value": [
+      {
+        "bytes": 11,
+        "hash": "sha256:93e2059298db97878d2d42a3ee94c7f9bc9099a6ce744fb2d516aa6f81c0fe16",
+        "id": "dr_lin_sheet_front",
+        "license": {
+          "commercial_use": true,
+          "terms": "Supplied by the project author"
+        },
+        "media_type": "image/png",
+        "origin": "user",
+        "provenance": {
+          "provider": "user_upload"
+        },
+        "role": "reference"
+      },
+      {
+        "bytes": 13,
+        "hash": "sha256:4cd793584e41cc2906c0a4a9c2e1f7d2cf0bf3379dea42b91d7707647286dd61",
+        "id": "dr_lin_sheet_profile",
+        "license": {
+          "commercial_use": true,
+          "terms": "Supplied by the project author"
+        },
+        "media_type": "image/png",
+        "origin": "user",
+        "provenance": {
+          "provider": "user_upload"
+        },
+        "role": "reference"
+      },
+      {
+        "bytes": 10,
+        "hash": "sha256:4d3b68e681b7c5ed00d285d3a223d0a8006ae4f8297bd7d8a66fada4aa00a044",
+        "id": "dr_lin_sheet_full",
+        "license": {
+          "commercial_use": true,
+          "terms": "Supplied by the project author"
+        },
+        "media_type": "image/png",
+        "origin": "user",
+        "provenance": {
+          "provider": "user_upload"
+        },
+        "role": "reference"
+      },
+      {
+        "bytes": 3,
+        "hash": "sha256:47d688093d81337564600b0fa9eaedb91c7c232d8dffb44f9f0fc87e84e7c5de",
+        "id": "take_l01",
+        "license": {
+          "commercial_use": true,
+          "terms": "Test fixture"
+        },
+        "line": "b01.l01",
+        "media_type": "audio/wav",
+        "origin": "agent",
+        "provenance": {
+          "provider": "tts_stub"
+        },
+        "role": "take"
+      },
+      {
+        "bytes": 3,
+        "hash": "sha256:657dbe46e7d1cdb2d72415ebe870d7c446560b25cb48c192e5b5967c571ea0b5",
+        "id": "take_l02",
+        "license": {
+          "commercial_use": true,
+          "terms": "Test fixture"
+        },
+        "line": "b01.l02",
+        "media_type": "audio/wav",
+        "origin": "agent",
+        "provenance": {
+          "provider": "tts_stub"
+        },
+        "role": "take"
+      },
+      {
+        "bytes": 3,
+        "hash": "sha256:9e7acc38d2e535859297322a15b608e2acc6f97ae9d1a3b7c26986f7b18ad8df",
+        "id": "take_l03",
+        "license": {
+          "commercial_use": true,
+          "terms": "Test fixture"
+        },
+        "line": "b01.l03",
+        "media_type": "audio/wav",
+        "origin": "agent",
+        "provenance": {
+          "provider": "tts_stub"
+        },
+        "role": "take"
+      }
+    ]
+  },
+  "autonomy": {
+    "state": "user",
+    "value": "guided"
+  },
+  "brief": {
+    "state": "user",
+    "value": "A 30-second explainer about why build pipelines slow down as teams grow."
+  },
+  "budget": {
+    "state": "user",
+    "value": {
+      "cap": 25,
+      "currency": "USD"
+    }
+  },
+  "cast": {
+    "state": "user",
+    "value": [
+      {
+        "consent": {
+          "state": "open"
+        },
+        "display_name": {
+          "state": "open"
+        },
+        "id": "narrator",
+        "on_screen": {
+          "state": "user",
+          "value": false
+        },
+        "origin": "user",
+        "performance": {
+          "baseline": {
+            "state": "user",
+            "value": "warm, confident, unhurried"
+          },
+          "pace_wpm": {
+            "state": "user",
+            "value": 150
+          },
+          "tics": {
+            "state": "open"
+          }
+        },
+        "role": {
+          "state": "user",
+          "value": "narrator"
+        },
+        "visual": {
+          "state": "open"
+        },
+        "voice": {
+          "bindings": {
+            "elevenlabs": {
+              "state": "agent",
+              "value": {
+                "model": "eleven_v4",
+                "settings": {
+                  "stability": 0.45
+                },
+                "voice_id": "…"
+              }
+            },
+            "kokoro": {
+              "state": "agent",
+              "value": {
+                "voice": "…"
+              }
+            }
+          },
+          "description": {
+            "state": "user",
+            "value": {
+              "accent": "neutral",
+              "language": "en",
+              "timbre": "warm, mid-low"
+            }
+          },
+          "lexicon": {
+            "Kubernetes": {
+              "state": "user",
+              "value": "KOO-ber-NET-eez"
+            }
+          }
+        }
+      },
+      {
+        "consent": {
+          "state": "user",
+          "value": {
+            "synthetic": true
+          }
+        },
+        "display_name": {
+          "state": "user",
+          "value": "Dr Lin"
+        },
+        "id": "dr_lin",
+        "on_screen": {
+          "state": "user",
+          "value": true
+        },
+        "origin": "user",
+        "performance": {
+          "baseline": {
+            "state": "user",
+            "value": "wry, precise"
+          },
+          "pace_wpm": {
+            "state": "open"
+          },
+          "tics": {
+            "state": "user",
+            "value": ["half-laugh before admissions"]
+          }
+        },
+        "role": {
+          "state": "user",
+          "value": "character"
+        },
+        "visual": {
+          "state": "user",
+          "value": {
+            "sheet": ["dr_lin_sheet_front", "dr_lin_sheet_profile", "dr_lin_sheet_full"],
+            "style": "photoreal",
+            "wardrobe": "navy blazer"
+          }
+        },
+        "voice": {
+          "bindings": {},
+          "description": {
+            "state": "user",
+            "value": {
+              "text": "woman, 40s, dry wit, slight rasp"
+            }
+          },
+          "lexicon": {}
+        }
+      }
+    ]
+  },
+  "deliverables": {
+    "state": "user",
+    "value": [
+      {
+        "burn_in_captions": {
+          "state": "user",
+          "value": false
+        },
+        "id": "web_landscape",
+        "label": {
+          "state": "open"
+        },
+        "origin": "user",
+        "profile": {
+          "state": "user",
+          "value": "landscape_1080p30"
+        }
+      },
+      {
+        "burn_in_captions": {
+          "state": "user",
+          "value": true
+        },
+        "id": "social_portrait",
+        "label": {
+          "state": "user",
+          "value": "Social cut-down"
+        },
+        "locked": true,
+        "origin": "user",
+        "profile": {
+          "state": "user",
+          "value": "portrait_1080p30"
+        }
+      }
+    ]
+  },
+  "id": "demo",
+  "origin": "user",
+  "policies": {
+    "state": "locked",
+    "value": {
+      "require_commercial_license": true
+    }
+  },
+  "profiles": {
+    "landscape_1080p30": {
+      "body": {
+        "aspect_class": "landscape",
+        "captions": {
+          "max_chars_per_line": 42,
+          "max_lines": 2,
+          "min_display_frames": 30
+        },
+        "frame_rate": {
+          "den": 1,
+          "num": 30
+        },
+        "height": 1080,
+        "id": "landscape_1080p30",
+        "loudness": {
+          "integrated_lufs": -14,
+          "tolerance_lu": 1,
+          "true_peak_dbtp": -1
+        },
+        "name": "Landscape 1080p, 30 fps (test fixture)",
+        "safe_zones": {
+          "action": {
+            "bottom": 0.05,
+            "left": 0.05,
+            "right": 0.05,
+            "top": 0.05
+          },
+          "title": {
+            "bottom": 0.1,
+            "left": 0.1,
+            "right": 0.1,
+            "top": 0.1
+          }
+        },
+        "sample_rate": 48000,
+        "schema_version": 1,
+        "width": 1920
+      },
+      "hash": "sha256:3238f594add04a4f649ee274aff2d704cd410044a497748e41c19d67e70d0e09"
+    },
+    "portrait_1080p30": {
+      "body": {
+        "aspect_class": "portrait",
+        "captions": {
+          "max_chars_per_line": 32,
+          "max_lines": 2,
+          "min_display_frames": 30
+        },
+        "frame_rate": {
+          "den": 1,
+          "num": 30
+        },
+        "height": 1920,
+        "id": "portrait_1080p30",
+        "loudness": {
+          "integrated_lufs": -14,
+          "tolerance_lu": 1,
+          "true_peak_dbtp": -1
+        },
+        "name": "Portrait 1080p, 30 fps (test fixture)",
+        "safe_zones": {
+          "action": {
+            "bottom": 0.05,
+            "left": 0.05,
+            "right": 0.05,
+            "top": 0.05
+          },
+          "title": {
+            "bottom": 0.1,
+            "left": 0.1,
+            "right": 0.1,
+            "top": 0.1
+          }
+        },
+        "sample_rate": 48000,
+        "schema_version": 1,
+        "width": 1080
+      },
+      "hash": "sha256:71b4fd1613a76aa87a1087fac5f09f0a58a728c7f05eb73258d893fe31dddf6d"
+    }
+  },
+  "schema_version": 1,
+  "script": {
+    "beats": {
+      "state": "agent",
+      "value": [
+        {
+          "id": "b01",
+          "lines": {
+            "state": "agent",
+            "value": [
+              {
+                "direction": {
+                  "state": "agent",
+                  "value": "[measured] low, deliberate"
+                },
+                "id": "b01.l01",
+                "lipsync": {
+                  "state": "agent",
+                  "value": false
+                },
+                "on_screen": {
+                  "state": "agent",
+                  "value": false
+                },
+                "on_screen_text": {
+                  "state": "open"
+                },
+                "origin": "agent",
+                "speaker": {
+                  "state": "agent",
+                  "value": "narrator"
+                },
+                "text": {
+                  "state": "agent",
+                  "value": "Every team hits the same wall."
+                }
+              },
+              {
+                "direction": {
+                  "state": "agent",
+                  "value": "[wry] half-laugh"
+                },
+                "id": "b01.l02",
+                "lipsync": {
+                  "state": "agent",
+                  "value": true
+                },
+                "on_screen": {
+                  "state": "agent",
+                  "value": true
+                },
+                "on_screen_text": {
+                  "state": "open"
+                },
+                "origin": "agent",
+                "speaker": {
+                  "state": "agent",
+                  "value": "dr_lin"
+                },
+                "text": {
+                  "state": "agent",
+                  "value": "We rebuilt it three times."
+                }
+              }
+            ]
+          },
+          "origin": "agent",
+          "summary": {
+            "state": "agent",
+            "value": "Every team hits the same wall"
+          }
+        },
+        {
+          "id": "b02",
+          "lines": {
+            "state": "agent",
+            "value": [
+              {
+                "direction": {
+                  "state": "agent",
+                  "value": "[warm] steady"
+                },
+                "id": "b01.l03",
+                "lipsync": {
+                  "state": "agent",
+                  "value": false
+                },
+                "on_screen": {
+                  "state": "agent",
+                  "value": false
+                },
+                "on_screen_text": {
+                  "state": "open"
+                },
+                "origin": "agent",
+                "speaker": {
+                  "state": "agent",
+                  "value": "narrator"
+                },
+                "text": {
+                  "state": "agent",
+                  "value": "Here is what changed."
+                }
+              }
+            ]
+          },
+          "origin": "agent",
+          "summary": {
+            "state": "open"
+          }
+        }
+      ]
+    },
+    "id": "script",
+    "origin": "agent"
+  },
+  "sequences": {
+    "state": "agent",
+    "value": [
+      {
+        "id": "seq_main",
+        "mood": {
+          "state": "open"
+        },
+        "music_bed": {
+          "state": "open"
+        },
+        "origin": "agent",
+        "scenes": {
+          "state": "agent",
+          "value": [
+            {
+              "cast": {
+                "state": "open"
+              },
+              "duration": {
+                "state": "open"
+              },
+              "gates": {
+                "state": "open"
+              },
+              "id": "scene_a",
+              "intent": {
+                "state": "agent",
+                "value": "Intent scene_a"
+              },
+              "lines": {
+                "state": "open"
+              },
+              "mood": {
+                "state": "open"
+              },
+              "origin": "agent",
+              "shots": {
+                "state": "agent",
+                "value": [
+                  {
+                    "anchors": {
+                      "state": "agent",
+                      "value": {
+                        "start": {
+                          "line": "b01.l01",
+                          "offset": 0,
+                          "point": "start"
+                        }
+                      }
+                    },
+                    "backend": {
+                      "state": "agent",
+                      "value": "html"
+                    },
+                    "camera": {
+                      "state": "agent",
+                      "value": {
+                        "ease": {
+                          "token": "motion.ease"
+                        },
+                        "move": "push_in"
+                      }
+                    },
+                    "duration": {
+                      "state": "agent",
+                      "value": 90
+                    },
+                    "framing": {
+                      "state": "agent",
+                      "value": "full_frame"
+                    },
+                    "id": "a1",
+                    "layers": {
+                      "state": "open"
+                    },
+                    "layout": {
+                      "landscape": {
+                        "state": "agent",
+                        "value": {
+                          "template": "a"
+                        }
+                      },
+                      "portrait": {
+                        "state": "agent",
+                        "value": {
+                          "template": "b"
+                        }
+                      }
+                    },
+                    "origin": "agent",
+                    "references": {
+                      "state": "open"
+                    },
+                    "style": {
+                      "overrides": {}
+                    },
+                    "subject": {
+                      "state": "open"
+                    },
+                    "type": {
+                      "state": "agent",
+                      "value": "motion_graphics"
+                    }
+                  },
+                  {
+                    "anchors": {
+                      "state": "agent",
+                      "value": {
+                        "start": {
+                          "line": "b01.l01",
+                          "offset": 0,
+                          "point": "start"
+                        }
+                      }
+                    },
+                    "backend": {
+                      "state": "agent",
+                      "value": "html"
+                    },
+                    "camera": {
+                      "state": "agent",
+                      "value": {
+                        "move": "push_in"
+                      }
+                    },
+                    "duration": {
+                      "state": "agent",
+                      "value": 90
+                    },
+                    "framing": {
+                      "state": "agent",
+                      "value": "full_frame"
+                    },
+                    "id": "a2",
+                    "layers": {
+                      "state": "open"
+                    },
+                    "layout": {
+                      "landscape": {
+                        "state": "agent",
+                        "value": {
+                          "template": "a"
+                        }
+                      },
+                      "portrait": {
+                        "state": "agent",
+                        "value": {
+                          "template": "b"
+                        }
+                      }
+                    },
+                    "origin": "agent",
+                    "references": {
+                      "state": "open"
+                    },
+                    "style": {
+                      "overrides": {}
+                    },
+                    "subject": {
+                      "state": "open"
+                    },
+                    "type": {
+                      "state": "agent",
+                      "value": "motion_graphics"
+                    }
+                  }
+                ]
+              },
+              "sound": {
+                "state": "agent",
+                "value": {
+                  "sfx": []
+                }
+              },
+              "style": {
+                "overrides": {}
+              },
+              "transition_out": {
+                "state": "agent",
+                "value": {
+                  "duration": 12,
+                  "to": "scene_b",
+                  "type": "cross_dissolve"
+                }
+              }
+            },
+            {
+              "cast": {
+                "state": "open"
+              },
+              "duration": {
+                "state": "open"
+              },
+              "gates": {
+                "state": "open"
+              },
+              "id": "scene_b",
+              "intent": {
+                "state": "agent",
+                "value": "Intent scene_b"
+              },
+              "lines": {
+                "state": "open"
+              },
+              "mood": {
+                "state": "open"
+              },
+              "origin": "agent",
+              "shots": {
+                "state": "agent",
+                "value": [
+                  {
+                    "anchors": {
+                      "state": "agent",
+                      "value": {
+                        "start": {
+                          "line": "b01.l02",
+                          "offset": 0,
+                          "point": "start"
+                        }
+                      }
+                    },
+                    "backend": {
+                      "state": "agent",
+                      "value": "html"
+                    },
+                    "camera": {
+                      "state": "agent",
+                      "value": {
+                        "move": "push_in"
+                      }
+                    },
+                    "duration": {
+                      "state": "agent",
+                      "value": 90
+                    },
+                    "framing": {
+                      "state": "agent",
+                      "value": "full_frame"
+                    },
+                    "id": "b1",
+                    "layers": {
+                      "state": "agent",
+                      "value": [
+                        {
+                          "component": {
+                            "state": "agent",
+                            "value": "kinetic_title"
+                          },
+                          "id": "b1.title",
+                          "layout": {},
+                          "motion": {
+                            "state": "open"
+                          },
+                          "origin": "agent",
+                          "props": {
+                            "color": {
+                              "state": "agent",
+                              "value": {
+                                "token": "palette.accent"
+                              }
+                            },
+                            "text": {
+                              "state": "agent",
+                              "value": "Hi"
+                            }
+                          },
+                          "style": {
+                            "overrides": {}
+                          },
+                          "timing": {
+                            "state": "open"
+                          }
+                        }
+                      ]
+                    },
+                    "layout": {
+                      "landscape": {
+                        "state": "agent",
+                        "value": {
+                          "template": "a"
+                        }
+                      },
+                      "portrait": {
+                        "state": "agent",
+                        "value": {
+                          "template": "b"
+                        }
+                      }
+                    },
+                    "origin": "agent",
+                    "references": {
+                      "state": "open"
+                    },
+                    "style": {
+                      "overrides": {}
+                    },
+                    "subject": {
+                      "state": "open"
+                    },
+                    "type": {
+                      "state": "agent",
+                      "value": "motion_graphics"
+                    }
+                  },
+                  {
+                    "anchors": {
+                      "state": "agent",
+                      "value": {
+                        "start": {
+                          "line": "b01.l02",
+                          "offset": 0,
+                          "point": "start"
+                        }
+                      }
+                    },
+                    "backend": {
+                      "state": "agent",
+                      "value": "html"
+                    },
+                    "camera": {
+                      "state": "agent",
+                      "value": {
+                        "move": "push_in"
+                      }
+                    },
+                    "duration": {
+                      "state": "agent",
+                      "value": 90
+                    },
+                    "framing": {
+                      "state": "agent",
+                      "value": "full_frame"
+                    },
+                    "id": "b2",
+                    "layers": {
+                      "state": "open"
+                    },
+                    "layout": {
+                      "landscape": {
+                        "state": "agent",
+                        "value": {
+                          "template": "a"
+                        }
+                      },
+                      "portrait": {
+                        "state": "agent",
+                        "value": {
+                          "template": "b"
+                        }
+                      }
+                    },
+                    "origin": "agent",
+                    "references": {
+                      "state": "open"
+                    },
+                    "style": {
+                      "overrides": {}
+                    },
+                    "subject": {
+                      "state": "open"
+                    },
+                    "type": {
+                      "state": "agent",
+                      "value": "motion_graphics"
+                    }
+                  }
+                ]
+              },
+              "sound": {
+                "state": "agent",
+                "value": {
+                  "sfx": []
+                }
+              },
+              "style": {
+                "overrides": {}
+              },
+              "transition_out": {
+                "state": "agent",
+                "value": {
+                  "type": "cut"
+                }
+              }
+            },
+            {
+              "cast": {
+                "state": "open"
+              },
+              "duration": {
+                "state": "open"
+              },
+              "gates": {
+                "state": "open"
+              },
+              "id": "scene_c",
+              "intent": {
+                "state": "agent",
+                "value": "Intent scene_c"
+              },
+              "lines": {
+                "state": "open"
+              },
+              "mood": {
+                "state": "open"
+              },
+              "origin": "agent",
+              "shots": {
+                "state": "agent",
+                "value": [
+                  {
+                    "anchors": {
+                      "state": "agent",
+                      "value": {
+                        "start": {
+                          "line": "b01.l03",
+                          "offset": 0,
+                          "point": "start"
+                        }
+                      }
+                    },
+                    "backend": {
+                      "state": "agent",
+                      "value": "html"
+                    },
+                    "camera": {
+                      "state": "agent",
+                      "value": {
+                        "move": "push_in"
+                      }
+                    },
+                    "duration": {
+                      "state": "agent",
+                      "value": 90
+                    },
+                    "framing": {
+                      "state": "agent",
+                      "value": "full_frame"
+                    },
+                    "id": "c1",
+                    "layers": {
+                      "state": "open"
+                    },
+                    "layout": {
+                      "landscape": {
+                        "state": "agent",
+                        "value": {
+                          "template": "a"
+                        }
+                      },
+                      "portrait": {
+                        "state": "agent",
+                        "value": {
+                          "template": "b"
+                        }
+                      }
+                    },
+                    "origin": "agent",
+                    "references": {
+                      "state": "open"
+                    },
+                    "style": {
+                      "overrides": {}
+                    },
+                    "subject": {
+                      "state": "open"
+                    },
+                    "type": {
+                      "state": "agent",
+                      "value": "motion_graphics"
+                    }
+                  }
+                ]
+              },
+              "sound": {
+                "state": "agent",
+                "value": {
+                  "sfx": []
+                }
+              },
+              "style": {
+                "overrides": {}
+              },
+              "transition_out": {
+                "state": "agent",
+                "value": {
+                  "type": "cut"
+                }
+              }
+            }
+          ]
+        },
+        "style": {
+          "overrides": {}
+        },
+        "title": {
+          "state": "agent",
+          "value": "Main"
+        }
+      }
+    ]
+  },
+  "settings": {
+    "propose_conversational_edits": {
+      "state": "user",
+      "value": true
+    }
+  },
+  "style": {
+    "overrides": {
+      "palette.accent": {
+        "state": "user",
+        "value": "#123456"
+      }
+    },
+    "pack": {
+      "state": "agent",
+      "value": "neutral"
+    }
+  },
+  "title": {
+    "state": "user",
+    "value": "Demo"
+  }
+}
