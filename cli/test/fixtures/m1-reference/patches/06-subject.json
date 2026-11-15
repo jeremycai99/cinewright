@@ -1,0 +1,16 @@
+{
+  "base_revision": 5,
+  "author": {
+    "kind": "user"
+  },
+  "mode": "apply",
+  "reason": "Dr Lin is the subject of shot 2",
+  "ops": [
+    {
+      "op": "set",
+      "entity": "s03.sh02",
+      "path": "/subject",
+      "value": "dr_lin"
+    }
+  ]
+}

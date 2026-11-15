@@ -1,0 +1,34 @@
+shot: s03.sh01  # origin agent
+type: motion_graphics  # agent
+backend: html  # agent
+framing: full_frame  # agent
+subject: ~  # open
+camera: { move: push_in, ease: { token: motion.ease_out_expo }, amount: 0.06 }  # agent
+duration: ~  # open
+anchors: { start: { line: b01.l01, point: start, offset: 0s } }  # agent
+references: ~  # open
+layout:
+  landscape: { template: grid.12col/title-left }  # agent
+  portrait: { template: stack/title-top }  # agent
+style:
+  overrides: {}
+layers:  # agent
+  - layer: s03.sh01.title  # origin agent
+    component: kinetic_title  # agent
+    motion: ~  # open
+    timing: { enter: { line: b01.l01, point: start, offset: 0s } }  # agent
+    props:
+      color: { token: palette.accent }  # agent
+      text: "Every team hits the same wall."  # agent
+    layout: {}
+    style:
+      overrides: {}
+  - layer: s03.sh01.bars  # origin agent
+    component: data_bars  # agent
+    motion: ~  # open
+    timing: { enter: { line: b01.l01, point: word, word: 3, offset: 0.2s } }  # agent
+    props:
+      series: [3, 5, 9]  # agent
+    layout: {}
+    style:
+      overrides: {}

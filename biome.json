@@ -7,7 +7,13 @@
   },
   "files": {
     "ignoreUnknown": true,
-    "includes": ["**", "!**/*.md", "!core/src/generated", "!core/test/generated"]
+    "includes": [
+      "**",
+      "!**/*.md",
+      "!core/src/generated",
+      "!core/test/generated",
+      "!cli/test/fixtures/m1-reference/project"
+    ]
   },
   "formatter": {
     "enabled": true,

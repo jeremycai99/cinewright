@@ -1,0 +1,14 @@
+cast_member: dr_lin  # origin user
+role: character  # user
+display_name: "Dr Lin"  # user
+voice:
+  description: { text: "woman, 40s, dry wit, slight rasp" }  # user
+  lexicon: {}
+  bindings: {}
+performance:
+  baseline: "wry, precise"  # user
+  pace_wpm: ~  # open
+  tics: ["half-laugh before admissions"]  # user
+on_screen: true  # user
+visual: { sheet: [dr_lin_sheet_front, dr_lin_sheet_profile, dr_lin_sheet_full], wardrobe: "navy blazer", style: photoreal }  # user
+consent: { synthetic: true }  # user

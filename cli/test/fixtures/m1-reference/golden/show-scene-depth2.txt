@@ -1,0 +1,62 @@
+scene: s03_the_problem  # origin user
+intent: "Show why legacy pipelines break at scale"  # user
+duration: { target: 18s, flex: 0.15, sync: voiceover }  # agent
+mood: [tense, building, urgent]  # user
+cast: [narrator, dr_lin]  # user
+lines:  # user
+  - { id: b01.l01, who: narrator, line: "Every team hits the same wall.", direction: "[measured] low, deliberate" }
+  - { id: b01.l02, who: dr_lin, line: "We rebuilt it three times.", direction: "[wry] half-laugh" }
+transition_out: { type: match_cut, to: s04, on: "data_bars → server racks" }  # agent
+sound: { music_cue: tension_rise, sfx: [whoosh_soft, tick_loop], duck_under_vo_db: -12 }  # agent
+gates: [storyboard, animatic]  # user
+style:
+  overrides:
+    palette.accent: "#FF4D2E"  # user
+shots:  # agent
+  - shot: s03.sh01  # origin agent
+    type: motion_graphics  # agent
+    backend: html  # agent
+    framing: full_frame  # agent
+    subject: ~  # open
+    camera: { move: push_in, ease: { token: motion.ease_out_expo }, amount: 0.06 }  # agent
+    duration: ~  # open
+    anchors: { start: { line: b01.l01, point: start, offset: 0s } }  # agent
+    references: ~  # open
+    layout:
+      landscape: { template: grid.12col/title-left }  # agent
+      portrait: { template: stack/title-top }  # agent
+    style:
+      overrides: {}
+    layers:  # agent
+      - layer: s03.sh01.title  # origin agent
+        component: kinetic_title  # agent
+        motion: ~  # open
+        timing: { enter: { line: b01.l01, point: start, offset: 0s } }  # agent
+        props:
+          color: { token: palette.accent }  # agent
+          text: "Every team hits the same wall."  # agent
+        layout: {}
+        style:
+          overrides: {}
+      - layer: s03.sh01.bars  # origin agent
+        component: data_bars  # agent
+        motion: ~  # open
+        timing: { enter: { line: b01.l01, point: word, word: 3, offset: 0.2s } }  # agent
+        props:
+          series: [3, 5, 9]  # agent
+        layout: {}
+        style:
+          overrides: {}
+  - shot: s03.sh02  # origin agent
+    type: generative_footage  # agent
+    backend: ~  # open
+    framing: "medium_close, 50mm, shallow DOF"  # agent
+    subject: dr_lin  # user
+    camera: ~  # open
+    duration: ~  # open
+    anchors: { start: { line: b01.l02, point: start, offset: 0s }, end: { line: b01.l02, point: end, offset: 0.4s } }  # agent
+    references: [dr_lin, dr_lin_sheet_front]  # agent
+    layout: {}
+    style:
+      overrides: {}
+    layers: ~  # open

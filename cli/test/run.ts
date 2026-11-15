@@ -7,7 +7,11 @@ export interface RunResult {
 }
 
 /** Run the CLI in process with captured output. */
-export async function run(argv: string[], env: Record<string, string> = {}): Promise<RunResult> {
+export async function run(
+  argv: string[],
+  env: Record<string, string> = {},
+  cwd: string = process.cwd(),
+): Promise<RunResult> {
   let stdout = "";
   let stderr = "";
   const code = await main(argv, {
@@ -18,7 +22,7 @@ export async function run(argv: string[], env: Record<string, string> = {}): Pro
       stderr += text;
     },
     env: { CINEWRIGHT_SESSION_ID: "test-session", ...env },
-    cwd: process.cwd(),
+    cwd,
   });
   return { code, stdout, stderr };
 }

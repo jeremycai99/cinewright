@@ -1,0 +1,17 @@
+cast_member: narrator  # origin user
+role: narrator  # user
+display_name: ~  # open
+voice:
+  description: { language: en, timbre: "warm, mid-low", accent: neutral }  # user
+  lexicon:
+    Kubernetes: KOO-ber-NET-eez  # user
+  bindings:
+    elevenlabs: { voice_id: "…", model: eleven_v4, settings: { stability: 0.45 } }  # user
+    kokoro: { voice: "…" }  # user
+performance:
+  baseline: "warm, confident, unhurried"  # user
+  pace_wpm: 150  # user
+  tics: ~  # open
+on_screen: false  # user
+visual: ~  # open
+consent: ~  # open

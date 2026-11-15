@@ -1,0 +1,35 @@
+{
+  "base_revision": 2,
+  "author": {
+    "kind": "user"
+  },
+  "mode": "apply",
+  "reason": "Script lines for scene 3",
+  "ops": [
+    {
+      "op": "insert",
+      "entity": "script",
+      "path": "/beats",
+      "value": {
+        "id": "b01",
+        "summary": "Every team hits the same wall",
+        "lines": [
+          {
+            "id": "b01.l01",
+            "text": "Every team hits the same wall.",
+            "direction": "[measured] low, deliberate",
+            "speaker": "narrator"
+          },
+          {
+            "id": "b01.l02",
+            "text": "We rebuilt it three times.",
+            "direction": "[wry] half-laugh",
+            "speaker": "dr_lin",
+            "on_screen": true,
+            "lipsync": true
+          }
+        ]
+      }
+    }
+  ]
+}

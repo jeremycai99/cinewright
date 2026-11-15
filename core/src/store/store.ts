@@ -230,7 +230,16 @@ export class Store {
         );
       }
       const at = firstDifference(expected, ir) ?? "";
-      const where = describe(expected, at);
+      let where: { file: string; entity: string | null; pointer: string };
+      try {
+        where = describe(expected, at);
+      } catch {
+        where = {
+          file: at.startsWith("/sequences/") ? "sequences" : "cinewright.json",
+          entity: null,
+          pointer: at,
+        };
+      }
       throw new ProjectLoadError(
         where.file,
         where.entity,

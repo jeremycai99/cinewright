@@ -1,0 +1,6 @@
+~ s03_the_problem /duration: ~ → { target: 18s, flex: 0.15, sync: voiceover }  [agent]
+~ s03_the_problem /transition_out: ~ → { type: match_cut, to: s04, on: "data_bars → server racks" }  [agent]
+~ s03_the_problem /sound: ~ → { music_cue: tension_rise, sfx: [whoosh_soft, tick_loop], duck_under_vo_db: -12 }  [agent]
++ s03_the_problem /shots at end: s03.sh01
++ s03_the_problem /shots at end: s03.sh02
+applied revision 5 (sha256:fa752577c91aaea5deb0383a0922f4dcf1b933b381842029fdc2f6b50e991a79)
