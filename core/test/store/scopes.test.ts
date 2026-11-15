@@ -4,6 +4,9 @@ import { describe, expect, it } from "vitest";
 import type { WriteScopes } from "../../src/store/scopes.js";
 import { AGENT, patch, setupProject } from "./helpers.js";
 
+/** A job builds the content: agent state, but jobs are not scope-checked. */
+const IMPORTER = { kind: "job", name: "importer" } as const;
+
 const SCOPES = JSON.parse(
   readFileSync(
     fileURLToPath(new URL("../fixtures/write-scopes.test.json", import.meta.url)),
@@ -13,7 +16,7 @@ const SCOPES = JSON.parse(
 
 describe("role write scopes", () => {
   it("apply a patch inside the role's scope", async () => {
-    const { store } = await setupProject({ writeScopes: SCOPES });
+    const { store } = await setupProject({ writeScopes: SCOPES }, IMPORTER);
     const result = await store.apply(
       patch(
         store,
@@ -34,7 +37,7 @@ describe("role write scopes", () => {
   });
 
   it("reject an op outside the scope, naming the op, and write nothing", async () => {
-    const { store } = await setupProject({ writeScopes: SCOPES });
+    const { store } = await setupProject({ writeScopes: SCOPES }, IMPORTER);
     const revision = store.revision();
     const result = await store.apply(
       patch(
@@ -62,7 +65,7 @@ describe("role write scopes", () => {
   });
 
   it("reject a role that has no scope", async () => {
-    const { store } = await setupProject({ writeScopes: SCOPES });
+    const { store } = await setupProject({ writeScopes: SCOPES }, IMPORTER);
     const result = await store.apply(
       patch(store, [{ op: "set", entity: "s01.sh01", path: "/framing", value: "x" }], {
         kind: "agent",
@@ -73,7 +76,7 @@ describe("role write scopes", () => {
   });
 
   it("do not limit users", async () => {
-    const { store } = await setupProject({ writeScopes: SCOPES });
+    const { store } = await setupProject({ writeScopes: SCOPES }, IMPORTER);
     const result = await store.apply(
       patch(store, [{ op: "set", entity: "s01", path: "/intent", value: "mine" }]),
     );

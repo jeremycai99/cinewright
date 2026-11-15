@@ -97,6 +97,7 @@ export function setupOps(): Op[] {
 /** A project after `init` and the setup patch (revision 1). */
 export async function setupProject(
   options: StoreOptions = {},
+  author: Author = USER,
 ): Promise<{ dir: string; store: Store }> {
   const dir = tempDir();
   await initProject(
@@ -111,7 +112,7 @@ export async function setupProject(
     OPTIONS,
   );
   const store = await Store.open(dir, { ...OPTIONS, ...options });
-  const result = await store.apply(patch(store, setupOps()));
+  const result = await store.apply(patch(store, setupOps(), author));
   if (result.status !== "applied") throw new Error(`setup failed: ${JSON.stringify(result)}`);
   return { dir, store };
 }

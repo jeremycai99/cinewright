@@ -52,7 +52,12 @@ type ResolvedOptions = Required<Omit<StoreOptions, "writeScopes">> & {
 
 export type ApplyResult =
   | { status: "applied"; revision: number; stateHash: string }
-  | { status: "pending"; pendingId: string; reason: PendingEntry["reason_code"] }
+  | {
+      status: "pending";
+      pendingId: string;
+      reason: PendingEntry["reason_code"];
+      blocked?: { op: number; rule: string }[];
+    }
   | { status: "rejected"; errors: PatchError[] }
   | { status: "conflict"; conflicts: Conflict[] };
 
@@ -332,6 +337,7 @@ export class Store {
   private async storePending(
     patch: Patch,
     reason: PendingEntry["reason_code"],
+    blocked: { op: number; rule: string }[] = [],
   ): Promise<ApplyResult> {
     const pendingId = this.nextPendingId();
     const entry: PendingEntry = {
@@ -347,6 +353,7 @@ export class Store {
       ops: patch.ops,
       reason_code: reason,
       ...(patch.decisions ? { decisions: patch.decisions } : {}),
+      ...(blocked.length > 0 ? { blocked } : {}),
     };
     await commitTxn(this.dir, {
       revision: this.revision(),
@@ -355,16 +362,16 @@ export class Store {
       appends: [{ file: PATCH_LOG, text: logLine(entry) }],
     });
     this.state.log.push(entry);
-    return { status: "pending", pendingId, reason };
+    return { status: "pending", pendingId, reason, ...(blocked.length > 0 ? { blocked } : {}) };
   }
 
   private async applyNow(patch: Patch, author: Author): Promise<ApplyResult> {
-    const result = applyOps(this.state.ir, patch.ops, author);
     const later = this.appliedAfter(patch.base_revision);
-    if (!result.ok) {
-      const gone = result.errors.find(
-        (e) => e.rule === "patch.unknown_entity" && e.entity !== null,
-      );
+    // Conflicts first (convention 11): a stale patch reports what changed under it before any
+    // authorship verdict, so its author can rebase rather than ask for approval.
+    const dry = applyOps(this.state.ir, patch.ops, author);
+    if (!dry.ok) {
+      const gone = dry.errors.find((e) => e.rule === "patch.unknown_entity" && e.entity !== null);
       const removedBy = gone
         ? later.find((entry) => entry.retired.includes(gone.entity as string))
         : undefined;
@@ -374,8 +381,16 @@ export class Store {
           conflicts: [{ entity: gone.entity as string, path: "", revision: removedBy.revision }],
         };
       }
-      return { status: "rejected", errors: result.errors };
+      return { status: "rejected", errors: dry.errors };
     }
+    const conflicts = findConflicts(later, touchedOf(dry.before), indexIr(dry.ir));
+    if (conflicts.length > 0) return { status: "conflict", conflicts };
+    const result = applyOps(this.state.ir, patch.ops, author, {
+      gates: new Set(this.options.gates),
+    });
+    if (!result.ok) return { status: "rejected", errors: result.errors };
+    if (result.blocked.length > 0)
+      return this.storePending(patch, "authorship_blocked", result.blocked);
     const denied = this.scopeErrors(
       author,
       result.before,
@@ -384,10 +399,14 @@ export class Store {
       indexIr(result.ir),
     );
     if (denied.length > 0) return { status: "rejected", errors: denied };
-    const touched = touchedOf(result.before);
-    const conflicts = findConflicts(later, touched, indexIr(result.ir));
-    if (conflicts.length > 0) return { status: "conflict", conflicts };
-    return this.commitApplied(patch, author, result.ir, result.before, touched, result.retired);
+    return this.commitApplied(
+      patch,
+      author,
+      result.ir,
+      result.before,
+      touchedOf(result.before),
+      result.retired,
+    );
   }
 
   private async commitApplied(
@@ -453,6 +472,20 @@ export class Store {
   async revert(revision: number, author: Author): Promise<ApplyResult> {
     return withLock(this.dir, this.options.lockTimeoutMs, async () => {
       this.state = await Store.load(this.dir);
+      if (author.kind !== "user" && author.kind !== "session") {
+        return {
+          status: "rejected",
+          errors: [
+            {
+              op: null,
+              entity: null,
+              pointer: "",
+              rule: "authorship.forbidden_op",
+              message: "only a user may revert",
+            },
+          ],
+        };
+      }
       const target = this.state.log.find(
         (e): e is AppliedEntry => e.kind === "applied" && e.revision === revision,
       );
