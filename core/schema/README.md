@@ -14,6 +14,10 @@ JSON Schema 2020-12, limited to what both code generators handle (M1 convention 
 
 `core/test/schema/lint.test.ts` enforces these rules.
 
+## Generated types
+
+`pnpm gen:types` regenerates `core/src/generated/ir.ts` (json-schema-to-typescript), `core/py/src/cinewright_ir/models.py` (datamodel-code-generator, Pydantic v2) and `core/test/generated/fixtures.ts`, which holds every valid fixture typed with `satisfies`, so `pnpm typecheck` proves the fixtures fit the TypeScript types. The outputs are committed. CI's `types` job runs `pnpm gen:check` and fails when they differ from what the schemas generate. Run `pnpm gen:types` after any schema change and commit the result. A new fixture directory needs an entry in `FIXTURE_TYPES` in `core/scripts/gen-types.mjs`.
+
 ## Annotations
 
 | Keyword | On | Meaning |

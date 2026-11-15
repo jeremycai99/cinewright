@@ -10,8 +10,12 @@
     }
   },
   "rules": [
-    { "type": "deletion" },
-    { "type": "non_fast_forward" },
+    {
+      "type": "deletion"
+    },
+    {
+      "type": "non_fast_forward"
+    },
     {
       "type": "pull_request",
       "parameters": {
@@ -27,10 +31,26 @@
       "parameters": {
         "strict_required_status_checks_policy": false,
         "required_status_checks": [
-          { "context": "ts", "integration_id": 15368 },
-          { "context": "py", "integration_id": 15368 },
-          { "context": "boundaries", "integration_id": 15368 },
-          { "context": "workflow-safety", "integration_id": 15368 }
+          {
+            "context": "ts",
+            "integration_id": 15368
+          },
+          {
+            "context": "py",
+            "integration_id": 15368
+          },
+          {
+            "context": "types",
+            "integration_id": 15368
+          },
+          {
+            "context": "boundaries",
+            "integration_id": 15368
+          },
+          {
+            "context": "workflow-safety",
+            "integration_id": 15368
+          }
         ]
       }
     }
