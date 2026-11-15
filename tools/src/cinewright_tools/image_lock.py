@@ -25,7 +25,11 @@ LABEL = "org.cinewright.inputs-hash"
 def check_image_lock(
     lock: Mapping[str, str | None], label_inputs_hash: str | None, tree_inputs_hash: str
 ) -> list[str]:
-    """Problems with the lock, or an empty list. An unpublished lock (both null) passes."""
+    """Problems with the lock, or an empty list. An unpublished lock (both null) passes.
+
+    A tree whose inputs moved on since the locked image is not a problem here; see
+    ``stale_lock_notice``.
+    """
     digest = lock.get("digest")
     locked = lock.get("inputs_hash")
     if digest is None and locked is None:
@@ -36,12 +40,23 @@ def check_image_lock(
     if label_inputs_hash != locked:
         built_from = label_inputs_hash or "unknown inputs (no label)"
         problems.append(f"image {digest} was built from inputs {built_from}, lock says {locked}")
-    if tree_inputs_hash != locked:
-        problems.append(
-            f"container inputs changed ({tree_inputs_hash}) since the locked image ({locked}): "
-            f"publish and update {LOCK_FILE}"
-        )
     return problems
+
+
+def stale_lock_notice(lock: Mapping[str, str | None], tree_inputs_hash: str) -> str | None:
+    """A notice when the tree's container inputs differ from the locked image's, else None.
+
+    Not a failure: a PR that changes a container input (a lockfile, for example) cannot
+    publish. ``render-image`` publishes after merge, and a follow-up PR updates the lock.
+    Until then the smoke jobs build the image from the tree.
+    """
+    locked = lock.get("inputs_hash")
+    if locked is None or tree_inputs_hash == locked:
+        return None
+    return (
+        f"container inputs changed ({tree_inputs_hash}) since the locked image ({locked}): "
+        f"publish and update {LOCK_FILE}"
+    )
 
 
 def main(argv: list[str] | None = None) -> int:
@@ -79,8 +94,15 @@ def main(argv: list[str] | None = None) -> int:
     problems = check_image_lock(lock, label, tree)
     for problem in problems:
         print(problem)
+    notice = stale_lock_notice(lock, tree)
+    if notice:
+        # GitHub Actions shows ::warning:: lines as annotations; elsewhere they read as text.
+        print(f"::warning::{notice}")
     if not problems:
-        print("image lock: unpublished" if lock.get("digest") is None else f"image lock ok: {tree}")
+        if lock.get("digest") is None:
+            print("image lock: unpublished")
+        else:
+            print(f"image lock ok: {lock['inputs_hash']}")
     return 1 if problems else 0
 
 

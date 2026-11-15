@@ -32,7 +32,7 @@ uv run cinewright-check-pins --image cinewright-render:dev
 
 `cinewright-check-pins` runs `render-job --versions` inside the image, with the network off, and compares each reported version with the tracked file it should come from. A mismatch names the key, both values and the file, for example `node: expected 24.22.3 (from .node-version), image reports 24.22.2`.
 
-The image carries the label `org.cinewright.inputs-hash`: a SHA-256 over every file in its build context (`cinewright_tools.container.inputs_hash`). CI uses it to tie a published digest to the inputs it was built from.
+The image carries the label `org.cinewright.inputs-hash`: a SHA-256 over every file in its build context (`cinewright_tools.container.inputs_hash`). CI uses it to tie a published digest to the inputs it was built from. `container/image.lock.json` records the published digest and its inputs hash. `cinewright-check-image-lock` fails when the locked image's label disagrees with the lock. A tree whose inputs moved on since the locked image is only a warning, because a PR cannot publish: `render-image` publishes after merge, and a follow-up PR updates the lock. Until then the smoke jobs build the image from the tree. Any change to `pnpm-lock.yaml` counts as a new input.
 
 ## Rendering
 
