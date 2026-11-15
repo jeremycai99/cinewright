@@ -1,4 +1,4 @@
-from cinewright_tools.image_lock import check_image_lock
+from cinewright_tools.image_lock import check_image_lock, stale_lock_notice
 
 
 def test_unpublished_lock_is_allowed() -> None:
@@ -15,11 +15,21 @@ def test_label_mismatch() -> None:
     ]
 
 
-def test_stale_lock() -> None:
-    assert check_image_lock({"digest": "sha256:a", "inputs_hash": "h1"}, "h1", "h3") == [
+def test_stale_lock_is_not_a_problem() -> None:
+    # A PR that changes a container input cannot publish; the image is published after merge.
+    assert check_image_lock({"digest": "sha256:a", "inputs_hash": "h1"}, "h1", "h3") == []
+
+
+def test_stale_lock_notice() -> None:
+    assert stale_lock_notice({"digest": "sha256:a", "inputs_hash": "h1"}, "h3") == (
         "container inputs changed (h3) since the locked image (h1): "
         "publish and update container/image.lock.json"
-    ]
+    )
+
+
+def test_no_notice_when_current_or_unpublished() -> None:
+    assert stale_lock_notice({"digest": "sha256:a", "inputs_hash": "h1"}, "h1") is None
+    assert stale_lock_notice({"digest": None, "inputs_hash": None}, "h1") is None
 
 
 def test_half_set_lock_is_rejected() -> None:
