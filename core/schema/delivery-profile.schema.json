@@ -1,0 +1,78 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://cinewright.invalid/ir/0/delivery-profile.schema.json",
+  "title": "DeliveryProfile",
+  "description": "A delivery profile: a data file, not an IR entity, so it has no wrappers. The project stores a copy and its hash (convention 16).",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schema_version",
+    "id",
+    "name",
+    "frame_rate",
+    "sample_rate",
+    "width",
+    "height",
+    "aspect_class",
+    "safe_zones",
+    "loudness",
+    "captions"
+  ],
+  "properties": {
+    "schema_version": { "const": 1 },
+    "id": { "$ref": "common.schema.json#/$defs/id" },
+    "name": { "type": "string", "minLength": 1 },
+    "frame_rate": { "$ref": "common.schema.json#/$defs/rational" },
+    "sample_rate": { "type": "integer", "minimum": 8000 },
+    "width": { "type": "integer", "minimum": 16 },
+    "height": { "type": "integer", "minimum": 16 },
+    "aspect_class": { "$ref": "common.schema.json#/$defs/aspect_class" },
+    "safe_zones": {
+      "title": "SafeZones",
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["action", "title"],
+      "properties": {
+        "action": { "$ref": "#/$defs/insets" },
+        "title": { "$ref": "#/$defs/insets" }
+      }
+    },
+    "loudness": {
+      "title": "LoudnessTarget",
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["integrated_lufs", "true_peak_dbtp", "tolerance_lu"],
+      "properties": {
+        "integrated_lufs": { "type": "number", "maximum": 0 },
+        "true_peak_dbtp": { "type": "number", "maximum": 0 },
+        "tolerance_lu": { "type": "number", "minimum": 0 }
+      }
+    },
+    "captions": {
+      "title": "CaptionRules",
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["max_chars_per_line", "max_lines", "min_display_frames"],
+      "properties": {
+        "max_chars_per_line": { "type": "integer", "minimum": 1 },
+        "max_lines": { "type": "integer", "minimum": 1 },
+        "min_display_frames": { "$ref": "common.schema.json#/$defs/frames" }
+      }
+    }
+  },
+  "$defs": {
+    "insets": {
+      "title": "Insets",
+      "description": "Safe-zone insets as fractions of the frame.",
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["top", "right", "bottom", "left"],
+      "properties": {
+        "top": { "type": "number", "minimum": 0, "maximum": 0.5 },
+        "right": { "type": "number", "minimum": 0, "maximum": 0.5 },
+        "bottom": { "type": "number", "minimum": 0, "maximum": 0.5 },
+        "left": { "type": "number", "minimum": 0, "maximum": 0.5 }
+      }
+    }
+  }
+}

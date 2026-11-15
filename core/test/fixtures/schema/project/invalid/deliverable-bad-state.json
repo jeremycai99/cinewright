@@ -1,0 +1,103 @@
+{
+  "autonomy": {
+    "state": "user",
+    "value": "guided"
+  },
+  "brief": {
+    "state": "open"
+  },
+  "budget": {
+    "state": "user",
+    "value": {
+      "cap": 25,
+      "currency": "USD"
+    }
+  },
+  "deliverables": {
+    "state": "user",
+    "value": [
+      {
+        "burn_in_captions": {
+          "state": "user",
+          "value": false
+        },
+        "id": "web_landscape",
+        "label": {
+          "state": "draft"
+        },
+        "origin": "user",
+        "profile": {
+          "state": "user",
+          "value": "landscape_1080p30"
+        }
+      }
+    ]
+  },
+  "id": "demo",
+  "origin": "user",
+  "policies": {
+    "state": "open"
+  },
+  "profiles": {
+    "landscape_1080p30": {
+      "body": {
+        "aspect_class": "landscape",
+        "captions": {
+          "max_chars_per_line": 42,
+          "max_lines": 2,
+          "min_display_frames": 30
+        },
+        "frame_rate": {
+          "den": 1,
+          "num": 30
+        },
+        "height": 1080,
+        "id": "landscape_1080p30",
+        "loudness": {
+          "integrated_lufs": -14,
+          "tolerance_lu": 1,
+          "true_peak_dbtp": -1
+        },
+        "name": "Landscape 1080p, 30 fps (test fixture)",
+        "safe_zones": {
+          "action": {
+            "bottom": 0.05,
+            "left": 0.05,
+            "right": 0.05,
+            "top": 0.05
+          },
+          "title": {
+            "bottom": 0.1,
+            "left": 0.1,
+            "right": 0.1,
+            "top": 0.1
+          }
+        },
+        "sample_rate": 48000,
+        "schema_version": 1,
+        "width": 1920
+      },
+      "hash": "sha256:3238f594add04a4f649ee274aff2d704cd410044a497748e41c19d67e70d0e09"
+    }
+  },
+  "schema_version": 1,
+  "sequences": {
+    "state": "open"
+  },
+  "settings": {
+    "propose_conversational_edits": {
+      "state": "user",
+      "value": true
+    }
+  },
+  "style": {
+    "overrides": {},
+    "pack": {
+      "state": "open"
+    }
+  },
+  "title": {
+    "state": "user",
+    "value": "Demo"
+  }
+}

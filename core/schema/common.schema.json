@@ -1,0 +1,120 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://cinewright.invalid/ir/0/common.schema.json",
+  "title": "Common",
+  "description": "Definitions shared by every IR schema. See core/schema/README.md.",
+  "$defs": {
+    "id": {
+      "title": "Id",
+      "description": "Project-unique entity id (convention 9). Immutable and never reused.",
+      "type": "string",
+      "pattern": "^[a-z][a-z0-9_]*(\\.[a-z0-9_]+)*$",
+      "maxLength": 64
+    },
+    "state": {
+      "title": "State",
+      "description": "Authorship state of a field or list (D25).",
+      "enum": ["open", "agent", "user", "locked"]
+    },
+    "origin": {
+      "title": "Origin",
+      "description": "Who inserted the entity: a user (including approved or dictated session edits) or an agent or job. Set by the store.",
+      "enum": ["user", "agent"]
+    },
+    "entity_lock": {
+      "title": "EntityLock",
+      "description": "Present only when the whole entity and its subtree are locked (convention 8).",
+      "const": true
+    },
+    "frames": {
+      "title": "Frames",
+      "description": "A time or duration in integer frames at the project rate (D27).",
+      "type": "integer",
+      "minimum": 0
+    },
+    "frame_offset": {
+      "title": "FrameOffset",
+      "description": "A signed offset in integer frames.",
+      "type": "integer"
+    },
+    "samples": {
+      "title": "Samples",
+      "description": "An audio offset in integer samples at the profile's sample rate (D27).",
+      "type": "integer",
+      "minimum": 0
+    },
+    "rational": {
+      "title": "Rational",
+      "description": "A rational number such as a frame rate (30000/1001).",
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["num", "den"],
+      "properties": {
+        "num": { "type": "integer", "minimum": 1 },
+        "den": { "type": "integer", "minimum": 1 }
+      }
+    },
+    "hash": {
+      "title": "Hash",
+      "description": "SHA-256 over the hash form (IR data) or over the bytes (assets).",
+      "type": "string",
+      "pattern": "^sha256:[0-9a-f]{64}$"
+    },
+    "aspect_class": {
+      "title": "AspectClass",
+      "enum": ["landscape", "portrait", "square"]
+    },
+    "token_path": {
+      "title": "TokenPath",
+      "description": "A dotted style token path, such as palette.accent.",
+      "type": "string",
+      "pattern": "^[a-z][a-z0-9_]*(\\.[a-z0-9_]+)*$",
+      "maxLength": 128
+    },
+    "token_ref": {
+      "title": "TokenRef",
+      "description": "A reference to a style token, resolved by the cascade (M1.3).",
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["token"],
+      "properties": {
+        "token": { "$ref": "#/$defs/token_path" }
+      }
+    },
+    "token_value": {
+      "title": "TokenValue",
+      "description": "A literal token value or a reference to another token.",
+      "anyOf": [
+        { "type": "string" },
+        { "type": "number" },
+        { "type": "boolean" },
+        { "$ref": "#/$defs/token_ref" }
+      ]
+    },
+    "anchor": {
+      "title": "Anchor",
+      "description": "A timing anchor (convention 15): a line's start, end or word, plus a frame offset. `word` is present exactly when `point` is `word`.",
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["line", "point", "offset"],
+      "properties": {
+        "line": { "$ref": "#/$defs/id", "x-ref": "line" },
+        "point": { "enum": ["start", "end", "word"] },
+        "word": { "type": "integer", "minimum": 0 },
+        "offset": { "$ref": "#/$defs/frame_offset" }
+      }
+    },
+    "license": {
+      "title": "License",
+      "description": "Output license terms of an asset or plugin.",
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["terms", "commercial_use"],
+      "properties": {
+        "terms": { "type": "string", "minLength": 1 },
+        "commercial_use": { "type": "boolean" },
+        "attribution": { "type": "string" }
+      }
+    }
+  }
+}

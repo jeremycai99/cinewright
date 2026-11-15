@@ -1,0 +1,7 @@
+[
+  {
+    "entity": "web_landscape",
+    "pointer": "/label/state",
+    "rule": "schema.enum"
+  }
+]

@@ -1,0 +1,7 @@
+[
+  {
+    "entity": null,
+    "pointer": "/loudness",
+    "rule": "schema.required"
+  }
+]

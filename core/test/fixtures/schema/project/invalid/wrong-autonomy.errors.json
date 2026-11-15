@@ -1,0 +1,7 @@
+[
+  {
+    "entity": "demo",
+    "pointer": "/autonomy/value",
+    "rule": "schema.enum"
+  }
+]

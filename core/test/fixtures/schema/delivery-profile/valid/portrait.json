@@ -1,0 +1,37 @@
+{
+  "aspect_class": "portrait",
+  "captions": {
+    "max_chars_per_line": 32,
+    "max_lines": 2,
+    "min_display_frames": 30
+  },
+  "frame_rate": {
+    "den": 1,
+    "num": 30
+  },
+  "height": 1920,
+  "id": "portrait_1080p30",
+  "loudness": {
+    "integrated_lufs": -14,
+    "tolerance_lu": 1,
+    "true_peak_dbtp": -1
+  },
+  "name": "Portrait 1080p, 30 fps (test fixture)",
+  "safe_zones": {
+    "action": {
+      "bottom": 0.05,
+      "left": 0.05,
+      "right": 0.05,
+      "top": 0.05
+    },
+    "title": {
+      "bottom": 0.1,
+      "left": 0.1,
+      "right": 0.1,
+      "top": 0.1
+    }
+  },
+  "sample_rate": 48000,
+  "schema_version": 1,
+  "width": 1080
+}
