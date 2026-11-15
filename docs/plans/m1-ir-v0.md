@@ -42,6 +42,8 @@ Versions were read from npm and PyPI on 2026-11-14.
 | Profiles in M1 | Two fixture profiles in `core/test/fixtures/profiles/` (`landscape_1080p30`, `portrait_1080p30`). `init` copies each profile body and hash into the project (convention 16). Adding a profile after `init` is out of scope until M5.3. | M1.7 says real profiles are M5.3. |
 | Show format | Hand-written printer; no YAML library | Convention 14: output only, never parsed. |
 
+**Approved 2026-11-14** for native execution in the maintainer's Claude Code session.
+
 ## Global Constraints
 
 - The M1 conventions 1–16 in `docs/V0_1_PLAN.md` bind every task. A deviation needs a ruling in the ledger and a note in the PR.

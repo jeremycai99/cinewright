@@ -2,7 +2,7 @@
 
 An open-source, agent-driven production framework for professional video: multi-scene productions with a cast of narrators and characters, a style system, and a built-in quality loop.
 
-**Status:** v0.1 in progress. M0 (repository, CI and the render container) is done; M1 (IR v0) is being planned in `docs/plans/m1-ir-v0.md`. See `docs/HANDOFF.md`.
+**Status:** v0.1 in progress. M0 (repository, CI and the render container) is done; M1 (IR v0) is in progress (`docs/plans/m1-ir-v0.md`). See `docs/HANDOFF.md`.
 
 ## Where things are
 

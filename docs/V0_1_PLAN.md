@@ -51,7 +51,7 @@ Order: M0.0 → M0.1 → M0.2 and M0.3 in either order. Whichever lands second a
 
 ### M1 — IR v0 (the contract everything else depends on)
 
-Implements D25–D32 and D40. Detailed task plan (awaiting approval): `docs/plans/m1-ir-v0.md`. M1 also creates the `cinewright` CLI package with `init`, `patch` and `show`; M8.1 adds the other commands.
+Implements D25–D32 and D40. Detailed task plan (approved 2026-11-14): `docs/plans/m1-ir-v0.md`. M1 also creates the `cinewright` CLI package with `init`, `patch` and `show`; M8.1 adds the other commands.
 
 **Order.** M1.1a → M1.6 → M1.1b → M1.1c → M1.7 → M1.4a → M1.4b → M1.2a → M1.2b → M1.9. M1.6 lands straight after M1.1a so the wrapper encoding is proven on both code generators before more schema is written. M1.3 can start after M1.1c; M1.5 needs M1.3 and M1.7. M1.8a and M1.8b need only M0.
 
