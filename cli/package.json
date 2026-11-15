@@ -17,5 +17,8 @@
   ],
   "scripts": {
     "test": "vitest run"
+  },
+  "dependencies": {
+    "@cinewright/core": "workspace:*"
   }
 }

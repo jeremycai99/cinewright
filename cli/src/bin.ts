@@ -1,4 +1,9 @@
 #!/usr/bin/env node
-import { VERSION } from "./index.js";
+import { main } from "./main.js";
 
-console.log(`cinewright ${VERSION}`);
+process.exitCode = await main(process.argv.slice(2), {
+  stdout: (text) => process.stdout.write(text),
+  stderr: (text) => process.stderr.write(text),
+  env: process.env,
+  cwd: process.cwd(),
+});
