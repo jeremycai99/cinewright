@@ -14,7 +14,7 @@ cinewright patch list --pending [--project <dir>] [--json]
 cinewright patch revert <revision> [--project <dir>] [--json]
 cinewright show [<id>] [--depth <n>] [--frames] [--resolved --pack <tokens.json> [--deliverable <id>]] [--json] [--project <dir>]
 cinewright status [--project <dir>] [--json]
-cinewright schema [<kind>]
+cinewright schema [<kind> | tokens [--json]]
 ```
 
 Without `--project`, a command uses the nearest directory upward that holds `cinewright.json`. `--file -` reads the patch from stdin.
@@ -101,6 +101,8 @@ A status line follows: `applied revision N (sha256:…)`, `pending pN (reason)`,
 `status` prints the current revision, its state hash and the pending ids; `--json` prints `{ revision, state_hash, pending }`.
 
 `schema` lists the entity kinds; `schema <kind>` prints every authorable path of that kind as patch ops address it, generated from `core/schema`: `field`, `list` (its item kind) or `map entry` (`<name>` is the entry), the value's type and allowed values, and an object's keys indented below, `(optional)` when they may be left out.
+
+`schema tokens` prints every style token path with its type, bounds and allowed values (the core vocabulary, `core/schema/pack/README.md`); `--json` prints them as `[{ path, type, enum?, minimum?, maximum? }]`. A style override (`/style/overrides/<path>`) and a `{ "token": <path> }` reference must use one of these paths or one under `ext.`, with a value of that type, or the patch is rejected (`semantic.unknown_token`, `semantic.token_type`, `semantic.token_bounds`).
 
 `show` prints the readable view (convention 14):
 - the entity's kind and id;

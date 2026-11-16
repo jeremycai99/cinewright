@@ -15,12 +15,16 @@ export {
 } from "./cas/cas.js";
 export {
   CascadeError,
+  isByAspect,
   type Origin,
+  type OverrideLayer,
   type Resolved,
   type ResolvedField,
   type ResolvedToken,
   resolveEntity,
+  resolvePackTokens,
   type TokenTree,
+  tokenLayers,
 } from "./cascade/resolve.js";
 export type * from "./generated/ir.js";
 export { dependencyGraph, dirtyNodes, type Graph } from "./graph/deps.js";
@@ -44,7 +48,24 @@ export {
   type Target,
   wrapperValueSchema,
 } from "./ir/paths.js";
-export { anchorErrors, crossDocumentErrors, wrapperErrors } from "./ir/semantic.js";
+export { anchorErrors, crossDocumentErrors, tokenErrors, wrapperErrors } from "./ir/semantic.js";
+export {
+  loadPack,
+  type Pack,
+  PackError,
+  type PackFont,
+  type PackIssue,
+  type PackManifest,
+} from "./pack/load.js";
+export { citation, parseRules, type Rule } from "./pack/rules.js";
+export { checkResolved, tokenPointer } from "./pack/tokens.js";
+export {
+  checkLiteral,
+  isVocabularyPath,
+  type TokenSpec,
+  type TokenType,
+  vocabulary,
+} from "./pack/vocabulary.js";
 export {
   ProjectFilesError,
   projectFileContents,

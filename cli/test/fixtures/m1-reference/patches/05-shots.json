@@ -57,7 +57,7 @@
         "camera": {
           "move": "push_in",
           "ease": {
-            "token": "motion.ease_out_expo"
+            "token": "motion.ease.enter"
           },
           "amount": 0.06
         },

@@ -540,7 +540,7 @@
                       "state": "agent",
                       "value": {
                         "ease": {
-                          "token": "motion.ease"
+                          "token": "motion.ease.standard"
                         },
                         "move": "push_in"
                       }

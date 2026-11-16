@@ -131,6 +131,20 @@ describe("finding 7: discover shapes with `cinewright schema`", () => {
   it("exits 2 for an unknown kind", async () => {
     expect((await run(["schema", "nope"])).code).toBe(EXIT.usage);
   });
+
+  it("`schema tokens` lists every style token path with its type", async () => {
+    const result = await run(["schema", "tokens"]);
+    expect(result.code, result.stderr).toBe(EXIT.ok);
+    expect(result.stdout).toContain("palette.accent  color\n");
+    expect(result.stdout).toContain("contrast.text_min  number, minimum 4.5\n");
+    expect(result.stdout).toContain(
+      "motion.entrance  one of: fade, rise, slide, scale, wipe, pop\n",
+    );
+    expect(result.stdout).toContain("ext.*  any value (pack-specific)\n");
+    const json = JSON.parse((await run(["schema", "tokens", "--json"])).stdout);
+    expect(json).toContainEqual({ path: "palette.accent", type: "color" });
+    expect(json).toContainEqual({ path: "contrast.text_min", type: "number", minimum: 4.5 });
+  });
 });
 
 describe("finding 8: the scene view's inline lines", () => {

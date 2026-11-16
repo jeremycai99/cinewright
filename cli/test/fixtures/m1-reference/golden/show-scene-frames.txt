@@ -18,7 +18,7 @@ shots:  # agent
     backend: html  # agent
     framing: full_frame  # agent
     subject: ~  # open
-    camera: { move: push_in, ease: { token: motion.ease_out_expo }, amount: 0.06 }  # agent
+    camera: { move: push_in, ease: { token: motion.ease.enter }, amount: 0.06 }  # agent
     duration: ~  # open
     anchors: { start: { line: b01.l01, point: start, offset: 0 } }  # agent
     references: ~  # open
