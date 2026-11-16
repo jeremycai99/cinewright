@@ -5,7 +5,14 @@ import { stateHash } from "../canonical/hash.js";
 import type { AppliedEntry, Op, Patch, PendingEntry, Snapshot, Touched } from "../generated/ir.js";
 import { collectEntities, locate } from "../ir/index.js";
 import type { InlinedIr } from "../ir/inlined.js";
-import { INLINED_ROOT, indexIr, inlinedSchemas, isObject, resolveTarget } from "../ir/paths.js";
+import {
+  INLINED_ROOT,
+  type IrEntity,
+  indexIr,
+  inlinedSchemas,
+  isObject,
+  resolveTarget,
+} from "../ir/paths.js";
 import {
   ProjectFilesError,
   projectFileContents,
@@ -21,6 +28,7 @@ import { type Conflict, findConflicts } from "./conflict.js";
 import { withLock } from "./lock.js";
 import { type LogEntry, logLine, readLog } from "./log.js";
 import { type PatchError, validatePatch } from "./patch.js";
+import { inScope, type WriteScopes } from "./scopes.js";
 import { commitTxn, recoverTxns } from "./txn.js";
 
 export interface StoreOptions {
@@ -30,7 +38,17 @@ export interface StoreOptions {
   now?: () => string;
   /** How long to wait for another process's lock (default 10 s). */
   lockTimeoutMs?: number;
+  /** Role write scopes; when given, agent patches outside their role's scope are rejected. */
+  writeScopes?: WriteScopes;
+  /** Job names allowed to lock as gates (default: gate.script, gate.storyboard, gate.final). */
+  gates?: readonly string[];
 }
+
+export const DEFAULT_GATES = ["gate.script", "gate.storyboard", "gate.final"] as const;
+
+type ResolvedOptions = Required<Omit<StoreOptions, "writeScopes">> & {
+  writeScopes: WriteScopes | null;
+};
 
 export type ApplyResult =
   | { status: "applied"; revision: number; stateHash: string }
@@ -146,7 +164,7 @@ export class Store {
 
   private constructor(
     readonly dir: string,
-    private readonly options: Required<StoreOptions>,
+    private readonly options: ResolvedOptions,
     state: { ir: InlinedIr; log: LogEntry[] },
   ) {
     this.state = state;
@@ -154,10 +172,12 @@ export class Store {
 
   /** Open a project: finish or discard an interrupted apply, then check the files against the log. */
   static async open(dir: string, options: StoreOptions = {}): Promise<Store> {
-    const full: Required<StoreOptions> = {
+    const full: ResolvedOptions = {
       sessionId: options.sessionId ?? randomUUID(),
       now: options.now ?? (() => new Date().toISOString()),
       lockTimeoutMs: options.lockTimeoutMs ?? 10_000,
+      writeScopes: options.writeScopes ?? null,
+      gates: options.gates ?? DEFAULT_GATES,
     };
     const state = await withLock(dir, full.lockTimeoutMs, () => Store.load(dir));
     return new Store(dir, full, state);
@@ -356,6 +376,14 @@ export class Store {
       }
       return { status: "rejected", errors: result.errors };
     }
+    const denied = this.scopeErrors(
+      author,
+      result.before,
+      result.opOf,
+      indexIr(this.state.ir),
+      indexIr(result.ir),
+    );
+    if (denied.length > 0) return { status: "rejected", errors: denied };
     const touched = touchedOf(result.before);
     const conflicts = findConflicts(later, touched, indexIr(result.ir));
     if (conflicts.length > 0) return { status: "conflict", conflicts };
@@ -461,6 +489,35 @@ export class Store {
         { revert_of: revision, ...(restored.length > 0 ? { restored } : {}) },
       );
     });
+  }
+
+  /** Ops of an agent patch that touch nodes outside its role's write scope (M1.4b). */
+  private scopeErrors(
+    author: Author,
+    before: readonly Snapshot[],
+    opOf: readonly number[],
+    current: ReadonlyMap<string, IrEntity>,
+    next: ReadonlyMap<string, IrEntity>,
+  ): PatchError[] {
+    const scopes = this.options.writeScopes;
+    if (!scopes || author.kind !== "agent") return [];
+    const errors: PatchError[] = [];
+    const reported = new Set<number>();
+    before.forEach((snap, k) => {
+      const op = opOf[k] ?? 0;
+      if (reported.has(op)) return;
+      const kind = (current.get(snap.entity) ?? next.get(snap.entity))?.kind ?? "unknown";
+      if (inScope(scopes, author.role, kind, snap.path)) return;
+      reported.add(op);
+      errors.push({
+        op,
+        entity: snap.entity,
+        pointer: snap.path,
+        rule: "scope.denied",
+        message: `role ${author.role} may not write ${kind} ${snap.path}`,
+      });
+    });
+    return errors;
   }
 
   /** The current value of a snapshot's node, so a revert can itself be reverted. */

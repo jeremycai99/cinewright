@@ -1,0 +1,15 @@
+{
+  "shot_builder": {
+    "kinds": ["shot", "layer"],
+    "paths": [
+      "/framing",
+      "/camera",
+      "/layout/*",
+      "/layers",
+      "/component",
+      "/props/*",
+      "/timing",
+      "/motion"
+    ]
+  }
+}
