@@ -3,13 +3,12 @@
   Network probe fixture (M0.2): hello-world plus one remote image. Renders run with the
   network off, so the request must fail the render with exit 3 and name the URL.
   Test content, not a style: it only has to exercise text, layout and motion deterministically.
-  GSAP loads by relative path; render-job adds vendor/gsap.min.js to the work copy.
+  Motion is WAAPI: paused animations that HyperFrames seeks (data-no-timeline, no GSAP).
 -->
 <html lang="en">
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=1280, height=720" />
-    <script src="vendor/gsap.min.js"></script>
     <style>
       * {
         margin: 0;
@@ -55,17 +54,29 @@
       data-duration="2"
       data-width="1280"
       data-height="720"
+      data-no-timeline
     >
       <h1 id="label" class="clip" data-start="0" data-duration="2" data-track-index="0">Hello, world</h1>
       <div id="box" class="clip" data-start="0" data-duration="2" data-track-index="1"></div>
       <img id="probe" src="https://example.com/cinewright-network-probe.png" alt="" />
     </div>
     <script>
-      const tl = gsap.timeline({ paused: true });
-      tl.fromTo("#label", { opacity: 0, y: 24 }, { opacity: 1, y: 0, duration: 0.6, ease: "power2.out" }, 0);
-      tl.fromTo("#box", { x: 0, rotation: 0 }, { x: 840, rotation: 90, duration: 1.6, ease: "power1.inOut" }, 0.2);
-      window.__timelines["hello"] = tl;
-      tl.seek(0);
+      const label = document.getElementById("label").animate(
+        [
+          { opacity: 0, transform: "translateY(24px)" },
+          { opacity: 1, transform: "translateY(0)" },
+        ],
+        { duration: 600, easing: "cubic-bezier(0.33, 1, 0.68, 1)", fill: "both" },
+      );
+      const box = document.getElementById("box").animate(
+        [
+          { transform: "translateX(0) rotate(0deg)" },
+          { transform: "translateX(840px) rotate(90deg)" },
+        ],
+        { delay: 200, duration: 1600, easing: "cubic-bezier(0.45, 0, 0.55, 1)", fill: "both" },
+      );
+      label.pause();
+      box.pause();
     </script>
   </body>
 </html>

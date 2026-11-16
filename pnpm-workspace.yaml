@@ -11,11 +11,11 @@ allowBuilds:
   puppeteer: false
 engineStrict: true
 minimumReleaseAgeExclude:
-  - "@hyperframes/core@0.9.41"
-  - "@hyperframes/engine@0.9.41"
-  - "@hyperframes/lint@0.9.41"
-  - "@hyperframes/parsers@0.9.41"
-  - "@hyperframes/producer@0.9.41"
-  - "@hyperframes/studio-server@0.9.41"
-  - hyperframes@0.9.41
+  - "@hyperframes/core@0.9.58"
+  - "@hyperframes/engine@0.9.58"
+  - "@hyperframes/lint@0.9.58"
+  - "@hyperframes/parsers@0.9.58"
+  - "@hyperframes/producer@0.9.58"
+  - "@hyperframes/studio-server@0.9.58"
+  - hyperframes@0.9.58
 saveExact: true

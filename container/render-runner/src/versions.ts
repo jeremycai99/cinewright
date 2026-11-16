@@ -10,7 +10,7 @@ const run = promisify(execFile);
 const PACKAGE_ROOT = dirname(dirname(fileURLToPath(import.meta.url)));
 
 /** npm packages the image reports, by report key. They are direct dependencies of this package. */
-const NPM_PACKAGES: Record<string, string> = { hyperframes: "hyperframes", gsap: "gsap" };
+const NPM_PACKAGES: Record<string, string> = { hyperframes: "hyperframes" };
 
 /** Debian packages the image reports, by report key. */
 const APT_PACKAGES: Record<string, string> = {

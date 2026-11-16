@@ -15,7 +15,7 @@ export interface EncoderSettings {
   threads: number;
 }
 
-/** Frame rates HyperFrames 0.9.41's engine config accepts. */
+/** Frame rates HyperFrames 0.9.58's engine config accepts. */
 export const FRAME_RATES = [24, 25, 30, 60] as const;
 export type FrameRate = (typeof FRAME_RATES)[number];
 
@@ -33,7 +33,7 @@ export interface RenderSettings {
 
 export type HyperframesQuality = "draft" | "standard" | "high";
 
-/** HyperFrames 0.9.41 quality levels as x264 preset and CRF (engine chunkEncoder.js). */
+/** HyperFrames 0.9.58 quality levels as x264 preset and CRF (engine chunkEncoder.js). */
 const HYPERFRAMES_QUALITY: Record<HyperframesQuality, { preset: string; crf: number }> = {
   draft: { preset: "ultrafast", crf: 28 },
   standard: { preset: "medium", crf: 18 },

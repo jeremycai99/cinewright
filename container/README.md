@@ -12,14 +12,14 @@ Every version lives in a tracked file. The Dockerfile has none typed in; `cinewr
 | Platform | `pins.json` `platform` | `linux/amd64` |
 | Debian packages | `pins.json` `debian_snapshot` and `apt` | snapshot `20261113T143145Z`: `ffmpeg`, `libx264-164`, `python3.13`, `fonts-noto-core` at exact versions |
 | chrome-headless-shell | `pins.json` `chrome_headless_shell` | `152.0.7977.30` |
-| HyperFrames, GSAP | `render-runner/package.json`, `pnpm-lock.yaml` | `hyperframes` and `@hyperframes/producer` 0.9.41, `gsap` 3.15.1 |
+| HyperFrames | `render-runner/package.json`, `pnpm-lock.yaml` | `hyperframes` and `@hyperframes/producer` 0.9.58 |
 | pnpm | `package.json` `packageManager` | 12.18.0 |
 
 **Debian packages** come from [snapshot.debian.org](https://snapshot.debian.org) at one timestamp, for both `trixie` and `trixie-security`. apt checks every package against the snapshot's signed indexes, using the base image's archive keyring. The packages Chrome needs come from the same snapshot, so the timestamp fixes their versions too. To move to newer packages, choose a new timestamp whose indexes carry the new exact versions, and update `debian_snapshot` and `apt` together.
 
-**chrome-headless-shell** is the build HyperFrames 0.9.41 manages itself: `CHROME_VERSION` in `@hyperframes/engine`, the build `hyperframes browser ensure` installs. HyperFrames tunes and tests its deterministic BeginFrame capture against that build; Puppeteer's default build (157.x for puppeteer-core 25.17) is not used. The `@puppeteer/browsers` version in the lockfile installs it to `/opt/chrome-headless-shell`, and `HYPERFRAMES_BROWSER_PATH` points HyperFrames at it. Chrome for Testing publishes no checksums, so the download relies on HTTPS, and `cinewright-check-pins` confirms the installed build. When HyperFrames is upgraded, read its new `CHROME_VERSION` and update the pin.
+**chrome-headless-shell** is the build HyperFrames 0.9.58 manages itself: `CHROME_VERSION` in `@hyperframes/engine`, the build `hyperframes browser ensure` installs. HyperFrames tunes and tests its deterministic BeginFrame capture against that build; Puppeteer's default build (157.x for puppeteer-core 25.17) is not used. The `@puppeteer/browsers` version in the lockfile installs it to `/opt/chrome-headless-shell`, and `HYPERFRAMES_BROWSER_PATH` points HyperFrames at it. Chrome for Testing publishes no checksums, so the download relies on HTTPS, and `cinewright-check-pins` confirms the installed build. When HyperFrames is upgraded, read its new `CHROME_VERSION` and update the pin.
 
-**GSAP** is copied from the lockfile into `/opt/cinewright/vendor/gsap.min.js`; nothing loads from a CDN. Core components never use GSAP (Open issue 6, resolved in the M2 plan: they animate with WAAPI). The image still vendors it for the hello-world smoke fixture and future user-authored compositions; whether it stays is decided in M3.1b.
+**No animation library** is in the image. Core components and the smoke fixtures animate with WAAPI, which HyperFrames seeks natively (Open issue 6). GSAP was removed in M3.0; it returns only with user-authored compositions, which declare its licence.
 
 **Install scripts** of dependencies are denied in `pnpm-workspace.yaml` (`allowBuilds`). Puppeteer's would download a browser.
 
@@ -42,7 +42,7 @@ uv run cinewright-render-in-container --image cinewright-render:dev --in contain
 
 The host runs `docker run --rm --network none --platform linux/amd64` as the host user, with the composition mounted read-only at `/job/in` and the output folder at `/job/out`. Every argument is a list element, never passed through a shell, and the bind mounts are CSV-quoted, so paths with spaces, commas or non-ASCII characters work. Inside the image, `render-job`:
 
-1. Copies `/job/in` to a fixed work folder and adds `vendor/gsap.min.js`.
+1. Copies `/job/in` to a fixed work folder, adding nothing to it.
 2. Calls `@hyperframes/producer`'s `createRenderJob` and `executeRenderJob`, passing every setting explicitly.
 3. Writes `output.mp4` (or `frames/000001.png`…), `framemd5.txt` (`ffmpeg -f framemd5` of the decoded frames), `sha256.txt` and `render-log.jsonl`.
 
@@ -56,7 +56,7 @@ With `--format png-sequence`, `render-job` moves HyperFrames' frames from its wo
 uv run cinewright-check-in-container --image cinewright-render:dev --in <composition dir> --out <dir> --at 0.5,1.5
 ```
 
-`render-job check --in /job/in --out /job/out --at <seconds,…>` runs HyperFrames 0.9.41's own `check` on a copy of the composition, with the network off:
+`render-job check --in /job/in --out /job/out --at <seconds,…>` runs HyperFrames 0.9.58's own `check` on a copy of the composition, with the network off:
 
 ```
 hyperframes check <dir> --json --strict --no-craft --no-cache --no-browser-gpu --at <seconds,…>
@@ -69,7 +69,7 @@ It audits each time for:
 
 Craft warnings (dead stretches, unread lines) are skipped, because they depend on the film, not the composition. It writes three files to `/job/out`:
 - `check.json`: the full report;
-- `failures.json`: every error or warning in the lint, runtime, layout and contrast sections, or a not-ok report;
+- `failures.json`: every error or warning in the lint, runtime, layout, contrast, motion and audio sections, or a not-ok report;
 - `check-log.txt`.
 
 HyperFrames demotes a contrast failure seen at one sample to a warning and still reports `ok`, so warnings count as failures here. The component host reports its markers as console warnings (`cinewright.overflow …`, `cinewright.density …`); `failures.json` gives those findings their marker as the code.
@@ -80,7 +80,7 @@ Exit codes: 0 nothing fails, 2 usage or input error, 4 no report, 5 failures.
 
 ### Settings
 
-`render-runner/render-settings.json` holds every render setting. `loadSettings` rejects unknown, missing or inconsistent keys. The encoder values are test settings until delivery profiles own them (M5.3). How each key reaches HyperFrames 0.9.41:
+`render-runner/render-settings.json` holds every render setting. `loadSettings` rejects unknown, missing or inconsistent keys. The encoder values are test settings until delivery profiles own them (M5.3). How each key reaches HyperFrames 0.9.58:
 
 | Key | HyperFrames option | Notes |
 | --- | --- | --- |
@@ -93,6 +93,23 @@ Exit codes: 0 nothing fails, 2 usage or input error, 4 no report, 5 failures.
 | `encode: "ffmpeg"` | HyperFrames writes a PNG sequence; `render-job` encodes it | Every `encoder` key is passed to `ffmpeg` (`-preset`, `-crf`, `-pix_fmt`, `-g`/`-keyint_min`, `-sc_threshold 0`, `open-gop`, `-threads`), with bitexact flags and no metadata. |
 | `low_memory_mode` | engine `lowMemoryMode` | |
 | (fixed) | `hdrMode: "force-sdr"`, `chromePath` from `HYPERFRAMES_BROWSER_PATH` | |
+
+## HyperFrames facts (re-read for 0.9.58, M3.0)
+
+Every behaviour Cinewright relies on, checked in the published 0.9.58 packages (paths under each package's `dist/`; line numbers are for 0.9.58 and move between releases). Re-read these on every bump (audit decision 3: bump only at a milestone start or for a security fix).
+
+| Fact | Where |
+| --- | --- |
+| The browser build is `CHROME_VERSION = "152.0.7977.30"`, unchanged from 0.9.41 | `@hyperframes/engine` `services/chromeHostCeiling.js:25` |
+| WAAPI animations are discovered and seeked by the runtime's `waapi` adapter | `@hyperframes/core` `hyperframe.runtime.iife.js` (adapter `name:"waapi"`) |
+| The runtime waits for every `window.__hf.buildReady[key]` before the first capture; a rejection fails the render | `@hyperframes/core` `runtime/diagnostics.js:54-66` |
+| A host with `data-no-timeline` is skipped when the engine looks for a timeline | `@hyperframes/engine` `services/frameCapture.js:1355`, `:1380`, `:1495` |
+| Frame rates are `DISTRIBUTED_FPS = [24, 25, 30, 60]` | `@hyperframes/core` `distributedFps.js:2`, used by `@hyperframes/engine` `config.js:105` |
+| Quality levels: `draft` `ultrafast`/28, `standard` `medium`/18, `high` `fast`/15 | `@hyperframes/engine` `services/chunkEncoder.js:23-27` |
+| `png-sequence` output writes frames, not an MP4 | `@hyperframes/producer` `index.js:14425`, `:14981` |
+| `check` flags `--json`, `--strict`, `--no-craft`, `--no-cache`, `--no-browser-gpu`, `--at` | `hyperframes` `chunk-ROESFEBP.js:2734-2826` |
+| `check` JSON: `ok`, `strict`, and sections `lint`, `runtime`, `layout`, `motion`, `contrast`, `craft`, `audio`, each with `findings`; `ok` is false in strict mode when any non-craft warning remains. both already existed in 0.9.41. Since M3.0 `motion` (active only with a motion spec) and `audio` count as failures too | `hyperframes` `chunk-ROESFEBP.js:2193-2240` |
+| `snapshot` command | `hyperframes` `snapshot-EVSKTVDG.js:1878` |
 
 ## Determinism
 

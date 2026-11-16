@@ -55,10 +55,6 @@ RUN apt-get update \
       --path /opt/chrome-headless-shell --install-deps \
  && rm -rf /var/lib/apt/lists/*
 
-# The animation runtime is vendored from the lockfile, never loaded from a CDN.
-RUN mkdir -p /opt/cinewright/vendor \
- && cp container/render-runner/node_modules/gsap/dist/gsap.min.js /opt/cinewright/vendor/gsap.min.js
-
 ENV HYPERFRAMES_BROWSER_PATH=/opt/chrome-headless-shell/chrome-headless-shell/linux-${CHROME_HEADLESS_SHELL}/chrome-headless-shell-linux64/chrome-headless-shell \
     HYPERFRAMES_FFMPEG_PATH=/usr/bin/ffmpeg \
     HYPERFRAMES_FFPROBE_PATH=/usr/bin/ffprobe \

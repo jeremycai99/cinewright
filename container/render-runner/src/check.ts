@@ -18,7 +18,7 @@ export interface CheckArgs {
 export const CHECK_EXIT = { ok: 0, input: 2, error: 4, findings: 5 } as const;
 
 const WORK_DIR = "/tmp/cinewright-check";
-const SECTIONS = ["lint", "runtime", "layout", "contrast"] as const;
+const SECTIONS = ["lint", "runtime", "layout", "contrast", "motion", "audio"] as const;
 
 /** A finding that fails the check (M2.4b): an error or warning, or a report that is not ok. */
 export interface Failure {
@@ -30,7 +30,7 @@ export interface Failure {
   time?: number;
 }
 
-/** HyperFrames 0.9.41 `check`, with every option explicit (craft warnings depend on the film). */
+/** HyperFrames 0.9.58 `check`, with every option explicit (craft warnings depend on the film). */
 export function checkArgs(dir: string, at: readonly number[]): string[] {
   return [
     "check",
@@ -54,7 +54,7 @@ type Finding = {
 };
 
 /**
- * What fails a check: every error or warning in the lint, runtime, layout and contrast sections
+ * What fails a check: every error or warning in the lint, runtime, layout, contrast, motion and audio sections
  * (HyperFrames demotes a contrast failure seen at one sample to a warning, so warnings count), and
  * a report that is not ok. Infos never fail. A component marker the host reports as a console
  * warning (`cinewright.overflow`, `cinewright.density`) keeps its marker as the code.

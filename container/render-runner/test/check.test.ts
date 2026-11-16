@@ -110,6 +110,15 @@ describe("failures", () => {
     ]);
   });
 
+  it("fails on a warning in the motion or audio section", () => {
+    const report = {
+      ...clean,
+      motion: { findings: [{ code: "m", severity: "warning", message: "motion" }] },
+      audio: { findings: [{ code: "a", severity: "error", message: "audio" }] },
+    };
+    expect(failures(report).map((f) => `${f.section}:${f.code}`)).toEqual(["motion:m", "audio:a"]);
+  });
+
   it("fails a report that is not ok even without findings", () => {
     expect(failures({ ...clean, ok: false })).toEqual([
       {
