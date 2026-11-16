@@ -1,0 +1,23 @@
+[
+  {
+    "name": "echo returns its params",
+    "request": { "id": "g1", "method": "echo", "params": { "x": [1, "two"] } },
+    "expect": { "ok": true, "result": { "x": [1, "two"] } }
+  },
+  {
+    "name": "add sums",
+    "request": { "id": "g2", "method": "add", "params": { "a": 2, "b": 3 } },
+    "expect": { "ok": true, "result": 5 }
+  },
+  {
+    "name": "bad params give a typed error",
+    "request": { "id": "g3", "method": "add", "params": { "a": "2" } },
+    "expect": { "ok": false, "code": "invalid_request" }
+  },
+  {
+    "name": "a slow call can be cancelled",
+    "request": { "id": "g4", "method": "sleep", "params": { "ms": 30000 } },
+    "cancel_after_ms": 50,
+    "expect": { "ok": false, "code": "cancelled" }
+  }
+]

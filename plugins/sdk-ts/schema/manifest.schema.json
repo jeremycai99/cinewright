@@ -1,0 +1,182 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://cinewright.invalid/plugin/0/manifest.schema.json",
+  "title": "PluginManifest",
+  "description": "A plugin's manifest (D32, M1.8a). Every plugin declares its output license terms.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schema_version",
+    "id",
+    "version",
+    "kind",
+    "capabilities",
+    "cost_model",
+    "latency_class",
+    "output_license",
+    "secrets",
+    "runtime",
+    "concurrency",
+    "rate_limits"
+  ],
+  "properties": {
+    "schema_version": {
+      "const": 1
+    },
+    "id": {
+      "type": "string",
+      "pattern": "^[a-z][a-z0-9_]*(\\.[a-z0-9_]+)*$",
+      "maxLength": 64
+    },
+    "version": {
+      "type": "string",
+      "pattern": "^\\d+\\.\\d+\\.\\d+([-+][0-9A-Za-z.-]+)?$"
+    },
+    "kind": {
+      "enum": [
+        "llm",
+        "tts",
+        "music",
+        "sfx",
+        "image",
+        "video",
+        "lipsync",
+        "stt",
+        "stock",
+        "backend",
+        "critic",
+        "exporter"
+      ]
+    },
+    "capabilities": {
+      "type": "array",
+      "items": {
+        "type": "string",
+        "minLength": 1
+      },
+      "uniqueItems": true
+    },
+    "cost_model": {
+      "title": "CostModel",
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["unit"],
+      "properties": {
+        "unit": {
+          "type": "string",
+          "minLength": 1,
+          "description": "\"free\", or what one unit of usage is (a character, a second, a request)."
+        },
+        "usd_per_unit": {
+          "type": "number",
+          "minimum": 0
+        }
+      }
+    },
+    "latency_class": {
+      "enum": ["interactive", "batch", "offline"]
+    },
+    "output_license": {
+      "description": "The license of what the plugin produces (AGENTS.md \u00a76).",
+      "title": "OutputLicense",
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["terms", "commercial_use"],
+      "properties": {
+        "terms": {
+          "type": "string",
+          "minLength": 1
+        },
+        "commercial_use": {
+          "type": "boolean"
+        },
+        "attribution": {
+          "type": "string"
+        }
+      }
+    },
+    "secrets": {
+      "type": "array",
+      "items": {
+        "type": "string",
+        "pattern": "^[A-Z][A-Z0-9_]*$"
+      },
+      "description": "Environment variables the plugin needs."
+    },
+    "runtime": {
+      "title": "Runtime",
+      "oneOf": [
+        {
+          "description": "A first-party TypeScript plugin, imported in process (D32).",
+          "title": "InProcessRuntime",
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["kind", "entry"],
+          "properties": {
+            "kind": {
+              "const": "in_process"
+            },
+            "entry": {
+              "type": "string",
+              "minLength": 1
+            }
+          }
+        },
+        {
+          "description": "A plugin run as a child process speaking JSON-RPC 2.0 on stdio (D32).",
+          "title": "SubprocessRuntime",
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["kind", "command"],
+          "properties": {
+            "kind": {
+              "const": "subprocess"
+            },
+            "command": {
+              "type": "array",
+              "minItems": 1,
+              "items": {
+                "type": "string",
+                "minLength": 1
+              }
+            },
+            "cwd": {
+              "type": "string"
+            }
+          }
+        }
+      ]
+    },
+    "concurrency": {
+      "title": "Concurrency",
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["max_parallel"],
+      "properties": {
+        "max_parallel": {
+          "type": "integer",
+          "minimum": 1
+        }
+      }
+    },
+    "rate_limits": {
+      "type": "array",
+      "items": {
+        "title": "RateLimit",
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["requests", "per_seconds"],
+        "properties": {
+          "requests": {
+            "type": "integer",
+            "minimum": 1
+          },
+          "per_seconds": {
+            "type": "number",
+            "exclusiveMinimum": 0
+          }
+        }
+      }
+    }
+  }
+}
