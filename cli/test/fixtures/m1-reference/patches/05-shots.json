@@ -1,0 +1,138 @@
+{
+  "base_revision": 4,
+  "author": {
+    "kind": "agent",
+    "role": "scene_planner"
+  },
+  "mode": "apply",
+  "reason": "Shot plan for scene 3",
+  "ops": [
+    {
+      "op": "set",
+      "entity": "s03_the_problem",
+      "path": "/duration",
+      "value": {
+        "target": "18s",
+        "flex": 0.15,
+        "sync": "voiceover"
+      }
+    },
+    {
+      "op": "set",
+      "entity": "s03_the_problem",
+      "path": "/transition_out",
+      "value": {
+        "type": "match_cut",
+        "to": "s04",
+        "on": "data_bars → server racks"
+      }
+    },
+    {
+      "op": "set",
+      "entity": "s03_the_problem",
+      "path": "/sound",
+      "value": {
+        "music_cue": "tension_rise",
+        "sfx": ["whoosh_soft", "tick_loop"],
+        "duck_under_vo_db": -12
+      }
+    },
+    {
+      "op": "insert",
+      "entity": "s03_the_problem",
+      "path": "/shots",
+      "value": {
+        "id": "s03.sh01",
+        "type": "motion_graphics",
+        "backend": "html",
+        "framing": "full_frame",
+        "layout": {
+          "landscape": {
+            "template": "grid.12col/title-left"
+          },
+          "portrait": {
+            "template": "stack/title-top"
+          }
+        },
+        "camera": {
+          "move": "push_in",
+          "ease": {
+            "token": "motion.ease_out_expo"
+          },
+          "amount": 0.06
+        },
+        "anchors": {
+          "start": {
+            "line": "b01.l01",
+            "point": "start",
+            "offset": 0
+          }
+        },
+        "layers": [
+          {
+            "id": "s03.sh01.title",
+            "component": "kinetic_title",
+            "props": {
+              "text": "Every team hits the same wall.",
+              "color": {
+                "token": "palette.accent"
+              }
+            },
+            "timing": {
+              "enter": {
+                "line": "b01.l01",
+                "point": "start",
+                "offset": 0
+              }
+            }
+          },
+          {
+            "id": "s03.sh01.bars",
+            "component": "data_bars",
+            "props": {
+              "series": [3, 5, 9]
+            },
+            "timing": {
+              "enter": {
+                "line": "b01.l01",
+                "point": "word",
+                "word": 3,
+                "offset": "200ms"
+              }
+            }
+          }
+        ]
+      }
+    },
+    {
+      "op": "insert",
+      "entity": "s03_the_problem",
+      "path": "/shots",
+      "value": {
+        "id": "s03.sh02",
+        "type": "generative_footage",
+        "framing": "medium_close, 50mm, shallow DOF",
+        "references": ["dr_lin", "dr_lin_sheet_front"],
+        "anchors": {
+          "start": {
+            "line": "b01.l02",
+            "point": "start",
+            "offset": 0
+          },
+          "end": {
+            "line": "b01.l02",
+            "point": "end",
+            "offset": "00:00:00:12"
+          }
+        }
+      }
+    }
+  ],
+  "decisions": [
+    {
+      "ops": [3],
+      "choice": "Open on kinetic type over data bars",
+      "citations": ["brief", "pack:editorial/motion.title_reveal"]
+    }
+  ]
+}

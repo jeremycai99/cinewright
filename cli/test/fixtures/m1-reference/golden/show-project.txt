@@ -1,0 +1,99 @@
+project: demo  # origin user
+schema_version: 1
+profiles: [landscape_1080p30, portrait_1080p30]  # copies written by init
+title: "Why pipelines break"  # user
+brief: "A 30-second explainer on why build pipelines break as teams grow."  # user
+autonomy: guided  # user
+budget: ~  # open
+policies: ~  # open
+settings:
+  propose_conversational_edits: true  # user
+style:
+  pack: editorial  # user
+  overrides: {}
+deliverables:  # user
+  - deliverable: web_landscape  # origin user
+    profile: landscape_1080p30  # user
+    label: ~  # open
+    burn_in_captions: ~  # open
+  - deliverable: social_portrait  # origin user
+    profile: portrait_1080p30  # user
+    label: ~  # open
+    burn_in_captions: ~  # open
+sequences:  # user
+  - sequence: seq_main  # origin user
+    title: "The problem"  # user
+    mood: ~  # open
+    music_bed: ~  # open
+    style:
+      overrides: {}
+    scenes:  # user
+      - s03_the_problem
+      - s04
+script:
+  script: script  # origin user
+  beats:  # user
+    - b01
+cast:  # user
+  - cast_member: narrator  # origin user
+    role: narrator  # user
+    display_name: ~  # open
+    voice:
+      description: { language: en, timbre: "warm, mid-low", accent: neutral }  # user
+      lexicon:
+        Kubernetes: KOO-ber-NET-eez  # user
+      bindings:
+        elevenlabs: { voice_id: "…", model: eleven_v4, settings: { stability: 0.45 } }  # user
+        kokoro: { voice: "…" }  # user
+    performance:
+      baseline: "warm, confident, unhurried"  # user
+      pace_wpm: 150  # user
+      tics: ~  # open
+    on_screen: false  # user
+    visual: ~  # open
+    consent: ~  # open
+  - cast_member: dr_lin  # origin user
+    role: character  # user
+    display_name: "Dr Lin"  # user
+    voice:
+      description: { text: "woman, 40s, dry wit, slight rasp" }  # user
+      lexicon: {}
+      bindings: {}
+    performance:
+      baseline: "wry, precise"  # user
+      pace_wpm: ~  # open
+      tics: ["half-laugh before admissions"]  # user
+    on_screen: true  # user
+    visual: { sheet: [dr_lin_sheet_front, dr_lin_sheet_profile, dr_lin_sheet_full], wardrobe: "navy blazer", style: photoreal }  # user
+    consent: { synthetic: true }  # user
+assets:  # user
+  - asset: dr_lin_sheet_front  # origin user
+    hash: "sha256:93e2059298db97878d2d42a3ee94c7f9bc9099a6ce744fb2d516aa6f81c0fe16"
+    media_type: image/png
+    bytes: 11
+    role: reference
+    provenance:
+      provider: user_upload
+    license:
+      terms: "Supplied by the project author"
+      commercial_use: true
+  - asset: dr_lin_sheet_profile  # origin user
+    hash: "sha256:4cd793584e41cc2906c0a4a9c2e1f7d2cf0bf3379dea42b91d7707647286dd61"
+    media_type: image/png
+    bytes: 13
+    role: reference
+    provenance:
+      provider: user_upload
+    license:
+      terms: "Supplied by the project author"
+      commercial_use: true
+  - asset: dr_lin_sheet_full  # origin user
+    hash: "sha256:4d3b68e681b7c5ed00d285d3a223d0a8006ae4f8297bd7d8a66fada4aa00a044"
+    media_type: image/png
+    bytes: 10
+    role: reference
+    provenance:
+      provider: user_upload
+    license:
+      terms: "Supplied by the project author"
+      commercial_use: true

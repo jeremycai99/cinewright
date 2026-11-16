@@ -1,5 +1,5 @@
 import { spawn } from "node:child_process";
-import { mkdirSync, writeFileSync } from "node:fs";
+import { mkdirSync, utimesSync, writeFileSync } from "node:fs";
 import { hostname } from "node:os";
 import { join } from "node:path";
 import { fileURLToPath } from "node:url";
@@ -23,6 +23,24 @@ describe("the store lock", () => {
       patch(store, [{ op: "set", entity: "s01", path: "/intent", value: "x" }]),
     );
     expect(result.status).toBe("applied");
+  });
+
+  it("is taken over when it is unreadable and old (a writer died before writing its holder)", async () => {
+    const { dir } = await setupProject();
+    const lock = join(dir, ".cinewright", "store.lock");
+    writeFileSync(lock, "");
+    const old = new Date(Date.now() - 60_000);
+    utimesSync(lock, old, old);
+    const store = await Store.open(dir, { ...OPTIONS, lockTimeoutMs: 500 });
+    expect(store.revision()).toBe(1);
+  });
+
+  it("an unreadable but fresh lock is still respected until the timeout", async () => {
+    const { dir } = await setupProject();
+    writeFileSync(join(dir, ".cinewright", "store.lock"), "");
+    await expect(Store.open(dir, { ...OPTIONS, lockTimeoutMs: 300 })).rejects.toBeInstanceOf(
+      LockTimeoutError,
+    );
   });
 
   it("held by a live process makes a writer fail after the timeout, naming the holder", async () => {

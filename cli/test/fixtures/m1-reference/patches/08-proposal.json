@@ -1,0 +1,16 @@
+{
+  "base_revision": 7,
+  "author": {
+    "kind": "session"
+  },
+  "mode": "propose",
+  "reason": "Make scene 3 tenser",
+  "ops": [
+    {
+      "op": "set",
+      "entity": "s03_the_problem",
+      "path": "/mood",
+      "value": ["tense", "building", "urgent"]
+    }
+  ]
+}

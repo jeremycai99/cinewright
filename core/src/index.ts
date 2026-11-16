@@ -25,8 +25,25 @@ export {
 export type * from "./generated/ir.js";
 export { dependencyGraph, dirtyNodes, type Graph } from "./graph/deps.js";
 export { type RenderInputs, renderKey, unwrap } from "./graph/render-key.js";
-export { collectEntities, type EntityInfo, entityIndex, locate, walkDocument } from "./ir/index.js";
+export {
+  collectEntities,
+  type EntityInfo,
+  entityIndex,
+  locate,
+  resolveNode,
+  walkDocument,
+} from "./ir/index.js";
 export { type InlinedIr, inlineIr, splitIr } from "./ir/inlined.js";
+export {
+  INLINED_ROOT,
+  type IrEntity,
+  indexIr,
+  inlinedSchemas,
+  isObject,
+  resolveTarget,
+  type Target,
+  wrapperValueSchema,
+} from "./ir/paths.js";
 export { anchorErrors, crossDocumentErrors, wrapperErrors } from "./ir/semantic.js";
 export {
   ProjectFilesError,
@@ -45,11 +62,17 @@ export * from "./project/layout.js";
 export { normalizeErrors, type ValidationError } from "./schema/errors.js";
 export { type JsonObject, loadSchemas, resolveRef, type SchemaSet } from "./schema/load.js";
 export { type DocumentKind, validateDocument, validateProject } from "./schema/validate.js";
-
+export { applyOps, projectFps } from "./store/apply.js";
 export { stateFor } from "./store/author.js";
 export { type Conflict, findConflicts } from "./store/conflict.js";
 export { LockTimeoutError, withLock } from "./store/lock.js";
-export { appendLog, type LogEntry, readLog } from "./store/log.js";
+export {
+  type AppliedEntry,
+  appendLog,
+  type LogEntry,
+  type PendingEntry,
+  readLog,
+} from "./store/log.js";
 export { type PatchError, validatePatch } from "./store/patch.js";
 export { inScope, type WriteScopes } from "./store/scopes.js";
 export {

@@ -1,0 +1,74 @@
+{
+  "base_revision": 1,
+  "author": {
+    "kind": "user"
+  },
+  "mode": "apply",
+  "reason": "Cast bible from the brief",
+  "ops": [
+    {
+      "op": "insert",
+      "entity": "demo",
+      "path": "/cast",
+      "value": {
+        "id": "narrator",
+        "role": "narrator",
+        "voice": {
+          "description": {
+            "language": "en",
+            "timbre": "warm, mid-low",
+            "accent": "neutral"
+          },
+          "lexicon": {
+            "Kubernetes": "KOO-ber-NET-eez"
+          },
+          "bindings": {
+            "elevenlabs": {
+              "voice_id": "…",
+              "model": "eleven_v4",
+              "settings": {
+                "stability": 0.45
+              }
+            },
+            "kokoro": {
+              "voice": "…"
+            }
+          }
+        },
+        "performance": {
+          "baseline": "warm, confident, unhurried",
+          "pace_wpm": 150
+        },
+        "on_screen": false
+      }
+    },
+    {
+      "op": "insert",
+      "entity": "demo",
+      "path": "/cast",
+      "value": {
+        "id": "dr_lin",
+        "role": "character",
+        "display_name": "Dr Lin",
+        "voice": {
+          "description": {
+            "text": "woman, 40s, dry wit, slight rasp"
+          }
+        },
+        "performance": {
+          "baseline": "wry, precise",
+          "tics": ["half-laugh before admissions"]
+        },
+        "on_screen": true,
+        "visual": {
+          "sheet": ["dr_lin_sheet_front", "dr_lin_sheet_profile", "dr_lin_sheet_full"],
+          "wardrobe": "navy blazer",
+          "style": "photoreal"
+        },
+        "consent": {
+          "synthetic": true
+        }
+      }
+    }
+  ]
+}

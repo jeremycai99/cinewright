@@ -1,0 +1,67 @@
+{
+  "base_revision": 0,
+  "author": {
+    "kind": "user"
+  },
+  "mode": "apply",
+  "reason": "Character sheet for Dr Lin",
+  "ops": [
+    {
+      "op": "insert",
+      "entity": "demo",
+      "path": "/assets",
+      "value": {
+        "id": "dr_lin_sheet_front",
+        "hash": "sha256:93e2059298db97878d2d42a3ee94c7f9bc9099a6ce744fb2d516aa6f81c0fe16",
+        "media_type": "image/png",
+        "bytes": 11,
+        "role": "reference",
+        "provenance": {
+          "provider": "user_upload"
+        },
+        "license": {
+          "terms": "Supplied by the project author",
+          "commercial_use": true
+        }
+      }
+    },
+    {
+      "op": "insert",
+      "entity": "demo",
+      "path": "/assets",
+      "value": {
+        "id": "dr_lin_sheet_profile",
+        "hash": "sha256:4cd793584e41cc2906c0a4a9c2e1f7d2cf0bf3379dea42b91d7707647286dd61",
+        "media_type": "image/png",
+        "bytes": 13,
+        "role": "reference",
+        "provenance": {
+          "provider": "user_upload"
+        },
+        "license": {
+          "terms": "Supplied by the project author",
+          "commercial_use": true
+        }
+      }
+    },
+    {
+      "op": "insert",
+      "entity": "demo",
+      "path": "/assets",
+      "value": {
+        "id": "dr_lin_sheet_full",
+        "hash": "sha256:4d3b68e681b7c5ed00d285d3a223d0a8006ae4f8297bd7d8a66fada4aa00a044",
+        "media_type": "image/png",
+        "bytes": 10,
+        "role": "reference",
+        "provenance": {
+          "provider": "user_upload"
+        },
+        "license": {
+          "terms": "Supplied by the project author",
+          "commercial_use": true
+        }
+      }
+    }
+  ]
+}

@@ -49,6 +49,10 @@ Not blocking M0–M1:
 - Run the neutrality test from `AGENTS.md` §2.3 on every PR.
 - Update `docs/DESIGN_SPEC.md` in the same PR when a design decision changes; add a decision-log row.
 
+## Editing a project
+
+Create a project with `cinewright init`, then change it only with `cinewright patch` and read it with `cinewright show`. `cli/README.md` documents the commands, ops and exit codes. Conversational edits from a coding agent use the `session` author: they are proposed first, and the user approves them with `cinewright patch approve`. `cli/test/fixtures/m1-reference/` is a complete example built only through the CLI.
+
 ## Suggested first prompt in Claude Code
 
 > Read AGENTS.md, docs/HANDOFF.md, docs/DESIGN_SPEC.md (especially the Decision log) and docs/V0_1_PLAN.md (approved 2026-11-13, including its M1 conventions). M0 is done (2026-11-14). Continue the current milestone's task plan in `docs/plans/` from the first task whose PR has not merged; if the next milestone has no approved plan yet, plan it in detail and wait for my approval before writing code.

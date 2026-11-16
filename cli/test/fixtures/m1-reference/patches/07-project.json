@@ -1,0 +1,28 @@
+{
+  "base_revision": 6,
+  "author": {
+    "kind": "user"
+  },
+  "mode": "apply",
+  "reason": "Brief and style",
+  "ops": [
+    {
+      "op": "set",
+      "entity": "demo",
+      "path": "/brief",
+      "value": "A 30-second explainer on why build pipelines break as teams grow."
+    },
+    {
+      "op": "set",
+      "entity": "demo",
+      "path": "/autonomy",
+      "value": "guided"
+    },
+    {
+      "op": "set",
+      "entity": "demo",
+      "path": "/style/pack",
+      "value": "editorial"
+    }
+  ]
+}

@@ -1,0 +1,38 @@
+{
+  "base_revision": 3,
+  "author": {
+    "kind": "user"
+  },
+  "mode": "apply",
+  "reason": "Scene 3 as the user scoped it",
+  "ops": [
+    {
+      "op": "insert",
+      "entity": "demo",
+      "path": "/sequences",
+      "value": {
+        "id": "seq_main",
+        "title": "The problem",
+        "scenes": [
+          {
+            "id": "s03_the_problem",
+            "intent": "Show why legacy pipelines break at scale",
+            "mood": ["tense", "building"],
+            "cast": ["narrator", "dr_lin"],
+            "lines": ["b01.l01", "b01.l02"],
+            "gates": ["storyboard", "animatic"],
+            "style": {
+              "overrides": {
+                "palette.accent": "#FF4D2E"
+              }
+            }
+          },
+          {
+            "id": "s04",
+            "intent": "Show the fix"
+          }
+        ]
+      }
+    }
+  ]
+}

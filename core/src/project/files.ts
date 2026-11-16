@@ -42,7 +42,10 @@ async function readJson(dir: string, file: string): Promise<unknown> {
 /** Read the project file and every listed sequence into the inlined IR. */
 export async function readProjectFiles(dir: string): Promise<InlinedIr> {
   const project = (await readJson(dir, PROJECT_FILE)) as Project;
-  const ids = Array.isArray(project?.sequences?.value) ? project.sequences.value : [];
+  if (project === null || typeof project !== "object" || typeof project.sequences !== "object") {
+    throw new ProjectFilesError(PROJECT_FILE, "not a Cinewright project file");
+  }
+  const ids = Array.isArray(project.sequences.value) ? project.sequences.value : [];
   const sequences = new Map<string, Sequence>();
   for (const id of ids) sequences.set(id, (await readJson(dir, sequenceFile(id))) as Sequence);
   return inlineIr(project, sequences);
