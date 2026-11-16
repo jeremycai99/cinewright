@@ -2,6 +2,7 @@
 import { realpathSync } from "node:fs";
 import { dirname, join } from "node:path";
 import { fileURLToPath } from "node:url";
+import { type CheckArgs, check } from "./check.js";
 import { EXIT, type Format, type RenderArgs, render } from "./render.js";
 import { loadSettings } from "./settings.js";
 import { reportVersions } from "./versions.js";
@@ -14,6 +15,7 @@ const FORMATS: readonly Format[] = ["mp4", "png-sequence"];
 const FLAGS = ["--in", "--out", "--format"];
 const USAGE = [
   "usage: render-job --in <composition dir> --out <output dir> [--format mp4|png-sequence]",
+  "       render-job check --in <composition dir> --out <output dir> --at <seconds,...>",
   "       render-job --versions",
 ].join("\n");
 
@@ -23,8 +25,37 @@ export const SETTINGS_PATH = join(
   "render-settings.json",
 );
 
-export function parseArgs(argv: readonly string[]): RenderArgs | { versions: true } {
+function flagValues(argv: readonly string[], flags: readonly string[]): Map<string, string> {
+  const values = new Map<string, string>();
+  for (let i = 0; i < argv.length; i += 2) {
+    const flag = argv[i] ?? "";
+    const value = argv[i + 1];
+    if (!flags.includes(flag)) throw new UsageError(`unknown argument "${flag}"`);
+    if (value === undefined || value.startsWith("--"))
+      throw new UsageError(`${flag} needs a value`);
+    if (values.has(flag)) throw new UsageError(`${flag} given twice`);
+    values.set(flag, value);
+  }
+  return values;
+}
+
+function parseCheck(argv: readonly string[]): CheckArgs {
+  const values = flagValues(argv, ["--in", "--out", "--at"]);
+  const input = values.get("--in");
+  const output = values.get("--out");
+  const at = values.get("--at");
+  if (input === undefined) throw new UsageError("--in is required");
+  if (output === undefined) throw new UsageError("--out is required");
+  if (at === undefined) throw new UsageError("--at is required");
+  const times = at.split(",").map((t) => Number(t));
+  if (times.some((t) => !Number.isFinite(t) || t < 0))
+    throw new UsageError(`--at must be seconds separated by commas, got "${at}"`);
+  return { check: true, input, output, at: times };
+}
+
+export function parseArgs(argv: readonly string[]): RenderArgs | CheckArgs | { versions: true } {
   if (argv.length === 1 && argv[0] === "--versions") return { versions: true };
+  if (argv[0] === "check") return parseCheck(argv.slice(1));
   const values = new Map<string, string>();
   for (let i = 0; i < argv.length; i += 2) {
     const flag = argv[i] ?? "";
@@ -47,7 +78,7 @@ export function parseArgs(argv: readonly string[]): RenderArgs | { versions: tru
 }
 
 export async function main(argv: readonly string[]): Promise<number> {
-  let parsed: RenderArgs | { versions: true };
+  let parsed: RenderArgs | CheckArgs | { versions: true };
   try {
     parsed = parseArgs(argv);
   } catch (error) {
@@ -59,6 +90,7 @@ export async function main(argv: readonly string[]): Promise<number> {
     console.log(JSON.stringify(await reportVersions()));
     return EXIT.ok;
   }
+  if ("check" in parsed) return check(parsed);
   return render(parsed, loadSettings(SETTINGS_PATH));
 }
 

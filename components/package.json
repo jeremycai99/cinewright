@@ -15,7 +15,8 @@
     "src"
   ],
   "scripts": {
-    "test": "vitest run"
+    "test": "vitest run",
+    "specimens": "node dist/node/specimens-cli.js"
   },
   "dependencies": {
     "@cinewright/core": "workspace:*",
