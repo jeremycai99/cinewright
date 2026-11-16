@@ -127,6 +127,7 @@ export interface IrDocuments {
   approved_entry?: ApprovedEntry;
   rejected_entry?: RejectedEntry;
   approve_failed_entry?: ApproveFailedEntry;
+  pinned_entry?: PinnedEntry;
   patch?: Patch;
   project?: Project;
   scene?: Scene;
@@ -134,6 +135,7 @@ export interface IrDocuments {
   sequence?: Sequence;
   shot?: Shot;
   style?: Style;
+  timing?: TimingTable;
 }
 /**
  * A content-addressed asset (D33). All fields are measured data, so none is authorable; list membership is.
@@ -696,6 +698,21 @@ export interface ApprovalError {
   message?: string;
 }
 /**
+ * A pack pinned or re-pinned (M3.1a): a new revision that sets packs.<pack> and changes nothing else.
+ */
+export interface PinnedEntry {
+  kind: "pinned";
+  seq: number;
+  time: string;
+  session_id: string;
+  author: Author;
+  revision: number;
+  pack: Id;
+  version: string;
+  hash: Hash;
+  state_hash: Hash;
+}
+/**
  * An IR patch (D30, M1 convention 10). Values are bare: the store adds wrappers and sets each state from the author.
  */
 export interface Patch {
@@ -718,6 +735,7 @@ export interface Project {
   locked?: EntityLock;
   schema_version: 1;
   profiles: ProfileCopies;
+  packs?: PackPins;
   title: {
     state: State;
     value?: string;
@@ -776,6 +794,16 @@ export interface ProfileCopies {
 export interface ProfileCopy {
   hash: Hash;
   body: DeliveryProfile;
+}
+/**
+ * The style packs this project is pinned to, keyed by pack id: each pack's version and content hash (M3.1a, audit decision 5). Written only by init and `cinewright pack pin`; compiling fails when the pack on disk no longer matches its pin.
+ */
+export interface PackPins {
+  [k: string]: PackPin;
+}
+export interface PackPin {
+  version: string;
+  hash: Hash;
 }
 export interface Budget {
   currency: "USD";
@@ -1056,4 +1084,22 @@ export interface Sequence {
  */
 export interface Style {
   [k: string]: unknown;
+}
+/**
+ * When each script line and word is spoken, in frames on its sequence's timeline (M3.1a). Derived data, not an IR entity: narration writes it (M4.2); until then a fixture or `--timing <file>` supplies it.
+ */
+export interface TimingTable {
+  fps: Rational;
+  lines: {
+    [k: string]: LineTiming;
+  };
+}
+export interface LineTiming {
+  start: Frames;
+  end: Frames;
+  words: FrameSpan[];
+}
+export interface FrameSpan {
+  start: Frames;
+  end: Frames;
 }

@@ -63,7 +63,7 @@ Every entity carries three plain properties:
 | `cast` | list | CastMember |
 | `assets` | list | Asset |
 
-Plain: `id`, `origin`, `locked`, `schema_version` (`1`), `script` (the Script entity), `profiles` (profile id → `{ hash, body }`, written only by `init`; convention 16).
+Plain: `id`, `origin`, `locked`, `schema_version` (`1`), `script` (the Script entity), `profiles` (profile id → `{ hash, body }`, written only by `init`; convention 16), and `packs` (pack id → `{ version, hash }`, written only by `init --pack` and `cinewright pack pin`; M3.1a). A pin's `hash` is the pack's content hash: `pack.json`, `tokens.json`, `layouts.json`, `rules.md` and its declared fonts, so a README edit or a stray file never breaks it. Compiling resolves `style.pack` against its pin and fails with `pack.unset`, `pack.unpinned`, `pack.not_found` or `pack.pin_mismatch` (naming the pinned and found versions).
 
 ### Deliverable (`project.schema.json#/$defs/deliverable`)
 
@@ -159,6 +159,10 @@ Stored-form mapping of the spec's scene example (`core/test/fixtures/schema/sequ
 - `style.inherit: pack.editorial` becomes the project's `style.pack`, because only the project chooses a pack.
 - `to: s04` points at a minimal scene `s04`, added so the reference resolves.
 
+### TimingTable (`timing.schema.json`)
+
+Derived data, not an entity (M3.1a): `fps`, and `lines` keyed by script line id, each `{ start, end, words: [{ start, end }] }` in frames on its sequence's timeline. Narration writes it from takes (M4.2); until then a fixture or `--timing <file>` supplies it. `resolveAnchor` turns an anchor into a frame (`timing.unknown_line`, `timing.unknown_word`). `shotSpan` gives a shot's frames: from `anchors.start` to `anchors.end`, or after its `duration`, or to the next shot's start in the sequence (`timing.unknown_span` when none applies). `layerTiming` gives a layer's entrance and end relative to its shot, the whole shot when it has no timing (`timing.outside_shot` when it leaves the shot).
+
 ### DeliveryProfile (`delivery-profile.schema.json`)
 
 A data file, not an entity, so it has no wrappers. It holds `schema_version`, `id`, `name`, `frame_rate` (rational), `sample_rate`, `width`, `height`, `aspect_class`, `safe_zones` (`action` and `title` insets as fractions), `loudness` (`integrated_lufs`, `true_peak_dbtp`, `tolerance_lu`) and `captions` (`max_chars_per_line`, `max_lines`, `min_display_frames`).
@@ -214,10 +218,11 @@ Errors are sorted by entity, then pointer, then rule. For a missing or unexpecte
 | `pending` | A patch is stored instead of applied: a proposal, a suggestion, or (from M1.2a) an authorship block. | The patch, a `pending_id` and a `reason_code`. |
 | `approved` / `rejected` | The user decides on a pending patch (M1.2b). | The pending id. |
 | `approve_failed` | An approval fails; the patch stays pending. | The pending id, the revision it was tried at, and its `conflicts` or `errors`. |
+| `pinned` | `cinewright pack pin` (M3.1a). | A new revision that sets `packs.<pack>` to the `version` and `hash` it records, and changes nothing else. |
 
 Every entry records `time`, `session_id` and the asserted `author` (D41). A revert is a new revision whose `revert_of` names its target; replaying the log re-applies the target's `before` snapshots. A revert restores a list of entities by membership and order only: items that still exist keep their current bodies, so a later edit to a sibling survives, and only items the target removed come back from the snapshot (M2.5a, audit F1). Such reverts carry `revert_lists: "membership"`; reverts recorded earlier lack it and replay with the old whole-list restore, so their state hashes still reproduce. A revert conflicts when a later revision changed the same list, or edited an entity the revert would delete. On open, the store:
 1. finishes or discards an interrupted journal (`.cinewright/txn/`);
-2. compares the files' `state_hash` with the last applied entry;
+2. compares the files' `state_hash` with the last `init`, `applied` or `pinned` entry;
 3. checks that every file is in the stored form.
 
 A file changed outside the store fails to load, naming the file, the entity and the field.

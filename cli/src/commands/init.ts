@@ -1,17 +1,27 @@
 import { resolve } from "node:path";
-import { InitError, initProject, profileRefPath, UnknownProfileError } from "@cinewright/core";
+import {
+  InitError,
+  initProject,
+  loadPack,
+  type Pack,
+  PackError,
+  packSearchPath,
+  profileRefPath,
+  UnknownProfileError,
+} from "@cinewright/core";
 import { parse, UsageError } from "../args.js";
 import { EXIT } from "../exit-codes.js";
 import { type Io, now, printJson, sessionId } from "../io.js";
 
 export const INIT_USAGE =
-  "usage: cinewright init <dir> --id <project_id> --deliverable <id>=<profile name or path> [--deliverable …] [--title <text>] [--json]";
+  "usage: cinewright init <dir> --id <project_id> --deliverable <id>=<profile name or path> [--deliverable …] [--pack <id>] [--title <text>] [--json]";
 
 export async function init(argv: string[], io: Io): Promise<number> {
   const { values, positionals } = parse(argv, {
     id: { type: "string" },
     deliverable: { type: "string", multiple: true },
     title: { type: "string" },
+    pack: { type: "string" },
     json: { type: "boolean" },
   });
   const [target, ...extra] = positionals;
@@ -32,6 +42,13 @@ export async function init(argv: string[], io: Io): Promise<number> {
       throw error;
     }
   });
+  let pack: Pack;
+  try {
+    pack = loadPack(values.pack ?? "neutral", packSearchPath(io.env));
+  } catch (error) {
+    if (error instanceof PackError) throw new UsageError(error.message);
+    throw error;
+  }
   const dir = resolve(io.cwd, target);
   try {
     const result = await initProject(
@@ -39,6 +56,7 @@ export async function init(argv: string[], io: Io): Promise<number> {
       {
         id: values.id,
         deliverables,
+        pack,
         ...(values.title === undefined ? {} : { title: values.title }),
       },
       { sessionId: sessionId(io), now: now(io) },

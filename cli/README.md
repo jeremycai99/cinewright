@@ -5,7 +5,7 @@
 ## Commands
 
 ```
-cinewright init <dir> --id <project_id> --deliverable <id>=<profile name or path> [--deliverable …] [--title <text>] [--json]
+cinewright init <dir> --id <project_id> --deliverable <id>=<profile name or path> [--deliverable …] [--pack <id>] [--title <text>] [--json]
 cinewright patch apply   --file <patch.json> [--project <dir>] [--frames] [--json]
 cinewright patch propose --file <patch.json> [--project <dir>] [--frames] [--json]
 cinewright patch approve <pending_id> [--project <dir>] [--json]
@@ -16,9 +16,10 @@ cinewright show [<id>] [--depth <n>] [--frames] [--resolved --pack <tokens.json>
 cinewright status [--project <dir>] [--json]
 cinewright schema [<kind> | tokens [--json]]
 cinewright components [<id>] [--json]
+cinewright pack pin <pack_id> [--project <dir>] [--json]
 ```
 
-`--deliverable` takes a delivery profile name from `registry/profiles/` (`landscape_web`, `vertical_social`; see `registry/README.md`) or a path to a profile file: anything with a `/` or ending in `.json`. An unknown name exits 2 and lists the names.
+`--deliverable` takes a delivery profile name from `registry/profiles/` (`landscape_web`, `vertical_social`; see `registry/README.md`) or a path to a profile file: anything with a `/` or ending in `.json`. An unknown name exits 2 and lists the names. `--pack` chooses the style pack (default `neutral`): `init` sets `style.pack` and pins the pack's version and content hash in `packs`, so a later change to the pack never silently changes the project. When a pack changes on disk, compiling fails with `pack.pin_mismatch` until `cinewright pack pin <id>` records the new pin as a new revision. Packs are found in each folder of `CINEWRIGHT_PACK_PATH` (separated like `PATH`), then in the repository's `packs/`.
 
 Without `--project`, a command uses the nearest directory upward that holds `cinewright.json`. `--file -` reads the patch from stdin.
 

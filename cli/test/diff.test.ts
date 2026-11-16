@@ -20,6 +20,8 @@ describe("the readable diff of each reference patch", () => {
         "demo",
         "--title",
         "Why pipelines break",
+        "--pack",
+        "neutral",
         "--deliverable",
         `web_landscape=${PROFILES}landscape_1080p30.json`,
         "--deliverable",

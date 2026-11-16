@@ -1,6 +1,7 @@
 project: demo  # origin user
 schema_version: 1
 profiles: [landscape_1080p30, portrait_1080p30]  # copies written by init
+packs: { neutral: { version: "1.0.0", hash: "sha256:fa77f23dd171c44d3936f50486780ab0a4214e84c8d5d827f2c0327316ef4ac3" } }
 title: "Why pipelines break"  # user
 brief: "A 30-second explainer on why build pipelines break as teams grow."  # user
 autonomy: guided  # user
@@ -9,7 +10,7 @@ policies: ~  # open
 settings:
   propose_conversational_edits: true  # user
 style:
-  pack: editorial  # user
+  pack: neutral  # user
   overrides: {}
 deliverables:  # user
   - deliverable: web_landscape  # origin user

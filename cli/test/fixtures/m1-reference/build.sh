@@ -11,7 +11,7 @@ PROFILES="$REPO/core/test/fixtures/profiles"
 export CINEWRIGHT_SESSION_ID=m1-reference
 export CINEWRIGHT_FIXED_TIME=2026-11-13T00:00:00Z
 
-$CW init "$OUT" --id demo --title "Why pipelines break" \
+$CW init "$OUT" --id demo --title "Why pipelines break" --pack neutral \
   --deliverable "web_landscape=$PROFILES/landscape_1080p30.json" \
   --deliverable "social_portrait=$PROFILES/portrait_1080p30.json"
 for patch in "$HERE"/patches/0[1-7]-*.json; do

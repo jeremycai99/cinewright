@@ -21,6 +21,9 @@
     },
     {
       "$ref": "#/$defs/approve_failed_entry"
+    },
+    {
+      "$ref": "#/$defs/pinned_entry"
     }
   ],
   "$defs": {
@@ -444,6 +447,61 @@
               }
             }
           }
+        }
+      }
+    },
+    "pinned_entry": {
+      "description": "A pack pinned or re-pinned (M3.1a): a new revision that sets packs.<pack> and changes nothing else.",
+      "title": "PinnedEntry",
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "kind",
+        "seq",
+        "time",
+        "session_id",
+        "author",
+        "revision",
+        "pack",
+        "version",
+        "hash",
+        "state_hash"
+      ],
+      "properties": {
+        "kind": {
+          "const": "pinned"
+        },
+        "seq": {
+          "type": "integer",
+          "minimum": 1
+        },
+        "time": {
+          "type": "string",
+          "minLength": 1
+        },
+        "session_id": {
+          "type": "string",
+          "minLength": 1
+        },
+        "author": {
+          "$ref": "common.schema.json#/$defs/author"
+        },
+        "revision": {
+          "type": "integer",
+          "minimum": 1
+        },
+        "pack": {
+          "$ref": "common.schema.json#/$defs/id"
+        },
+        "version": {
+          "type": "string",
+          "minLength": 1
+        },
+        "hash": {
+          "$ref": "common.schema.json#/$defs/hash"
+        },
+        "state_hash": {
+          "$ref": "common.schema.json#/$defs/hash"
         }
       }
     }

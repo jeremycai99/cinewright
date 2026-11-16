@@ -227,6 +227,12 @@
   },
   "id": "demo",
   "origin": "user",
+  "packs": {
+    "neutral": {
+      "hash": "sha256:fa77f23dd171c44d3936f50486780ab0a4214e84c8d5d827f2c0327316ef4ac3",
+      "version": "1.0.0"
+    }
+  },
   "policies": {
     "state": "open"
   },
@@ -403,7 +409,7 @@
     "overrides": {},
     "pack": {
       "state": "user",
-      "value": "editorial"
+      "value": "neutral"
     }
   },
   "title": {

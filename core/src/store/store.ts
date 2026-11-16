@@ -24,6 +24,7 @@ import {
   isObject,
   resolveTarget,
 } from "../ir/paths.js";
+import type { Pack } from "../pack/load.js";
 import {
   ProjectFilesError,
   projectFileContents,
@@ -37,7 +38,7 @@ import { applyOps, type OpsResult, restoreSnapshots } from "./apply.js";
 import type { Author } from "./author.js";
 import { type Conflict, findConflicts } from "./conflict.js";
 import { withLock } from "./lock.js";
-import { type LogEntry, logLine, readLog } from "./log.js";
+import { type LogEntry, logLine, type PinnedEntry, readLog } from "./log.js";
 import { type PatchError, validatePatch } from "./patch.js";
 import { inScope, type WriteScopes } from "./scopes.js";
 import { commitTxn, recoverTxns } from "./txn.js";
@@ -91,7 +92,8 @@ export class ProjectLoadError extends Error {
 function lastStateEntry(log: readonly LogEntry[]): { revision: number; state_hash: string } {
   for (let i = log.length - 1; i >= 0; i -= 1) {
     const entry = log[i];
-    if (entry && (entry.kind === "init" || entry.kind === "applied")) return entry;
+    if (entry && (entry.kind === "init" || entry.kind === "applied" || entry.kind === "pinned"))
+      return entry;
   }
   throw new ProjectLoadError(PATCH_LOG, null, "", `${PATCH_LOG} has no init entry`);
 }
@@ -106,6 +108,10 @@ export function replayLog(log: readonly LogEntry[]): InlinedIr {
   let ir = structuredClone(first.ir) as unknown as InlinedIr;
   const byRevision = new Map<number, AppliedEntry>();
   for (const entry of log) {
+    if (entry.kind === "pinned") {
+      ir = withPin(ir, entry.pack, entry.version, entry.hash);
+      continue;
+    }
     if (entry.kind !== "applied") continue;
     byRevision.set(entry.revision, entry);
     if (entry.revert_of !== undefined) {
@@ -121,6 +127,11 @@ export function replayLog(log: readonly LogEntry[]): InlinedIr {
     ir = result.ir;
   }
   return ir;
+}
+
+/** The IR with `packs.<pack>` set to a pin (M3.1a). */
+function withPin(ir: InlinedIr, pack: string, version: string, hash: string): InlinedIr {
+  return { ...ir, packs: { ...(ir.packs ?? {}), [pack]: { version, hash } } };
 }
 
 /** The first pointer at which two JSON values differ, or null when they are equal. */
@@ -628,6 +639,42 @@ export class Store {
     await commitTxn(this.dir, { revision, writes, deletes, appends });
     this.state = { ir: next, log: [...this.state.log, ...(approved ? [approved] : []), entry] };
     return { status: "applied", revision, stateHash: hash };
+  }
+
+  /**
+   * Pin a style pack (M3.1a, audit decision 5): a new revision that records the pack's version and
+   * content hash in `packs`, adding the pin or refreshing it after the pack changed on disk.
+   */
+  async pinPack(pack: Pack, author: Author): Promise<ApplyResult> {
+    return withLock(this.dir, this.options.lockTimeoutMs, async () => {
+      const next = withPin(this.state.ir, pack.id, pack.version, pack.contentHash);
+      const revision = this.revision() + 1;
+      const hash = stateHash(next);
+      const entry: PinnedEntry = {
+        seq: this.nextSeq(),
+        kind: "pinned",
+        time: this.options.now(),
+        session_id: this.options.sessionId,
+        author,
+        revision,
+        pack: pack.id,
+        version: pack.version,
+        hash: pack.contentHash,
+        state_hash: hash,
+      };
+      const oldFiles = projectFileContents(this.state.ir);
+      const writes = new Map(
+        [...projectFileContents(next)].filter(([file, text]) => oldFiles.get(file) !== text),
+      );
+      await commitTxn(this.dir, {
+        revision,
+        writes,
+        deletes: [],
+        appends: [{ file: PATCH_LOG, text: logLine(entry) }],
+      });
+      this.state = { ir: next, log: [...this.state.log, entry] };
+      return { status: "applied", revision, stateHash: hash };
+    });
   }
 
   /**

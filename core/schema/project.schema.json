@@ -48,6 +48,17 @@
         "$ref": "#/$defs/profile_copy"
       }
     },
+    "packs": {
+      "title": "PackPins",
+      "description": "The style packs this project is pinned to, keyed by pack id: each pack's version and content hash (M3.1a, audit decision 5). Written only by init and `cinewright pack pin`; compiling fails when the pack on disk no longer matches its pin.",
+      "type": "object",
+      "propertyNames": {
+        "$ref": "common.schema.json#/$defs/id"
+      },
+      "additionalProperties": {
+        "$ref": "#/$defs/pack_pin"
+      }
+    },
     "title": {
       "x-authorable": "field",
       "type": "object",
@@ -228,7 +239,7 @@
       }
     },
     "assets": {
-      "description": "The asset registry: every asset the IR references, by content hash (AGENTS.md §6).",
+      "description": "The asset registry: every asset the IR references, by content hash (AGENTS.md \u00a76).",
       "x-authorable": "list",
       "type": "object",
       "additionalProperties": false,
@@ -347,6 +358,21 @@
               "type": "boolean"
             }
           }
+        }
+      }
+    },
+    "pack_pin": {
+      "title": "PackPin",
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["version", "hash"],
+      "properties": {
+        "version": {
+          "type": "string",
+          "minLength": 1
+        },
+        "hash": {
+          "$ref": "common.schema.json#/$defs/hash"
         }
       }
     }
