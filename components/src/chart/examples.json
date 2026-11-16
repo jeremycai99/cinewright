@@ -1,0 +1,46 @@
+[
+  {
+    "name": "bars",
+    "description": "One series of bars.",
+    "template": "title_body",
+    "region": "body",
+    "duration_ms": 4000,
+    "props": {
+      "kind": "bar",
+      "categories": ["2023", "2024", "2025"],
+      "series": [{ "label": "Rebuilds", "values": [3, 5, 9] }]
+    }
+  },
+  {
+    "name": "grouped",
+    "description": "Three series of grouped bars, with a legend.",
+    "template": "full",
+    "region": "main",
+    "duration_ms": 4000,
+    "props": {
+      "kind": "bar",
+      "categories": ["Ingest", "Transform", "Serve"],
+      "series": [
+        { "label": "Late data", "values": [12, 4, 2] },
+        { "label": "Schema drift", "values": [3, 9, 1] },
+        { "label": "Unowned alerts", "values": [5, 6, 8] }
+      ],
+      "unit": "%"
+    }
+  },
+  {
+    "name": "trend",
+    "description": "Two lines over six steps.",
+    "template": "full",
+    "region": "main",
+    "duration_ms": 4000,
+    "props": {
+      "kind": "line",
+      "categories": ["Jan", "Feb", "Mar", "Apr", "May", "Jun"],
+      "series": [
+        { "label": "Incidents", "values": [9, 8, 8, 6, 4, 3] },
+        { "label": "Checks", "values": [1, 2, 4, 6, 7, 9] }
+      ]
+    }
+  }
+]

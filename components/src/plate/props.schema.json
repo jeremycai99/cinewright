@@ -1,0 +1,32 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "PlateProps",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["asset", "fit"],
+  "properties": {
+    "asset": {
+      "description": "An image or video asset id (the project's asset entities).",
+      "type": "string",
+      "pattern": "^[a-z][a-z0-9_]*(\\.[a-z0-9_]+)*$"
+    },
+    "fit": {
+      "description": "cover fills the region and crops; contain shows all of it.",
+      "enum": ["cover", "contain"]
+    },
+    "ken_burns": {
+      "description": "A slow push over the layer, to camera.ken_burns.scale.",
+      "type": "boolean"
+    },
+    "focus": {
+      "description": "Where the push heads and the crop centres, as fractions of the asset.",
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["x", "y"],
+      "properties": {
+        "x": { "type": "number", "minimum": 0, "maximum": 1 },
+        "y": { "type": "number", "minimum": 0, "maximum": 1 }
+      }
+    }
+  }
+}

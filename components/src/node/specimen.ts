@@ -26,18 +26,34 @@ export interface SpecimenResult {
   spec: MountSpec;
 }
 
-/** Copy an example's assets (paths in its component folder) into the composition. */
+/** A clip the specimen checker generates in the container (`generated.json`); never committed. */
+export interface GeneratedAsset {
+  path: string;
+  lavfi: string;
+}
+
+/**
+ * Copy an example's assets (files in its component folder) into the composition; a `{ file, lavfi }`
+ * asset is listed in `generated` for the checker to make with the image's FFmpeg.
+ */
 function copyAssets(
   component: string,
-  assets: Record<string, string>,
+  assets: NonNullable<ComponentExample["assets"]>,
   outDir: string,
+  generated: GeneratedAsset[],
 ): Record<string, string> {
   const out: Record<string, string> = {};
   mkdirSync(join(outDir, "assets", component), { recursive: true });
-  for (const [id, path] of Object.entries(assets)) {
-    const target = `assets/${component}/${basename(path)}`;
-    copyFileSync(join(catalogDir, component, path), join(outDir, target));
-    out[id] = target;
+  for (const [id, source] of Object.entries(assets)) {
+    if (typeof source === "string") {
+      const target = `assets/${component}/${basename(source)}`;
+      copyFileSync(join(catalogDir, component, source), join(outDir, target));
+      out[id] = target;
+    } else {
+      const target = `assets/${component}/${source.file}`;
+      generated.push({ path: target, lavfi: source.lavfi });
+      out[id] = target;
+    }
   }
   return out;
 }
@@ -94,6 +110,7 @@ export async function buildSpecimen(options: {
 
   let cursor = 0;
   const layers: LayerSpec[] = [];
+  const generated: GeneratedAsset[] = [];
   const samples = new Set<number>();
   const entranceMs = base["motion.duration.m"]?.value as number;
   for (const { component, example } of examples) {
@@ -125,7 +142,9 @@ export async function buildSpecimen(options: {
       motion: (example.motion ?? []) as LayerSpec["motion"],
       seed: seedOf(id),
       captions: profile.captions,
-      ...(example.assets ? { assets: copyAssets(component, example.assets, outDir) } : {}),
+      ...(example.assets
+        ? { assets: copyAssets(component, example.assets, outDir, generated) }
+        : {}),
     });
     const startS = seconds(enter);
     const durationMs = (seconds(end) - startS) * 1000;
@@ -175,5 +194,7 @@ ${clips}
 </html>
 `;
   writeFileSync(join(outDir, "index.html"), html);
+  if (generated.length > 0)
+    writeFileSync(join(outDir, "generated.json"), `${JSON.stringify(generated, null, 2)}\n`);
   return { dir: outDir, samples: [...samples].sort((a, b) => a - b), spec };
 }

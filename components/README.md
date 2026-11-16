@@ -12,7 +12,7 @@ Each folder in `src/` holding a `component.json` is one component:
 | --- | --- |
 | `component.json` | The catalog entry (`core/schema/pack/catalog.schema.json`): `id` (the folder name), `version`, `name`, `runtime` (`waapi` for every core component; a `gsap` component must state its `license`), `catalog` (`summary`, `use_when`, `avoid_when`), `tokens` (every vocabulary path it reads), `templates` (the template regions it fills). |
 | `props.schema.json` | The layer props, in the M1 JSON Schema dialect. Props carry content only. A design-valued prop declares `x-token-type` and accepts only `{ "token": <path> }`. |
-| `examples.json` | Specimen inputs (`core/schema/pack/examples.schema.json`): template, region, duration, props and optional layer overrides. They hold no pack values, so the same examples render under any pack. |
+| `examples.json` | Specimen inputs (`core/schema/pack/examples.schema.json`): template, region, duration, props, and optional layer overrides and assets. An asset is a file in the component folder, or `{ file, lavfi }`: a clip the specimen checker generates with the image's FFmpeg, so no media is committed. Examples hold no pack values, so the same examples render under any pack. |
 | `index.ts` | The `Build`: given a `ComponentContext`, it creates its DOM inside `ctx.root` and its paused WAAPI animations. |
 
 Patches are checked against the catalog when they are applied:
@@ -80,7 +80,7 @@ uv run cinewright-check-specimens --image cinewright-render:dev out/specimens
 
 **Checking.** The second command:
 1. runs `render-job check` on each folder at its sample times;
-2. renders it to MP4 and tiles the sample frames into `contact-sheet.png`;
+2. renders it to MP4 and tiles the sample frames into `contact-sheet.png`; before either step, it generates any clip listed in the folder's `generated.json`;
 3. writes `summary.json`;
 4. fails if any check fails.
 
@@ -94,6 +94,10 @@ A specimen fails on any lint, runtime, layout or contrast error or warning, incl
 | `bullet_reveal` | A few parallel points revealed one at a time (`motion.stagger`), with an optional heading. More items or words than the pack's density limits are marked `data-cw-density="exceeded"`. | `title_body.body`, `full.main`, `split.a`, `split.b`, `lower_third.main` |
 | `end_card` | The closing shot: headline, optional supporting line, call to action (on-accent on accent) and logo. The logo is an asset, passed in the mount spec's `assets`. | `end_card.main`, `full.main` |
 | `caption_track` | Burned-in captions (D35). Each cue shows for exactly its frames, broken into lines at the profile's `max_chars_per_line`. A cue is held for at least `min_display_frames`; one that needs more than `max_lines` lines is marked overflow. Captions are drawn as ink on surface. | `captions.captions` |
+| `lower_third` | A name strap: name, optional role, accent bar on a surface panel. | `lower_third.lower_third` |
+| `chart` | Bars (compare) or lines (trend), up to six series in `palette.data.1`–`6` order (the props schema rejects a seventh), category labels, value labels on bars, and a legend for more than one series. Bars grow and lines draw on, staggered by series; the largest value fills the plot height. | `title_body.body`, `full.main`, `split.a`, `split.b` |
+| `quote_card` | A pull quote with an accent quotation mark and an optional attribution. | `full.main`, `title.title`, `split.a`, `split.b`, `title_body.body` |
+| `plate` | An image or video asset, `cover` or `contain`, with an optional Ken Burns push to `camera.ken_burns.scale` toward a focus point. A video is a HyperFrames clip (`class="clip"`, timed to the layer) so it is seeked frame by frame; the push moves a wrapper, never the video. | `full.main`, `split.a`, `split.b`, `title_body.body`, `lower_third.main` |
 
 ## Limitations
 

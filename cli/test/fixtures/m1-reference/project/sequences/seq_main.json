@@ -127,7 +127,7 @@
                   {
                     "component": {
                       "state": "agent",
-                      "value": "kinetic_title"
+                      "value": "chart"
                     },
                     "id": "s03.sh01.bars",
                     "layout": {},
@@ -136,9 +136,30 @@
                     },
                     "origin": "agent",
                     "props": {
-                      "text": {
+                      "categories": {
                         "state": "agent",
-                        "value": "Three rebuilds in one year."
+                        "value": [
+                          "2023",
+                          "2024",
+                          "2025"
+                        ]
+                      },
+                      "kind": {
+                        "state": "agent",
+                        "value": "bar"
+                      },
+                      "series": {
+                        "state": "agent",
+                        "value": [
+                          {
+                            "label": "Rebuilds",
+                            "values": [
+                              3,
+                              5,
+                              9
+                            ]
+                          }
+                        ]
                       }
                     },
                     "style": {

@@ -1,0 +1,41 @@
+{
+  "id": "chart",
+  "version": "1.0.0",
+  "name": "Chart",
+  "runtime": "waapi",
+  "catalog": {
+    "summary": "A bar or line chart of up to six series, one data colour each, with category labels and a legend when there is more than one series.",
+    "use_when": "The narration compares quantities or shows a trend: a handful of categories or time steps.",
+    "avoid_when": "Exact tables, more than about twelve categories, or values the viewer must read to the decimal."
+  },
+  "tokens": [
+    "layout.gutter",
+    "layout.stroke",
+    "motion.duration.l",
+    "motion.duration.s",
+    "motion.ease.enter",
+    "motion.ease.exit",
+    "motion.exit",
+    "motion.distance",
+    "motion.stagger",
+    "palette.data.1",
+    "palette.data.2",
+    "palette.data.3",
+    "palette.data.4",
+    "palette.data.5",
+    "palette.data.6",
+    "palette.ink",
+    "palette.ink_muted",
+    "palette.line",
+    "type.family.body",
+    "type.leading.normal",
+    "type.size.caption",
+    "type.size.small",
+    "type.weight.regular"
+  ],
+  "templates": {
+    "title_body": ["body"],
+    "full": ["main"],
+    "split": ["a", "b"]
+  }
+}

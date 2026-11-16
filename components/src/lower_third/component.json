@@ -1,0 +1,41 @@
+{
+  "id": "lower_third",
+  "version": "1.0.0",
+  "name": "Lower third",
+  "runtime": "waapi",
+  "catalog": {
+    "summary": "A name strap: a person's or place's name with an optional role, on a panel with an accent bar.",
+    "use_when": "Someone speaks or appears on screen for the first time, or a location needs naming.",
+    "avoid_when": "Headlines or general statements (use kinetic_title)."
+  },
+  "tokens": [
+    "density.min_text_size",
+    "layout.gutter",
+    "layout.radius",
+    "layout.stroke",
+    "motion.distance",
+    "motion.duration.m",
+    "motion.duration.s",
+    "motion.ease.emphasis",
+    "motion.ease.enter",
+    "motion.ease.exit",
+    "motion.entrance",
+    "motion.exit",
+    "palette.accent",
+    "palette.ink",
+    "palette.ink_muted",
+    "palette.surface",
+    "type.family.body",
+    "type.family.display",
+    "type.leading.normal",
+    "type.leading.tight",
+    "type.size.body",
+    "type.size.small",
+    "type.size.subtitle",
+    "type.weight.bold",
+    "type.weight.regular"
+  ],
+  "templates": {
+    "lower_third": ["lower_third"]
+  }
+}

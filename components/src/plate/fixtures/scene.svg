@@ -1,0 +1,8 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1600 900" width="1600" height="900">
+  <title>Placeholder scene (test fixture)</title>
+  <rect width="1600" height="900" fill="#9FB4C7"/>
+  <rect y="560" width="1600" height="340" fill="#6E8B5E"/>
+  <circle cx="1240" cy="220" r="90" fill="#E8D9A0"/>
+  <polygon points="200,560 520,220 840,560" fill="#56606B"/>
+  <polygon points="620,560 980,160 1340,560" fill="#4A535D"/>
+</svg>

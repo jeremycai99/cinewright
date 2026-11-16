@@ -34,9 +34,16 @@ describe("buildSpecimen", () => {
         expect(html).toContain('data-composition-id="specimen"');
         expect(html).toContain("runtime.js");
         for (const font of pack.fonts) expect(existsSync(join(out, font.file))).toBe(true);
+        // Generated clips are made by the checker in the container; every other asset is copied.
+        const generatedFile = join(out, "generated.json");
+        const generated = existsSync(generatedFile)
+          ? (JSON.parse(readFileSync(generatedFile, "utf8")) as { path: string }[]).map(
+              (g) => g.path,
+            )
+          : [];
         for (const layer of result.spec.layers)
           for (const path of Object.values(layer.assets ?? {}))
-            expect(existsSync(join(out, path))).toBe(true);
+            expect(existsSync(join(out, path)) || generated.includes(path), path).toBe(true);
         expect(existsSync(join(out, "runtime.js"))).toBe(true);
         expect(result.samples.length).toBeGreaterThanOrEqual(examples.length * 2);
       });

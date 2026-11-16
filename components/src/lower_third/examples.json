@@ -1,0 +1,16 @@
+[
+  {
+    "name": "name_and_role",
+    "template": "lower_third",
+    "region": "lower_third",
+    "duration_ms": 3500,
+    "props": { "name": "Dr Mei Lin", "role": "Head of data platform" }
+  },
+  {
+    "name": "name_only",
+    "template": "lower_third",
+    "region": "lower_third",
+    "duration_ms": 3000,
+    "props": { "name": "Rotterdam harbour" }
+  }
+]

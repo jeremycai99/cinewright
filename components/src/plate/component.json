@@ -1,0 +1,30 @@
+{
+  "id": "plate",
+  "version": "1.0.0",
+  "name": "Image or video plate",
+  "runtime": "waapi",
+  "catalog": {
+    "summary": "An image or video asset filling its region (cover or contain), with an optional slow Ken Burns push toward a focus point.",
+    "use_when": "A photo, screenshot, stock clip or generated footage carries the shot; titles and callouts sit on other layers above it.",
+    "avoid_when": "Logos (use end_card) or charts drawn from data (use chart)."
+  },
+  "tokens": [
+    "camera.ken_burns.ease",
+    "camera.ken_burns.scale",
+    "motion.distance",
+    "motion.duration.m",
+    "motion.duration.s",
+    "motion.ease.emphasis",
+    "motion.ease.enter",
+    "motion.ease.exit",
+    "motion.entrance",
+    "motion.exit",
+    "palette.surface"
+  ],
+  "templates": {
+    "full": ["main"],
+    "split": ["a", "b"],
+    "title_body": ["body"],
+    "lower_third": ["main"]
+  }
+}
