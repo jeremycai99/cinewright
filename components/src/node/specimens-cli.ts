@@ -9,7 +9,7 @@ import {
   loadExamples,
   loadPack,
 } from "@cinewright/core";
-import { catalogDir } from "../index.js";
+import { catalogDir } from "../catalog-dir.js";
 import { buildSpecimen } from "./specimen.js";
 
 const PACKS = fileURLToPath(new URL("../../../packs/", import.meta.url));

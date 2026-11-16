@@ -41,6 +41,7 @@ export function mount(spec: MountSpec): Promise<void> {
         justify: layer.justify,
         random: mulberry32(layer.seed),
         ...(layer.captions ? { captions: layer.captions } : {}),
+        ...(layer.assets ? { assets: layer.assets } : {}),
       };
       try {
         await build(ctx);

@@ -10,6 +10,7 @@ import {
   resolvePackTokens,
   tokenEmit,
 } from "@cinewright/core";
+import { catalogDir } from "../catalog-dir.js";
 import type { LayerSpec, MountSpec } from "../host/spec.js";
 import { bundleRuntime } from "./bundle.js";
 
@@ -23,6 +24,22 @@ export interface SpecimenResult {
   /** Times to check, in seconds: each example's entrance midpoint, hold midpoint and last frame. */
   samples: number[];
   spec: MountSpec;
+}
+
+/** Copy an example's assets (paths in its component folder) into the composition. */
+function copyAssets(
+  component: string,
+  assets: Record<string, string>,
+  outDir: string,
+): Record<string, string> {
+  const out: Record<string, string> = {};
+  mkdirSync(join(outDir, "assets", component), { recursive: true });
+  for (const [id, path] of Object.entries(assets)) {
+    const target = `assets/${component}/${basename(path)}`;
+    copyFileSync(join(catalogDir, component, path), join(outDir, target));
+    out[id] = target;
+  }
+  return out;
 }
 
 function seedOf(id: string): number {
@@ -108,6 +125,7 @@ export async function buildSpecimen(options: {
       motion: (example.motion ?? []) as LayerSpec["motion"],
       seed: seedOf(id),
       captions: profile.captions,
+      ...(example.assets ? { assets: copyAssets(component, example.assets, outDir) } : {}),
     });
     const startS = seconds(enter);
     const durationMs = (seconds(end) - startS) * 1000;

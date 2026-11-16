@@ -86,6 +86,17 @@
               }
             ]
           }
+        },
+        "assets": {
+          "description": "Asset id \u2192 a file in the component folder, copied into the specimen.",
+          "type": "object",
+          "propertyNames": {
+            "pattern": "^[a-z][a-z0-9_]*(\\.[a-z0-9_]+)*$"
+          },
+          "additionalProperties": {
+            "type": "string",
+            "pattern": "^[A-Za-z0-9_][A-Za-z0-9_./-]*$"
+          }
         }
       }
     }

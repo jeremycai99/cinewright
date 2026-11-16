@@ -91,7 +91,12 @@ A specimen fails on any lint, runtime, layout or contrast error or warning, incl
 | Component | Use when | Fits |
 | --- | --- | --- |
 | `kinetic_title` | A short statement: an opening title, a chapter heading, a key claim. Reveals whole, by line or by word (`motion.text_reveal`); optional subtitle and accented words. | `title.title`, `title_body.title`, `full.main`, `end_card.main` |
+| `bullet_reveal` | A few parallel points revealed one at a time (`motion.stagger`), with an optional heading. More items or words than the pack's density limits are marked `data-cw-density="exceeded"`. | `title_body.body`, `full.main`, `split.a`, `split.b`, `lower_third.main` |
+| `end_card` | The closing shot: headline, optional supporting line, call to action (on-accent on accent) and logo. The logo is an asset, passed in the mount spec's `assets`. | `end_card.main`, `full.main` |
+| `caption_track` | Burned-in captions (D35). Each cue shows for exactly its frames, broken into lines at the profile's `max_chars_per_line`. A cue is held for at least `min_display_frames`; one that needs more than `max_lines` lines is marked overflow. Captions are drawn as ink on surface. | `captions.captions` |
 
 ## Limitations
+
+- **Right-to-left text:** every text element sets `dir="auto"`, so Arabic and Hebrew align to the start side, with list markers before the text. The `bullet_reveal` specimen includes Arabic.
 
 - **Scripts:** the first-party packs ship Latin fonts. Other scripts fall back to the render image's Noto fonts, which cover Arabic and other non-Latin scripts. CJK needs a pinned CJK font, which no pack ships yet.
