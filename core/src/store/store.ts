@@ -2,7 +2,16 @@ import { randomUUID } from "node:crypto";
 import { readFile } from "node:fs/promises";
 import { join } from "node:path";
 import { stateHash } from "../canonical/hash.js";
-import type { AppliedEntry, Op, Patch, PendingEntry, Snapshot, Touched } from "../generated/ir.js";
+import type {
+  AppliedEntry,
+  ApprovedEntry,
+  Op,
+  Patch,
+  PendingEntry,
+  RejectedEntry,
+  Snapshot,
+  Touched,
+} from "../generated/ir.js";
 import { collectEntities, locate } from "../ir/index.js";
 import type { InlinedIr } from "../ir/inlined.js";
 import {
@@ -330,6 +339,9 @@ export class Store {
       }
       if (suggests > 0) return this.storePending(patch, "suggest");
       if (patch.mode === "propose") return this.storePending(patch, "proposed");
+      if (patch.author.kind === "session" && this.proposeFirst()) {
+        return this.storePending(patch, "session_propose_first");
+      }
       return this.applyNow(patch, patch.author);
     });
   }
@@ -365,7 +377,12 @@ export class Store {
     return { status: "pending", pendingId, reason, ...(blocked.length > 0 ? { blocked } : {}) };
   }
 
-  private async applyNow(patch: Patch, author: Author): Promise<ApplyResult> {
+  /** Conversational edits are proposed first unless the project turned that off (D25; on when open). */
+  private proposeFirst(): boolean {
+    return this.state.ir.settings.propose_conversational_edits.value !== false;
+  }
+
+  private async applyNow(patch: Patch, author: Author, approval?: string): Promise<ApplyResult> {
     const later = this.appliedAfter(patch.base_revision);
     // Conflicts first (convention 11): a stale patch reports what changed under it before any
     // authorship verdict, so its author can rebase rather than ask for approval.
@@ -389,8 +406,20 @@ export class Store {
       gates: new Set(this.options.gates),
     });
     if (!result.ok) return { status: "rejected", errors: result.errors };
-    if (result.blocked.length > 0)
+    if (result.blocked.length > 0) {
+      if (approval) {
+        return {
+          status: "rejected",
+          errors: result.blocked.map((b) => ({
+            op: b.op,
+            entity: null,
+            pointer: "",
+            rule: b.rule,
+          })),
+        };
+      }
       return this.storePending(patch, "authorship_blocked", result.blocked);
+    }
     const denied = this.scopeErrors(
       author,
       result.before,
@@ -406,6 +435,7 @@ export class Store {
       result.before,
       touchedOf(result.before),
       result.retired,
+      approval ? { pending_id: approval } : {},
     );
   }
 
@@ -426,10 +456,21 @@ export class Store {
     }
     const revision = this.revision() + 1;
     const hash = stateHash(next);
+    const time = this.options.now();
+    const approved: ApprovedEntry | null = extra.pending_id
+      ? {
+          seq: this.nextSeq(),
+          kind: "approved",
+          pending_id: extra.pending_id,
+          time,
+          session_id: this.options.sessionId,
+          author,
+        }
+      : null;
     const entry: AppliedEntry = {
-      seq: this.nextSeq(),
+      seq: this.nextSeq() + (approved ? 1 : 0),
       kind: "applied",
-      time: this.options.now(),
+      time,
       session_id: this.options.sessionId,
       author,
       revision,
@@ -459,9 +500,9 @@ export class Store {
       }),
     );
     if (decisions.length > 0) appends.push({ file: DECISION_LOG, text: decisions.join("") });
-    appends.push({ file: PATCH_LOG, text: logLine(entry) });
+    appends.push({ file: PATCH_LOG, text: (approved ? logLine(approved) : "") + logLine(entry) });
     await commitTxn(this.dir, { revision, writes, deletes, appends });
-    this.state = { ir: next, log: [...this.state.log, entry] };
+    this.state = { ir: next, log: [...this.state.log, ...(approved ? [approved] : []), entry] };
     return { status: "applied", revision, stateHash: hash };
   }
 
@@ -551,6 +592,110 @@ export class Store {
       });
     });
     return errors;
+  }
+
+  /** Pending patches not yet approved or rejected, oldest first (M1.2b). */
+  pending(): PendingEntry[] {
+    const decided = new Set(
+      this.state.log.flatMap((e) =>
+        e.kind === "approved" || e.kind === "rejected" ? [e.pending_id] : [],
+      ),
+    );
+    return structuredClone(
+      this.state.log.filter(
+        (e): e is PendingEntry => e.kind === "pending" && !decided.has(e.pending_id),
+      ),
+    );
+  }
+
+  /** The undecided pending entry `id`, or why it cannot be decided. */
+  private decidable(id: string, approver: Author): PendingEntry | PatchError {
+    if (approver.kind !== "user") {
+      return {
+        op: null,
+        entity: null,
+        pointer: "",
+        rule: "authorship.forbidden_op",
+        message: "only a user may approve or reject",
+      };
+    }
+    const entry = this.state.log.find(
+      (e): e is PendingEntry => e.kind === "pending" && e.pending_id === id,
+    );
+    if (!entry)
+      return {
+        op: null,
+        entity: null,
+        pointer: "",
+        rule: "pending.unknown",
+        message: `no pending patch ${id}`,
+      };
+    if (!this.pending().some((p) => p.pending_id === id)) {
+      return {
+        op: null,
+        entity: null,
+        pointer: "",
+        rule: "pending.decided",
+        message: `${id} was already approved or rejected`,
+      };
+    }
+    return entry;
+  }
+
+  /**
+   * Approve a pending patch (D25): apply its ops as the approving user, so every field it
+   * touches becomes `user`, and record the approval. Suggestions apply as `set`. Conflicts when
+   * a revision after the patch's base touched the same nodes.
+   */
+  async approve(id: string, approver: Author): Promise<ApplyResult> {
+    return withLock(this.dir, this.options.lockTimeoutMs, async () => {
+      this.state = await Store.load(this.dir);
+      const entry = this.decidable(id, approver);
+      if (!("kind" in entry)) return { status: "rejected", errors: [entry] };
+      const ops = entry.ops.map((op): Op => {
+        if (op.op !== "suggest") return op;
+        return { op: "set", entity: op.entity, path: op.path, value: op.value };
+      });
+      const patch: Patch = {
+        base_revision: entry.base_revision,
+        author: approver,
+        mode: "apply",
+        reason: entry.reason,
+        ops: ops as Patch["ops"],
+        ...(entry.decisions ? { decisions: entry.decisions } : {}),
+      };
+      return this.applyNow(patch, approver, id);
+    });
+  }
+
+  /** Reject a pending patch: record the decision; nothing else changes. */
+  async reject(
+    id: string,
+    approver: Author,
+    note?: string,
+  ): Promise<{ status: "recorded" } | { status: "rejected"; errors: PatchError[] }> {
+    return withLock(this.dir, this.options.lockTimeoutMs, async () => {
+      this.state = await Store.load(this.dir);
+      const pendingEntry = this.decidable(id, approver);
+      if (!("kind" in pendingEntry)) return { status: "rejected", errors: [pendingEntry] };
+      const entry: RejectedEntry = {
+        seq: this.nextSeq(),
+        kind: "rejected",
+        pending_id: id,
+        time: this.options.now(),
+        session_id: this.options.sessionId,
+        author: approver,
+        ...(note ? { note } : {}),
+      };
+      await commitTxn(this.dir, {
+        revision: this.revision(),
+        writes: new Map(),
+        deletes: [],
+        appends: [{ file: PATCH_LOG, text: logLine(entry) }],
+      });
+      this.state.log.push(entry);
+      return { status: "recorded" };
+    });
   }
 
   /** The current value of a snapshot's node, so a revert can itself be reverted. */

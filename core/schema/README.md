@@ -235,3 +235,13 @@ Rule codes:
 - `authorship.locked` and `authorship.forbidden_op` (rejected).
 
 `core/test/authorship/properties.test.ts` checks the four protections with 1,000 generated cases each.
+
+## Pending patches (D25, M1.2b)
+
+A patch is stored as `pending` instead of applied when:
+- it proposes (`mode: "propose"`);
+- it is a `session` patch in `apply` mode while `settings.propose_conversational_edits` is on (the default; an `open` setting counts as on);
+- it is all `suggest` ops;
+- authorship blocks one of its ops.
+
+Then `approve(id, user)` applies it as the approving user, so every field it touches becomes `user`. A suggestion applies as `set`. The approval writes an `approved` entry and the applied revision in one transaction. It fails with a conflict when a revision after the patch's base touched the same nodes. `reject(id, user, note?)` records the decision and changes nothing. Only a user approves or rejects, and a decided patch cannot be decided again (`pending.decided`).
