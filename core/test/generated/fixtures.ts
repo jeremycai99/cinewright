@@ -1149,13 +1149,13 @@ export const sequenceSpecSceneExample = {
                       "landscape": {
                         "state": "agent",
                         "value": {
-                          "region": "title_left"
+                          "region": "title"
                         }
                       },
                       "portrait": {
                         "state": "agent",
                         "value": {
-                          "region": "title_top"
+                          "region": "title"
                         }
                       }
                     },
@@ -1239,13 +1239,13 @@ export const sequenceSpecSceneExample = {
                 "landscape": {
                   "state": "agent",
                   "value": {
-                    "template": "grid.12col/title-left"
+                    "template": "title_body"
                   }
                 },
                 "portrait": {
                   "state": "agent",
                   "value": {
-                    "template": "stack/title-top"
+                    "template": "title_body"
                   }
                 }
               },

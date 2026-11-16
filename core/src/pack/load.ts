@@ -3,10 +3,11 @@ import { join, relative, sep } from "node:path";
 import { Ajv2020, type ValidateFunction } from "ajv/dist/2020.js";
 import { sha256Bytes, sha256Hash } from "../canonical/hash.js";
 import { isByAspect, type TokenTree, tokenLayers } from "../cascade/resolve.js";
-import type { PackFont, PackManifest } from "../generated/pack.js";
+import type { LayoutRegion, PackFont, PackLayouts, PackManifest } from "../generated/pack.js";
 import type { JsonObject } from "../schema/load.js";
 import { collapse, errorPointer } from "../schema/validate.js";
 import { parseRules, type Rule } from "./rules.js";
+import { CORE_TEMPLATES, isExtTemplate } from "./templates.js";
 import { tokenPointer } from "./tokens.js";
 import {
   checkLiteral,
@@ -16,7 +17,7 @@ import {
   vocabulary,
 } from "./vocabulary.js";
 
-export type { PackFont, PackManifest };
+export type { LayoutRegion, PackFont, PackLayouts, PackManifest };
 
 /** A problem with a pack: the pack id, the file in it, a JSON Pointer (or `/<line>`), a rule. */
 export interface PackIssue {
@@ -43,12 +44,13 @@ export interface Pack {
   manifest: PackManifest;
   tokens: TokenTree;
   rules: Rule[];
+  layouts: PackLayouts;
   fonts: PackFont[];
 }
 
 const PACK_ID = /^[a-z][a-z0-9_]*(\.[a-z0-9_]+)*$/;
 const PACK_BASE = "https://cinewright.invalid/pack/0/";
-const PACK_SCHEMAS = ["tokens.schema.json", "pack.schema.json"];
+const PACK_SCHEMAS = ["tokens.schema.json", "pack.schema.json", "layouts.schema.json"];
 const PACK_ANNOTATIONS = ["x-token-type", "x-enum", "x-minimum", "x-maximum"];
 
 let validators: Map<string, ValidateFunction> | undefined;
@@ -178,6 +180,10 @@ export function loadPack(id: string, searchPath: readonly string[]): Pack {
   const tokensOk = schemaCheck("tokens.json", "tokens.schema.json", tokensDoc);
   const tokens = (tokensDoc ?? {}) as TokenTree;
 
+  const layoutsDoc = readJson("layouts.json");
+  const layoutsOk = schemaCheck("layouts.json", "layouts.schema.json", layoutsDoc);
+  const layouts = (layoutsDoc ?? { schema_version: 1, templates: {} }) as PackLayouts;
+
   let rules: Rule[] = [];
   const rulesPath = join(dir, "rules.md");
   if (!existsSync(rulesPath)) issue("rules.md", "", "pack.missing_file");
@@ -245,6 +251,8 @@ export function loadPack(id: string, searchPath: readonly string[]): Pack {
     }
   }
 
+  if (manifestOk && tokensOk && layoutsOk) layoutIssues(manifest, tokens, layouts, issue);
+
   if (issues.length > 0) throw new PackError(finish(issues));
   return {
     id,
@@ -254,6 +262,57 @@ export function loadPack(id: string, searchPath: readonly string[]): Pack {
     manifest,
     tokens,
     rules,
+    layouts,
     fonts: manifest.fonts,
   };
+}
+
+/**
+ * Layout checks (M2.1b): every core template for every aspect class, a core template's region
+ * names, the same region names in every variant of an ext_ template, and every region inside its
+ * aspect class's grid.
+ */
+function layoutIssues(
+  manifest: PackManifest,
+  tokens: TokenTree,
+  layouts: PackLayouts,
+  issue: (file: string, pointer: string, rule: string) => void,
+): void {
+  const at = (pointer: string, rule: string) => issue("layouts.json", pointer, rule);
+  for (const name of Object.keys(CORE_TEMPLATES)) {
+    const template = layouts.templates[name];
+    if (!template) {
+      at(`/templates/${name}`, "pack.template_missing");
+      continue;
+    }
+    for (const aspect of manifest.aspect_classes) {
+      if (!template.variants[aspect])
+        at(`/templates/${name}/variants/${aspect}`, "pack.template_missing");
+    }
+  }
+  const grids = new Map<string, { columns: number; rows: number }>();
+  for (const aspect of manifest.aspect_classes) {
+    const resolved = tokenLayers(tokens, aspect).tokens;
+    grids.set(aspect, {
+      columns: resolved["layout.columns"]?.value as number,
+      rows: resolved["layout.rows"]?.value as number,
+    });
+  }
+  for (const [name, template] of Object.entries(layouts.templates)) {
+    const core = CORE_TEMPLATES[name];
+    let first: string | null = null;
+    for (const [aspect, variant] of Object.entries(template.variants)) {
+      const names = Object.keys(variant.regions).sort().join(",");
+      const base = `/templates/${name}/variants/${aspect}`;
+      const expected: string | null = core ? [...core].sort().join(",") : first;
+      if (expected !== null && names !== expected) at(`${base}/regions`, "pack.region_mismatch");
+      if (!core && isExtTemplate(name) && first === null) first = names;
+      const grid = grids.get(aspect);
+      if (!grid) continue;
+      for (const [region, cell] of Object.entries(variant.regions) as [string, LayoutRegion][]) {
+        if (cell.col + cell.col_span - 1 > grid.columns || cell.row + cell.row_span - 1 > grid.rows)
+          at(`${base}/regions/${region}`, "pack.region_bounds");
+      }
+    }
+  }
 }

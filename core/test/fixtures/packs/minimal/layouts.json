@@ -1,0 +1,288 @@
+{
+  "schema_version": 1,
+  "templates": {
+    "full": {
+      "description": "Test template full.",
+      "variants": {
+        "landscape": {
+          "regions": {
+            "main": {
+              "col": 1,
+              "row": 1,
+              "col_span": 12,
+              "row_span": 6,
+              "align": "start",
+              "justify": "start"
+            }
+          }
+        },
+        "portrait": {
+          "regions": {
+            "main": {
+              "col": 1,
+              "row": 1,
+              "col_span": 4,
+              "row_span": 8,
+              "align": "start",
+              "justify": "start"
+            }
+          }
+        }
+      }
+    },
+    "title": {
+      "description": "Test template title.",
+      "variants": {
+        "landscape": {
+          "regions": {
+            "title": {
+              "col": 2,
+              "row": 2,
+              "col_span": 10,
+              "row_span": 2,
+              "align": "center",
+              "justify": "center"
+            },
+            "subtitle": {
+              "col": 3,
+              "row": 4,
+              "col_span": 8,
+              "row_span": 1,
+              "align": "center",
+              "justify": "center"
+            }
+          }
+        },
+        "portrait": {
+          "regions": {
+            "title": {
+              "col": 1,
+              "row": 3,
+              "col_span": 4,
+              "row_span": 2,
+              "align": "center",
+              "justify": "center"
+            },
+            "subtitle": {
+              "col": 1,
+              "row": 5,
+              "col_span": 4,
+              "row_span": 1,
+              "align": "center",
+              "justify": "center"
+            }
+          }
+        }
+      }
+    },
+    "title_body": {
+      "description": "Test template title_body.",
+      "variants": {
+        "landscape": {
+          "regions": {
+            "title": {
+              "col": 1,
+              "row": 1,
+              "col_span": 12,
+              "row_span": 2,
+              "align": "start",
+              "justify": "start"
+            },
+            "body": {
+              "col": 2,
+              "row": 3,
+              "col_span": 5,
+              "row_span": 4,
+              "align": "start",
+              "justify": "start"
+            }
+          }
+        },
+        "portrait": {
+          "regions": {
+            "title": {
+              "col": 1,
+              "row": 1,
+              "col_span": 4,
+              "row_span": 3,
+              "align": "start",
+              "justify": "start"
+            },
+            "body": {
+              "col": 1,
+              "row": 4,
+              "col_span": 4,
+              "row_span": 5,
+              "align": "start",
+              "justify": "start"
+            }
+          }
+        }
+      }
+    },
+    "split": {
+      "description": "Test template split.",
+      "variants": {
+        "landscape": {
+          "regions": {
+            "a": {
+              "col": 1,
+              "row": 1,
+              "col_span": 6,
+              "row_span": 6,
+              "align": "start",
+              "justify": "start"
+            },
+            "b": {
+              "col": 7,
+              "row": 1,
+              "col_span": 6,
+              "row_span": 6,
+              "align": "start",
+              "justify": "start"
+            }
+          }
+        },
+        "portrait": {
+          "regions": {
+            "a": {
+              "col": 1,
+              "row": 1,
+              "col_span": 4,
+              "row_span": 4,
+              "align": "start",
+              "justify": "start"
+            },
+            "b": {
+              "col": 1,
+              "row": 5,
+              "col_span": 4,
+              "row_span": 4,
+              "align": "start",
+              "justify": "start"
+            }
+          }
+        }
+      }
+    },
+    "lower_third": {
+      "description": "Test template lower_third.",
+      "variants": {
+        "landscape": {
+          "regions": {
+            "main": {
+              "col": 1,
+              "row": 1,
+              "col_span": 12,
+              "row_span": 4,
+              "align": "start",
+              "justify": "start"
+            },
+            "lower_third": {
+              "col": 1,
+              "row": 5,
+              "col_span": 6,
+              "row_span": 2,
+              "align": "end",
+              "justify": "start"
+            }
+          }
+        },
+        "portrait": {
+          "regions": {
+            "main": {
+              "col": 1,
+              "row": 1,
+              "col_span": 4,
+              "row_span": 5,
+              "align": "start",
+              "justify": "start"
+            },
+            "lower_third": {
+              "col": 1,
+              "row": 6,
+              "col_span": 4,
+              "row_span": 2,
+              "align": "end",
+              "justify": "start"
+            }
+          }
+        }
+      }
+    },
+    "end_card": {
+      "description": "Test template end_card.",
+      "variants": {
+        "landscape": {
+          "regions": {
+            "main": {
+              "col": 3,
+              "row": 2,
+              "col_span": 8,
+              "row_span": 3,
+              "align": "center",
+              "justify": "center"
+            },
+            "footer": {
+              "col": 3,
+              "row": 6,
+              "col_span": 8,
+              "row_span": 1,
+              "align": "center",
+              "justify": "center"
+            }
+          }
+        },
+        "portrait": {
+          "regions": {
+            "main": {
+              "col": 1,
+              "row": 3,
+              "col_span": 4,
+              "row_span": 3,
+              "align": "center",
+              "justify": "center"
+            },
+            "footer": {
+              "col": 1,
+              "row": 7,
+              "col_span": 4,
+              "row_span": 1,
+              "align": "center",
+              "justify": "center"
+            }
+          }
+        }
+      }
+    },
+    "captions": {
+      "description": "Test template captions.",
+      "variants": {
+        "landscape": {
+          "regions": {
+            "captions": {
+              "col": 2,
+              "row": 6,
+              "col_span": 10,
+              "row_span": 1,
+              "align": "end",
+              "justify": "center"
+            }
+          }
+        },
+        "portrait": {
+          "regions": {
+            "captions": {
+              "col": 1,
+              "row": 7,
+              "col_span": 4,
+              "row_span": 1,
+              "align": "end",
+              "justify": "center"
+            }
+          }
+        }
+      }
+    }
+  }
+}

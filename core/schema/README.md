@@ -187,6 +187,8 @@ Errors are sorted by entity, then pointer, then rule. For a missing or unexpecte
 | `semantic.unknown_token` | A style override path, or the path in a `{ "token": … }` reference anywhere in a value, is not in the token vocabulary (`pack/README.md`) and not under `ext.` (M2.1a). |
 | `semantic.token_type` | A literal or reference in a style override, or in a field marked `x-token-type` (shot `camera.ease`), does not fit that token's type. A reference is checked by the type of the path it points to. |
 | `semantic.token_bounds` | A literal is outside its token's bounds or allowed values (`contrast.text_min: 3`). |
+| `semantic.unknown_template` | A shot's layout template is neither a core template nor `ext_*` (M2.1b, `pack/README.md`). |
+| `semantic.unknown_region` | A layer's region is not one of its shot's core template's regions for that aspect class. |
 
 `validateDocument(kind, doc)` checks one document: schema, wrappers and anchors. `validateProject(ir, { retiredIds })` checks the whole inlined IR, including every rule above. `explainProject` returns the same errors with a `message` on each schema error saying what was expected (the type, the allowed values, the missing field or the allowed fields); the store puts these messages on patch errors.
 
