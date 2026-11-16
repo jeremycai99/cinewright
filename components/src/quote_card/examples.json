@@ -1,0 +1,19 @@
+[
+  {
+    "name": "with_attribution",
+    "template": "full",
+    "region": "main",
+    "duration_ms": 4500,
+    "props": {
+      "quote": "We rebuilt it three times before anyone asked what it was for.",
+      "attribution": "Dr Mei Lin, Head of data platform"
+    }
+  },
+  {
+    "name": "short",
+    "template": "split",
+    "region": "b",
+    "duration_ms": 3000,
+    "props": { "quote": "Measure first." }
+  }
+]

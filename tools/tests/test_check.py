@@ -82,6 +82,21 @@ def test_contact_sheet_selects_the_sample_frames() -> None:
     )
 
 
+def test_generated_assets_are_made_with_the_image_ffmpeg(
+    fake_docker: list[Sequence[str]], tmp_path: Path
+) -> None:
+    (tmp_path / "generated.json").write_text(
+        json.dumps([{"path": "assets/plate/testsrc.mp4", "lavfi": "testsrc2=size=64x36:rate=30"}])
+    )
+    specimens.generate_assets("img", tmp_path)
+    command = list(fake_docker[-1])
+    assert command[command.index("--network") + 1] == "none"
+    assert command[command.index("--entrypoint") + 1] == "ffmpeg"
+    assert "lavfi" in command and "testsrc2=size=64x36:rate=30" in command
+    assert command[-1] == "/w/assets/plate/testsrc.mp4"
+    assert (tmp_path / "assets/plate").is_dir()
+
+
 def _build(out: Path, *extra: str) -> list[Path]:
     """Build specimens with the components CLI (needs Node and a built workspace)."""
     command = ["pnpm", "--filter", "@cinewright/components", "specimens", "--", "--out", str(out)]

@@ -1,0 +1,21 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "QuoteCardProps",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["quote"],
+  "properties": {
+    "quote": {
+      "description": "The quoted words, without quotation marks.",
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 280
+    },
+    "attribution": {
+      "description": "Who said it, and where.",
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 100
+    }
+  }
+}

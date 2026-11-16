@@ -39,7 +39,7 @@ Not blocking M0–M1:
 - Confirm the name Cinewright, then pick the GitHub org and npm scope. The npm and PyPI names were free as of 2026-11-12. Packages use a provisional scope until then.
 - Who authors the first benchmark briefs; budget for paid raters.
 - CI provider for GPU render tests (v0.3).
-- Open issues 6–8 in `V0_1_PLAN.md` §Open issues (the GSAP licence before M2.4). Issue 5, byte-identical output, was resolved by the M0.2 spike.
+- Open issues 7–8 in `V0_1_PLAN.md` §Open issues. Issue 5, byte-identical output, was resolved by the M0.2 spike; issue 6, the GSAP licence, by the M2 plan (core components use WAAPI).
 
 ## How to work in this repo (for Claude Code)
 
@@ -55,4 +55,4 @@ Create a project with `cinewright init`, then change it only with `cinewright pa
 
 ## Suggested first prompt in Claude Code
 
-> Read AGENTS.md, docs/HANDOFF.md, docs/DESIGN_SPEC.md (especially the Decision log) and docs/V0_1_PLAN.md (approved 2026-11-13, including its M1 conventions). M0 is done (2026-11-14). Continue the current milestone's task plan in `docs/plans/` from the first task whose PR has not merged; if the next milestone has no approved plan yet, plan it in detail and wait for my approval before writing code.
+> Read AGENTS.md, docs/HANDOFF.md, docs/DESIGN_SPEC.md (especially the Decision log) and docs/V0_1_PLAN.md (approved 2026-11-13, including its M1 conventions). M0 is done (2026-11-14); M1 is done (2026-11-15). Continue the current milestone's task plan in `docs/plans/` from the first task whose PR has not merged; if the next milestone has no approved plan yet, plan it in detail and wait for my approval before writing code.

@@ -85,9 +85,16 @@
           },
           {
             "id": "s03.sh01.bars",
-            "component": "kinetic_title",
+            "component": "chart",
             "props": {
-              "text": "Three rebuilds in one year."
+              "kind": "bar",
+              "categories": ["2023", "2024", "2025"],
+              "series": [
+                {
+                  "label": "Rebuilds",
+                  "values": [3, 5, 9]
+                }
+              ]
             },
             "timing": {
               "enter": {

@@ -88,14 +88,33 @@
           }
         },
         "assets": {
-          "description": "Asset id \u2192 a file in the component folder, copied into the specimen.",
+          "description": "Asset id \u2192 a file in the component folder (copied into the specimen), or { file, lavfi }: a clip the specimen checker generates with the image's FFmpeg (never committed).",
           "type": "object",
           "propertyNames": {
             "pattern": "^[a-z][a-z0-9_]*(\\.[a-z0-9_]+)*$"
           },
           "additionalProperties": {
-            "type": "string",
-            "pattern": "^[A-Za-z0-9_][A-Za-z0-9_./-]*$"
+            "anyOf": [
+              {
+                "type": "string",
+                "pattern": "^[A-Za-z0-9_][A-Za-z0-9_./-]*$"
+              },
+              {
+                "type": "object",
+                "additionalProperties": false,
+                "required": ["file", "lavfi"],
+                "properties": {
+                  "file": {
+                    "type": "string",
+                    "pattern": "^[A-Za-z0-9_][A-Za-z0-9_.-]*$"
+                  },
+                  "lavfi": {
+                    "type": "string",
+                    "minLength": 1
+                  }
+                }
+              }
+            ]
           }
         }
       }

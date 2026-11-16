@@ -38,11 +38,13 @@ shots:  # agent
         style:
           overrides: {}
       - layer: s03.sh01.bars  # origin agent
-        component: kinetic_title  # agent
+        component: chart  # agent
         motion: ~  # open
         timing: { enter: { line: b01.l01, point: word, word: 3, offset: 0.2s } }  # agent
         props:
-          text: "Three rebuilds in one year."  # agent
+          categories: ["2023", "2024", "2025"]  # agent
+          kind: bar  # agent
+          series: [{ label: Rebuilds, values: [3, 5, 9] }]  # agent
         layout: {}
         style:
           overrides: {}

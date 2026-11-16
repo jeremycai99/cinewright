@@ -2,7 +2,7 @@
 
 An open-source, agent-driven production framework for professional video: multi-scene productions with a cast of narrators and characters, a style system, and a built-in quality loop.
 
-**Status:** v0.1 in progress. M0 (repository, CI and the render container) is done; M1 (IR v0) is in progress (`docs/plans/m1-ir-v0.md`). See `docs/HANDOFF.md`.
+**Status:** v0.1 in progress. M0 (repository, CI and the render container) and M1 (IR v0) are done. M2 (style system v0: pack format, the neutral and playful packs, the component library) is implemented and in review (`docs/plans/m2-style-v0.md`). See `docs/HANDOFF.md`.
 
 ## Where things are
 
@@ -13,6 +13,8 @@ An open-source, agent-driven production framework for professional video: multi-
 | `docs/` | `DESIGN_SPEC.md` (architecture and the binding decision log), `V0_1_PLAN.md` (milestone plan), `HANDOFF.md` (where the project stands) and `plans/` (detailed task plans per milestone) |
 | `core/` | `@cinewright/core` (IR schema, store, patch engine) and `core/py/` (`cinewright-ir`, the Python models) |
 | `cli/` | `@cinewright/cli`, the `cinewright` command |
+| `packs/` | Style packs: `neutral/` (the neutral default) and `playful/` (the contrasting pack, D39) |
+| `components/` | `@cinewright/components`: the component catalog agents choose from, its browser runtime, and specimens |
 | `plugins/` | Plugin SDKs: `sdk-ts/` and `sdk-py/`. First-party plugins arrive with their milestones |
 | `container/` | The pinned render image: Dockerfile, pins, its `render-runner/` entry point and render fixtures |
 | `tools/` | `cinewright-tools`: repository checks and the render-container runner (Python) |

@@ -1,0 +1,21 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "LowerThirdProps",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["name"],
+  "properties": {
+    "name": {
+      "description": "The name shown first.",
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 60
+    },
+    "role": {
+      "description": "A role, title or place under the name.",
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 80
+    }
+  }
+}

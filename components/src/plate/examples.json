@@ -1,0 +1,27 @@
+[
+  {
+    "name": "image_ken_burns",
+    "description": "An image covering the frame, pushing toward its upper right.",
+    "template": "full",
+    "region": "main",
+    "duration_ms": 4000,
+    "props": {
+      "asset": "scene",
+      "fit": "cover",
+      "ken_burns": true,
+      "focus": { "x": 0.75, "y": 0.3 }
+    },
+    "assets": { "scene": "fixtures/scene.svg" }
+  },
+  {
+    "name": "video_contain",
+    "description": "A test-pattern clip generated in the container at check time, shown whole.",
+    "template": "split",
+    "region": "a",
+    "duration_ms": 2000,
+    "props": { "asset": "test_clip", "fit": "contain" },
+    "assets": {
+      "test_clip": { "file": "testsrc.mp4", "lavfi": "testsrc2=size=640x360:rate=30:duration=3" }
+    }
+  }
+]

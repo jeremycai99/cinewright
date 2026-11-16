@@ -18,7 +18,7 @@ from pathlib import Path
 
 from cinewright_tools.container import bind_mount, docker_run_base, run_check, run_render
 
-__all__ = ["main", "render_stills", "run_check", "select_filter"]
+__all__ = ["generate_assets", "main", "render_stills", "run_check", "select_filter"]
 
 
 def select_filter(samples: list[float], fps: dict[str, int]) -> str:
@@ -28,6 +28,29 @@ def select_filter(samples: list[float], fps: dict[str, int]) -> str:
     columns = min(len(frames), 4)
     rows = math.ceil(len(frames) / columns)
     return f"select='{terms}',scale=480:-1,tile={columns}x{rows}"
+
+
+def generate_assets(image: str, directory: Path) -> None:
+    """Make the clips a specimen lists in ``generated.json`` with the image's FFmpeg."""
+    listing = directory / "generated.json"
+    if not listing.is_file():
+        return
+    docker = shutil.which("docker") or "docker"
+    for asset in json.loads(listing.read_text()):
+        target = directory / asset["path"]
+        target.parent.mkdir(parents=True, exist_ok=True)
+        command = docker_run_base(docker)
+        command += [
+            "--mount",
+            bind_mount(directory, "/w", readonly=False),
+            "--entrypoint",
+            "ffmpeg",
+        ]
+        command += [image, "-nostdin", "-loglevel", "error", "-y", "-f", "lavfi"]
+        command += ["-i", asset["lavfi"], "-c:v", "libx264", "-pix_fmt", "yuv420p", "-an"]
+        command += ["-threads", "1", "-map_metadata", "-1", "-fflags", "+bitexact"]
+        command += ["-flags:v", "+bitexact", f"/w/{asset['path']}"]
+        subprocess.run(command, capture_output=True, text=True, check=True)
 
 
 def render_stills(image: str, directory: Path, samples: list[float], fps: dict[str, int]) -> None:
@@ -68,6 +91,7 @@ def main(argv: list[str] | None = None) -> int:
         directory = samples_file.parent
         name = directory.relative_to(root).as_posix()
         meta = json.loads(samples_file.read_text())
+        generate_assets(args.image, directory)
         result = run_check(
             args.image, directory, directory.parent / f"{directory.name}.check", meta["samples"]
         )

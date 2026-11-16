@@ -1,0 +1,44 @@
+{
+  "id": "quote_card",
+  "version": "1.0.0",
+  "name": "Quote card",
+  "runtime": "waapi",
+  "catalog": {
+    "summary": "A pull quote with an accent quotation mark and an optional attribution.",
+    "use_when": "Someone's own words carry the point: a customer, an expert, a source.",
+    "avoid_when": "Paraphrase or the narrator's own statement (use kinetic_title)."
+  },
+  "tokens": [
+    "density.max_lines_title",
+    "density.min_text_size",
+    "layout.gutter",
+    "motion.distance",
+    "motion.duration.m",
+    "motion.duration.s",
+    "motion.ease.emphasis",
+    "motion.ease.enter",
+    "motion.ease.exit",
+    "motion.entrance",
+    "motion.exit",
+    "motion.stagger",
+    "palette.accent",
+    "palette.ink",
+    "palette.ink_muted",
+    "type.family.body",
+    "type.family.display",
+    "type.leading.normal",
+    "type.leading.tight",
+    "type.size.body",
+    "type.size.display",
+    "type.size.subtitle",
+    "type.size.title",
+    "type.weight.display",
+    "type.weight.regular"
+  ],
+  "templates": {
+    "full": ["main"],
+    "title": ["title"],
+    "split": ["a", "b"],
+    "title_body": ["body"]
+  }
+}
