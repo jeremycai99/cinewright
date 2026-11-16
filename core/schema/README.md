@@ -258,3 +258,20 @@ Then `approve(id, user)` applies it as the approving user, so every field it tou
   - a layout with variants but none for the deliverable's aspect class: `cascade.layout_variant_missing`. There is no silent fallback.
 
 Only values cascade. Authorship states do not, except that `locked` freezes a subtree (D25). Pack tokens are a plain token tree until the pack format exists (M2.1).
+
+## Render keys and the dependency graph (M1.5)
+
+`renderKey(ir, shotId, deliverableId, inputs)` hashes what a shot renders from:
+- its resolved spec: states, `origin` and `locked` stripped; tokens resolved; the layout variant picked; its layers included;
+- the hashes of assets it names;
+- the versions of the components its layers use;
+- the backend version, the container digest and the deliverable's profile hash.
+
+Locking or approving a field never changes the key. Key order never matters.
+
+`dependencyGraph(ir)` links, per deliverable: `line:` → `take:` → `anchors:` → `duration:` → `render:<shot>@<d>` and the adjacent `transition:<scene>@<d>` segment → `mix@<d>` → `captions@<d>` → `assembly@<d>`.
+- Only `cross_dissolve` and `wipe` render as segments (D34).
+- A segment depends on the last shot of its scene and the first shot of the next.
+- Planning nodes (`script`, `plan:<scene>`) sit beside the chain.
+
+`dirtyNodes(before, after, inputs)` returns the nodes whose own inputs changed, plus everything downstream of them.
