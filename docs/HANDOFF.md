@@ -55,4 +55,4 @@ Create a project with `cinewright init`, then change it only with `cinewright pa
 
 ## Suggested first prompt in Claude Code
 
-> Read AGENTS.md, docs/HANDOFF.md, docs/DESIGN_SPEC.md (especially the Decision log) and docs/V0_1_PLAN.md (approved 2026-11-13, including its M1 conventions). M0 is done (2026-11-14); M1 is done (2026-11-15). Continue the current milestone's task plan in `docs/plans/` from the first task whose PR has not merged; if the next milestone has no approved plan yet, plan it in detail and wait for my approval before writing code.
+> Read AGENTS.md, docs/HANDOFF.md, docs/DESIGN_SPEC.md (especially the Decision log) and docs/V0_1_PLAN.md (approved 2026-11-13, including its M1 conventions). M0 is done (2026-11-14), M1 (2026-11-15) and M2 (2026-11-16). The task order from here is `V0_1_PLAN.md` §Revised task breakdown and order. Continue the current milestone's task plan in `docs/plans/` from the first task whose PR has not merged; if the next milestone has no approved plan yet, plan it in detail and wait for my approval before writing code.

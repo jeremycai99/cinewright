@@ -569,7 +569,7 @@ D1–D24 were approved on 2026-11-12. D25–D41 came out of the implementation-r
 | D38 | v0.1 scope and gates | v0.1 includes narration TTS, one music provider plus a library, the mixer, captions, the vision critic and fix loop, and the v0.1 agent subset (roadmap aligned). Guided gates stay script, storyboard, final (D8); in v0.1 the storyboard is the shot list plus keyframe stills of the real compositions. The animatic gate joins Guided in v0.3 |
 | D39 | v0.1 packs | Ship the neutral default plus one deliberately contrasting pack from D14 in v0.1, so "style is data" is tested from the start |
 | D40 | Storage format | The IR is stored as canonical JSON (sorted keys, pretty-printed for diffs), written only by the IR store: `cinewright.json` plus one file per sequence. Nobody hand-writes YAML; people read the IR through `cinewright show`, which prints a readable view. Amends D4 |
-| D41 | Collaboration and trust (v0.1) | One branch writes a project's IR at a time; merging two IR branches is unsupported until an adopt command or merge driver exists. Approvals rest on cooperative trust: every patch-log entry records the asserted author kind and the session id. Agent harnesses never auto-approve `cinewright patch approve`, so each approval passes a prompt the user answers |
+| D41 | Collaboration and trust (v0.1) | One branch writes a project's IR at a time; merging two IR branches is unsupported until an adopt command or merge driver exists. Approvals rest on cooperative trust: every patch-log entry records the asserted author kind and the session id. Agent harnesses never auto-approve `cinewright patch approve` or `cinewright patch revert` (both act as the user), so each passes a prompt the user answers |
 
 ## Open questions
 
@@ -577,7 +577,7 @@ D1–D24 were approved on 2026-11-12. D25–D41 came out of the implementation-r
 - [ ] Who authors the benchmark briefs (8 for v0.1, growing to the full AGENTS.md §4.1 suite by v1.0), and the budget for paid raters
 - [x] Repository host, CI provider and container registry for the CPU render image: GitHub, GitHub Actions and GHCR (2026-11-13)
 - [ ] CI provider for GPU render tests (v0.3)
-- [ ] The remaining open issues from the readiness review (5–8), listed in `V0_1_PLAN.md` §Open issues
+- [ ] The remaining open issues from the readiness review (7 and 8; 5 and 6 are resolved), listed in `V0_1_PLAN.md` §Open issues
 
 ## Sources
 

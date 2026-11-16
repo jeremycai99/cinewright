@@ -2,7 +2,7 @@
 
 An open-source, agent-driven production framework for professional video: multi-scene productions with a cast of narrators and characters, a style system, and a built-in quality loop.
 
-**Status:** v0.1 in progress. M0 (repository, CI and the render container) and M1 (IR v0) are done. M2 (style system v0: pack format, the neutral and playful packs, the component library) is implemented and in review (`docs/plans/m2-style-v0.md`). See `docs/HANDOFF.md`.
+**Status:** v0.1 in progress. M0 (repository, CI and the render container) and M1 (IR v0) are done. M2 (style system v0: pack format, the neutral and playful packs, the component library) is done. M2.5 (fixes from the 2026-11-16 audit, `docs/plans/roadmap-audit-2026-11-16.md`) comes next, then M3 (HyperFrames backend). See `docs/HANDOFF.md`.
 
 ## Where things are
 

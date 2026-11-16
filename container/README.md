@@ -19,7 +19,7 @@ Every version lives in a tracked file. The Dockerfile has none typed in; `cinewr
 
 **chrome-headless-shell** is the build HyperFrames 0.9.41 manages itself: `CHROME_VERSION` in `@hyperframes/engine`, the build `hyperframes browser ensure` installs. HyperFrames tunes and tests its deterministic BeginFrame capture against that build; Puppeteer's default build (157.x for puppeteer-core 25.17) is not used. The `@puppeteer/browsers` version in the lockfile installs it to `/opt/chrome-headless-shell`, and `HYPERFRAMES_BROWSER_PATH` points HyperFrames at it. Chrome for Testing publishes no checksums, so the download relies on HTTPS, and `cinewright-check-pins` confirms the installed build. When HyperFrames is upgraded, read its new `CHROME_VERSION` and update the pin.
 
-**GSAP** is copied from the lockfile into `/opt/cinewright/vendor/gsap.min.js`; nothing loads from a CDN. Open issue 6 (the GSAP licence) still decides whether GSAP stays a core dependency (M2.4).
+**GSAP** is copied from the lockfile into `/opt/cinewright/vendor/gsap.min.js`; nothing loads from a CDN. Core components never use GSAP (Open issue 6, resolved in the M2 plan: they animate with WAAPI). The image still vendors it for the hello-world smoke fixture and future user-authored compositions; whether it stays is decided in M3.1b.
 
 **Install scripts** of dependencies are denied in `pnpm-workspace.yaml` (`allowBuilds`). Puppeteer's would download a browser.
 

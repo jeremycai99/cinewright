@@ -74,7 +74,7 @@ A patch is JSON (`core/schema/patch.schema.json`):
 **Who may change what** (D25; details in `core/schema/README.md`):
 - Agents and jobs write only `open` and `agent` fields, and only change `open` or `agent` lists. A patch that touches a `user` or `locked` field, or removes a `user` item, is stored as a pending suggestion (exit 5) for the user to approve.
 - Session patches are proposed first while the project setting `propose_conversational_edits` is on, which is the default.
-- Only a user approves (`patch approve`). Agent harnesses must never run `patch approve` without asking the user (D41).
+- Only a user approves (`patch approve`), and a revert acts as the user (`patch revert`). Agent harnesses must never run either without asking the user (D41).
 
 **Checked before it is stored.** A patch stored as pending (a proposal, a session edit proposed first, a suggestion, or a patch blocked by authorship) is first checked as the approving user would apply it: paths, values, times, conflicts and the whole-IR validation. An invalid one exits 3 and a stale one exits 4, and neither is stored, so the user is never asked to approve a patch that cannot apply. Authorship is not checked then: a block is what pending is for.
 
