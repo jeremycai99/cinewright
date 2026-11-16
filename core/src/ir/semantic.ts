@@ -1,4 +1,11 @@
 import { sha256Hash } from "../canonical/hash.js";
+import {
+  checkLiteral,
+  compatible,
+  isVocabularyPath,
+  type TokenSpec,
+  vocabulary,
+} from "../pack/vocabulary.js";
 import type { ValidationError } from "../schema/errors.js";
 import type { JsonObject, SchemaSet } from "../schema/load.js";
 import { escapeSegment } from "../schema/load.js";
@@ -170,5 +177,63 @@ function profileErrors(project: JsonObject): ValidationError[] {
       rule: "semantic.frame_rate_mismatch",
     });
   }
+  return errors;
+}
+
+function isTokenRef(value: unknown): value is { token: string } {
+  return isObject(value) && Object.keys(value).length === 1 && typeof value.token === "string";
+}
+
+/**
+ * Token checks that need no pack (M2.1a): every style override path and every `{ token }`
+ * reference names a vocabulary path (`semantic.unknown_token`); a literal or reference in an
+ * override, or in a field marked `x-token-type`, fits that type (`semantic.token_type`,
+ * `semantic.token_bounds`). `ext.*` paths are untyped.
+ */
+export function tokenErrors(schemas: SchemaSet, rootFile: string, doc: unknown): ValidationError[] {
+  const entities = collectEntities(schemas, rootFile, doc);
+  const errors: ValidationError[] = [];
+  const report = (pointer: string, rule: string) =>
+    errors.push({ ...locate(entities, pointer), rule });
+  const v = vocabulary();
+  const checkValue = (spec: TokenSpec | undefined, value: unknown, pointer: string) => {
+    if (isTokenRef(value)) {
+      if (!isVocabularyPath(value.token)) return report(pointer, "semantic.unknown_token");
+      const target = v.get(value.token);
+      if (spec && target && !compatible(spec, target)) report(pointer, "semantic.token_type");
+      return;
+    }
+    if (!spec) return;
+    const problem = checkLiteral(spec, value);
+    if (problem)
+      report(pointer, problem === "type" ? "semantic.token_type" : "semantic.token_bounds");
+  };
+  const scanRefs = (value: unknown, pointer: string) => {
+    if (isTokenRef(value)) {
+      if (!isVocabularyPath(value.token)) report(pointer, "semantic.unknown_token");
+    } else if (Array.isArray(value)) {
+      for (const [i, item] of value.entries()) scanRefs(item, `${pointer}/${i}`);
+    } else if (isObject(value))
+      for (const [key, child] of Object.entries(value))
+        scanRefs(child, `${pointer}/${escapeSegment(key)}`);
+  };
+  walkDocument(schemas, rootFile, doc, (node) => {
+    if (node.schema.title === "StyleOverrides") {
+      if (!isObject(node.value)) return;
+      for (const [path, wrapper] of Object.entries(node.value)) {
+        const pointer = `${node.pointer}/${escapeSegment(path)}`;
+        if (!isVocabularyPath(path)) report(pointer, "semantic.unknown_token");
+        else if (isObject(wrapper) && "value" in wrapper)
+          checkValue(v.get(path), wrapper.value, pointer);
+      }
+      return;
+    }
+    const typed = node.schema["x-token-type"];
+    if (typeof typed === "string" && node.value !== undefined) {
+      checkValue({ type: typed as TokenSpec["type"] }, node.value, node.pointer);
+    }
+    const kind = node.schema["x-authorable"];
+    if (kind === "field" || kind === "map") scanRefs(node.value, node.pointer);
+  });
   return errors;
 }

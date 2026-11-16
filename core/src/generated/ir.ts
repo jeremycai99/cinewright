@@ -99,6 +99,10 @@ export type Id9 = string;
  */
 export type Id10 = string;
 /**
+ * A literal token value or a reference to another token.
+ */
+export type TokenValue1 = string | number | boolean | TokenRef;
+/**
  * Project-unique entity id (convention 9). Immutable and never reused.
  */
 export type Id11 = string;
@@ -982,7 +986,7 @@ export interface Shot {
 }
 export interface Camera {
   move: string;
-  ease?: TokenValue;
+  ease?: TokenValue1;
   amount?: number;
 }
 export interface ShotAnchors {

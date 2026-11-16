@@ -76,4 +76,38 @@ describe("cascade resolver", () => {
     const pack: TokenTree = { a: { token: "b" }, b: { token: "a" } };
     expect(() => resolveEntity(ir, "s03_the_problem", "web_landscape", pack)).toThrow(CascadeError);
   });
+
+  it("picks a by_aspect leaf's variant for each deliverable, and overrides beat both", () => {
+    const ir = load<InlinedIr>("per-aspect-layout", "ir.json");
+    const pack: TokenTree = {
+      ...load<TokenTree>("per-aspect-layout", "pack.json"),
+      layout: { columns: { by_aspect: { landscape: 12, portrait: 4 } } },
+      palette: {
+        ...(load<TokenTree>("per-aspect-layout", "pack.json").palette as TokenTree),
+        accent: { by_aspect: { landscape: "#111111", portrait: "#222222" } },
+      },
+    };
+    const landscape = resolveEntity(ir, "s03.sh01", "web_landscape", pack);
+    const portrait = resolveEntity(ir, "s03.sh01", "social_portrait", pack);
+    expect(landscape.tokens["layout.columns"]).toEqual({ value: 12, origin: { level: "pack" } });
+    expect(portrait.tokens["layout.columns"]).toEqual({ value: 4, origin: { level: "pack" } });
+    // The scene overrides palette.accent in this fixture, so neither variant shows through.
+    expect(portrait.tokens["palette.accent"]?.origin).toEqual({
+      level: "scene",
+      entity: "s03_the_problem",
+    });
+  });
+
+  it("refuses an aspect class the pack does not declare", () => {
+    // biome-ignore lint/suspicious/noExplicitAny: test mutation
+    const ir = load<any>("per-aspect-layout", "ir.json");
+    const pack = load<TokenTree>("per-aspect-layout", "pack.json");
+    expect(() =>
+      resolveEntity(ir, "s03.sh01", "social_portrait", pack, { aspectClasses: ["landscape"] }),
+    ).toThrow(
+      expect.objectContaining({
+        errors: [{ entity: "social_portrait", pointer: "", rule: "pack.aspect_unsupported" }],
+      }),
+    );
+  });
 });

@@ -786,17 +786,17 @@ export const projectFull = {
   },
   "style": {
     "overrides": {
-      "motion.ease": {
+      "motion.ease.standard": {
         "state": "agent",
         "value": {
-          "token": "motion.ease_out_expo"
+          "token": "motion.ease.enter"
         }
       },
       "palette.accent": {
         "state": "user",
         "value": "#FF4D2E"
       },
-      "type.scale": {
+      "type.leading.normal": {
         "state": "agent",
         "value": 1.25
       }
@@ -1123,7 +1123,7 @@ export const sequenceSpecSceneExample = {
                 "value": {
                   "amount": 0.06,
                   "ease": {
-                    "token": "motion.ease_out_expo"
+                    "token": "motion.ease.enter"
                   },
                   "move": "push_in"
                 }

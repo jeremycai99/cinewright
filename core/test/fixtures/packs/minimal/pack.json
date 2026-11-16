@@ -1,0 +1,21 @@
+{
+  "schema_version": 1,
+  "id": "minimal",
+  "name": "Minimal test pack",
+  "version": "1.0.0",
+  "description": "Test fixture: every core token with values that pass every check.",
+  "license": "Apache-2.0",
+  "aspect_classes": ["landscape", "portrait"],
+  "fonts": [
+    {
+      "family": "Test Sans",
+      "file": "fonts/test-sans.woff2",
+      "weight": [100, 900],
+      "style": "normal",
+      "sha256": "sha256:1ebf49eee097ce3af241dd819ddc9a0b08a465f1eb11c64fb79f276249054cad",
+      "license": "OFL-1.1",
+      "source": "test fixture"
+    }
+  ],
+  "retired_rules": ["motion.old_rule"]
+}

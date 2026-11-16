@@ -1,0 +1,692 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://cinewright.invalid/pack/0/tokens.schema.json",
+  "title": "PackTokens",
+  "description": "The core token vocabulary (M2.1a). Every pack defines every path; `x-token-type` and the `x-` bounds are checked by the pack loader and the IR validator, after references are followed. See core/schema/pack/README.md.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "camera",
+    "contrast",
+    "density",
+    "layout",
+    "motion",
+    "palette",
+    "sound",
+    "transition",
+    "type"
+  ],
+  "properties": {
+    "palette": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["accent", "bg", "data", "ink", "ink_muted", "line", "on_accent", "surface"],
+      "properties": {
+        "bg": {
+          "$ref": "#/$defs/leaf",
+          "x-token-type": "color"
+        },
+        "surface": {
+          "$ref": "#/$defs/leaf",
+          "x-token-type": "color"
+        },
+        "ink": {
+          "$ref": "#/$defs/leaf",
+          "x-token-type": "color"
+        },
+        "ink_muted": {
+          "$ref": "#/$defs/leaf",
+          "x-token-type": "color"
+        },
+        "accent": {
+          "$ref": "#/$defs/leaf",
+          "x-token-type": "color"
+        },
+        "on_accent": {
+          "$ref": "#/$defs/leaf",
+          "x-token-type": "color"
+        },
+        "line": {
+          "$ref": "#/$defs/leaf",
+          "x-token-type": "color"
+        },
+        "data": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["1", "2", "3", "4", "5", "6"],
+          "properties": {
+            "1": {
+              "$ref": "#/$defs/leaf",
+              "x-token-type": "color"
+            },
+            "2": {
+              "$ref": "#/$defs/leaf",
+              "x-token-type": "color"
+            },
+            "3": {
+              "$ref": "#/$defs/leaf",
+              "x-token-type": "color"
+            },
+            "4": {
+              "$ref": "#/$defs/leaf",
+              "x-token-type": "color"
+            },
+            "5": {
+              "$ref": "#/$defs/leaf",
+              "x-token-type": "color"
+            },
+            "6": {
+              "$ref": "#/$defs/leaf",
+              "x-token-type": "color"
+            }
+          }
+        }
+      }
+    },
+    "contrast": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["graphic_min", "large_text_min", "text_min"],
+      "properties": {
+        "text_min": {
+          "$ref": "#/$defs/leaf",
+          "x-token-type": "number",
+          "x-minimum": 4.5
+        },
+        "large_text_min": {
+          "$ref": "#/$defs/leaf",
+          "x-token-type": "number",
+          "x-minimum": 3
+        },
+        "graphic_min": {
+          "$ref": "#/$defs/leaf",
+          "x-token-type": "number",
+          "x-minimum": 3
+        }
+      }
+    },
+    "type": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["family", "leading", "size", "tracking", "transform", "weight"],
+      "properties": {
+        "family": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["body", "display"],
+          "properties": {
+            "display": {
+              "$ref": "#/$defs/leaf",
+              "x-token-type": "font_family"
+            },
+            "body": {
+              "$ref": "#/$defs/leaf",
+              "x-token-type": "font_family"
+            }
+          }
+        },
+        "weight": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["bold", "display", "regular"],
+          "properties": {
+            "regular": {
+              "$ref": "#/$defs/leaf",
+              "x-token-type": "font_weight"
+            },
+            "bold": {
+              "$ref": "#/$defs/leaf",
+              "x-token-type": "font_weight"
+            },
+            "display": {
+              "$ref": "#/$defs/leaf",
+              "x-token-type": "font_weight"
+            }
+          }
+        },
+        "size": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["body", "caption", "display", "small", "subtitle", "title"],
+          "properties": {
+            "caption": {
+              "$ref": "#/$defs/leaf",
+              "x-token-type": "dimension"
+            },
+            "small": {
+              "$ref": "#/$defs/leaf",
+              "x-token-type": "dimension"
+            },
+            "body": {
+              "$ref": "#/$defs/leaf",
+              "x-token-type": "dimension"
+            },
+            "subtitle": {
+              "$ref": "#/$defs/leaf",
+              "x-token-type": "dimension"
+            },
+            "title": {
+              "$ref": "#/$defs/leaf",
+              "x-token-type": "dimension"
+            },
+            "display": {
+              "$ref": "#/$defs/leaf",
+              "x-token-type": "dimension"
+            }
+          }
+        },
+        "leading": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["normal", "tight"],
+          "properties": {
+            "tight": {
+              "$ref": "#/$defs/leaf",
+              "x-token-type": "number",
+              "x-minimum": 0
+            },
+            "normal": {
+              "$ref": "#/$defs/leaf",
+              "x-token-type": "number",
+              "x-minimum": 0
+            }
+          }
+        },
+        "tracking": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["body", "display"],
+          "properties": {
+            "display": {
+              "$ref": "#/$defs/leaf",
+              "x-token-type": "number"
+            },
+            "body": {
+              "$ref": "#/$defs/leaf",
+              "x-token-type": "number"
+            }
+          }
+        },
+        "transform": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["display"],
+          "properties": {
+            "display": {
+              "$ref": "#/$defs/leaf",
+              "x-token-type": "enum",
+              "x-enum": ["none", "uppercase"]
+            }
+          }
+        }
+      }
+    },
+    "layout": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["columns", "gutter", "margin", "radius", "rows", "stroke"],
+      "properties": {
+        "margin": {
+          "$ref": "#/$defs/leaf",
+          "x-token-type": "dimension"
+        },
+        "gutter": {
+          "$ref": "#/$defs/leaf",
+          "x-token-type": "dimension"
+        },
+        "columns": {
+          "$ref": "#/$defs/leaf",
+          "x-token-type": "integer",
+          "x-minimum": 1
+        },
+        "rows": {
+          "$ref": "#/$defs/leaf",
+          "x-token-type": "integer",
+          "x-minimum": 1
+        },
+        "radius": {
+          "$ref": "#/$defs/leaf",
+          "x-token-type": "dimension"
+        },
+        "stroke": {
+          "$ref": "#/$defs/leaf",
+          "x-token-type": "dimension"
+        }
+      }
+    },
+    "density": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "hold_per_word",
+        "max_bullets",
+        "max_lines_title",
+        "max_words_bullet",
+        "min_hold",
+        "min_text_size"
+      ],
+      "properties": {
+        "max_lines_title": {
+          "$ref": "#/$defs/leaf",
+          "x-token-type": "integer",
+          "x-minimum": 1
+        },
+        "max_bullets": {
+          "$ref": "#/$defs/leaf",
+          "x-token-type": "integer",
+          "x-minimum": 1
+        },
+        "max_words_bullet": {
+          "$ref": "#/$defs/leaf",
+          "x-token-type": "integer",
+          "x-minimum": 1
+        },
+        "min_text_size": {
+          "$ref": "#/$defs/leaf",
+          "x-token-type": "dimension"
+        },
+        "hold_per_word": {
+          "$ref": "#/$defs/leaf",
+          "x-token-type": "duration"
+        },
+        "min_hold": {
+          "$ref": "#/$defs/leaf",
+          "x-token-type": "duration"
+        }
+      }
+    },
+    "motion": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "distance",
+        "duration",
+        "ease",
+        "entrance",
+        "exit",
+        "preset",
+        "stagger",
+        "text_reveal"
+      ],
+      "properties": {
+        "ease": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["emphasis", "enter", "exit", "standard"],
+          "properties": {
+            "standard": {
+              "$ref": "#/$defs/leaf",
+              "x-token-type": "easing"
+            },
+            "enter": {
+              "$ref": "#/$defs/leaf",
+              "x-token-type": "easing"
+            },
+            "exit": {
+              "$ref": "#/$defs/leaf",
+              "x-token-type": "easing"
+            },
+            "emphasis": {
+              "$ref": "#/$defs/leaf",
+              "x-token-type": "easing"
+            }
+          }
+        },
+        "duration": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["l", "m", "s", "xl", "xs"],
+          "properties": {
+            "xs": {
+              "$ref": "#/$defs/leaf",
+              "x-token-type": "duration"
+            },
+            "s": {
+              "$ref": "#/$defs/leaf",
+              "x-token-type": "duration"
+            },
+            "m": {
+              "$ref": "#/$defs/leaf",
+              "x-token-type": "duration"
+            },
+            "l": {
+              "$ref": "#/$defs/leaf",
+              "x-token-type": "duration"
+            },
+            "xl": {
+              "$ref": "#/$defs/leaf",
+              "x-token-type": "duration"
+            }
+          }
+        },
+        "stagger": {
+          "$ref": "#/$defs/leaf",
+          "x-token-type": "duration"
+        },
+        "distance": {
+          "$ref": "#/$defs/leaf",
+          "x-token-type": "dimension"
+        },
+        "entrance": {
+          "$ref": "#/$defs/leaf",
+          "x-token-type": "enum",
+          "x-enum": ["fade", "rise", "slide", "scale", "wipe", "pop"]
+        },
+        "exit": {
+          "$ref": "#/$defs/leaf",
+          "x-token-type": "enum",
+          "x-enum": ["fade", "rise", "slide", "scale", "wipe", "pop"]
+        },
+        "text_reveal": {
+          "$ref": "#/$defs/leaf",
+          "x-token-type": "enum",
+          "x-enum": ["whole", "lines", "words"]
+        },
+        "preset": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["fade", "pop", "rise", "scale", "slide", "wipe"],
+          "properties": {
+            "fade": {
+              "type": "object",
+              "additionalProperties": false,
+              "required": ["enabled"],
+              "properties": {
+                "enabled": {
+                  "$ref": "#/$defs/leaf",
+                  "x-token-type": "boolean"
+                }
+              }
+            },
+            "rise": {
+              "type": "object",
+              "additionalProperties": false,
+              "required": ["enabled"],
+              "properties": {
+                "enabled": {
+                  "$ref": "#/$defs/leaf",
+                  "x-token-type": "boolean"
+                }
+              }
+            },
+            "slide": {
+              "type": "object",
+              "additionalProperties": false,
+              "required": ["enabled"],
+              "properties": {
+                "enabled": {
+                  "$ref": "#/$defs/leaf",
+                  "x-token-type": "boolean"
+                }
+              }
+            },
+            "scale": {
+              "type": "object",
+              "additionalProperties": false,
+              "required": ["enabled"],
+              "properties": {
+                "enabled": {
+                  "$ref": "#/$defs/leaf",
+                  "x-token-type": "boolean"
+                }
+              }
+            },
+            "wipe": {
+              "type": "object",
+              "additionalProperties": false,
+              "required": ["enabled"],
+              "properties": {
+                "enabled": {
+                  "$ref": "#/$defs/leaf",
+                  "x-token-type": "boolean"
+                }
+              }
+            },
+            "pop": {
+              "type": "object",
+              "additionalProperties": false,
+              "required": ["enabled"],
+              "properties": {
+                "enabled": {
+                  "$ref": "#/$defs/leaf",
+                  "x-token-type": "boolean"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "camera": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["ken_burns"],
+      "properties": {
+        "ken_burns": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["ease", "scale"],
+          "properties": {
+            "scale": {
+              "$ref": "#/$defs/leaf",
+              "x-token-type": "number",
+              "x-minimum": 1
+            },
+            "ease": {
+              "$ref": "#/$defs/leaf",
+              "x-token-type": "easing"
+            }
+          }
+        }
+      }
+    },
+    "transition": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["cross_dissolve", "default", "wipe"],
+      "properties": {
+        "default": {
+          "$ref": "#/$defs/leaf",
+          "x-token-type": "enum",
+          "x-enum": ["cut", "cross_dissolve", "wipe"]
+        },
+        "cross_dissolve": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["duration", "enabled"],
+          "properties": {
+            "enabled": {
+              "$ref": "#/$defs/leaf",
+              "x-token-type": "boolean"
+            },
+            "duration": {
+              "$ref": "#/$defs/leaf",
+              "x-token-type": "duration"
+            }
+          }
+        },
+        "wipe": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["direction", "duration", "enabled", "softness"],
+          "properties": {
+            "enabled": {
+              "$ref": "#/$defs/leaf",
+              "x-token-type": "boolean"
+            },
+            "duration": {
+              "$ref": "#/$defs/leaf",
+              "x-token-type": "duration"
+            },
+            "direction": {
+              "$ref": "#/$defs/leaf",
+              "x-token-type": "enum",
+              "x-enum": ["left", "right", "up", "down"]
+            },
+            "softness": {
+              "$ref": "#/$defs/leaf",
+              "x-token-type": "number",
+              "x-minimum": 0,
+              "x-maximum": 1
+            }
+          }
+        }
+      }
+    },
+    "sound": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["bus", "duck", "music", "sfx"],
+      "properties": {
+        "music": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["bpm_max", "bpm_min", "genre", "mood"],
+          "properties": {
+            "genre": {
+              "$ref": "#/$defs/leaf",
+              "x-token-type": "string"
+            },
+            "mood": {
+              "$ref": "#/$defs/leaf",
+              "x-token-type": "string"
+            },
+            "bpm_min": {
+              "$ref": "#/$defs/leaf",
+              "x-token-type": "integer",
+              "x-minimum": 1
+            },
+            "bpm_max": {
+              "$ref": "#/$defs/leaf",
+              "x-token-type": "integer",
+              "x-minimum": 1
+            }
+          }
+        },
+        "sfx": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["enabled", "family"],
+          "properties": {
+            "family": {
+              "$ref": "#/$defs/leaf",
+              "x-token-type": "string"
+            },
+            "enabled": {
+              "$ref": "#/$defs/leaf",
+              "x-token-type": "boolean"
+            }
+          }
+        },
+        "duck": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["attack", "depth_db", "release"],
+          "properties": {
+            "depth_db": {
+              "$ref": "#/$defs/leaf",
+              "x-token-type": "number",
+              "x-maximum": 0
+            },
+            "attack": {
+              "$ref": "#/$defs/leaf",
+              "x-token-type": "duration"
+            },
+            "release": {
+              "$ref": "#/$defs/leaf",
+              "x-token-type": "duration"
+            }
+          }
+        },
+        "bus": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["music_db", "sfx_db"],
+          "properties": {
+            "music_db": {
+              "$ref": "#/$defs/leaf",
+              "x-token-type": "number",
+              "x-maximum": 0
+            },
+            "sfx_db": {
+              "$ref": "#/$defs/leaf",
+              "x-token-type": "number",
+              "x-maximum": 0
+            }
+          }
+        }
+      }
+    },
+    "ext": {
+      "description": "Pack-specific tokens for pack-specific components; free-form and untyped.",
+      "type": "object"
+    }
+  },
+  "$defs": {
+    "token_ref": {
+      "title": "TokenRef",
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["token"],
+      "properties": {
+        "token": {
+          "type": "string",
+          "pattern": "^[a-z][a-z0-9_]*(\\.[a-z0-9_]+)*$",
+          "maxLength": 128
+        }
+      }
+    },
+    "literal": {
+      "anyOf": [
+        {
+          "type": "string"
+        },
+        {
+          "type": "number"
+        },
+        {
+          "type": "boolean"
+        }
+      ]
+    },
+    "by_aspect": {
+      "title": "ByAspect",
+      "description": "One value per aspect class (packs only); covers every aspect class in the pack's aspect_classes.",
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["by_aspect"],
+      "properties": {
+        "by_aspect": {
+          "type": "object",
+          "minProperties": 1,
+          "propertyNames": {
+            "enum": ["landscape", "portrait", "square"]
+          },
+          "additionalProperties": {
+            "anyOf": [
+              {
+                "$ref": "#/$defs/literal"
+              },
+              {
+                "$ref": "#/$defs/token_ref"
+              }
+            ]
+          }
+        }
+      }
+    },
+    "leaf": {
+      "anyOf": [
+        {
+          "$ref": "#/$defs/literal"
+        },
+        {
+          "$ref": "#/$defs/token_ref"
+        },
+        {
+          "$ref": "#/$defs/by_aspect"
+        }
+      ]
+    }
+  }
+}

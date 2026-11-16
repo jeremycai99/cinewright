@@ -3,5 +3,10 @@
     "entity": "demo",
     "pointer": "/style/overrides/Palette Accent",
     "rule": "schema.propertyNames"
+  },
+  {
+    "entity": "demo",
+    "pointer": "/style/overrides/Palette Accent",
+    "rule": "semantic.unknown_token"
   }
 ]

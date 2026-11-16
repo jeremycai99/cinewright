@@ -99,3 +99,64 @@ describe("validateProject", () => {
     ]);
   });
 });
+
+describe("token checks (M2.1a)", () => {
+  it("reports an override path outside the vocabulary", () => {
+    const ir = reference();
+    ir.style.overrides["palette.acent"] = { state: "user", value: "#000000" };
+    expect(validateProject(ir)).toEqual([
+      { entity: "demo", pointer: "/style/overrides/palette.acent", rule: "semantic.unknown_token" },
+    ]);
+  });
+
+  it("reports a literal of the wrong type or out of bounds", () => {
+    const ir = reference();
+    ir.style.overrides["palette.accent"].value = 12;
+    ir.style.overrides["contrast.text_min"] = { state: "user", value: 3 };
+    expect(validateProject(ir)).toEqual([
+      {
+        entity: "demo",
+        pointer: "/style/overrides/contrast.text_min",
+        rule: "semantic.token_bounds",
+      },
+      { entity: "demo", pointer: "/style/overrides/palette.accent", rule: "semantic.token_type" },
+    ]);
+  });
+
+  it("type-checks a reference by its target, in an override and in a typed field", () => {
+    const ir = reference();
+    ir.style.overrides["motion.ease.standard"].value = { token: "palette.ink" };
+    shots(ir)[0].camera.value.ease = { token: "palette.ink" };
+    expect(validateProject(ir)).toEqual([
+      {
+        entity: "demo",
+        pointer: "/style/overrides/motion.ease.standard",
+        rule: "semantic.token_type",
+      },
+      { entity: "s03.sh01", pointer: "/camera/value/ease", rule: "semantic.token_type" },
+    ]);
+  });
+
+  it("type-checks a literal in a typed field", () => {
+    const ir = reference();
+    shots(ir)[0].camera.value.ease = "ease-out";
+    expect(validateProject(ir)).toEqual([
+      { entity: "s03.sh01", pointer: "/camera/value/ease", rule: "semantic.token_type" },
+    ]);
+  });
+
+  it("reports a reference to an unknown path anywhere in a value", () => {
+    const ir = reference();
+    shots(ir)[0].layers.value[0].props.color.value = { token: "palette.nope" };
+    expect(validateProject(ir)).toEqual([
+      { entity: "s03.sh01.title", pointer: "/props/color/value", rule: "semantic.unknown_token" },
+    ]);
+  });
+
+  it("accepts ext.* paths with any value", () => {
+    const ir = reference();
+    ir.style.overrides["ext.brand.glow"] = { state: "user", value: 3 };
+    shots(ir)[0].layers.value[0].props.color.value = { token: "ext.brand.tint" };
+    expect(validateProject(ir)).toEqual([]);
+  });
+});

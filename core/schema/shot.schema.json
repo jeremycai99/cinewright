@@ -187,7 +187,8 @@
           "minLength": 1
         },
         "ease": {
-          "$ref": "common.schema.json#/$defs/token_value"
+          "$ref": "common.schema.json#/$defs/token_value",
+          "x-token-type": "easing"
         },
         "amount": {
           "type": "number"

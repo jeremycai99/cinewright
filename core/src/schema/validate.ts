@@ -1,7 +1,7 @@
 import { Ajv2020, type ErrorObject, type ValidateFunction } from "ajv/dist/2020.js";
 import { collectEntities, locate } from "../ir/index.js";
 import { type InlinedIr, splitIr } from "../ir/inlined.js";
-import { anchorErrors, crossDocumentErrors, wrapperErrors } from "../ir/semantic.js";
+import { anchorErrors, crossDocumentErrors, tokenErrors, wrapperErrors } from "../ir/semantic.js";
 import {
   type DetailedError,
   normalizeDetailed,
@@ -30,7 +30,7 @@ export const ROOT_FILES: Readonly<Record<DocumentKind, string>> = {
 const SCHEMA_BASE = "https://cinewright.invalid/ir/0/";
 
 /** Annotation keywords the IR schemas use (core/schema/README.md). */
-export const ANNOTATIONS = ["x-authorable", "x-entity", "x-ref"] as const;
+export const ANNOTATIONS = ["x-authorable", "x-entity", "x-ref", "x-token-type"] as const;
 
 const validators = new WeakMap<SchemaSet, Map<string, ValidateFunction>>();
 
@@ -54,7 +54,7 @@ function validatorFor(schemas: SchemaSet, rootFile: string): ValidateFunction {
 }
 
 /** The absolute pointer an Ajv error is about: the missing or extra property where there is one. */
-function errorPointer(error: ErrorObject): string {
+export function errorPointer(error: ErrorObject): string {
   const params = error.params as Record<string, unknown>;
   if (error.keyword === "required" && typeof params.missingProperty === "string") {
     return `${error.instancePath}/${escapeSegment(params.missingProperty)}`;
@@ -71,7 +71,7 @@ function errorPointer(error: ErrorObject): string {
  * Keep one error per failure: drop the branch errors under a failing `anyOf` and the inner
  * errors under a failing `propertyNames`, which Ajv reports alongside the outer error.
  */
-function collapse(errors: readonly ErrorObject[]): ErrorObject[] {
+export function collapse(errors: readonly ErrorObject[]): ErrorObject[] {
   const outer = errors
     .filter((e) => e.keyword === "anyOf" || e.keyword === "propertyNames")
     .map((e) => e.schemaPath);
@@ -124,6 +124,7 @@ function documentErrors(kind: DocumentKind, doc: unknown, schemas: SchemaSet): D
   }
   errors.push(...wrapperErrors(schemas, rootFile, doc));
   errors.push(...anchorErrors(schemas, rootFile, doc));
+  errors.push(...tokenErrors(schemas, rootFile, doc));
   return errors;
 }
 

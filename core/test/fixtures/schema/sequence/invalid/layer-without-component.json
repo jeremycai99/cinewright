@@ -64,7 +64,7 @@
                 "value": {
                   "amount": 0.06,
                   "ease": {
-                    "token": "motion.ease_out_expo"
+                    "token": "motion.ease.enter"
                   },
                   "move": "push_in"
                 }
