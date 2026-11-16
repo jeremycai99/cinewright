@@ -1,0 +1,7 @@
+[
+  {
+    "entity": "narrator",
+    "pointer": "/role/value",
+    "rule": "schema.enum"
+  }
+]

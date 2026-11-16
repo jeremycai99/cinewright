@@ -1,0 +1,7 @@
+[
+  {
+    "entity": "narrator",
+    "pointer": "/performance/pace_wpm/value",
+    "rule": "schema.type"
+  }
+]

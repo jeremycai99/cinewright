@@ -13,6 +13,9 @@
       "currency": "USD"
     }
   },
+  "cast": {
+    "state": "open"
+  },
   "deliverables": {
     "state": "user",
     "value": [
@@ -81,6 +84,13 @@
     }
   },
   "schema_version": 1,
+  "script": {
+    "beats": {
+      "state": "open"
+    },
+    "id": "script",
+    "origin": "user"
+  },
   "sequences": {
     "state": "open"
   },

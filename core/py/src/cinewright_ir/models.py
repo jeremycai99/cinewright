@@ -2,18 +2,14 @@
 
 from __future__ import annotations
 
-from typing import Annotated, Literal
-from pydantic import BaseModel, ConfigDict, Field, RootModel, StringConstraints
 from enum import Enum
+from typing import Annotated, Any, Literal
+from pydantic import BaseModel, ConfigDict, Field, RootModel, StringConstraints
 
 
-class LoudnessTarget(BaseModel):
-    model_config = ConfigDict(
-        extra="forbid",
-    )
-    integrated_lufs: Annotated[float, Field(le=0.0)]
-    true_peak_dbtp: Annotated[float, Field(le=0.0)]
-    tolerance_lu: Annotated[float, Field(ge=0.0)]
+class Value(Enum):
+    narrator = "narrator"
+    character = "character"
 
 
 class Id(RootModel[str]):
@@ -158,6 +154,125 @@ class License(BaseModel):
     attribution: str | None = None
 
 
+class Baseline(BaseModel):
+    model_config = ConfigDict(
+        extra="forbid",
+    )
+    state: State
+    value: Annotated[str | None, Field(max_length=500)] = None
+
+
+class PaceWpm(BaseModel):
+    model_config = ConfigDict(
+        extra="forbid",
+    )
+    state: State
+    value: Annotated[int | None, Field(ge=60, le=300)] = None
+
+
+class ValueItem(RootModel[str]):
+    root: Annotated[str, Field(min_length=1)]
+
+
+class Tics(BaseModel):
+    model_config = ConfigDict(
+        extra="forbid",
+    )
+    state: State
+    value: list[ValueItem] | None = None
+
+
+class Performance(BaseModel):
+    model_config = ConfigDict(
+        extra="forbid",
+    )
+    baseline: Baseline
+    pace_wpm: PaceWpm
+    tics: Tics
+
+
+class VoiceDescription(BaseModel):
+    model_config = ConfigDict(
+        extra="forbid",
+    )
+    language: Annotated[
+        str | None, Field(pattern="^[a-z]{2,3}(-[A-Za-z0-9]{2,8})*$")
+    ] = None
+    timbre: str | None = None
+    accent: str | None = None
+    text: str | None = None
+
+
+class Lexicon1(BaseModel):
+    model_config = ConfigDict(
+        extra="forbid",
+    )
+    state: State
+    value: Annotated[str | None, Field(max_length=200, min_length=1)] = None
+
+
+class Lexicon(
+    RootModel[
+        dict[Annotated[str, StringConstraints(min_length=1, max_length=100)], Lexicon1]
+    ]
+):
+    root: Annotated[
+        dict[Annotated[str, StringConstraints(min_length=1, max_length=100)], Lexicon1],
+        Field(
+            description="Pronunciations, one wrapper per term. Plugins translate them for their provider (D29).",
+            title="Lexicon",
+        ),
+    ]
+
+
+class VoiceBinding(BaseModel):
+    model_config = ConfigDict(
+        extra="forbid",
+    )
+    voice_id: str | None = None
+    voice: str | None = None
+    model: str | None = None
+    settings: Annotated[
+        dict[str, Any] | None,
+        Field(description="Provider-specific settings, passed through to the plugin."),
+    ] = None
+
+
+class Visual(BaseModel):
+    model_config = ConfigDict(
+        extra="forbid",
+    )
+    sheet: list[Id]
+    wardrobe: str | None = None
+    style: str | None = None
+
+
+class Consent(BaseModel):
+    model_config = ConfigDict(
+        extra="forbid",
+    )
+    synthetic: bool
+    record: Id | None = None
+
+
+class LoudnessTarget(BaseModel):
+    model_config = ConfigDict(
+        extra="forbid",
+    )
+    integrated_lufs: Annotated[float, Field(le=0.0)]
+    true_peak_dbtp: Annotated[float, Field(le=0.0)]
+    tolerance_lu: Annotated[float, Field(ge=0.0)]
+
+
+class CaptionRules(BaseModel):
+    model_config = ConfigDict(
+        extra="forbid",
+    )
+    max_chars_per_line: Annotated[int, Field(ge=1)]
+    max_lines: Annotated[int, Field(ge=1)]
+    min_display_frames: Frames
+
+
 class Insets(BaseModel):
     model_config = ConfigDict(
         extra="forbid",
@@ -184,7 +299,7 @@ class Brief(BaseModel):
     value: Annotated[str | None, Field(max_length=20000)] = None
 
 
-class Value(Enum):
+class Value1(Enum):
     auto = "auto"
     guided = "guided"
     directed = "directed"
@@ -196,7 +311,7 @@ class Autonomy(BaseModel):
         extra="forbid",
     )
     state: State
-    value: Value | None = None
+    value: Value1 | None = None
 
 
 class ProposeConversationalEdits(BaseModel):
@@ -233,6 +348,83 @@ class Sequences(BaseModel):
     )
     state: State
     value: list[Id] | None = None
+
+
+class Summary(BaseModel):
+    model_config = ConfigDict(
+        extra="forbid",
+    )
+    state: State
+    value: Annotated[str | None, Field(max_length=1000)] = None
+
+
+class Text(BaseModel):
+    model_config = ConfigDict(
+        extra="forbid",
+    )
+    state: State
+    value: Annotated[str | None, Field(max_length=2000, min_length=1)] = None
+
+
+class Direction(BaseModel):
+    model_config = ConfigDict(
+        extra="forbid",
+    )
+    state: State
+    value: Annotated[str | None, Field(max_length=500)] = None
+
+
+class Speaker(BaseModel):
+    model_config = ConfigDict(
+        extra="forbid",
+    )
+    state: State
+    value: Id | None = None
+
+
+class OnScreen(BaseModel):
+    model_config = ConfigDict(
+        extra="forbid",
+    )
+    state: State
+    value: bool | None = None
+
+
+class Lipsync(BaseModel):
+    model_config = ConfigDict(
+        extra="forbid",
+    )
+    state: State
+    value: bool | None = None
+
+
+class OnScreenText(BaseModel):
+    model_config = ConfigDict(
+        extra="forbid",
+    )
+    state: State
+    value: Annotated[str | None, Field(max_length=500)] = None
+
+
+class Line(BaseModel):
+    model_config = ConfigDict(
+        extra="forbid",
+    )
+    id: Id
+    origin: Origin
+    locked: EntityLock | None = None
+    text: Text
+    direction: Annotated[
+        Direction, Field(description="Delivery direction, such as audio tags.")
+    ]
+    speaker: Speaker
+    on_screen: Annotated[
+        OnScreen, Field(description="The speaker is visible while delivering the line.")
+    ]
+    lipsync: Lipsync
+    on_screen_text: Annotated[
+        OnScreenText, Field(description="Text shown on screen with the line.")
+    ]
 
 
 class Budget(BaseModel):
@@ -324,21 +516,90 @@ class Deliverable(BaseModel):
     burn_in_captions: BurnInCaptions
 
 
+class Role(BaseModel):
+    model_config = ConfigDict(
+        extra="forbid",
+    )
+    state: State
+    value: Value | None = None
+
+
+class DisplayName(BaseModel):
+    model_config = ConfigDict(
+        extra="forbid",
+    )
+    state: State
+    value: Annotated[str | None, Field(max_length=100, min_length=1)] = None
+
+
+class VisualModel(BaseModel):
+    model_config = ConfigDict(
+        extra="forbid",
+    )
+    state: State
+    value: Visual | None = None
+
+
+class ConsentModel(BaseModel):
+    model_config = ConfigDict(
+        extra="forbid",
+    )
+    state: State
+    value: Consent | None = None
+
+
+class Description(BaseModel):
+    model_config = ConfigDict(
+        extra="forbid",
+    )
+    state: State
+    value: VoiceDescription | None = None
+
+
+class VoiceBindings1(BaseModel):
+    model_config = ConfigDict(
+        extra="forbid",
+    )
+    state: State
+    value: VoiceBinding | None = None
+
+
+class VoiceBindings(
+    RootModel[
+        dict[
+            Annotated[
+                str,
+                StringConstraints(
+                    max_length=64, pattern=r"^[a-z][a-z0-9_]*(\.[a-z0-9_]+)*$"
+                ),
+            ],
+            VoiceBindings1,
+        ]
+    ]
+):
+    root: Annotated[
+        dict[
+            Annotated[
+                str,
+                StringConstraints(
+                    max_length=64, pattern=r"^[a-z][a-z0-9_]*(\.[a-z0-9_]+)*$"
+                ),
+            ],
+            VoiceBindings1,
+        ],
+        Field(
+            description="Per-provider voice bindings, keyed by provider id (D29).",
+            title="VoiceBindings",
+        ),
+    ]
+
+
 class SafeZones(BaseModel):
     model_config = ConfigDict(
         extra="forbid",
     )
     action: Insets
     title: Insets
-
-
-class CaptionRules(BaseModel):
-    model_config = ConfigDict(
-        extra="forbid",
-    )
-    max_chars_per_line: Annotated[int, Field(ge=1)]
-    max_lines: Annotated[int, Field(ge=1)]
-    min_display_frames: Frames
 
 
 class DeliveryProfile(BaseModel):
@@ -390,12 +651,40 @@ class Deliverables(BaseModel):
     value: list[Deliverable] | None = None
 
 
+class Lines(BaseModel):
+    model_config = ConfigDict(
+        extra="forbid",
+    )
+    state: State
+    value: list[Line] | None = None
+
+
+class Beat(BaseModel):
+    model_config = ConfigDict(
+        extra="forbid",
+    )
+    id: Id
+    origin: Origin
+    locked: EntityLock | None = None
+    summary: Summary
+    lines: Lines
+
+
 class ProfileCopy(BaseModel):
     model_config = ConfigDict(
         extra="forbid",
     )
     hash: Hash
     body: DeliveryProfile
+
+
+class Voice(BaseModel):
+    model_config = ConfigDict(
+        extra="forbid",
+    )
+    description: Description
+    lexicon: Lexicon
+    bindings: VoiceBindings
 
 
 class ProfileCopies(
@@ -426,6 +715,48 @@ class ProfileCopies(
             title="ProfileCopies",
         ),
     ]
+
+
+class Beats(BaseModel):
+    model_config = ConfigDict(
+        extra="forbid",
+    )
+    state: State
+    value: list[Beat] | None = None
+
+
+class Script(BaseModel):
+    model_config = ConfigDict(
+        extra="forbid",
+    )
+    id: Id
+    origin: Origin
+    locked: EntityLock | None = None
+    beats: Beats
+
+
+class CastMember(BaseModel):
+    model_config = ConfigDict(
+        extra="forbid",
+    )
+    id: Id
+    origin: Origin
+    locked: EntityLock | None = None
+    role: Role
+    display_name: DisplayName
+    voice: Voice
+    performance: Performance
+    on_screen: OnScreen
+    visual: VisualModel
+    consent: ConsentModel
+
+
+class Cast(BaseModel):
+    model_config = ConfigDict(
+        extra="forbid",
+    )
+    state: State
+    value: list[CastMember] | None = None
 
 
 class Project(BaseModel):
@@ -463,11 +794,17 @@ class Project(BaseModel):
             description="Sequence ids in order; each body is stored in sequences/<id>.json (convention 7)."
         ),
     ]
+    script: Script
+    cast: Annotated[
+        Cast, Field(description="The cast bible: narrators and characters (D29).")
+    ]
 
 
 class IrDocuments(BaseModel):
     model_config = ConfigDict(
         extra="forbid",
     )
+    cast: CastMember | None = None
     delivery_profile: DeliveryProfile | None = None
     project: Project | None = None
+    script: Script | None = None

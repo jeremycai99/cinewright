@@ -60,8 +60,9 @@ Every entity carries three plain properties:
 | `style.overrides` | map | token path → token value |
 | `deliverables` | list | Deliverable |
 | `sequences` | list | sequence ids, in order; each body is `sequences/<id>.json` |
+| `cast` | list | CastMember |
 
-Plain: `id`, `origin`, `locked`, `schema_version` (`1`), `profiles` (profile id → `{ hash, body }`, written only by `init`; convention 16).
+Plain: `id`, `origin`, `locked`, `schema_version` (`1`), `script` (the Script entity), `profiles` (profile id → `{ hash, body }`, written only by `init`; convention 16).
 
 ### Deliverable (`project.schema.json#/$defs/deliverable`)
 
@@ -70,6 +71,41 @@ Plain: `id`, `origin`, `locked`, `schema_version` (`1`), `profiles` (profile id 
 | `profile` | field | a profile id present in `project.profiles` |
 | `label` | field | string, 1–200 characters |
 | `burn_in_captions` | field | boolean |
+
+### Script (`script.schema.json`; `project.script`)
+
+| Entity | Field | Kind | Value |
+| --- | --- | --- | --- |
+| Script | `beats` | list | Beat |
+| Beat | `summary` | field | string |
+| Beat | `lines` | list | Line |
+| Line | `text` | field | string, 1–2,000 characters |
+| Line | `direction` | field | string (delivery direction, such as audio tags) |
+| Line | `speaker` | field | id of a cast member (`x-ref: cast_member`) |
+| Line | `on_screen` | field | boolean: the speaker is visible |
+| Line | `lipsync` | field | boolean |
+| Line | `on_screen_text` | field | string shown on screen with the line |
+
+### CastMember (`cast.schema.json`; items of `project.cast`)
+
+| Field | Kind | Value |
+| --- | --- | --- |
+| `role` | field | `narrator` · `character` (v0.1 casts only a narrator; checked at intake, M7.1) |
+| `display_name` | field | string |
+| `voice.description` | field | `{ language?, timbre?, accent?, text? }` (provider-neutral, D29) |
+| `voice.lexicon` | map | term → pronunciation; any Unicode term |
+| `voice.bindings` | map | provider id → `{ voice_id?, voice?, model?, settings? }` |
+| `performance.baseline` | field | string |
+| `performance.pace_wpm` | field | integer, 60–300 |
+| `performance.tics` | field | list of strings |
+| `on_screen` | field | boolean |
+| `visual` | field | `{ sheet: [asset id], wardrobe?, style? }` |
+| `consent` | field | `{ synthetic: boolean, record?: asset id }` (D18) |
+
+Stored-form mapping of the spec's cast example (`core/test/fixtures/schema/cast/valid/spec-*.json`):
+- `performance.pronunciations` becomes `voice.lexicon` (D29).
+- `visual.sheet` paths become asset ids.
+- Fields the example leaves out are `open`.
 
 ### DeliveryProfile (`delivery-profile.schema.json`)
 

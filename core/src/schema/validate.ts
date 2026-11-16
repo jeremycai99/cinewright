@@ -4,11 +4,13 @@ import { wrapperErrors } from "../ir/semantic.js";
 import { normalizeErrors, type ValidationError } from "./errors.js";
 import { escapeSegment, loadSchemas, type SchemaSet } from "./load.js";
 
-export type DocumentKind = "project" | "delivery_profile";
+export type DocumentKind = "project" | "delivery_profile" | "script" | "cast_member";
 
 export const ROOT_FILES: Readonly<Record<DocumentKind, string>> = {
   project: "project.schema.json",
   delivery_profile: "delivery-profile.schema.json",
+  script: "script.schema.json",
+  cast_member: "cast.schema.json",
 };
 
 const SCHEMA_BASE = "https://cinewright.invalid/ir/0/";

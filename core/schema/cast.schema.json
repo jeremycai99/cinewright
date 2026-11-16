@@ -1,0 +1,322 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://cinewright.invalid/ir/0/cast.schema.json",
+  "title": "CastMember",
+  "description": "A narrator or character, defined once and referenced by id (AGENTS.md invariant 4). v0.1 casts only a narrator (checked at intake, M7.1); the schema is ready for more.",
+  "x-entity": "cast_member",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "id",
+    "origin",
+    "role",
+    "display_name",
+    "voice",
+    "performance",
+    "on_screen",
+    "visual",
+    "consent"
+  ],
+  "properties": {
+    "id": {
+      "$ref": "common.schema.json#/$defs/id"
+    },
+    "origin": {
+      "$ref": "common.schema.json#/$defs/origin"
+    },
+    "locked": {
+      "$ref": "common.schema.json#/$defs/entity_lock"
+    },
+    "role": {
+      "x-authorable": "field",
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["state"],
+      "properties": {
+        "state": {
+          "$ref": "common.schema.json#/$defs/state"
+        },
+        "value": {
+          "enum": ["narrator", "character"]
+        }
+      }
+    },
+    "display_name": {
+      "x-authorable": "field",
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["state"],
+      "properties": {
+        "state": {
+          "$ref": "common.schema.json#/$defs/state"
+        },
+        "value": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 100
+        }
+      }
+    },
+    "voice": {
+      "$ref": "#/$defs/voice"
+    },
+    "performance": {
+      "$ref": "#/$defs/performance"
+    },
+    "on_screen": {
+      "x-authorable": "field",
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["state"],
+      "properties": {
+        "state": {
+          "$ref": "common.schema.json#/$defs/state"
+        },
+        "value": {
+          "type": "boolean"
+        }
+      }
+    },
+    "visual": {
+      "x-authorable": "field",
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["state"],
+      "properties": {
+        "state": {
+          "$ref": "common.schema.json#/$defs/state"
+        },
+        "value": {
+          "$ref": "#/$defs/visual"
+        }
+      }
+    },
+    "consent": {
+      "x-authorable": "field",
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["state"],
+      "properties": {
+        "state": {
+          "$ref": "common.schema.json#/$defs/state"
+        },
+        "value": {
+          "$ref": "#/$defs/consent"
+        }
+      }
+    }
+  },
+  "$defs": {
+    "voice": {
+      "title": "Voice",
+      "description": "A provider-neutral voice: description and pronunciation lexicon, plus per-provider bindings (D29).",
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["description", "lexicon", "bindings"],
+      "properties": {
+        "description": {
+          "x-authorable": "field",
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["state"],
+          "properties": {
+            "state": {
+              "$ref": "common.schema.json#/$defs/state"
+            },
+            "value": {
+              "$ref": "#/$defs/voice_description"
+            }
+          }
+        },
+        "lexicon": {
+          "$ref": "#/$defs/lexicon"
+        },
+        "bindings": {
+          "$ref": "#/$defs/voice_bindings"
+        }
+      }
+    },
+    "performance": {
+      "title": "Performance",
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["baseline", "pace_wpm", "tics"],
+      "properties": {
+        "baseline": {
+          "x-authorable": "field",
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["state"],
+          "properties": {
+            "state": {
+              "$ref": "common.schema.json#/$defs/state"
+            },
+            "value": {
+              "type": "string",
+              "maxLength": 500
+            }
+          }
+        },
+        "pace_wpm": {
+          "x-authorable": "field",
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["state"],
+          "properties": {
+            "state": {
+              "$ref": "common.schema.json#/$defs/state"
+            },
+            "value": {
+              "type": "integer",
+              "minimum": 60,
+              "maximum": 300
+            }
+          }
+        },
+        "tics": {
+          "x-authorable": "field",
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["state"],
+          "properties": {
+            "state": {
+              "$ref": "common.schema.json#/$defs/state"
+            },
+            "value": {
+              "type": "array",
+              "items": {
+                "type": "string",
+                "minLength": 1
+              }
+            }
+          }
+        }
+      }
+    },
+    "voice_description": {
+      "title": "VoiceDescription",
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "language": {
+          "type": "string",
+          "pattern": "^[a-z]{2,3}(-[A-Za-z0-9]{2,8})*$"
+        },
+        "timbre": {
+          "type": "string"
+        },
+        "accent": {
+          "type": "string"
+        },
+        "text": {
+          "type": "string"
+        }
+      }
+    },
+    "lexicon": {
+      "title": "Lexicon",
+      "description": "Pronunciations, one wrapper per term. Plugins translate them for their provider (D29).",
+      "x-authorable": "map",
+      "type": "object",
+      "propertyNames": {
+        "type": "string",
+        "minLength": 1,
+        "maxLength": 100
+      },
+      "additionalProperties": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["state"],
+        "properties": {
+          "state": {
+            "$ref": "common.schema.json#/$defs/state"
+          },
+          "value": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 200
+          }
+        }
+      }
+    },
+    "voice_bindings": {
+      "title": "VoiceBindings",
+      "description": "Per-provider voice bindings, keyed by provider id (D29).",
+      "x-authorable": "map",
+      "type": "object",
+      "propertyNames": {
+        "$ref": "common.schema.json#/$defs/id"
+      },
+      "additionalProperties": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["state"],
+        "properties": {
+          "state": {
+            "$ref": "common.schema.json#/$defs/state"
+          },
+          "value": {
+            "$ref": "#/$defs/voice_binding"
+          }
+        }
+      }
+    },
+    "voice_binding": {
+      "title": "VoiceBinding",
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "voice_id": {
+          "type": "string"
+        },
+        "voice": {
+          "type": "string"
+        },
+        "model": {
+          "type": "string"
+        },
+        "settings": {
+          "type": "object",
+          "description": "Provider-specific settings, passed through to the plugin."
+        }
+      }
+    },
+    "visual": {
+      "title": "Visual",
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["sheet"],
+      "properties": {
+        "sheet": {
+          "type": "array",
+          "items": {
+            "$ref": "common.schema.json#/$defs/id",
+            "x-ref": "asset"
+          }
+        },
+        "wardrobe": {
+          "type": "string"
+        },
+        "style": {
+          "type": "string"
+        }
+      }
+    },
+    "consent": {
+      "title": "Consent",
+      "description": "A cloned voice needs a consent record (D18).",
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["synthetic"],
+      "properties": {
+        "synthetic": {
+          "type": "boolean"
+        },
+        "record": {
+          "$ref": "common.schema.json#/$defs/id",
+          "x-ref": "asset"
+        }
+      }
+    }
+  }
+}

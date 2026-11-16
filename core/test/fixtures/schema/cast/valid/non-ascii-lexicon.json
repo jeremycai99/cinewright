@@ -1,0 +1,76 @@
+{
+  "consent": {
+    "state": "open"
+  },
+  "display_name": {
+    "state": "open"
+  },
+  "id": "narrator_intl",
+  "on_screen": {
+    "state": "user",
+    "value": false
+  },
+  "origin": "user",
+  "performance": {
+    "baseline": {
+      "state": "user",
+      "value": "warm, confident, unhurried"
+    },
+    "pace_wpm": {
+      "state": "user",
+      "value": 150
+    },
+    "tics": {
+      "state": "open"
+    }
+  },
+  "role": {
+    "state": "user",
+    "value": "narrator"
+  },
+  "visual": {
+    "state": "open"
+  },
+  "voice": {
+    "bindings": {
+      "elevenlabs": {
+        "state": "agent",
+        "value": {
+          "model": "eleven_v4",
+          "settings": {
+            "stability": 0.45
+          },
+          "voice_id": "…"
+        }
+      },
+      "kokoro": {
+        "state": "agent",
+        "value": {
+          "voice": "…"
+        }
+      }
+    },
+    "description": {
+      "state": "user",
+      "value": {
+        "accent": "neutral",
+        "language": "en",
+        "timbre": "warm, mid-low"
+      }
+    },
+    "lexicon": {
+      "Zoë": {
+        "state": "user",
+        "value": "zo-AY"
+      },
+      "東京": {
+        "state": "user",
+        "value": "TOH-kyoh"
+      },
+      "🚀 launch": {
+        "state": "agent",
+        "value": "LAWNCH"
+      }
+    }
+  }
+}
