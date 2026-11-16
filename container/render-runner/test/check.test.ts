@@ -82,6 +82,34 @@ describe("failures", () => {
     ]);
   });
 
+  it("names a component marker reported through the console after its marker", () => {
+    const report = {
+      ...clean,
+      ok: false,
+      runtime: {
+        findings: [
+          {
+            code: "console_warning",
+            severity: "warning",
+            message: "cinewright.density layer=bullet_reveal.too_many element=div.cw-bullet-reveal",
+            selector: "[data-composition-id]",
+            time: 0,
+          },
+        ],
+      },
+    };
+    expect(failures(report)).toEqual([
+      {
+        section: "runtime",
+        code: "cinewright.density",
+        severity: "warning",
+        message: "cinewright.density layer=bullet_reveal.too_many element=div.cw-bullet-reveal",
+        selector: "[data-composition-id]",
+        time: 0,
+      },
+    ]);
+  });
+
   it("fails a report that is not ok even without findings", () => {
     expect(failures({ ...clean, ok: false })).toEqual([
       {

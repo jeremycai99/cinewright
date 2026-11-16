@@ -76,6 +76,14 @@ def test_check_specimens_reports_each_failure_and_fails(
     assert summary["failed"] == ["neutral/b"]
 
 
+def test_check_specimens_fails_on_a_root_with_no_specimens(
+    monkeypatch: pytest.MonkeyPatch, tmp_path: Path, capsys: pytest.CaptureFixture[str]
+) -> None:
+    monkeypatch.setattr(shutil, "which", lambda _: "/usr/bin/docker")
+    assert specimens.main(["--image", "img", str(tmp_path)]) == 1
+    assert "no specimens" in capsys.readouterr().err
+
+
 def test_contact_sheet_selects_the_sample_frames() -> None:
     assert specimens.select_filter([0.5, 1.0, 2.0], {"num": 30, "den": 1}) == (
         r"select='eq(n\,15)+eq(n\,30)+eq(n\,60)',scale=480:-1,tile=3x1"
@@ -155,3 +163,58 @@ def test_an_override_that_breaks_contrast_fails_naming_the_element(
     codes = {(f["section"], f["code"]) for f in result.failures}
     assert ("contrast", "contrast_aa_failure") in codes
     assert any("span" in str(f.get("selector", "")) for f in result.failures)
+
+
+def _one_example(tmp_path: Path, component: str, example: dict[str, object]) -> Path:
+    examples = tmp_path / "examples.json"
+    examples.write_text(json.dumps([example]))
+    built = _build(
+        tmp_path / "s",
+        "--component",
+        component,
+        "--pack",
+        "neutral",
+        "--profile",
+        "landscape_1080p30",
+        "--examples",
+        str(examples),
+    )
+    return built[0]
+
+
+@pytest.mark.container
+def test_a_list_past_the_density_limit_fails_naming_the_layer(image: str, tmp_path: Path) -> None:
+    built = _one_example(
+        tmp_path,
+        "bullet_reveal",
+        {
+            "name": "too_many",
+            "template": "full",
+            "region": "main",
+            "duration_ms": 2000,
+            "props": {"items": [f"Point {i}" for i in range(1, 8)]},
+        },
+    )
+    result = run_check(image, built, tmp_path / "check", _samples(built))
+    assert result.exit_code == 5, result.stderr
+    density = [f for f in result.failures if f["code"] == "cinewright.density"]
+    assert density and "layer=bullet_reveal.too_many" in str(density[0]["message"])
+
+
+@pytest.mark.container
+def test_text_that_cannot_fit_fails_with_the_overflow_marker(image: str, tmp_path: Path) -> None:
+    built = _one_example(
+        tmp_path,
+        "kinetic_title",
+        {
+            "name": "cannot_fit",
+            "template": "captions",
+            "region": "captions",
+            "duration_ms": 2000,
+            "props": {"text": " ".join(["overflowing"] * 40)},
+        },
+    )
+    result = run_check(image, built, tmp_path / "check", _samples(built))
+    assert result.exit_code == 5, result.stderr
+    codes = {f["code"] for f in result.failures}
+    assert "cinewright.overflow" in codes, result.failures

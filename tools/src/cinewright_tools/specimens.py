@@ -85,6 +85,9 @@ def main(argv: list[str] | None = None) -> int:
         print("Docker is not available: install a Docker runtime and start it", file=sys.stderr)
         return 2
     root: Path = args.root
+    if not any(root.glob("*/*/samples.json")):
+        print(f"no specimens under {root}: nothing was checked", file=sys.stderr)
+        return 1
     failed: list[str] = []
     results: dict[str, list[dict[str, object]]] = {}
     for samples_file in sorted(root.glob("*/*/samples.json")):

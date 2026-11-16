@@ -51,8 +51,34 @@ export function mount(spec: MountSpec): Promise<void> {
       }
     }
   })();
+  ready.then(() => reportMarkers(spec)).catch(() => {});
   window.__hf = window.__hf ?? {};
   window.__hf.buildReady = window.__hf.buildReady ?? {};
   window.__hf.buildReady.cinewright = ready;
   return ready;
+}
+
+// Fixed selector strings: HyperFrames' lint rejects template literals in selectors.
+const MARKERS = [
+  { selector: "[data-cw-overflow]", code: "cinewright.overflow" },
+  { selector: "[data-cw-density]", code: "cinewright.density" },
+] as const;
+
+/**
+ * Report every element a component marked (text that does not fit even at the minimum size, a
+ * list past the pack's density limits) as a console warning, which HyperFrames' check reports and
+ * `render-job check` fails on (M2.5b, audit F2). One line per element: `cinewright.<marker>
+ * layer=<id> element=<tag.class>`.
+ */
+function reportMarkers(spec: MountSpec): void {
+  for (const layer of spec.layers) {
+    const root = document.getElementById(`cw-${layer.id}`);
+    if (!root) continue;
+    for (const { selector, code } of MARKERS) {
+      for (const el of Array.from(root.querySelectorAll(selector))) {
+        const name = `${el.tagName.toLowerCase()}${el.className ? `.${String(el.className).split(" ")[0]}` : ""}`;
+        console.warn(`${code} layer=${layer.id} element=${name}`);
+      }
+    }
+  }
 }

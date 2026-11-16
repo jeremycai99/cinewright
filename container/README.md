@@ -72,7 +72,7 @@ Craft warnings (dead stretches, unread lines) are skipped, because they depend o
 - `failures.json`: every error or warning in the lint, runtime, layout and contrast sections, or a not-ok report;
 - `check-log.txt`.
 
-HyperFrames demotes a contrast failure seen at one sample to a warning and still reports `ok`, so warnings count as failures here.
+HyperFrames demotes a contrast failure seen at one sample to a warning and still reports `ok`, so warnings count as failures here. The component host reports its markers as console warnings (`cinewright.overflow …`, `cinewright.density …`); `failures.json` gives those findings their marker as the code.
 
 Exit codes: 0 nothing fails, 2 usage or input error, 4 no report, 5 failures.
 

@@ -56,7 +56,8 @@ type Finding = {
 /**
  * What fails a check: every error or warning in the lint, runtime, layout and contrast sections
  * (HyperFrames demotes a contrast failure seen at one sample to a warning, so warnings count), and
- * a report that is not ok. Infos never fail.
+ * a report that is not ok. Infos never fail. A component marker the host reports as a console
+ * warning (`cinewright.overflow`, `cinewright.density`) keeps its marker as the code.
  */
 export function failures(report: Record<string, unknown>): Failure[] {
   const out: Failure[] = [];
@@ -65,9 +66,11 @@ export function failures(report: Record<string, unknown>): Failure[] {
       []) as Finding[];
     for (const f of findings) {
       if (f.severity !== "error" && f.severity !== "warning") continue;
+      // The component host reports its markers as console warnings: `cinewright.<marker> …`.
+      const marker = /^(cinewright\.[a-z_]+)\b/.exec(f.message ?? "")?.[1];
       out.push({
         section,
-        code: f.code ?? "unknown",
+        code: marker ?? f.code ?? "unknown",
         severity: f.severity,
         message: f.message ?? "",
         ...(f.selector !== undefined ? { selector: f.selector } : {}),
