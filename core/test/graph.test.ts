@@ -3,7 +3,7 @@ import { fileURLToPath } from "node:url";
 import fc from "fast-check";
 import { describe, expect, it } from "vitest";
 import type { TokenTree } from "../src/cascade/resolve.js";
-import { dependencyGraph, dirtyNodes, renderKey } from "../src/graph/deps.js";
+import { dependencyGraph, dirtyNodes, renderKey, renderKeyV1 } from "../src/graph/deps.js";
 import type { InlinedIr } from "../src/ir/inlined.js";
 import { validateProject } from "../src/schema/validate.js";
 
@@ -182,4 +182,47 @@ describe("renderKey", () => {
       { numRuns: 1000 },
     );
   }, 60_000);
+});
+
+describe("render key v1 (M3.2b)", () => {
+  const base = {
+    compile: { spec: { layers: [] }, fonts: { "a.woff2": "x" } },
+    renderer: { image: "sha256:aaa", hyperframes: "0.9.58", settings: { fps: 30 } },
+  };
+
+  it("is stable under key order and changes with every input", () => {
+    const k = renderKeyV1(base);
+    expect(renderKeyV1({ renderer: base.renderer, compile: base.compile })).toBe(k);
+    expect(
+      renderKeyV1({ ...base, compile: { ...base.compile, fonts: { "a.woff2": "y" } } }),
+    ).not.toBe(k);
+    expect(renderKeyV1({ ...base, renderer: { ...base.renderer, image: "sha256:bbb" } })).not.toBe(
+      k,
+    );
+    expect(
+      renderKeyV1({ ...base, renderer: { ...base.renderer, hyperframes: "0.9.59" } }),
+    ).not.toBe(k);
+    expect(
+      renderKeyV1({ ...base, renderer: { ...base.renderer, settings: { fps: 25 } } }),
+    ).not.toBe(k);
+  });
+
+  it("dirtyNodes uses an injected render key for render nodes", () => {
+    const before = fixture();
+    const after = fixture();
+    const seen: string[] = [];
+    const inputs = {
+      ...INPUTS,
+      renderKey: (_ir: InlinedIr, shot: string, deliverable: string) => {
+        seen.push(`${shot}@${deliverable}`);
+        return shot === "a1" && _ir === after ? "changed" : "same";
+      },
+    };
+    const dirty = dirtyNodes(before, after, inputs);
+    expect(seen.length).toBeGreaterThan(0);
+    expect([...dirty].filter((n) => n.startsWith("render:"))).toEqual(
+      expect.arrayContaining(["render:a1@web_landscape", "render:a1@social_portrait"]),
+    );
+    expect([...dirty].filter((n) => n.startsWith("render:") && !n.includes(":a1@"))).toEqual([]);
+  });
 });

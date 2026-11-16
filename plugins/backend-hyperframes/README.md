@@ -34,6 +34,20 @@ Compiling the same inputs twice writes byte-identical folders. `inputs` lists ev
 | `timing.unknown_line`, `timing.unknown_word`, `timing.empty_span`, `timing.outside_shot` | The timing table does not cover an anchor, or a span is empty or leaves its shot. |
 | `compile.unknown_deliverable`, `compile.unknown_shot` | The ids do not exist. |
 
+## `renderShot` (M3.2a, M3.2b)
+
+```ts
+renderShot({ compiled, shotId, renderer, cacheDir, limits? }) → { key, dir, framemd5, sha256, hit }
+```
+
+Runs `render-job --format mp4+frames --fps <rate>` in the render image with the network off and the run limits (`src/limits.ts`; container README), into `<cacheDir>/<key>/`: `frames/`, `body.mp4`, `framemd5.txt`, `sha256.txt`, `render-log.jsonl`, `inputs.json`. The entry appears only after a successful render. The cache is disposable (D37).
+
+- **Key:** render key v1 (core `renderKeyV1`): the compile inputs plus `renderer`, which `resolveRenderer(imageRef)` builds from the image's content digest (`docker image inspect`), the HyperFrames version and `render-settings.json`. A shot whose key is cached runs no container.
+- **Planning:** `planShot` computes the mount spec and compile inputs without writing anything; `shotRenderKey(options, renderer)` is its v1 key, which the engine passes to core's `dirtyNodes` as `inputs.renderKey`.
+- **Failures:** `RenderError` with `render.timeout` (killed after 120 s plus 1 s per frame), `render.memory` (exit 137 at the memory limit), `render.failed` (render-job's own error) or `render.unsupported_fps`, naming the shot.
+
+CI renders the reference shot twice on each of two runners (`.github/scripts/reference-shot.sh`): both renders and both runners must give identical `framemd5.txt` and `sha256.txt`, and a third run must be a cache hit.
+
 ## Plugin
 
 `manifest.json` declares a `backend` plugin with the capability `render.composition`. `createPlugin()` answers it with `{ project, shot, deliverable, timing, out_dir, pack_path? }` and returns `{ dir, inputs }`; compile and pack errors are `invalid_request`.

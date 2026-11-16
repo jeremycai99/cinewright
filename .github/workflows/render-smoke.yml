@@ -1,5 +1,6 @@
 # Render smoke test (M0.2, D33): two separate amd64 runners each check the pins, render the
-# hello-world fixture twice and the remote-URL fixture; their hashes must match each other.
+# hello-world fixture twice and the remote-URL fixture, then the M1 reference shot twice through
+# cinewright render-shot (render key v1, M3.2b); their hashes must match each other.
 # Specimens (M2.4b): every component example under every pack and aspect class passes
 # HyperFrames' check in the image; contact sheets are uploaded for review.
 name: render-smoke
@@ -8,6 +9,10 @@ on:
   pull_request:
     paths:
       - container/**
+      - plugins/backend-hyperframes/**
+      - cli/**
+      - core/src/**
+      - core/schema/**
       - tools/**
       - .dockerignore
       - .node-version
@@ -27,6 +32,10 @@ on:
     branches: [main]
     paths:
       - container/**
+      - plugins/backend-hyperframes/**
+      - cli/**
+      - core/src/**
+      - core/schema/**
       - tools/**
       - .dockerignore
       - .node-version
@@ -88,6 +97,14 @@ jobs:
         env:
           CINEWRIGHT_CONTAINER_TESTS: "1"
           CINEWRIGHT_IMAGE: ${{ env.IMAGE }}
+      - uses: pnpm/action-setup@73e46992e05b19abd31f2f3c20e0e7370d762115 # v6.1.1
+      - uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7.1.0
+        with:
+          node-version-file: .node-version
+      - run: pnpm install --frozen-lockfile
+      - run: pnpm typecheck
+      - name: The reference shot twice, then a cache hit
+        run: sh .github/scripts/reference-shot.sh "$IMAGE" "$RUNNER_TEMP/reference" smoke
       - name: Record hashes and CPU
         run: |
           uv run --locked cinewright-render-in-container --image "$IMAGE" \
@@ -160,6 +177,8 @@ jobs:
           status=0
           cmp smoke-a/framemd5.txt smoke-b/framemd5.txt || { echo "::error::framemd5 differs across runners"; status=1; }
           cmp smoke-a/sha256.txt smoke-b/sha256.txt || { echo "::error::output bytes differ across runners"; status=1; }
+          cmp smoke-a/reference-framemd5.txt smoke-b/reference-framemd5.txt || { echo "::error::reference shot frames differ across runners"; status=1; }
+          cmp smoke-a/reference-sha256.txt smoke-b/reference-sha256.txt || { echo "::error::reference shot bytes differ across runners"; status=1; }
           if [ "$status" -ne 0 ]; then
             echo "CPU flags, runner a:"; sed -n 2p smoke-a/cpu.txt
             echo "CPU flags, runner b:"; sed -n 2p smoke-b/cpu.txt

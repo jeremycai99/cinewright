@@ -10,5 +10,7 @@ export {
   type RenderOptions,
   renderCacheKey,
   renderShot,
+  resolveRenderer,
+  shotRenderKey,
 } from "./render.js";
 export { COMPILER_VERSION } from "./version.js";

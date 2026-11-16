@@ -1,8 +1,11 @@
+import { execFile } from "node:child_process";
 import { randomUUID } from "node:crypto";
 import { existsSync, mkdirSync, readFileSync, renameSync, rmSync, writeFileSync } from "node:fs";
 import { join } from "node:path";
-import { sha256Bytes, sha256Hash } from "@cinewright/core";
-import type { Compiled } from "./compile.js";
+import { fileURLToPath } from "node:url";
+import { promisify } from "node:util";
+import { type HashString, type RendererInfo, renderKeyV1, sha256Bytes } from "@cinewright/core";
+import { type Compiled, type PlanOptions, planShot } from "./compile.js";
 import { dockerRunArgs, oomKilled, removeContainer, runDocker } from "./docker.js";
 import { DEFAULT_LIMITS, type RunLimits, timeoutMs } from "./limits.js";
 
@@ -24,8 +27,8 @@ export class RenderError extends Error {
 export interface RenderOptions {
   compiled: Compiled;
   shotId: string;
-  /** The render image, by tag or digest. */
-  image: string;
+  /** The render image by content digest, HyperFrames version and settings (`resolveRenderer`). */
+  renderer: RendererInfo;
   /** `<project>/.cinewright/cache/renders`. */
   cacheDir: string;
   limits?: RunLimits;
@@ -42,9 +45,41 @@ export interface Rendered {
   hit: boolean;
 }
 
-/** The cache key for a render (replaced by render key v1 in M3.2b). */
-export function renderCacheKey(compiled: Compiled, image: string): string {
-  return sha256Hash({ inputs: compiled.inputs, image }).slice("sha256:".length);
+const RUNNER = fileURLToPath(new URL("../../../container/render-runner/", import.meta.url));
+
+/**
+ * The renderer side of render key v1 for an image reference: the image's content digest (so a
+ * re-tagged image never reuses a stale render), the HyperFrames version and the render settings.
+ */
+export async function resolveRenderer(image: string): Promise<RendererInfo> {
+  const { stdout } = await promisify(execFile)("docker", [
+    "image",
+    "inspect",
+    "--format",
+    "{{.Id}}",
+    image,
+  ]);
+  const manifest = JSON.parse(readFileSync(join(RUNNER, "package.json"), "utf8")) as {
+    dependencies: Record<string, string>;
+  };
+  return {
+    image: stdout.trim(),
+    hyperframes: manifest.dependencies.hyperframes ?? "unknown",
+    settings: JSON.parse(readFileSync(join(RUNNER, "render-settings.json"), "utf8")),
+  };
+}
+
+/** Render key v1 of a compiled shot (M3.2b): its compile inputs and the renderer. */
+export function renderCacheKey(compiled: Compiled, renderer: RendererInfo): string {
+  return renderKeyV1({ compile: compiled.inputs, renderer }).slice("sha256:".length);
+}
+
+/** Render key v1 of a shot without writing anything: what the dependency graph uses. */
+export async function shotRenderKey(
+  options: PlanOptions,
+  renderer: RendererInfo,
+): Promise<HashString> {
+  return renderKeyV1({ compile: (await planShot(options)).inputs, renderer });
 }
 
 function result(key: string, dir: string, hit: boolean): Rendered {
@@ -58,13 +93,14 @@ function result(key: string, dir: string, hit: boolean): Rendered {
 }
 
 /**
- * Render a compiled shot in the pinned image (M3.2a): a PNG sequence encoded with the pinned FFmpeg
+ * Render a compiled shot in the pinned image (M3.2a), cached by render key v1 (M3.2b): a PNG sequence encoded with the pinned FFmpeg
  * per the M0.2 spike, keeping the frames for transition segments. The cache folder
  * `<cacheDir>/<key>/` holds `frames/`, `body.mp4`, `framemd5.txt`, `sha256.txt`,
  * `render-log.jsonl` and `inputs.json`; it appears only when the render succeeded.
  */
 export async function renderShot(options: RenderOptions): Promise<Rendered> {
-  const { compiled, shotId, image, cacheDir } = options;
+  const { compiled, shotId, renderer, cacheDir } = options;
+  const image = renderer.image;
   const limits = options.limits ?? DEFAULT_LIMITS;
   const fps = compiled.spec.fps;
   if (fps.den !== 1 || !FRAME_RATES.includes(fps.num)) {
@@ -74,7 +110,7 @@ export async function renderShot(options: RenderOptions): Promise<Rendered> {
       `${fps.num}/${fps.den} fps; the image renders ${FRAME_RATES.join(", ")}`,
     );
   }
-  const key = renderCacheKey(compiled, image);
+  const key = renderCacheKey(compiled, renderer);
   const dir = join(cacheDir, key);
   if (existsSync(join(dir, "inputs.json"))) return result(key, dir, true);
 
