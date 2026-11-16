@@ -1,6 +1,12 @@
 import { readFileSync } from "node:fs";
 import { resolve } from "node:path";
-import { type ApplyResult, type Author, projectFps, type Store } from "@cinewright/core";
+import {
+  type ApplyResult,
+  type ApproveFailedEntry,
+  type Author,
+  projectFps,
+  type Store,
+} from "@cinewright/core";
 import { parse, UsageError } from "../args.js";
 import { EXIT } from "../exit-codes.js";
 import { type Io, printJson } from "../io.js";
@@ -100,6 +106,19 @@ async function report(
   return exitFor(result);
 }
 
+/** One line for the last failed approval of a pending patch (finding 2). */
+function failureLine(f: ApproveFailedEntry): string {
+  const what =
+    f.status === "conflict"
+      ? (f.conflicts ?? []).map(
+          (c) => `${c.entity} ${c.path || "/"} changed in revision ${c.revision}`,
+        )
+      : (f.errors ?? []).map(
+          (e) => `op ${e.op ?? "-"} ${e.entity ?? "-"} ${e.pointer || "/"}: ${e.rule}`,
+        );
+  return `approve failed at revision ${f.revision}: ${f.status} (${what.join("; ")})`;
+}
+
 export async function patch(argv: string[], io: Io): Promise<number> {
   const [sub, ...rest] = argv;
   const { values, positionals } = parse(rest, {
@@ -144,7 +163,22 @@ export async function patch(argv: string[], io: Io): Promise<number> {
     const before = store.ir();
     if (sub === "approve") {
       const result = await store.approve(id, USER);
-      return report(io, store, before, entry?.ops ?? [], result, json, frames, `approve ${id}`);
+      const code = await report(
+        io,
+        store,
+        before,
+        entry?.ops ?? [],
+        result,
+        json,
+        frames,
+        `approve ${id}`,
+      );
+      // A failed approval decides nothing (finding 2): say so, and how to go on.
+      if (!json && entry && (result.status === "conflict" || result.status === "rejected"))
+        io.stdout(
+          `${id} stays pending: rebase and propose again, then reject ${id}; or fix what blocks it and approve again\n`,
+        );
+      return code;
     }
     const result = await store.reject(id, USER, values.reason);
     if (json)
@@ -163,8 +197,11 @@ export async function patch(argv: string[], io: Io): Promise<number> {
   if (sub === "list") {
     if (!values.pending) throw new UsageError("patch list needs --pending");
     const store = await openStore(io, findProject(io, values.project));
-    const pending = store.pending();
-    if (json) printJson(io, { pending });
+    const pending = store.pending().map((p) => {
+      const failed = store.approvalFailure(p.pending_id);
+      return failed ? { ...p, approve_failed: failed } : p;
+    });
+    if (json) printJson(io, { revision: store.revision(), pending });
     else {
       for (const p of pending) {
         const who =
@@ -174,6 +211,7 @@ export async function patch(argv: string[], io: Io): Promise<number> {
               ? `job:${p.author.name}`
               : p.author.kind;
         io.stdout(`${p.pending_id}  ${who}  ${p.reason_code}  ${p.reason}\n`);
+        if ("approve_failed" in p) io.stdout(`  ${failureLine(p.approve_failed)}\n`);
       }
       if (pending.length === 0) io.stdout("no pending patches\n");
     }

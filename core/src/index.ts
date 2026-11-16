@@ -59,15 +59,23 @@ export {
   initProject,
 } from "./project/init.js";
 export * from "./project/layout.js";
-export { normalizeErrors, type ValidationError } from "./schema/errors.js";
+export { describeKind, entitySchemas } from "./schema/describe.js";
+export { type DetailedError, normalizeErrors, type ValidationError } from "./schema/errors.js";
 export { type JsonObject, loadSchemas, resolveRef, type SchemaSet } from "./schema/load.js";
-export { type DocumentKind, validateDocument, validateProject } from "./schema/validate.js";
+export {
+  type DocumentKind,
+  describeSchemaError,
+  explainProject,
+  validateDocument,
+  validateProject,
+} from "./schema/validate.js";
 export { applyOps, projectFps } from "./store/apply.js";
 export { stateFor } from "./store/author.js";
 export { type Conflict, findConflicts } from "./store/conflict.js";
 export { LockTimeoutError, withLock } from "./store/lock.js";
 export {
   type AppliedEntry,
+  type ApproveFailedEntry,
   appendLog,
   type LogEntry,
   type PendingEntry,

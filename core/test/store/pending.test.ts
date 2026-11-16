@@ -96,7 +96,7 @@ describe("pending patches", () => {
     expect(scene(store).intent).toEqual({ value: "sharper", state: "user" });
   });
 
-  it("approving a pending patch whose base has since changed fails with a conflict and writes nothing", async () => {
+  it("approving a pending patch whose base has since changed fails with a conflict, changes no IR file and keeps it pending", async () => {
     const { dir, store } = await setupProject();
     await as(
       store,
@@ -113,7 +113,10 @@ describe("pending patches", () => {
       conflicts: [{ entity: "s01", path: "/intent", revision: store.revision() }],
     });
     expect(irFiles(dir)).toEqual(before.files);
-    expect(store.log().length).toBe(before.log);
+    // Only the approve_failed entry is added (finding 2 of the M1.9 trial).
+    expect(store.log().length).toBe(before.log + 1);
+    expect(store.log().at(-1)).toMatchObject({ kind: "approve_failed", pending_id: "p1" });
+    expect(store.pending().map((p) => p.pending_id)).toEqual(["p1"]);
   });
 
   it("rejecting records the rejection and changes nothing", async () => {

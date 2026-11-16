@@ -13,6 +13,8 @@ cinewright patch reject  <pending_id> [--reason <text>] [--project <dir>] [--jso
 cinewright patch list --pending [--project <dir>] [--json]
 cinewright patch revert <revision> [--project <dir>] [--json]
 cinewright show [<id>] [--depth <n>] [--frames] [--resolved --pack <tokens.json> [--deliverable <id>]] [--json] [--project <dir>]
+cinewright status [--project <dir>] [--json]
+cinewright schema [<kind>]
 ```
 
 Without `--project`, a command uses the nearest directory upward that holds `cinewright.json`. `--file -` reads the patch from stdin.
@@ -31,15 +33,32 @@ A patch is JSON (`core/schema/patch.schema.json`):
 }
 ```
 
-- **`base_revision`:** the revision you read. `show --json` and the last line of `patch apply` tell you the current one.
+- **`base_revision`:** the revision you read. `cinewright status` prints the current one, and so does the last line of `patch apply`. (`show --json` prints the stored form, which has no revision.)
 - **`author`:**
   - `user` for a person;
   - `session` for an agent acting directly for the user (conversational edits);
   - `agent` with a `role`, or `job` with a `name`, for pipeline work.
   - In v0.1 the caller asserts it, and every log entry records it with the session id (`CINEWRIGHT_SESSION_ID`, D41).
 - **`mode`:** `patch apply` and `patch propose` set `mode` from the command.
-- **Values** are bare: the store adds `{ value, state }` and sets the state from the author.
-- **Times:** a field in frames also takes `"18s"`, `"1500ms"` or `"HH:MM:SS:FF"`.
+- **Values** are bare: the store adds `{ value, state }` and sets the state from the author. `cinewright schema <kind>` lists every path of an entity kind with its type, allowed values and an object's keys.
+- **Times:** a value whose type is frames (`cinewright schema` says `frames`) also takes `"18s"`, `"1500ms"` or `"HH:MM:SS:FF"`. The string replaces that number only, never an object: scene `duration` is `{ target, flex, sync }`, so the seconds go in `duration.target`:
+
+```json
+{
+  "base_revision": 7,
+  "author": { "kind": "session" },
+  "mode": "propose",
+  "reason": "Scene 3 runs about 18 seconds, synced to the voiceover",
+  "ops": [
+    {
+      "op": "set",
+      "entity": "s03_the_problem",
+      "path": "/duration",
+      "value": { "target": "18s", "flex": 0.15, "sync": "voiceover" }
+    }
+  ]
+}
+```
 
 | Op | Fields | Does |
 | --- | --- | --- |
@@ -56,6 +75,10 @@ A patch is JSON (`core/schema/patch.schema.json`):
 - Session patches are proposed first while the project setting `propose_conversational_edits` is on, which is the default.
 - Only a user approves (`patch approve`). Agent harnesses must never run `patch approve` without asking the user (D41).
 
+**Checked before it is stored.** A patch stored as pending (a proposal, a session edit proposed first, a suggestion, or a patch blocked by authorship) is first checked as the approving user would apply it: paths, values, times, conflicts and the whole-IR validation. An invalid one exits 3 and a stale one exits 4, and neither is stored, so the user is never asked to approve a patch that cannot apply. Authorship is not checked then: a block is what pending is for.
+
+**A failed approve decides nothing.** When `patch approve` fails, because a later revision changed the same fields (exit 4) or because the project changed so the patch no longer applies (exit 3, for example a lock or a removed reference), the patch stays pending and the log records an `approve_failed` entry. `patch list --pending` shows the last failure under the patch. Then rebase it (read again, propose a new patch, reject the old one), or fix what blocks it and approve again, or reject it.
+
 ## Output
 
 The human output is the readable diff, one line per op:
@@ -64,15 +87,26 @@ The human output is the readable diff, one line per op:
 - `lock entity /path`, `unlock entity /path`;
 - `? entity /path: value` for `suggest`.
 
-A status line follows: `applied revision N (sha256:…)`, `pending pN (reason)`, `rejected:` with one line per error, or `conflict:` with the fields and revisions.
+A status line follows: `applied revision N (sha256:…)`, `pending pN (reason)`, `rejected:` with one line per error, or `conflict:` with the fields and revisions. After a failed approve, a last line says the patch stays pending.
 
 `--json` prints `{ status, revision?, state_hash?, pending_id?, reason?, blocked?, errors?, conflicts? }`.
+
+**Errors** are `{ op, entity, pointer, rule, message }`:
+- `op` is the index of the op the error is about. Errors from the whole-IR check name the op that wrote there; `op` is null only when no op did, or for the patch as a whole.
+- `message` says what was expected: the expected type (`schema.type`), the allowed values (`schema.enum`), the missing field (`schema.required`), or the allowed fields (`schema.additionalProperties`). A malformed op names the field it needs, or the op kinds.
+- One round reports every independent problem: an op that fails is skipped and the others still run, an unknown property is skipped and the rest of the entity is still checked, and the whole-IR check runs on what did apply.
+
+`patch list --pending --json` prints `{ revision, pending }`: the current revision, and each pending entry with `approve_failed` when its last approval failed.
+
+`status` prints the current revision, its state hash and the pending ids; `--json` prints `{ revision, state_hash, pending }`.
+
+`schema` lists the entity kinds; `schema <kind>` prints every authorable path of that kind as patch ops address it, generated from `core/schema`: `field`, `list` (its item kind) or `map entry` (`<name>` is the entry), the value's type and allowed values, and an object's keys indented below, `(optional)` when they may be left out.
 
 `show` prints the readable view (convention 14):
 - the entity's kind and id;
 - every field with its state as a trailing comment;
 - times in seconds (`--frames` for frames);
-- script lines inline in scenes;
+- script lines inline in scenes, with their speaker, direction, `on_screen` and `lipsync`;
 - pending suggestions under their field;
 - child entities `--depth` levels deep (default 1).
 
@@ -82,7 +116,7 @@ A status line follows: `applied revision N (sha256:…)`, `pending pN (reason)`,
 
 | Code | Meaning |
 | --- | --- |
-| 0 | Done, including a patch stored as pending because it was proposed |
+| 0 | Done, including a patch stored as pending because it was proposed (after it passed the checks) |
 | 1 | Internal error |
 | 2 | Usage |
 | 3 | Invalid patch or IR (schema, semantic, path, or an op the author may not send) |

@@ -185,7 +185,9 @@ Errors are sorted by entity, then pointer, then rule. For a missing or unexpecte
 | `semantic.profile_hash` | A profile copy's `hash` is not the hash of its `body` (convention 16). |
 | `semantic.frame_rate_mismatch` | The deliverables' profiles have different frame rates (D27). |
 
-`validateDocument(kind, doc)` checks one document: schema, wrappers and anchors. `validateProject(ir, { retiredIds })` checks the whole inlined IR, including every rule above.
+`validateDocument(kind, doc)` checks one document: schema, wrappers and anchors. `validateProject(ir, { retiredIds })` checks the whole inlined IR, including every rule above. `explainProject` returns the same errors with a `message` on each schema error saying what was expected (the type, the allowed values, the missing field or the allowed fields); the store puts these messages on patch errors.
+
+`describeKind(kind)` lists every authorable path of an entity kind with its type, allowed values and nested keys, generated from these schemas; `cinewright schema <kind>` prints it.
 
 ## Patches and the patch log
 
@@ -206,6 +208,7 @@ Errors are sorted by entity, then pointer, then rule. For a missing or unexpecte
 | `applied` | A patch or revert creates a new revision. | `before` snapshots of every node it changed, `touched`, `retired` (removed ids) and `restored` (ids a revert brought back). |
 | `pending` | A patch is stored instead of applied: a proposal, a suggestion, or (from M1.2a) an authorship block. | The patch, a `pending_id` and a `reason_code`. |
 | `approved` / `rejected` | The user decides on a pending patch (M1.2b). | The pending id. |
+| `approve_failed` | An approval fails; the patch stays pending. | The pending id, the revision it was tried at, and its `conflicts` or `errors`. |
 
 Every entry records `time`, `session_id` and the asserted `author` (D41). A revert is a new revision whose `revert_of` names its target; replaying the log re-applies the target's `before` snapshots. On open, the store:
 1. finishes or discards an interrupted journal (`.cinewright/txn/`);
@@ -244,7 +247,9 @@ A patch is stored as `pending` instead of applied when:
 - it is all `suggest` ops;
 - authorship blocks one of its ops.
 
-Then `approve(id, user)` applies it as the approving user, so every field it touches becomes `user`. A suggestion applies as `set`. The approval writes an `approved` entry and the applied revision in one transaction. It fails with a conflict when a revision after the patch's base touched the same nodes. `reject(id, user, note?)` records the decision and changes nothing. Only a user approves or rejects, and a decided patch cannot be decided again (`pending.decided`).
+Before it is stored, a patch is checked as its approval would apply it: suggestions as `set`, authored by the approving user, against the current IR. Every check `apply` runs applies (paths, wrapping, times, conflicts, `validateProject`) except authorship, because a block is what pending is for. An invalid or stale patch is rejected or reported as a conflict, and nothing is stored.
+
+Then `approve(id, user)` applies it as the approving user, so every field it touches becomes `user`. A suggestion applies as `set`. The approval writes an `approved` entry and the applied revision in one transaction. It fails with a conflict when a revision after the patch's base touched the same nodes, and it is rejected when the project changed so the patch no longer applies (a lock, a removed reference). A failed approval decides nothing: the patch stays pending and an `approve_failed` entry records the failure (`Store.approvalFailure(id)` returns the last one). The user can then rebase it as a new patch, fix what blocks it and approve again, or reject it. `reject(id, user, note?)` records the decision and changes nothing. Only a user approves or rejects, and a decided patch cannot be decided again (`pending.decided`).
 
 ## Cascade (M1.3)
 

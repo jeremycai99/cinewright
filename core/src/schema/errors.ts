@@ -29,3 +29,26 @@ export function normalizeErrors(errors: Iterable<ValidationError>): ValidationEr
   }
   return out.sort(compareErrors);
 }
+
+/** A validation error with a sentence saying what was expected (for patch errors, finding 3). */
+export interface DetailedError extends ValidationError {
+  readonly message?: string;
+}
+
+/** Like normalizeErrors, but keeps the first message seen for each error. */
+export function normalizeDetailed(errors: Iterable<DetailedError>): DetailedError[] {
+  const seen = new Map<string, DetailedError>();
+  for (const error of errors) {
+    const key = JSON.stringify([error.entity, error.pointer, error.rule]);
+    const known = seen.get(key);
+    if (!known || (known.message === undefined && error.message !== undefined)) {
+      seen.set(key, {
+        entity: error.entity,
+        pointer: error.pointer,
+        rule: error.rule,
+        ...(error.message !== undefined ? { message: error.message } : {}),
+      });
+    }
+  }
+  return [...seen.values()].sort(compareErrors);
+}

@@ -1,7 +1,8 @@
-import { Ajv2020, type ValidateFunction } from "ajv/dist/2020.js";
+import { Ajv2020, type ErrorObject, type ValidateFunction } from "ajv/dist/2020.js";
 import type { Patch } from "../generated/ir.js";
-import { loadSchemas } from "../schema/load.js";
-import { ANNOTATIONS } from "../schema/validate.js";
+import { isObject } from "../ir/paths.js";
+import { type JsonObject, loadSchemas } from "../schema/load.js";
+import { ANNOTATIONS, describeSchemaError } from "../schema/validate.js";
 
 /**
  * Why a patch was refused. `op` is the op's index, or null for the whole patch; `entity` and
@@ -19,7 +20,7 @@ let validator: ValidateFunction | undefined;
 
 function patchValidator(): ValidateFunction {
   if (validator) return validator;
-  const ajv = new Ajv2020({ strict: true, allErrors: true });
+  const ajv = new Ajv2020({ strict: true, allErrors: true, verbose: true });
   ajv.addVocabulary([...ANNOTATIONS]);
   for (const schema of loadSchemas().byName.values()) ajv.addSchema(schema);
   const fn = ajv.getSchema("https://cinewright.invalid/ir/0/patch.schema.json");
@@ -28,27 +29,66 @@ function patchValidator(): ValidateFunction {
   return fn;
 }
 
+/** The op kinds in schema order, each with its branch index in `common.schema.json#/$defs/op`. */
+function opKinds(): string[] {
+  const common = loadSchemas().byName.get("common.schema.json") as JsonObject;
+  const op = (common.$defs as JsonObject).op as JsonObject;
+  return (op.oneOf as JsonObject[]).map((branch) => {
+    const kind = ((branch.properties as JsonObject).op as JsonObject).const;
+    return String(kind);
+  });
+}
+
+/**
+ * Why op `value` fits no op branch, in one sentence (finding 3): the op kinds when `op` is
+ * unknown, else the fields its own branch is missing or does not take.
+ */
+function describeOp(value: unknown, errors: readonly ErrorObject[], at: string): string {
+  const kinds = opKinds();
+  if (!isObject(value)) return "an op is an object";
+  const kind = value.op;
+  const branch = typeof kind === "string" ? kinds.indexOf(kind) : -1;
+  if (branch === -1) return `op must be one of ${kinds.join(", ")}`;
+  const marker = `/oneOf/${branch}/`;
+  const own = errors.filter(
+    (e) => e.schemaPath.includes(marker) && !e.schemaPath.includes(`${marker}properties/op/`),
+  );
+  const parts = own.map((e) => {
+    const params = e.params as Record<string, unknown>;
+    if (e.keyword === "required") return `${kind} needs ${String(params.missingProperty)}`;
+    if (e.keyword === "additionalProperties")
+      return `${kind} takes no ${String(params.additionalProperty)}`;
+    const where = e.instancePath.slice(at.length);
+    return `${where || "/"}: ${describeSchemaError(e)}`;
+  });
+  return [...new Set(parts)].join("; ") || "not a valid op";
+}
+
 /** Check a patch against `patch.schema.json` (the wire format, convention 10). */
 export function validatePatch(
   patch: unknown,
 ): { ok: true; patch: Patch } | { ok: false; errors: PatchError[] } {
   const validate = patchValidator();
+  const input: unknown = patch;
   if (validate(patch)) return { ok: true, patch: patch as Patch };
+  const all = validate.errors ?? [];
   const seen = new Set<string>();
   const errors: PatchError[] = [];
-  for (const error of validate.errors ?? []) {
-    if (error.keyword === "oneOf" || error.schemaPath.includes("/oneOf/")) {
+  for (const error of all) {
+    const match = /^\/ops\/(\d+)/.exec(error.instancePath);
+    if (match && (error.keyword === "oneOf" || error.schemaPath.includes("/oneOf/"))) {
       // Report a bad op once, at the op, rather than once per branch it failed.
-      const match = /^\/ops\/(\d+)/.exec(error.instancePath);
-      const key = match ? `op${match[1]}` : error.instancePath;
-      if (seen.has(key)) continue;
-      seen.add(key);
+      const at = `/ops/${match[1]}`;
+      if (seen.has(at)) continue;
+      seen.add(at);
+      const ops = isObject(input) && Array.isArray(input.ops) ? input.ops : [];
+      const inOp = all.filter((e) => e.instancePath === at || e.instancePath.startsWith(`${at}/`));
       errors.push({
-        op: match ? Number(match[1]) : null,
+        op: Number(match[1]),
         entity: null,
-        pointer: error.instancePath,
+        pointer: at,
         rule: "patch.schema",
-        message: "not a valid op",
+        message: describeOp(ops[Number(match[1])], inOp, at),
       });
       continue;
     }
@@ -57,7 +97,7 @@ export function validatePatch(
       entity: null,
       pointer: error.instancePath,
       rule: `schema.${error.keyword}`,
-      message: error.message ?? "",
+      message: describeSchemaError(error),
     });
   }
   return { ok: false, errors };
