@@ -1,0 +1,9 @@
+{
+  "errors": [
+    {
+      "entity": "s03.sh01.bars",
+      "pointer": "/props/fill",
+      "rule": "cascade.unresolved_token"
+    }
+  ]
+}

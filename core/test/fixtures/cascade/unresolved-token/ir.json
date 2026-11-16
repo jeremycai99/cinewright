@@ -1,0 +1,804 @@
+{
+  "assets": {
+    "state": "user",
+    "value": [
+      {
+        "bytes": 11,
+        "hash": "sha256:93e2059298db97878d2d42a3ee94c7f9bc9099a6ce744fb2d516aa6f81c0fe16",
+        "id": "dr_lin_sheet_front",
+        "license": {
+          "commercial_use": true,
+          "terms": "Supplied by the project author"
+        },
+        "media_type": "image/png",
+        "origin": "user",
+        "provenance": {
+          "provider": "user_upload"
+        },
+        "role": "reference"
+      },
+      {
+        "bytes": 13,
+        "hash": "sha256:4cd793584e41cc2906c0a4a9c2e1f7d2cf0bf3379dea42b91d7707647286dd61",
+        "id": "dr_lin_sheet_profile",
+        "license": {
+          "commercial_use": true,
+          "terms": "Supplied by the project author"
+        },
+        "media_type": "image/png",
+        "origin": "user",
+        "provenance": {
+          "provider": "user_upload"
+        },
+        "role": "reference"
+      },
+      {
+        "bytes": 10,
+        "hash": "sha256:4d3b68e681b7c5ed00d285d3a223d0a8006ae4f8297bd7d8a66fada4aa00a044",
+        "id": "dr_lin_sheet_full",
+        "license": {
+          "commercial_use": true,
+          "terms": "Supplied by the project author"
+        },
+        "media_type": "image/png",
+        "origin": "user",
+        "provenance": {
+          "provider": "user_upload"
+        },
+        "role": "reference"
+      }
+    ]
+  },
+  "autonomy": {
+    "state": "user",
+    "value": "guided"
+  },
+  "brief": {
+    "state": "user",
+    "value": "A 30-second explainer about why build pipelines slow down as teams grow."
+  },
+  "budget": {
+    "state": "user",
+    "value": {
+      "cap": 25,
+      "currency": "USD"
+    }
+  },
+  "cast": {
+    "state": "user",
+    "value": [
+      {
+        "consent": {
+          "state": "open"
+        },
+        "display_name": {
+          "state": "open"
+        },
+        "id": "narrator",
+        "on_screen": {
+          "state": "user",
+          "value": false
+        },
+        "origin": "user",
+        "performance": {
+          "baseline": {
+            "state": "user",
+            "value": "warm, confident, unhurried"
+          },
+          "pace_wpm": {
+            "state": "user",
+            "value": 150
+          },
+          "tics": {
+            "state": "open"
+          }
+        },
+        "role": {
+          "state": "user",
+          "value": "narrator"
+        },
+        "visual": {
+          "state": "open"
+        },
+        "voice": {
+          "bindings": {
+            "elevenlabs": {
+              "state": "agent",
+              "value": {
+                "model": "eleven_v4",
+                "settings": {
+                  "stability": 0.45
+                },
+                "voice_id": "…"
+              }
+            },
+            "kokoro": {
+              "state": "agent",
+              "value": {
+                "voice": "…"
+              }
+            }
+          },
+          "description": {
+            "state": "user",
+            "value": {
+              "accent": "neutral",
+              "language": "en",
+              "timbre": "warm, mid-low"
+            }
+          },
+          "lexicon": {
+            "Kubernetes": {
+              "state": "user",
+              "value": "KOO-ber-NET-eez"
+            }
+          }
+        }
+      },
+      {
+        "consent": {
+          "state": "user",
+          "value": {
+            "synthetic": true
+          }
+        },
+        "display_name": {
+          "state": "user",
+          "value": "Dr Lin"
+        },
+        "id": "dr_lin",
+        "on_screen": {
+          "state": "user",
+          "value": true
+        },
+        "origin": "user",
+        "performance": {
+          "baseline": {
+            "state": "user",
+            "value": "wry, precise"
+          },
+          "pace_wpm": {
+            "state": "open"
+          },
+          "tics": {
+            "state": "user",
+            "value": ["half-laugh before admissions"]
+          }
+        },
+        "role": {
+          "state": "user",
+          "value": "character"
+        },
+        "visual": {
+          "state": "user",
+          "value": {
+            "sheet": ["dr_lin_sheet_front", "dr_lin_sheet_profile", "dr_lin_sheet_full"],
+            "style": "photoreal",
+            "wardrobe": "navy blazer"
+          }
+        },
+        "voice": {
+          "bindings": {},
+          "description": {
+            "state": "user",
+            "value": {
+              "text": "woman, 40s, dry wit, slight rasp"
+            }
+          },
+          "lexicon": {}
+        }
+      }
+    ]
+  },
+  "deliverables": {
+    "state": "user",
+    "value": [
+      {
+        "burn_in_captions": {
+          "state": "user",
+          "value": false
+        },
+        "id": "web_landscape",
+        "label": {
+          "state": "open"
+        },
+        "origin": "user",
+        "profile": {
+          "state": "user",
+          "value": "landscape_1080p30"
+        }
+      },
+      {
+        "burn_in_captions": {
+          "state": "user",
+          "value": true
+        },
+        "id": "social_portrait",
+        "label": {
+          "state": "user",
+          "value": "Social cut-down"
+        },
+        "locked": true,
+        "origin": "user",
+        "profile": {
+          "state": "user",
+          "value": "portrait_1080p30"
+        }
+      }
+    ]
+  },
+  "id": "demo",
+  "origin": "user",
+  "policies": {
+    "state": "locked",
+    "value": {
+      "require_commercial_license": true
+    }
+  },
+  "profiles": {
+    "landscape_1080p30": {
+      "body": {
+        "aspect_class": "landscape",
+        "captions": {
+          "max_chars_per_line": 42,
+          "max_lines": 2,
+          "min_display_frames": 30
+        },
+        "frame_rate": {
+          "den": 1,
+          "num": 30
+        },
+        "height": 1080,
+        "id": "landscape_1080p30",
+        "loudness": {
+          "integrated_lufs": -14,
+          "tolerance_lu": 1,
+          "true_peak_dbtp": -1
+        },
+        "name": "Landscape 1080p, 30 fps (test fixture)",
+        "safe_zones": {
+          "action": {
+            "bottom": 0.05,
+            "left": 0.05,
+            "right": 0.05,
+            "top": 0.05
+          },
+          "title": {
+            "bottom": 0.1,
+            "left": 0.1,
+            "right": 0.1,
+            "top": 0.1
+          }
+        },
+        "sample_rate": 48000,
+        "schema_version": 1,
+        "width": 1920
+      },
+      "hash": "sha256:3238f594add04a4f649ee274aff2d704cd410044a497748e41c19d67e70d0e09"
+    },
+    "portrait_1080p30": {
+      "body": {
+        "aspect_class": "portrait",
+        "captions": {
+          "max_chars_per_line": 32,
+          "max_lines": 2,
+          "min_display_frames": 30
+        },
+        "frame_rate": {
+          "den": 1,
+          "num": 30
+        },
+        "height": 1920,
+        "id": "portrait_1080p30",
+        "loudness": {
+          "integrated_lufs": -14,
+          "tolerance_lu": 1,
+          "true_peak_dbtp": -1
+        },
+        "name": "Portrait 1080p, 30 fps (test fixture)",
+        "safe_zones": {
+          "action": {
+            "bottom": 0.05,
+            "left": 0.05,
+            "right": 0.05,
+            "top": 0.05
+          },
+          "title": {
+            "bottom": 0.1,
+            "left": 0.1,
+            "right": 0.1,
+            "top": 0.1
+          }
+        },
+        "sample_rate": 48000,
+        "schema_version": 1,
+        "width": 1080
+      },
+      "hash": "sha256:71b4fd1613a76aa87a1087fac5f09f0a58a728c7f05eb73258d893fe31dddf6d"
+    }
+  },
+  "schema_version": 1,
+  "script": {
+    "beats": {
+      "state": "agent",
+      "value": [
+        {
+          "id": "b01",
+          "lines": {
+            "state": "agent",
+            "value": [
+              {
+                "direction": {
+                  "state": "agent",
+                  "value": "[measured] low, deliberate"
+                },
+                "id": "b01.l01",
+                "lipsync": {
+                  "state": "agent",
+                  "value": false
+                },
+                "on_screen": {
+                  "state": "agent",
+                  "value": false
+                },
+                "on_screen_text": {
+                  "state": "open"
+                },
+                "origin": "agent",
+                "speaker": {
+                  "state": "agent",
+                  "value": "narrator"
+                },
+                "text": {
+                  "state": "agent",
+                  "value": "Every team hits the same wall."
+                }
+              },
+              {
+                "direction": {
+                  "state": "agent",
+                  "value": "[wry] half-laugh"
+                },
+                "id": "b01.l02",
+                "lipsync": {
+                  "state": "agent",
+                  "value": true
+                },
+                "on_screen": {
+                  "state": "agent",
+                  "value": true
+                },
+                "on_screen_text": {
+                  "state": "open"
+                },
+                "origin": "agent",
+                "speaker": {
+                  "state": "agent",
+                  "value": "dr_lin"
+                },
+                "text": {
+                  "state": "agent",
+                  "value": "We rebuilt it three times."
+                }
+              }
+            ]
+          },
+          "origin": "agent",
+          "summary": {
+            "state": "agent",
+            "value": "Every team hits the same wall"
+          }
+        },
+        {
+          "id": "b02",
+          "lines": {
+            "state": "agent",
+            "value": [
+              {
+                "direction": {
+                  "state": "agent",
+                  "value": "[warm] steady"
+                },
+                "id": "b01.l03",
+                "lipsync": {
+                  "state": "agent",
+                  "value": false
+                },
+                "on_screen": {
+                  "state": "agent",
+                  "value": false
+                },
+                "on_screen_text": {
+                  "state": "open"
+                },
+                "origin": "agent",
+                "speaker": {
+                  "state": "agent",
+                  "value": "narrator"
+                },
+                "text": {
+                  "state": "agent",
+                  "value": "Here is what changed."
+                }
+              }
+            ]
+          },
+          "origin": "agent",
+          "summary": {
+            "state": "open"
+          }
+        }
+      ]
+    },
+    "id": "script",
+    "origin": "agent"
+  },
+  "sequences": {
+    "state": "agent",
+    "value": [
+      {
+        "id": "seq_main",
+        "mood": {
+          "state": "open"
+        },
+        "music_bed": {
+          "state": "open"
+        },
+        "origin": "agent",
+        "scenes": {
+          "state": "agent",
+          "value": [
+            {
+              "cast": {
+                "state": "user",
+                "value": ["narrator", "dr_lin"]
+              },
+              "duration": {
+                "state": "agent",
+                "value": {
+                  "flex": 0.15,
+                  "sync": "voiceover",
+                  "target": 540
+                }
+              },
+              "gates": {
+                "state": "user",
+                "value": ["storyboard", "animatic"]
+              },
+              "id": "s03_the_problem",
+              "intent": {
+                "state": "user",
+                "value": "Show why legacy pipelines break at scale"
+              },
+              "lines": {
+                "state": "user",
+                "value": ["b01.l01", "b01.l02"]
+              },
+              "mood": {
+                "state": "user",
+                "value": ["tense", "building"]
+              },
+              "origin": "user",
+              "shots": {
+                "state": "agent",
+                "value": [
+                  {
+                    "anchors": {
+                      "state": "agent",
+                      "value": {
+                        "start": {
+                          "line": "b01.l01",
+                          "offset": 0,
+                          "point": "start"
+                        }
+                      }
+                    },
+                    "backend": {
+                      "state": "agent",
+                      "value": "html"
+                    },
+                    "camera": {
+                      "state": "agent",
+                      "value": {
+                        "amount": 0.06,
+                        "ease": {
+                          "token": "motion.ease_out_expo"
+                        },
+                        "move": "push_in"
+                      }
+                    },
+                    "duration": {
+                      "state": "open"
+                    },
+                    "framing": {
+                      "state": "agent",
+                      "value": "full_frame"
+                    },
+                    "id": "s03.sh01",
+                    "layers": {
+                      "state": "agent",
+                      "value": [
+                        {
+                          "component": {
+                            "state": "agent",
+                            "value": "kinetic_title"
+                          },
+                          "id": "s03.sh01.title",
+                          "layout": {
+                            "landscape": {
+                              "state": "agent",
+                              "value": {
+                                "region": "title_left"
+                              }
+                            },
+                            "portrait": {
+                              "state": "agent",
+                              "value": {
+                                "region": "title_top"
+                              }
+                            }
+                          },
+                          "motion": {
+                            "state": "open"
+                          },
+                          "origin": "agent",
+                          "props": {
+                            "color": {
+                              "state": "agent",
+                              "value": {
+                                "token": "palette.accent"
+                              }
+                            },
+                            "text": {
+                              "state": "agent",
+                              "value": "Every team hits the same wall."
+                            }
+                          },
+                          "style": {
+                            "overrides": {}
+                          },
+                          "timing": {
+                            "state": "agent",
+                            "value": {
+                              "enter": {
+                                "line": "b01.l01",
+                                "offset": 0,
+                                "point": "start"
+                              }
+                            }
+                          }
+                        },
+                        {
+                          "component": {
+                            "state": "agent",
+                            "value": "data_bars"
+                          },
+                          "id": "s03.sh01.bars",
+                          "layout": {},
+                          "motion": {
+                            "state": "agent",
+                            "value": [
+                              {
+                                "params": {
+                                  "stagger_frames": 4
+                                },
+                                "preset": "grow_up"
+                              }
+                            ]
+                          },
+                          "origin": "agent",
+                          "props": {
+                            "fill": {
+                              "state": "agent",
+                              "value": {
+                                "token": "palette.missing"
+                              }
+                            },
+                            "series": {
+                              "state": "agent",
+                              "value": [3, 5, 9]
+                            }
+                          },
+                          "style": {
+                            "overrides": {}
+                          },
+                          "timing": {
+                            "state": "agent",
+                            "value": {
+                              "enter": {
+                                "line": "b01.l01",
+                                "offset": 6,
+                                "point": "word",
+                                "word": 3
+                              }
+                            }
+                          }
+                        }
+                      ]
+                    },
+                    "layout": {
+                      "landscape": {
+                        "state": "agent",
+                        "value": {
+                          "template": "grid.12col/title-left"
+                        }
+                      },
+                      "portrait": {
+                        "state": "agent",
+                        "value": {
+                          "template": "stack/title-top"
+                        }
+                      }
+                    },
+                    "origin": "agent",
+                    "references": {
+                      "state": "open"
+                    },
+                    "style": {
+                      "overrides": {}
+                    },
+                    "subject": {
+                      "state": "open"
+                    },
+                    "type": {
+                      "state": "agent",
+                      "value": "motion_graphics"
+                    }
+                  },
+                  {
+                    "anchors": {
+                      "state": "agent",
+                      "value": {
+                        "end": {
+                          "line": "b01.l02",
+                          "offset": 12,
+                          "point": "end"
+                        },
+                        "start": {
+                          "line": "b01.l02",
+                          "offset": 0,
+                          "point": "start"
+                        }
+                      }
+                    },
+                    "backend": {
+                      "state": "open"
+                    },
+                    "camera": {
+                      "state": "open"
+                    },
+                    "duration": {
+                      "state": "open"
+                    },
+                    "framing": {
+                      "state": "agent",
+                      "value": "medium_close, 50mm, shallow DOF"
+                    },
+                    "id": "s03.sh02",
+                    "layers": {
+                      "state": "open"
+                    },
+                    "layout": {},
+                    "origin": "agent",
+                    "references": {
+                      "state": "agent",
+                      "value": ["dr_lin", "dr_lin_sheet_front"]
+                    },
+                    "style": {
+                      "overrides": {}
+                    },
+                    "subject": {
+                      "state": "user",
+                      "value": "dr_lin"
+                    },
+                    "type": {
+                      "state": "agent",
+                      "value": "generative_footage"
+                    }
+                  }
+                ]
+              },
+              "sound": {
+                "state": "agent",
+                "value": {
+                  "duck_under_vo_db": -12,
+                  "music_cue": "tension_rise",
+                  "sfx": ["whoosh_soft", "tick_loop"]
+                }
+              },
+              "style": {
+                "overrides": {
+                  "palette.accent": {
+                    "state": "user",
+                    "value": "#FF4D2E"
+                  }
+                }
+              },
+              "transition_out": {
+                "state": "agent",
+                "value": {
+                  "on": "data_bars → server racks",
+                  "to": "s04",
+                  "type": "match_cut"
+                }
+              }
+            },
+            {
+              "cast": {
+                "state": "open"
+              },
+              "duration": {
+                "state": "open"
+              },
+              "gates": {
+                "state": "open"
+              },
+              "id": "s04",
+              "intent": {
+                "state": "open"
+              },
+              "lines": {
+                "state": "open"
+              },
+              "mood": {
+                "state": "open"
+              },
+              "origin": "agent",
+              "shots": {
+                "state": "open"
+              },
+              "sound": {
+                "state": "open"
+              },
+              "style": {
+                "overrides": {}
+              },
+              "transition_out": {
+                "state": "open"
+              }
+            }
+          ]
+        },
+        "style": {
+          "overrides": {}
+        },
+        "title": {
+          "state": "agent",
+          "value": "The problem"
+        }
+      }
+    ]
+  },
+  "settings": {
+    "propose_conversational_edits": {
+      "state": "user",
+      "value": true
+    }
+  },
+  "style": {
+    "overrides": {
+      "motion.ease": {
+        "state": "agent",
+        "value": {
+          "token": "motion.ease_out_expo"
+        }
+      },
+      "palette.accent": {
+        "state": "user",
+        "value": "#FF4D2E"
+      },
+      "type.scale": {
+        "state": "agent",
+        "value": 1.25
+      }
+    },
+    "pack": {
+      "state": "user",
+      "value": "editorial"
+    }
+  },
+  "title": {
+    "state": "user",
+    "value": "Demo"
+  }
+}
