@@ -4,6 +4,7 @@ import { toHashForm } from "../canonical/hash.js";
 import type {
   AppliedEntry,
   ApprovedEntry,
+  ApproveFailedEntry,
   InitEntry,
   PendingEntry,
   RejectedEntry,
@@ -11,9 +12,22 @@ import type {
 import { PATCH_LOG } from "../project/layout.js";
 
 /** One line of `log/patches.jsonl` (M1 convention 12; `log-entry.schema.json`). */
-export type LogEntry = InitEntry | AppliedEntry | PendingEntry | ApprovedEntry | RejectedEntry;
+export type LogEntry =
+  | InitEntry
+  | AppliedEntry
+  | PendingEntry
+  | ApprovedEntry
+  | RejectedEntry
+  | ApproveFailedEntry;
 
-export type { AppliedEntry, ApprovedEntry, InitEntry, PendingEntry, RejectedEntry };
+export type {
+  AppliedEntry,
+  ApprovedEntry,
+  ApproveFailedEntry,
+  InitEntry,
+  PendingEntry,
+  RejectedEntry,
+};
 
 /** One log line: the entry's hash form, so the log is deterministic. */
 export function logLine(entry: object): string {

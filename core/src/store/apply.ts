@@ -36,7 +36,12 @@ export type OpsResult =
       retired: string[];
       blocked: BlockedOp[];
     }
-  | { ok: false; errors: PatchError[] };
+  | {
+      ok: false;
+      errors: PatchError[];
+      /** The IR with every op that did apply: the store checks it as a whole for more errors. */
+      ir: InlinedIr;
+    };
 
 /** An op that a field, list or item state stopped (convention 13). */
 export interface BlockedOp {
@@ -144,7 +149,13 @@ export function applyOps(
   const fps = projectFps(ir);
   const schemas = inlinedSchemas();
   const startIds = entityIds(ir);
+  /** Shape problems an op reported without stopping (unknown properties); finding 4. */
+  let collected: Omit<PatchError, "op">[] = [];
+  const errors: PatchError[] = [];
+  // Each op that fails is skipped and the next one still runs, so one round reports every
+  // independent problem (finding 4 of the M1.9 trial). Ops fail before they change anything.
   for (const [i, op] of ops.entries()) {
+    collected = [];
     try {
       const index = indexIr(next);
       const taken = before.length;
@@ -152,33 +163,29 @@ export function applyOps(
       applyOne(op, index);
       for (let k = taken; k < before.length; k += 1) opOf.push(i);
     } catch (error) {
-      if (error instanceof OpError) return { ok: false, errors: [{ op: i, ...error.error }] };
       const pointer = "path" in op && typeof op.path === "string" ? op.path : "";
-      if (error instanceof TimeError) {
-        return {
-          ok: false,
-          errors: [
-            { op: i, entity: op.entity, pointer, rule: "patch.time", message: error.message },
-          ],
-        };
-      }
-      if (error instanceof ShapeError) {
-        return {
-          ok: false,
-          errors: [
-            {
-              op: i,
-              entity: op.entity,
-              pointer: `${pointer}${error.pointer}`,
-              rule: error.rule,
-              message: error.message,
-            },
-          ],
-        };
-      }
-      throw error;
+      if (error instanceof OpError) errors.push({ op: i, ...error.error });
+      else if (error instanceof TimeError) {
+        errors.push({
+          op: i,
+          entity: op.entity,
+          pointer,
+          rule: "patch.time",
+          message: error.message,
+        });
+      } else if (error instanceof ShapeError) {
+        errors.push({
+          op: i,
+          entity: op.entity,
+          pointer: `${pointer}${error.pointer}`,
+          rule: error.rule,
+          message: error.message,
+        });
+      } else throw error;
     }
+    for (const e of collected) errors.push({ op: i, ...e });
   }
+  if (errors.length > 0) return { ok: false, errors, ir: next };
   const endIds = entityIds(next);
   const retired = [...startIds].filter((id) => !endIds.has(id)).sort();
   return { ok: true, ir: next, before, opOf, retired, blocked: blockedOps };
@@ -238,12 +245,23 @@ export function applyOps(
         if (t.kind !== "list")
           fail(entity.id, op.path, "patch.not_a_list", "insert needs an entity list");
         const item = listItemSchema(t, schemas);
+        const shape: ShapeError[] = [];
         const wrapped = wrapEntity(op.value, item.schema, item.file, {
           state,
           origin: state,
           fps,
           schemas,
+          errors: shape,
         });
+        // Insert what did wrap, so the whole-IR check still reports the entity's other errors.
+        for (const e of shape) {
+          collected.push({
+            entity: op.entity,
+            pointer: `${op.path}${e.pointer}`,
+            rule: e.rule,
+            message: e.message,
+          });
+        }
         if (!allowed(checkListChange(index, entity, stateOf(t), author), entity.id, op.path))
           return;
         before.push(snapshot(entity, op.path, t.container, t.key));
@@ -275,6 +293,7 @@ export function applyOps(
         const { owner, list, items, at } = holder(index, entity);
         if (op.after === entity.id)
           fail(entity.id, "", "patch.unknown_after", "an item cannot move after itself");
+        insertIndex(items, op.after, owner.id, entity.list?.path ?? "");
         if (
           !allowed(
             checkListChange(index, owner, stateOf(list), author),

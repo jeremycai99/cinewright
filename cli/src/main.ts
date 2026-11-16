@@ -2,13 +2,29 @@ import { LockTimeoutError, ProjectLoadError } from "@cinewright/core";
 import { UsageError } from "./args.js";
 import { INIT_USAGE, init } from "./commands/init.js";
 import { PATCH_USAGE, patch } from "./commands/patch.js";
+import { SCHEMA_USAGE, schema } from "./commands/schema.js";
 import { SHOW_USAGE, show } from "./commands/show.js";
+import { STATUS_USAGE, status } from "./commands/status.js";
 import { EXIT } from "./exit-codes.js";
 import { VERSION } from "./index.js";
 import type { Io } from "./io.js";
 
-const COMMANDS: Record<string, (argv: string[], io: Io) => Promise<number>> = { init, patch, show };
-const USAGE = [`cinewright ${VERSION}`, "", INIT_USAGE, PATCH_USAGE, SHOW_USAGE].join("\n");
+const COMMANDS: Record<string, (argv: string[], io: Io) => Promise<number>> = {
+  init,
+  patch,
+  show,
+  status,
+  schema,
+};
+const USAGE = [
+  `cinewright ${VERSION}`,
+  "",
+  INIT_USAGE,
+  PATCH_USAGE,
+  SHOW_USAGE,
+  STATUS_USAGE,
+  SCHEMA_USAGE,
+].join("\n");
 
 /** Run one CLI invocation and return its exit code (cli/README.md). */
 export async function main(argv: string[], io: Io): Promise<number> {

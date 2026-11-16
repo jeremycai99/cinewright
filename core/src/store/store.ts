@@ -5,6 +5,7 @@ import { stateHash } from "../canonical/hash.js";
 import type {
   AppliedEntry,
   ApprovedEntry,
+  ApproveFailedEntry,
   Op,
   Patch,
   PendingEntry,
@@ -30,8 +31,8 @@ import {
 } from "../project/files.js";
 import { DECISION_LOG, PATCH_LOG } from "../project/layout.js";
 import { escapeSegment, type JsonObject } from "../schema/load.js";
-import { validateProject } from "../schema/validate.js";
-import { applyOps, restoreSnapshots } from "./apply.js";
+import { explainProject, validateProject } from "../schema/validate.js";
+import { applyOps, type OpsResult, restoreSnapshots } from "./apply.js";
 import type { Author } from "./author.js";
 import { type Conflict, findConflicts } from "./conflict.js";
 import { withLock } from "./lock.js";
@@ -167,6 +168,45 @@ function touchedOf(before: readonly Snapshot[]): Touched[] {
     out.push({ entity, path });
   }
   return out;
+}
+
+const APPROVER: Author = { kind: "user" };
+
+/** A pending patch's ops as its approval applies them: suggestions become `set`. */
+function approvalOps(ops: readonly Op[]): Op[] {
+  return ops.map((op): Op => {
+    if (op.op !== "suggest") return op;
+    return { op: "set", entity: op.entity, path: op.path, value: op.value };
+  });
+}
+
+/**
+ * The op that wrote where a whole-IR error is (finding 3): the last op that set that field, or
+ * inserted the entity (or an ancestor of it), or removed or moved it. Null when none did.
+ */
+function opFor(
+  error: { entity: string | null; pointer: string },
+  ops: readonly Op[],
+  index: ReadonlyMap<string, IrEntity>,
+): number | null {
+  if (error.entity === null) return null;
+  const lineage = new Set<string>();
+  for (let id: string | null = error.entity; id !== null && !lineage.has(id); ) {
+    lineage.add(id);
+    id = index.get(id)?.parent ?? null;
+  }
+  for (let i = ops.length - 1; i >= 0; i -= 1) {
+    const op = ops[i] as Op;
+    if (op.op === "insert") {
+      const id = isObject(op.value) ? op.value.id : undefined;
+      if (typeof id === "string" && lineage.has(id)) return i;
+    }
+    if (op.entity !== error.entity) continue;
+    if (op.op === "remove" || op.op === "move") return i;
+    const path = "path" in op && typeof op.path === "string" ? op.path : "";
+    if (path !== "" && (error.pointer === path || error.pointer.startsWith(`${path}/`))) return i;
+  }
+  return null;
 }
 
 /**
@@ -346,13 +386,89 @@ export class Store {
           ],
         };
       }
-      if (suggests > 0) return this.storePending(patch, "suggest");
-      if (patch.mode === "propose") return this.storePending(patch, "proposed");
-      if (patch.author.kind === "session" && this.proposeFirst()) {
-        return this.storePending(patch, "session_propose_first");
-      }
-      return this.applyNow(patch, patch.author);
+      const reason: PendingEntry["reason_code"] | null =
+        suggests > 0
+          ? "suggest"
+          : patch.mode === "propose"
+            ? "proposed"
+            : patch.author.kind === "session" && this.proposeFirst()
+              ? "session_propose_first"
+              : null;
+      if (reason === null) return this.applyNow(patch, patch.author);
+      return this.checkedPending(patch, reason);
     });
+  }
+
+  /**
+   * Store a patch as pending only if its approval could apply now (finding 1 of the M1.9
+   * trial): its ops, as the approving user would apply them, must pass every check `apply`
+   * runs (paths, wrapping, times, conflicts, the whole-IR validation). Authorship is not
+   * checked here: a patch blocked by authorship is what pending is for, and a lock taken
+   * before the approval makes that approval fail and the patch stay pending.
+   */
+  private checkedPending(
+    patch: Patch,
+    reason: PendingEntry["reason_code"],
+    blocked: { op: number; rule: string }[] = [],
+  ): Promise<ApplyResult> | ApplyResult {
+    const asApproved = { ...patch, ops: approvalOps(patch.ops) as Patch["ops"] };
+    const verdict = this.evaluate(asApproved, APPROVER, false);
+    if (verdict.status !== "ok") return verdict;
+    return this.storePending(patch, reason, blocked);
+  }
+
+  /** Whole-IR errors of `next`, each with the op that wrote there when one did (finding 3). */
+  private wholeIrErrors(next: InlinedIr, ops: readonly Op[]): PatchError[] {
+    const errors = explainProject(next, { retiredIds: this.retiredIds() });
+    if (errors.length === 0) return [];
+    const index = indexIr(next);
+    return errors.map((e) => ({ op: opFor(e, ops, index), ...e }));
+  }
+
+  /**
+   * Every check before a patch applies, in order: ops (each failing op reported, the rest still
+   * run), the conflict check, authorship when `enforce`, then the whole-IR validation unless an
+   * op was blocked. A stale patch reports its conflict before any authorship verdict.
+   */
+  private evaluate(
+    patch: Patch,
+    author: Author,
+    enforce: boolean,
+  ):
+    | { status: "ok"; result: Extract<OpsResult, { ok: true }> }
+    | Extract<ApplyResult, { status: "rejected" | "conflict" }> {
+    const later = this.appliedAfter(patch.base_revision);
+    // Conflicts first (convention 11): a stale patch reports what changed under it before any
+    // authorship verdict, so its author can rebase rather than ask for approval.
+    const dry = applyOps(this.state.ir, patch.ops, author);
+    if (!dry.ok) {
+      const gone = dry.errors.find((e) => e.rule === "patch.unknown_entity" && e.entity !== null);
+      const removedBy = gone
+        ? later.find((entry) => entry.retired.includes(gone.entity as string))
+        : undefined;
+      if (gone && removedBy) {
+        return {
+          status: "conflict",
+          conflicts: [{ entity: gone.entity as string, path: "", revision: removedBy.revision }],
+        };
+      }
+      // Finding 4: also report what the whole-IR check finds in the ops that did apply.
+      return {
+        status: "rejected",
+        errors: [...dry.errors, ...this.wholeIrErrors(dry.ir, patch.ops)],
+      };
+    }
+    const conflicts = findConflicts(later, touchedOf(dry.before), indexIr(dry.ir));
+    if (conflicts.length > 0) return { status: "conflict", conflicts };
+    const result = enforce
+      ? applyOps(this.state.ir, patch.ops, author, { gates: new Set(this.options.gates) })
+      : dry;
+    if (!result.ok) return { status: "rejected", errors: result.errors };
+    if (result.blocked.length === 0) {
+      const errors = this.wholeIrErrors(result.ir, patch.ops);
+      if (errors.length > 0) return { status: "rejected", errors };
+    }
+    return { status: "ok", result };
   }
 
   private async storePending(
@@ -392,29 +508,9 @@ export class Store {
   }
 
   private async applyNow(patch: Patch, author: Author, approval?: string): Promise<ApplyResult> {
-    const later = this.appliedAfter(patch.base_revision);
-    // Conflicts first (convention 11): a stale patch reports what changed under it before any
-    // authorship verdict, so its author can rebase rather than ask for approval.
-    const dry = applyOps(this.state.ir, patch.ops, author);
-    if (!dry.ok) {
-      const gone = dry.errors.find((e) => e.rule === "patch.unknown_entity" && e.entity !== null);
-      const removedBy = gone
-        ? later.find((entry) => entry.retired.includes(gone.entity as string))
-        : undefined;
-      if (gone && removedBy) {
-        return {
-          status: "conflict",
-          conflicts: [{ entity: gone.entity as string, path: "", revision: removedBy.revision }],
-        };
-      }
-      return { status: "rejected", errors: dry.errors };
-    }
-    const conflicts = findConflicts(later, touchedOf(dry.before), indexIr(dry.ir));
-    if (conflicts.length > 0) return { status: "conflict", conflicts };
-    const result = applyOps(this.state.ir, patch.ops, author, {
-      gates: new Set(this.options.gates),
-    });
-    if (!result.ok) return { status: "rejected", errors: result.errors };
+    const verdict = this.evaluate(patch, author, true);
+    if (verdict.status !== "ok") return verdict;
+    const result = verdict.result;
     if (result.blocked.length > 0) {
       if (approval) {
         return {
@@ -427,7 +523,7 @@ export class Store {
           })),
         };
       }
-      return this.storePending(patch, "authorship_blocked", result.blocked);
+      return this.checkedPending(patch, "authorship_blocked", result.blocked);
     }
     const denied = this.scopeErrors(
       author,
@@ -445,6 +541,7 @@ export class Store {
       touchedOf(result.before),
       result.retired,
       approval ? { pending_id: approval } : {},
+      true,
     );
   }
 
@@ -456,12 +553,16 @@ export class Store {
     touched: Touched[],
     retired: string[],
     extra: { revert_of?: number; pending_id?: string; restored?: string[] } = {},
+    /** The whole IR was already validated (evaluate). */
+    validated = false,
   ): Promise<ApplyResult> {
-    const retiredIds = this.retiredIds();
-    for (const id of extra.restored ?? []) retiredIds.delete(id);
-    const errors = validateProject(next, { retiredIds });
-    if (errors.length > 0) {
-      return { status: "rejected", errors: errors.map((e) => ({ op: null, ...e })) };
+    if (!validated) {
+      const retiredIds = this.retiredIds();
+      for (const id of extra.restored ?? []) retiredIds.delete(id);
+      const errors = validateProject(next, { retiredIds });
+      if (errors.length > 0) {
+        return { status: "rejected", errors: errors.map((e) => ({ op: null, ...e })) };
+      }
     }
     const revision = this.revision() + 1;
     const hash = stateHash(next);
@@ -655,26 +756,79 @@ export class Store {
    * Approve a pending patch (D25): apply its ops as the approving user, so every field it
    * touches becomes `user`, and record the approval. Suggestions apply as `set`. Conflicts when
    * a revision after the patch's base touched the same nodes.
+   *
+   * A failed approval decides nothing (finding 2 of the M1.9 trial): the patch stays pending
+   * and an `approve_failed` entry records why, so the user can rebase it, unlock what blocks
+   * it and approve again, or reject it. The patch was valid when stored (finding 1), so a
+   * failure means the project changed since.
    */
   async approve(id: string, approver: Author): Promise<ApplyResult> {
     return withLock(this.dir, this.options.lockTimeoutMs, async () => {
       this.state = await Store.load(this.dir);
       const entry = this.decidable(id, approver);
       if (!("kind" in entry)) return { status: "rejected", errors: [entry] };
-      const ops = entry.ops.map((op): Op => {
-        if (op.op !== "suggest") return op;
-        return { op: "set", entity: op.entity, path: op.path, value: op.value };
-      });
       const patch: Patch = {
         base_revision: entry.base_revision,
         author: approver,
         mode: "apply",
         reason: entry.reason,
-        ops: ops as Patch["ops"],
+        ops: approvalOps(entry.ops) as Patch["ops"],
         ...(entry.decisions ? { decisions: entry.decisions } : {}),
       };
-      return this.applyNow(patch, approver, id);
+      const result = await this.applyNow(patch, approver, id);
+      if (result.status === "rejected" || result.status === "conflict")
+        await this.recordApprovalFailure(id, approver, result);
+      return result;
     });
+  }
+
+  private async recordApprovalFailure(
+    id: string,
+    approver: Author,
+    result: Extract<ApplyResult, { status: "rejected" | "conflict" }>,
+  ): Promise<void> {
+    const entry: ApproveFailedEntry = {
+      seq: this.nextSeq(),
+      kind: "approve_failed",
+      pending_id: id,
+      time: this.options.now(),
+      session_id: this.options.sessionId,
+      author: approver,
+      revision: this.revision(),
+      status: result.status,
+      ...(result.status === "conflict"
+        ? { conflicts: result.conflicts }
+        : {
+            errors: result.errors.map((e) => ({
+              ...(e.op !== null ? { op: e.op } : {}),
+              ...(e.entity !== null ? { entity: e.entity } : {}),
+              pointer: e.pointer,
+              rule: e.rule,
+              ...(e.message ? { message: e.message } : {}),
+            })),
+          }),
+    };
+    await commitTxn(this.dir, {
+      revision: this.revision(),
+      writes: new Map(),
+      deletes: [],
+      appends: [{ file: PATCH_LOG, text: logLine(entry) }],
+    });
+    this.state.log.push(entry);
+  }
+
+  /** The last failed approval of a still-pending patch, or null (finding 2). */
+  approvalFailure(id: string): ApproveFailedEntry | null {
+    if (!this.pending().some((p) => p.pending_id === id)) return null;
+    const failures = this.state.log.filter(
+      (e): e is ApproveFailedEntry => e.kind === "approve_failed" && e.pending_id === id,
+    );
+    return structuredClone(failures.at(-1) ?? null);
+  }
+
+  /** The state hash of the current revision. */
+  stateHash(): string {
+    return lastStateEntry(this.state.log).state_hash;
   }
 
   /** Reject a pending patch: record the decision; nothing else changes. */

@@ -227,6 +227,18 @@ export interface WrapContext {
   origin: "user" | "agent";
   fps: Rational;
   schemas: SchemaSet;
+  /**
+   * When given, a shape problem that leaves the rest wrappable (an unknown property, a value of
+   * the wrong kind for a list, map or container) is pushed here and skipped instead of thrown,
+   * so one round reports every problem (finding 4 of the M1.9 trial).
+   */
+  errors?: ShapeError[];
+}
+
+/** Record a shape problem when the caller collects them; throw it otherwise. */
+function problem(ctx: WrapContext, error: ShapeError): void {
+  if (!ctx.errors) throw error;
+  ctx.errors.push(error);
 }
 
 /**
@@ -257,15 +269,20 @@ function wrapContainer(
   skip: Set<string>,
 ): JsonObject {
   const props = isObject(node.properties) ? node.properties : {};
+  const skipped = new Set<string>();
+  const allowed = Object.keys(props).filter((k) => !skip.has(k));
   for (const key of Object.keys(bare)) {
     if (!skip.has(key) && !(key in props)) {
-      throw new ShapeError(
-        "patch.unknown_property",
-        `${pointer}/${key}`,
-        `unknown property ${key}`,
+      problem(
+        ctx,
+        new ShapeError(
+          "patch.unknown_property",
+          `${pointer}/${key}`,
+          `unknown property ${key}; allowed: ${allowed.join(", ")}`,
+        ),
       );
-    }
-    if (key === "origin" || key === "locked") {
+      skipped.add(key);
+    } else if (key === "origin" || key === "locked") {
       throw new ShapeError(
         "patch.store_property",
         `${pointer}/${key}`,
@@ -277,7 +294,7 @@ function wrapContainer(
   for (const [key, raw] of Object.entries(props)) {
     if (skip.has(key)) continue;
     const { schema: child, file: at } = resolveNode(ctx.schemas, file, raw as JsonObject);
-    const given = key in bare;
+    const given = key in bare && !skipped.has(key);
     const kind = child["x-authorable"];
     const here = `${pointer}/${key}`;
     if (kind === "field") {
@@ -296,31 +313,37 @@ function wrapContainer(
         };
       }
     } else if (kind === "list") {
-      if (!given) out[key] = { state: "open" };
+      const items = bare[key];
+      if (given && !Array.isArray(items))
+        problem(ctx, new ShapeError("patch.list_value", here, `${key} must be a list`));
+      if (!given || !Array.isArray(items)) out[key] = { state: "open" };
       else {
-        const items = bare[key];
-        if (!Array.isArray(items))
-          throw new ShapeError("patch.list_value", here, `${key} must be a list`);
         const itemSchema = ((child.properties as JsonObject).value as JsonObject)
           .items as JsonObject;
-        out[key] = {
-          value: items.map((item) => {
-            const resolvedItem = resolveNode(ctx.schemas, at, itemSchema);
-            return typeof resolvedItem.schema["x-entity"] === "string"
-              ? wrapEntity(item, itemSchema, at, ctx)
-              : item;
-          }),
-          state: ctx.state,
-        };
+        const resolvedItem = resolveNode(ctx.schemas, at, itemSchema);
+        const entities = typeof resolvedItem.schema["x-entity"] === "string";
+        const value: unknown[] = [];
+        for (const [i, item] of items.entries()) {
+          if (!entities) value.push(item);
+          else if (!isObject(item) || typeof item.id !== "string")
+            problem(
+              ctx,
+              new ShapeError("patch.insert_id", `${here}/${i}`, "an entity needs an id"),
+            );
+          else value.push(wrapEntity(item, itemSchema, at, ctx));
+        }
+        out[key] = { value, state: ctx.state };
       }
     } else if (kind === "map") {
-      const entries = given ? bare[key] : {};
-      if (!isObject(entries))
-        throw new ShapeError("patch.map_value", here, `${key} must be an object`);
+      let entries = given ? bare[key] : {};
+      if (!isObject(entries)) {
+        problem(ctx, new ShapeError("patch.map_value", here, `${key} must be an object`));
+        entries = {};
+      }
       const entrySchema = resolveNode(ctx.schemas, at, child.additionalProperties as JsonObject);
       const valueSchema = wrapperValueSchema(entrySchema.schema, entrySchema.file, ctx.schemas);
       const wrapped: JsonObject = {};
-      for (const [name, value] of Object.entries(entries)) {
+      for (const [name, value] of Object.entries(entries as JsonObject)) {
         wrapped[name] = {
           value: normalizeTimes(value, valueSchema.schema, valueSchema.file, ctx.fps, ctx.schemas),
           state: ctx.state,
@@ -332,10 +355,12 @@ function wrapContainer(
       isObject(child.properties) &&
       typeof child["x-entity"] !== "string"
     ) {
-      const inner = given ? bare[key] : {};
-      if (!isObject(inner))
-        throw new ShapeError("patch.container_value", here, `${key} must be an object`);
-      out[key] = wrapContainer(inner, child, at, ctx, here, new Set());
+      let inner = given ? bare[key] : {};
+      if (!isObject(inner)) {
+        problem(ctx, new ShapeError("patch.container_value", here, `${key} must be an object`));
+        inner = {};
+      }
+      out[key] = wrapContainer(inner as JsonObject, child, at, ctx, here, new Set());
     } else if (given) {
       out[key] = normalizeTimes(bare[key], child, at, ctx.fps, ctx.schemas);
     }

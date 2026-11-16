@@ -118,6 +118,7 @@ export interface IrDocuments {
   pending_entry?: PendingEntry;
   approved_entry?: ApprovedEntry;
   rejected_entry?: RejectedEntry;
+  approve_failed_entry?: ApproveFailedEntry;
   patch?: Patch;
   project?: Project;
   scene?: Scene;
@@ -635,6 +636,39 @@ export interface RejectedEntry {
   author: Author;
   pending_id: string;
   note?: string;
+}
+/**
+ * An approval that failed (a conflict, or the project changed so the patch no longer applies); the patch stays pending.
+ */
+export interface ApproveFailedEntry {
+  kind: "approve_failed";
+  seq: number;
+  time: string;
+  session_id: string;
+  author: Author;
+  pending_id: string;
+  /**
+   * The revision the approval was tried at.
+   */
+  revision: number;
+  status: "conflict" | "rejected";
+  conflicts?: ApprovalConflict[];
+  errors?: ApprovalError[];
+}
+export interface ApprovalConflict {
+  entity: Id;
+  /**
+   * JSON Pointer relative to the entity (RFC 6901); empty for the whole entity.
+   */
+  path: string;
+  revision: number;
+}
+export interface ApprovalError {
+  op?: number;
+  entity?: string;
+  pointer: string;
+  rule: string;
+  message?: string;
 }
 /**
  * An IR patch (D30, M1 convention 10). Values are bare: the store adds wrappers and sets each state from the author.

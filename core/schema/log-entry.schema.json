@@ -18,6 +18,9 @@
     },
     {
       "$ref": "#/$defs/rejected_entry"
+    },
+    {
+      "$ref": "#/$defs/approve_failed_entry"
     }
   ],
   "$defs": {
@@ -339,6 +342,104 @@
         },
         "note": {
           "type": "string"
+        }
+      }
+    },
+    "approve_failed_entry": {
+      "description": "An approval that failed (a conflict, or the project changed so the patch no longer applies); the patch stays pending.",
+      "title": "ApproveFailedEntry",
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "kind",
+        "seq",
+        "time",
+        "session_id",
+        "author",
+        "pending_id",
+        "revision",
+        "status"
+      ],
+      "properties": {
+        "kind": {
+          "const": "approve_failed"
+        },
+        "seq": {
+          "type": "integer",
+          "minimum": 1
+        },
+        "time": {
+          "type": "string",
+          "minLength": 1
+        },
+        "session_id": {
+          "type": "string",
+          "minLength": 1
+        },
+        "author": {
+          "$ref": "common.schema.json#/$defs/author"
+        },
+        "pending_id": {
+          "type": "string",
+          "pattern": "^p[1-9][0-9]*$"
+        },
+        "revision": {
+          "type": "integer",
+          "minimum": 0,
+          "description": "The revision the approval was tried at."
+        },
+        "status": {
+          "enum": ["conflict", "rejected"]
+        },
+        "conflicts": {
+          "type": "array",
+          "items": {
+            "title": "ApprovalConflict",
+            "type": "object",
+            "additionalProperties": false,
+            "required": ["entity", "path", "revision"],
+            "properties": {
+              "entity": {
+                "$ref": "common.schema.json#/$defs/id"
+              },
+              "path": {
+                "type": "string",
+                "pattern": "^(/([^~]|~[01])*)*$",
+                "description": "JSON Pointer relative to the entity (RFC 6901); empty for the whole entity."
+              },
+              "revision": {
+                "type": "integer",
+                "minimum": 1
+              }
+            }
+          }
+        },
+        "errors": {
+          "type": "array",
+          "items": {
+            "title": "ApprovalError",
+            "type": "object",
+            "additionalProperties": false,
+            "required": ["pointer", "rule"],
+            "properties": {
+              "op": {
+                "type": "integer",
+                "minimum": 0
+              },
+              "entity": {
+                "type": "string"
+              },
+              "pointer": {
+                "type": "string"
+              },
+              "rule": {
+                "type": "string"
+              },
+              "message": {
+                "type": "string"
+              }
+            }
+          }
         }
       }
     }

@@ -94,7 +94,8 @@ function linesOf(
               return isObject(field) ? field.value : undefined;
             };
             const entry: JsonObject = { id, who: show("speaker"), line: show("text") };
-            if (show("direction") !== undefined) entry.direction = show("direction");
+            for (const f of ["direction", "on_screen", "lipsync"])
+              if (show(f) !== undefined) entry[f] = show(f);
             out.push(`${indent}  - ${flow(entry)}`);
           }
         } else {

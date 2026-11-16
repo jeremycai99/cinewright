@@ -785,6 +785,55 @@ class RejectedEntry(BaseModel):
     note: str | None = None
 
 
+class Status(Enum):
+    conflict = "conflict"
+    rejected = "rejected"
+
+
+class ApprovalConflict(BaseModel):
+    model_config = ConfigDict(
+        extra="forbid",
+    )
+    entity: Id
+    path: Annotated[
+        str,
+        Field(
+            description="JSON Pointer relative to the entity (RFC 6901); empty for the whole entity.",
+            pattern="^(/([^~]|~[01])*)*$",
+        ),
+    ]
+    revision: Annotated[int, Field(ge=1)]
+
+
+class ApprovalError(BaseModel):
+    model_config = ConfigDict(
+        extra="forbid",
+    )
+    op: Annotated[int | None, Field(ge=0)] = None
+    entity: str | None = None
+    pointer: str
+    rule: str
+    message: str | None = None
+
+
+class ApproveFailedEntry(BaseModel):
+    model_config = ConfigDict(
+        extra="forbid",
+    )
+    kind: Literal["approve_failed"]
+    seq: Annotated[int, Field(ge=1)]
+    time: Annotated[str, Field(min_length=1)]
+    session_id: Annotated[str, Field(min_length=1)]
+    author: Author
+    pending_id: Annotated[str, Field(pattern="^p[1-9][0-9]*$")]
+    revision: Annotated[
+        int, Field(description="The revision the approval was tried at.", ge=0)
+    ]
+    status: Status
+    conflicts: list[ApprovalConflict] | None = None
+    errors: list[ApprovalError] | None = None
+
+
 class Patch(BaseModel):
     model_config = ConfigDict(
         extra="forbid",
@@ -1695,6 +1744,7 @@ class IrDocuments(BaseModel):
     pending_entry: PendingEntry | None = None
     approved_entry: ApprovedEntry | None = None
     rejected_entry: RejectedEntry | None = None
+    approve_failed_entry: ApproveFailedEntry | None = None
     patch: Patch | None = None
     project: Project | None = None
     scene: Scene | None = None
