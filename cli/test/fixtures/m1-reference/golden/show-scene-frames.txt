@@ -23,8 +23,8 @@ shots:  # agent
     anchors: { start: { line: b01.l01, point: start, offset: 0 } }  # agent
     references: ~  # open
     layout:
-      landscape: { template: grid.12col/title-left }  # agent
-      portrait: { template: stack/title-top }  # agent
+      landscape: { template: title_body }  # agent
+      portrait: { template: title_body }  # agent
     style:
       overrides: {}
     layers:  # agent

@@ -3,4 +3,4 @@
 ~ s03_the_problem /sound: ~ → { music_cue: tension_rise, sfx: [whoosh_soft, tick_loop], duck_under_vo_db: -12 }  [agent]
 + s03_the_problem /shots at end: s03.sh01
 + s03_the_problem /shots at end: s03.sh02
-applied revision 5 (sha256:d92c5c464529bde991bc0a69ecdab2020100573ab8e6793ac2b04f000ac33bcf)
+applied revision 5 (sha256:77b8fef0f1bfb549130f6ddc08a7c775c34d15a9b7426345e11020dbe9d43729)

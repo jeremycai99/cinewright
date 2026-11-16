@@ -35,3 +35,35 @@ export interface PackFont {
   license: string;
   source: string;
 }
+
+/**
+ * A pack's layout templates, layouts.json (M2.1b). Regions are in grid cells of layout.columns × layout.rows for each aspect class; see README.md.
+ */
+export interface PackLayouts {
+  schema_version: 1;
+  templates: {
+    [k: string]: LayoutTemplate;
+  };
+}
+export interface LayoutTemplate {
+  description: string;
+  variants: {
+    [k: string]: LayoutVariant;
+  };
+}
+export interface LayoutVariant {
+  regions: {
+    [k: string]: LayoutRegion;
+  };
+}
+/**
+ * Grid cells, 1-based; align is vertical, justify horizontal.
+ */
+export interface LayoutRegion {
+  col: number;
+  row: number;
+  col_span: number;
+  row_span: number;
+  align: "start" | "center" | "end";
+  justify: "start" | "center" | "end";
+}

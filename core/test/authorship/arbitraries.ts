@@ -36,7 +36,7 @@ const FIELD_PATHS = [
 const LIST_PATHS = ["/shots", "/layers", "/scenes", "/sequences", "/cast", "/lines", "/beats"];
 const VALUES: Record<string, unknown> = {
   "/mood": ["calm"],
-  "/layout/landscape": { template: "t" },
+  "/layout/landscape": { template: "full" },
 };
 
 /** Where an insert can go, with a minimal bare entity for that list. */

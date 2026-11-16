@@ -160,3 +160,36 @@ describe("token checks (M2.1a)", () => {
     expect(validateProject(ir)).toEqual([]);
   });
 });
+
+describe("template and region checks (M2.1b)", () => {
+  it("reports a shot template that is neither core nor ext_*", () => {
+    const ir = reference();
+    shots(ir)[0].layout.landscape.value.template = "grid.12col/title-left";
+    expect(validateProject(ir)).toEqual([
+      {
+        entity: "s03.sh01",
+        pointer: "/layout/landscape/value/template",
+        rule: "semantic.unknown_template",
+      },
+    ]);
+  });
+
+  it("reports a layer region its shot's template does not have", () => {
+    const ir = reference();
+    shots(ir)[0].layers.value[0].layout.landscape.value.region = "left";
+    expect(validateProject(ir)).toEqual([
+      {
+        entity: "s03.sh01.title",
+        pointer: "/layout/landscape/value/region",
+        rule: "semantic.unknown_region",
+      },
+    ]);
+  });
+
+  it("accepts any region under an ext_ template", () => {
+    const ir = reference();
+    shots(ir)[0].layout.landscape.value.template = "ext_hero";
+    shots(ir)[0].layers.value[0].layout.landscape.value.region = "anything";
+    expect(validateProject(ir)).toEqual([]);
+  });
+});

@@ -48,13 +48,21 @@ export {
   type Target,
   wrapperValueSchema,
 } from "./ir/paths.js";
-export { anchorErrors, crossDocumentErrors, tokenErrors, wrapperErrors } from "./ir/semantic.js";
+export {
+  anchorErrors,
+  crossDocumentErrors,
+  layoutErrors,
+  tokenErrors,
+  wrapperErrors,
+} from "./ir/semantic.js";
+export { type Box, CORE_TEMPLATES, isExtTemplate, regionBox, safeRect } from "./pack/layouts.js";
 export {
   loadPack,
   type Pack,
   PackError,
   type PackFont,
   type PackIssue,
+  type PackLayouts,
   type PackManifest,
 } from "./pack/load.js";
 export { citation, parseRules, type Rule } from "./pack/rules.js";

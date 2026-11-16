@@ -1,4 +1,5 @@
 import { sha256Hash } from "../canonical/hash.js";
+import { CORE_TEMPLATES, isExtTemplate } from "../pack/templates.js";
 import {
   checkLiteral,
   compatible,
@@ -234,6 +235,55 @@ export function tokenErrors(schemas: SchemaSet, rootFile: string, doc: unknown):
     }
     const kind = node.schema["x-authorable"];
     if (kind === "field" || kind === "map") scanRefs(node.value, node.pointer);
+  });
+  return errors;
+}
+
+/**
+ * Template checks that need no pack (M2.1b): a shot's template per aspect class is a core
+ * template or `ext_*` (`semantic.unknown_template`); a layer's region belongs to its shot's core
+ * template for the same aspect class (`semantic.unknown_region`).
+ */
+export function layoutErrors(
+  schemas: SchemaSet,
+  rootFile: string,
+  doc: unknown,
+): ValidationError[] {
+  const entities = collectEntities(schemas, rootFile, doc);
+  const errors: ValidationError[] = [];
+  const inner = (wrapper: unknown, key: string): unknown =>
+    isObject(wrapper) && isObject(wrapper.value) ? wrapper.value[key] : undefined;
+  walkDocument(schemas, rootFile, doc, (node) => {
+    if (node.schema["x-entity"] !== "shot" || !isObject(node.value)) return;
+    const shot = node.value;
+    const templates = new Map<string, string>();
+    for (const [aspect, wrapper] of Object.entries(isObject(shot.layout) ? shot.layout : {})) {
+      const template = inner(wrapper, "template");
+      if (typeof template !== "string") continue;
+      if (template in CORE_TEMPLATES || isExtTemplate(template)) templates.set(aspect, template);
+      else
+        errors.push({
+          ...locate(entities, `${node.pointer}/layout/${escapeSegment(aspect)}/value/template`),
+          rule: "semantic.unknown_template",
+        });
+    }
+    const layers =
+      isObject(shot.layers) && Array.isArray(shot.layers.value) ? shot.layers.value : [];
+    for (const [i, layer] of layers.entries()) {
+      if (!isObject(layer) || !isObject(layer.layout)) continue;
+      for (const [aspect, wrapper] of Object.entries(layer.layout)) {
+        const region = inner(wrapper, "region");
+        const regions = CORE_TEMPLATES[templates.get(aspect) ?? ""];
+        if (typeof region !== "string" || !regions || regions.includes(region)) continue;
+        errors.push({
+          ...locate(
+            entities,
+            `${node.pointer}/layers/value/${i}/layout/${escapeSegment(aspect)}/value/region`,
+          ),
+          rule: "semantic.unknown_region",
+        });
+      }
+    }
   });
   return errors;
 }

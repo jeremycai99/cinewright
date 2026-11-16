@@ -12,6 +12,7 @@ A pack is a folder `<id>/` holding:
 | --- | --- |
 | `pack.json` | The manifest (`pack.schema.json`): `schema_version`, `id`, `name`, `version` (semver), `description`, `license`, `aspect_classes`, `fonts`, `retired_rules`. `extends` is reserved: pack composition comes after v0.1, and a pack that sets it is rejected. |
 | `tokens.json` | Every core token (`tokens.schema.json`), plus pack-specific tokens under `ext`. |
+| `layouts.json` | Layout templates (`layouts.schema.json`). |
 | `rules.md` | The pack's rules, each with a stable id. |
 | `fonts/` | Every font the tokens name, plus its licence text. Each font's `sha256`, `source` and `license` are recorded in `pack.json`. Renders load fonts only from here. |
 | `README.md` | What the pack is for. |
@@ -64,6 +65,33 @@ The core paths by group (`cinewright schema tokens` has the full list):
 | `transition` | `default`, `cross_dissolve.*`, `wipe.*` |
 | `sound` | `music.*`, `sfx.*`, `duck.*`, `bus.*`. Loudness targets belong to delivery profiles, not packs. |
 
+## Layout templates
+
+The IR names a template per aspect class on each shot, and a region per aspect class on each layer. So every pack defines the same core templates and regions, for every aspect class in its `aspect_classes`:
+
+| Template | Regions |
+| --- | --- |
+| `full` | `main` |
+| `title` | `title`, `subtitle` |
+| `title_body` | `title`, `body` |
+| `split` | `a`, `b` |
+| `lower_third` | `main`, `lower_third` |
+| `end_card` | `main`, `footer` |
+| `captions` | `captions` |
+
+Pack-specific templates are named `ext_<name>`. Each must define the same region names in every variant.
+
+A region is `{ col, row, col_span, row_span, align, justify }`:
+- **Cells:** 1-based cells of the aspect class's grid, `layout.columns` × `layout.rows`.
+- **Alignment:** `align` is vertical and `justify` horizontal, each `start`, `center` or `end`.
+
+`regionBox(pack, template, region, profile)` gives the box in whole pixels:
+1. **Safe rect:** the frame inset on each side by the larger of the profile's title-safe zone (a fraction of the width or height) and `layout.margin`. Delivery profiles own platform safe zones, so a pack can only add margin.
+2. **Grid:** the cells divide the safe rect, separated by `layout.gutter`.
+3. **Rounding:** each edge of the box is rounded to the nearest whole pixel, ties up, and width and height come from the rounded edges.
+
+An IR check (`semantic.unknown_template`, `semantic.unknown_region`) rejects a template that is neither core nor `ext_*`, and a region that the shot's core template lacks.
+
 ## Rules
 
 `rules.md` uses level-2 headings to group rules by domain. Each rule is a level-3 heading ``### `<rule id>` <title>`` followed by its prose, up to the next heading.
@@ -89,6 +117,10 @@ The core paths by group (`cinewright schema tokens` has the full list):
 | `pack.token_cycle` | References form a cycle; every path on it is reported. |
 | `pack.aspect_missing` | A `by_aspect` leaf lacks one of the pack's aspect classes; the pointer ends in that class. |
 | `pack.rule_id`, `pack.rule_duplicate`, `pack.rule_retired` | A rule heading lacks a valid id, repeats one, or reuses a retired one. |
+| `pack.template_missing` | A core template, or one of its aspect-class variants, is missing. `regionBox` also raises it for an unknown template. |
+| `pack.region_mismatch` | A core template's regions differ from the core list, or an `ext_` template's regions differ between variants. |
+| `pack.region_bounds` | A region extends past its aspect class's grid. |
+| `pack.region_missing` | `regionBox` was asked for a region the template lacks. |
 
 Resolving tokens has errors of its own:
 - **Unsupported aspect class:** `resolvePackTokens(pack, aspect)`, or `resolveEntity` with `{ aspectClasses }`, throws `CascadeError` with `pack.aspect_unsupported` for an aspect class the pack does not declare.

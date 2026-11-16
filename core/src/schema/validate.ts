@@ -1,7 +1,13 @@
 import { Ajv2020, type ErrorObject, type ValidateFunction } from "ajv/dist/2020.js";
 import { collectEntities, locate } from "../ir/index.js";
 import { type InlinedIr, splitIr } from "../ir/inlined.js";
-import { anchorErrors, crossDocumentErrors, tokenErrors, wrapperErrors } from "../ir/semantic.js";
+import {
+  anchorErrors,
+  crossDocumentErrors,
+  layoutErrors,
+  tokenErrors,
+  wrapperErrors,
+} from "../ir/semantic.js";
 import {
   type DetailedError,
   normalizeDetailed,
@@ -125,6 +131,7 @@ function documentErrors(kind: DocumentKind, doc: unknown, schemas: SchemaSet): D
   errors.push(...wrapperErrors(schemas, rootFile, doc));
   errors.push(...anchorErrors(schemas, rootFile, doc));
   errors.push(...tokenErrors(schemas, rootFile, doc));
+  errors.push(...layoutErrors(schemas, rootFile, doc));
   return errors;
 }
 

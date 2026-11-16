@@ -561,13 +561,13 @@
                       "landscape": {
                         "state": "agent",
                         "value": {
-                          "template": "a"
+                          "template": "full"
                         }
                       },
                       "portrait": {
                         "state": "agent",
                         "value": {
-                          "template": "b"
+                          "template": "title"
                         }
                       }
                     },
@@ -623,13 +623,13 @@
                       "landscape": {
                         "state": "agent",
                         "value": {
-                          "template": "a"
+                          "template": "full"
                         }
                       },
                       "portrait": {
                         "state": "agent",
                         "value": {
-                          "template": "b"
+                          "template": "title"
                         }
                       }
                     },
@@ -762,13 +762,13 @@
                       "landscape": {
                         "state": "agent",
                         "value": {
-                          "template": "a"
+                          "template": "full"
                         }
                       },
                       "portrait": {
                         "state": "agent",
                         "value": {
-                          "template": "b"
+                          "template": "title"
                         }
                       }
                     },
@@ -824,13 +824,13 @@
                       "landscape": {
                         "state": "agent",
                         "value": {
-                          "template": "a"
+                          "template": "full"
                         }
                       },
                       "portrait": {
                         "state": "agent",
                         "value": {
-                          "template": "b"
+                          "template": "title"
                         }
                       }
                     },
@@ -929,13 +929,13 @@
                       "landscape": {
                         "state": "agent",
                         "value": {
-                          "template": "a"
+                          "template": "full"
                         }
                       },
                       "portrait": {
                         "state": "agent",
                         "value": {
-                          "template": "b"
+                          "template": "title"
                         }
                       }
                     },

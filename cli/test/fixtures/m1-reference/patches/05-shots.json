@@ -48,10 +48,10 @@
         "framing": "full_frame",
         "layout": {
           "landscape": {
-            "template": "grid.12col/title-left"
+            "template": "title_body"
           },
           "portrait": {
-            "template": "stack/title-top"
+            "template": "title_body"
           }
         },
         "camera": {

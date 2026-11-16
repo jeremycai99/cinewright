@@ -1,0 +1,96 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://cinewright.invalid/pack/0/layouts.schema.json",
+  "title": "PackLayouts",
+  "description": "A pack's layout templates, layouts.json (M2.1b). Regions are in grid cells of layout.columns \u00d7 layout.rows for each aspect class; see README.md.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["schema_version", "templates"],
+  "properties": {
+    "schema_version": {
+      "const": 1
+    },
+    "templates": {
+      "type": "object",
+      "propertyNames": {
+        "pattern": "^(full|title|title_body|split|lower_third|end_card|captions|ext_[a-z0-9_]+)$"
+      },
+      "additionalProperties": {
+        "$ref": "#/$defs/template"
+      }
+    }
+  },
+  "$defs": {
+    "template": {
+      "title": "LayoutTemplate",
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["description", "variants"],
+      "properties": {
+        "description": {
+          "type": "string",
+          "minLength": 1
+        },
+        "variants": {
+          "type": "object",
+          "minProperties": 1,
+          "propertyNames": {
+            "enum": ["landscape", "portrait", "square"]
+          },
+          "additionalProperties": {
+            "$ref": "#/$defs/variant"
+          }
+        }
+      }
+    },
+    "variant": {
+      "title": "LayoutVariant",
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["regions"],
+      "properties": {
+        "regions": {
+          "type": "object",
+          "minProperties": 1,
+          "propertyNames": {
+            "pattern": "^[a-z][a-z0-9_]*$"
+          },
+          "additionalProperties": {
+            "$ref": "#/$defs/region"
+          }
+        }
+      }
+    },
+    "region": {
+      "title": "LayoutRegion",
+      "description": "Grid cells, 1-based; align is vertical, justify horizontal.",
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["col", "row", "col_span", "row_span", "align", "justify"],
+      "properties": {
+        "col": {
+          "type": "integer",
+          "minimum": 1
+        },
+        "row": {
+          "type": "integer",
+          "minimum": 1
+        },
+        "col_span": {
+          "type": "integer",
+          "minimum": 1
+        },
+        "row_span": {
+          "type": "integer",
+          "minimum": 1
+        },
+        "align": {
+          "enum": ["start", "center", "end"]
+        },
+        "justify": {
+          "enum": ["start", "center", "end"]
+        }
+      }
+    }
+  }
+}

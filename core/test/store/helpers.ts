@@ -80,7 +80,7 @@ export function setupOps(): Op[] {
                 id: "s01.sh01",
                 type: "motion_graphics",
                 framing: "full_frame",
-                layout: { landscape: { template: "grid" }, portrait: { template: "stack" } },
+                layout: { landscape: { template: "title_body" }, portrait: { template: "full" } },
                 layers: [
                   { id: "s01.sh01.title", component: "kinetic_title", props: { text: "Hello" } },
                 ],
