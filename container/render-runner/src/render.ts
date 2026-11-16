@@ -1,7 +1,7 @@
 import { execFile } from "node:child_process";
 import { createHash } from "node:crypto";
 import { appendFileSync, writeFileSync } from "node:fs";
-import { cp, mkdir, readdir, readFile, rename, rm, stat } from "node:fs/promises";
+import { copyFile, cp, mkdir, readdir, readFile, rename, rm, stat, unlink } from "node:fs/promises";
 import { join, resolve } from "node:path";
 import { promisify } from "node:util";
 import {
@@ -180,7 +180,7 @@ async function collectFrames(from: string, to: string): Promise<string[]> {
     const match = /^frame_(\d+)\.png$/.exec(name);
     if (!match?.[1]) continue;
     const target = `${match[1].padStart(6, "0")}.png`;
-    await rename(join(from, name), join(to, target));
+    await moveFile(join(from, name), join(to, target));
     names.push(target);
   }
   return names;
@@ -222,4 +222,22 @@ function jsonlLogger(path: string): ProducerLogger {
     info: (message, meta) => write("info", message, meta),
     debug: (message, meta) => write("debug", message, meta),
   };
+}
+
+/**
+ * Move a file, falling back to copy and delete when the rename crosses devices (EXDEV): the work
+ * folder is inside the container and the output folder is a bind mount from the host.
+ */
+export async function moveFile(
+  from: string,
+  to: string,
+  renameFile: (a: string, b: string) => Promise<void> = rename,
+): Promise<void> {
+  try {
+    await renameFile(from, to);
+  } catch (error) {
+    if ((error as { code?: string }).code !== "EXDEV") throw error;
+    await copyFile(from, to);
+    await unlink(from);
+  }
 }

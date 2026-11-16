@@ -14,6 +14,8 @@ cinewright-check-workflows = "cinewright_tools.workflows:main"
 cinewright-check-pins = "cinewright_tools.pins:main"
 cinewright-build-image = "cinewright_tools.pins:build_main"
 cinewright-render-in-container = "cinewright_tools.container:main"
+cinewright-check-in-container = "cinewright_tools.container:check_main"
+cinewright-check-specimens = "cinewright_tools.specimens:main"
 cinewright-check-image-lock = "cinewright_tools.image_lock:main"
 
 [build-system]

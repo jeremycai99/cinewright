@@ -8,6 +8,7 @@ from __future__ import annotations
 
 import argparse
 import hashlib
+import json
 import os
 import platform
 import shutil
@@ -76,12 +77,9 @@ def run_render(image: str, composition: Path, out_dir: Path, fmt: str = "mp4") -
     if docker is None:
         raise DockerUnavailableError("Docker is not available")
     out_dir.mkdir(parents=True, exist_ok=True)
-    command = [docker, "run", "--rm", "--network", "none", "--platform", IMAGE_PLATFORM]
-    if hasattr(os, "getuid"):
-        # Outputs belong to the host user; HOME must be writable for Chrome.
-        command += ["--user", f"{os.getuid()}:{os.getgid()}", "--env", "HOME=/tmp"]
-    command += ["--mount", _bind(composition, "/job/in", readonly=True)]
-    command += ["--mount", _bind(out_dir, "/job/out", readonly=False)]
+    command = docker_run_base(docker)
+    command += ["--mount", bind_mount(composition, "/job/in", readonly=True)]
+    command += ["--mount", bind_mount(out_dir, "/job/out", readonly=False)]
     command += [image, "--in", "/job/in", "--out", "/job/out", "--format", fmt]
     result = subprocess.run(command, capture_output=True, text=True, check=False)
     return RenderResult(
@@ -91,6 +89,63 @@ def run_render(image: str, composition: Path, out_dir: Path, fmt: str = "mp4") -
         sha256=_read(out_dir / "sha256.txt"),
         stderr=result.stderr,
     )
+
+
+@dataclass(frozen=True)
+class CheckResult:
+    exit_code: int
+    out_dir: Path
+    failures: list[dict[str, object]]
+    stderr: str
+
+
+def docker_run_base(docker: str) -> list[str]:
+    command = [docker, "run", "--rm", "--network", "none", "--platform", IMAGE_PLATFORM]
+    if hasattr(os, "getuid"):
+        # Outputs belong to the host user; HOME must be writable for Chrome.
+        command += ["--user", f"{os.getuid()}:{os.getgid()}", "--env", "HOME=/tmp"]
+    return command
+
+
+def run_check(image: str, composition: Path, out_dir: Path, at: list[float]) -> CheckResult:
+    """Run ``render-job check`` (HyperFrames check, M2.4b) on ``composition`` at ``at`` seconds.
+
+    Outputs land in ``out_dir``: ``check.json``, ``failures.json``, ``check-log.txt``.
+    """
+    docker = shutil.which("docker")
+    if docker is None:
+        raise DockerUnavailableError("Docker is not available")
+    out_dir.mkdir(parents=True, exist_ok=True)
+    command = docker_run_base(docker)
+    command += ["--mount", bind_mount(composition, "/job/in", readonly=True)]
+    command += ["--mount", bind_mount(out_dir, "/job/out", readonly=False)]
+    times = ",".join(f"{t:g}" for t in at)
+    command += [image, "check", "--in", "/job/in", "--out", "/job/out", "--at", times]
+    result = subprocess.run(command, capture_output=True, text=True, check=False)
+    raw = _read(out_dir / "failures.json")
+    failures: list[dict[str, object]] = json.loads(raw) if raw else []
+    return CheckResult(
+        exit_code=result.returncode, out_dir=out_dir, failures=failures, stderr=result.stderr
+    )
+
+
+def check_main(argv: list[str] | None = None) -> int:
+    parser = argparse.ArgumentParser(
+        prog="cinewright-check-in-container",
+        description="Check a composition (layout, contrast, runtime) in the pinned render image.",
+    )
+    parser.add_argument("--image", required=True)
+    parser.add_argument("--in", dest="composition", required=True, type=Path)
+    parser.add_argument("--out", dest="out_dir", required=True, type=Path)
+    parser.add_argument("--at", required=True, help="seconds to audit, comma-separated")
+    args = parser.parse_args(argv)
+    if shutil.which("docker") is None:
+        print("Docker is not available: install a Docker runtime and start it", file=sys.stderr)
+        return 2
+    at = [float(t) for t in args.at.split(",")]
+    result = run_check(args.image, args.composition, args.out_dir, at)
+    sys.stderr.write(result.stderr)
+    return result.exit_code
 
 
 def main(argv: list[str] | None = None) -> int:
@@ -120,7 +175,7 @@ def main(argv: list[str] | None = None) -> int:
     return result.exit_code
 
 
-def _bind(source: Path, target: str, *, readonly: bool) -> str:
+def bind_mount(source: Path, target: str, *, readonly: bool) -> str:
     """A ``--mount`` value. CSV quoting keeps commas, spaces and quotes in paths intact."""
     fields = ["type=bind", _csv_quote(f"source={source.resolve()}"), f"target={target}"]
     if readonly:

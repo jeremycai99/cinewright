@@ -67,6 +67,25 @@ The presets are `fade`, `rise`, `slide`, `scale`, `wipe` and `pop` (`src/motion/
 2. **Broken words:** only when no step fits whole words does it let words break, at the smallest allowed step. It never goes below `density.min_text_size`.
 3. **Overflow:** if even that overflows, the element is marked `data-cw-overflow` and the specimen check fails. Text is never clipped silently.
 
+## Specimens
+
+A specimen is one HyperFrames composition holding every chosen example in turn, under one pack and one delivery profile. It has no pack values outside the emitted tokens, so switching the pack is the only change between two packs' specimens. A pack's example frames are its specimens.
+
+```bash
+pnpm --filter @cinewright/components specimens -- --out out/specimens [--pack <id>] [--profile <name>] [--component <id>] [--examples <file>]
+uv run cinewright-check-specimens --image cinewright-render:dev out/specimens
+```
+
+**Building.** The first command writes `out/specimens/<pack>/<profile>/` for every pack and every profile whose aspect class that pack supports. Each folder holds `index.html`, `runtime.js`, `fonts/` and `samples.json`: the frame rate, the times to check (each example's entrance midpoint, hold midpoint and last frame) and each layer's frames. The profiles are the M1 fixture profiles until delivery profiles ship (M5.3).
+
+**Checking.** The second command:
+1. runs `render-job check` on each folder at its sample times;
+2. renders it to MP4 and tiles the sample frames into `contact-sheet.png`;
+3. writes `summary.json`;
+4. fails if any check fails.
+
+A specimen fails on any lint, runtime, layout or contrast error or warning, including text overflowing its box. The `specimens` CI job (`render-smoke.yml`) runs both commands on every change to `packs/`, `components/` or the pack format, and uploads the folder, contact sheets included, for the reviewer.
+
 ## Catalog
 
 | Component | Use when | Fits |

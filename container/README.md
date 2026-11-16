@@ -48,6 +48,36 @@ The host runs `docker run --rm --network none --platform linux/amd64` as the hos
 
 Exit codes: 0 ok, 2 usage or input error, 3 blocked network request, 4 render failure.
 
+With `--format png-sequence`, `render-job` moves HyperFrames' frames from its work folder to `/job/out/frames/`. The two are on different devices (the output is a bind mount), so a rename that fails with `EXDEV` falls back to copy and delete.
+
+## Checking
+
+```bash
+uv run cinewright-check-in-container --image cinewright-render:dev --in <composition dir> --out <dir> --at 0.5,1.5
+```
+
+`render-job check --in /job/in --out /job/out --at <seconds,…>` runs HyperFrames 0.9.41's own `check` on a copy of the composition, with the network off:
+
+```
+hyperframes check <dir> --json --strict --no-craft --no-cache --no-browser-gpu --at <seconds,…>
+```
+
+It audits each time for:
+- runtime console errors and failed requests;
+- layout overflow, clipping and overlaps;
+- WCAG AA contrast.
+
+Craft warnings (dead stretches, unread lines) are skipped, because they depend on the film, not the composition. It writes three files to `/job/out`:
+- `check.json`: the full report;
+- `failures.json`: every error or warning in the lint, runtime, layout and contrast sections, or a not-ok report;
+- `check-log.txt`.
+
+HyperFrames demotes a contrast failure seen at one sample to a warning and still reports `ok`, so warnings count as failures here.
+
+Exit codes: 0 nothing fails, 2 usage or input error, 4 no report, 5 failures.
+
+`uv run cinewright-check-specimens --image <image> <root>` checks every component specimen under `<root>`, written by `pnpm --filter @cinewright/components specimens -- --out <root>`; see `components/README.md`.
+
 ### Settings
 
 `render-runner/render-settings.json` holds every render setting. `loadSettings` rejects unknown, missing or inconsistent keys. The encoder values are test settings until delivery profiles own them (M5.3). How each key reaches HyperFrames 0.9.41:
