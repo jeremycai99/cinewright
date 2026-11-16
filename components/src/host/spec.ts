@@ -34,8 +34,11 @@ export interface LayerSpec {
   props: Record<string, unknown>;
   css: Record<string, string>;
   js: Record<string, string | number | boolean>;
-  /** The layer is on screen from `enter` until `end`; its exit animation ends at `end`. */
-  timing: { enter: number; end: number };
+  /**
+   * The layer is on screen from `enter` until `end`; its exit animation ends at `end`, except with
+   * `exit: false`, when an outgoing transition segment is its exit (M3.3).
+   */
+  timing: { enter: number; end: number; exit?: false };
   motion: MotionEntry[];
   /** mulberry32 seed: the first 32 bits of the SHA-256 of the layer id. */
   seed: number;

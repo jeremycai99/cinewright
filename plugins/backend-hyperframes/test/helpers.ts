@@ -41,3 +41,44 @@ export async function reference(extraOps: Record<string, unknown>[] = []): Promi
   if (result.status !== "applied") throw new Error(`regions patch: ${JSON.stringify(result)}`);
   return store;
 }
+
+/**
+ * Ops that make scene 3 end in a transition into a new scene-4 shot: s03.sh02 (Dr Lin, no layers)
+ * gets a template, s04.sh01 starts where it ends, with a title.
+ */
+export function segmentOps(
+  type: "cross_dissolve" | "wipe" | "cut",
+  frames = 12,
+): Record<string, unknown>[] {
+  return [
+    {
+      op: "set",
+      entity: "s03_the_problem",
+      path: "/transition_out",
+      value: { type, to: "s04", duration: frames },
+    },
+    { op: "set", entity: "s03.sh02", path: "/layout/landscape", value: { template: "full" } },
+    { op: "set", entity: "s03.sh02", path: "/layout/portrait", value: { template: "full" } },
+    {
+      op: "insert",
+      entity: "s04",
+      path: "/shots",
+      value: {
+        id: "s04.sh01",
+        type: "motion_graphics",
+        framing: "full_frame",
+        anchors: { start: { line: "b01.l02", point: "end", offset: 12 } },
+        duration: 60,
+        layout: { landscape: { template: "title" }, portrait: { template: "title" } },
+        layers: [
+          {
+            id: "s04.sh01.title",
+            component: "kinetic_title",
+            props: { text: "Here is why." },
+            layout: { landscape: { region: "title" }, portrait: { region: "title" } },
+          },
+        ],
+      },
+    },
+  ];
+}

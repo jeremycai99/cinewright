@@ -1,5 +1,7 @@
 import fc from "fast-check";
 import { describe, expect, it } from "vitest";
+import type { ComponentContext } from "../src/host/context.js";
+import { animateOut } from "../src/motion/presets.js";
 import { scaleMotion } from "../src/motion/scale.js";
 
 describe("scaleMotion", () => {
@@ -28,5 +30,20 @@ describe("scaleMotion", () => {
       ),
       { numRuns: 1000 },
     );
+  });
+});
+
+describe("animateOut", () => {
+  it("plays nothing when the layer's exit is suppressed by an outgoing transition (M3.3)", () => {
+    const calls: unknown[][] = [];
+    const el = {
+      animate: (...args: unknown[]) => {
+        calls.push(args);
+        return { pause() {} };
+      },
+    } as unknown as HTMLElement;
+    const ctx = { timing: { enterMs: 0, endMs: 1000, exit: false } } as unknown as ComponentContext;
+    animateOut(el, "fade", { startMs: 800, durationMs: 200 }, ctx);
+    expect(calls).toEqual([[[], { duration: 0 }]]);
   });
 });

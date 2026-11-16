@@ -93,3 +93,97 @@ export function layerTiming(
   }
   throw new TimingError("timing.unknown_entity", `no layer ${layerId}`, layerId);
 }
+
+/** A transition rendered as its own segment (M3.3, D34): an overlap centred on the cut. */
+export interface Segment {
+  scene: string;
+  type: "cross_dissolve" | "wipe";
+  /** The outgoing shot (the scene's last) and the incoming one (the next scene's first). */
+  from: string;
+  to: string;
+  /** The cut frame, and the overlap `[start, end)`: `h = floor(d / 2)` frames before the cut. */
+  cut: number;
+  start: number;
+  end: number;
+}
+
+/**
+ * Every segment transition in timeline order (M3.3, audit decision 6). `transitionOf(scene)` says
+ * whether a scene's outgoing transition renders as a segment, and over how many frames; `null`
+ * is a cut. Throws `timing.discontinuous` when the two shots do not meet at the cut, and
+ * `timing.transition_too_long` when the overlap is longer than either shot.
+ */
+export function segmentsOf(
+  ir: InlinedIr,
+  table: TimingTable,
+  transitionOf: (sceneId: string) => { type: Segment["type"]; frames: number } | null,
+): Segment[] {
+  const out: Segment[] = [];
+  for (const sequence of ir.sequences.value ?? []) {
+    const scenes = sequence.scenes?.value ?? [];
+    scenes.forEach((scene, i) => {
+      const transition = transitionOf(scene.id);
+      const next = scenes[i + 1];
+      const from = (scene.shots?.value ?? []).at(-1);
+      const to = next?.shots?.value?.[0];
+      if (!transition || !from || !to) return;
+      const a = shotSpan(ir, from.id, table);
+      const b = shotSpan(ir, to.id, table);
+      if (a.end !== b.start) {
+        throw new TimingError(
+          "timing.discontinuous",
+          `${from.id} ends at ${a.end} but ${to.id} starts at ${b.start}`,
+          scene.id,
+        );
+      }
+      const d = transition.frames;
+      if (d > a.end - a.start || d > b.end - b.start) {
+        throw new TimingError(
+          "timing.transition_too_long",
+          `the ${d}-frame ${transition.type} is longer than ${from.id} (${a.end - a.start}) or ${to.id} (${b.end - b.start})`,
+          scene.id,
+        );
+      }
+      const h = Math.floor(d / 2);
+      out.push({
+        scene: scene.id,
+        type: transition.type,
+        from: from.id,
+        to: to.id,
+        cut: a.end,
+        start: a.end - h,
+        end: a.end + d - h,
+      });
+    });
+  }
+  return out;
+}
+
+/**
+ * The frames a shot is compiled over (M3.3): its span, plus the overlap on any side with a
+ * segment transition. `body` is the part that plays outside every segment.
+ */
+export function compileSpan(
+  ir: InlinedIr,
+  shotId: string,
+  table: TimingTable,
+  segments: readonly Segment[],
+): Span & { before: number; after: number; body: Span; incoming?: Segment; outgoing?: Segment } {
+  const span = shotSpan(ir, shotId, table);
+  const incoming = segments.find((s) => s.to === shotId);
+  const outgoing = segments.find((s) => s.from === shotId);
+  const before = incoming ? span.start - incoming.start : 0;
+  const after = outgoing ? outgoing.end - span.end : 0;
+  return {
+    start: span.start - before,
+    end: span.end + after,
+    before,
+    after,
+    body: {
+      start: incoming ? incoming.end : span.start,
+      end: outgoing ? outgoing.start : span.end,
+    },
+    ...(incoming ? { incoming } : {}),
+    ...(outgoing ? { outgoing } : {}),
+  };
+}

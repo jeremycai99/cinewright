@@ -16,8 +16,11 @@ export interface ComponentContext {
   root: HTMLElement;
   props: Record<string, unknown>;
   tokens: TokenReader;
-  /** Composition time in ms: the layer appears at `enterMs` and is gone at `endMs`. */
-  timing: { enterMs: number; endMs: number };
+  /**
+   * Composition time in ms: the layer appears at `enterMs` and is gone at `endMs`. `exit: false`
+   * when an outgoing transition segment is its exit (M3.3): it stays on screen until `endMs`.
+   */
+  timing: { enterMs: number; endMs: number; exit?: false };
   /** Frames to ms at the composition's frame rate. */
   frameMs(frames: number): number;
   motion: MotionEntry[];

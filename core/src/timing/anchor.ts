@@ -11,7 +11,9 @@ export class TimingError extends Error {
       | "timing.unknown_span"
       | "timing.empty_span"
       | "timing.unknown_entity"
-      | "timing.outside_shot",
+      | "timing.outside_shot"
+      | "timing.discontinuous"
+      | "timing.transition_too_long",
     message: string,
     readonly entity?: string,
   ) {
