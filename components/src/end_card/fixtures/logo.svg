@@ -1,0 +1,6 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 240 80" width="240" height="80">
+  <title>Placeholder logo (test fixture)</title>
+  <rect x="4" y="4" width="72" height="72" rx="16" fill="#5C6470"/>
+  <rect x="96" y="22" width="140" height="14" rx="7" fill="#5C6470"/>
+  <rect x="96" y="46" width="96" height="12" rx="6" fill="#8A919B"/>
+</svg>

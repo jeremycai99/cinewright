@@ -1,0 +1,39 @@
+[
+  {
+    "name": "three_steps",
+    "description": "A heading and three short points.",
+    "template": "title_body",
+    "region": "body",
+    "duration_ms": 4000,
+    "props": {
+      "title": "Where pipelines break",
+      "items": ["Data arrives late", "Schemas drift", "Nobody owns the alerts"]
+    }
+  },
+  {
+    "name": "no_heading",
+    "description": "Four points without a heading, filling the whole frame.",
+    "template": "full",
+    "region": "main",
+    "duration_ms": 4000,
+    "props": {
+      "items": [
+        "Measure first",
+        "Fix the biggest gap",
+        "Automate the check",
+        "Repeat every quarter"
+      ]
+    }
+  },
+  {
+    "name": "arabic",
+    "description": "Right-to-left text: a heading and two points in Arabic (Review Focus 2).",
+    "template": "title_body",
+    "region": "body",
+    "duration_ms": 3500,
+    "props": {
+      "title": "لماذا تتعطل الأنظمة",
+      "items": ["البيانات تصل متأخرة", "لا أحد يراقب التنبيهات"]
+    }
+  }
+]

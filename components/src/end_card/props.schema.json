@@ -1,0 +1,32 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "EndCardProps",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["headline"],
+  "properties": {
+    "headline": {
+      "description": "The closing message.",
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 120
+    },
+    "subline": {
+      "description": "A supporting line.",
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 160
+    },
+    "cta": {
+      "description": "A call to action, drawn as a button.",
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 40
+    },
+    "logo": {
+      "description": "An image asset id (the project's asset entities).",
+      "type": "string",
+      "pattern": "^[a-z][a-z0-9_]*(\\.[a-z0-9_]+)*$"
+    }
+  }
+}

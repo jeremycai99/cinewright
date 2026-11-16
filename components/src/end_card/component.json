@@ -1,0 +1,46 @@
+{
+  "id": "end_card",
+  "version": "1.0.0",
+  "name": "End card",
+  "runtime": "waapi",
+  "catalog": {
+    "summary": "A closing card: headline, optional supporting line, call to action and logo.",
+    "use_when": "The last shot of a video: the takeaway, what to do next, who made it.",
+    "avoid_when": "Mid-video titles (use kinetic_title) or long legal text."
+  },
+  "tokens": [
+    "density.max_lines_title",
+    "density.min_text_size",
+    "layout.gutter",
+    "layout.radius",
+    "motion.distance",
+    "motion.duration.m",
+    "motion.duration.s",
+    "motion.ease.emphasis",
+    "motion.ease.enter",
+    "motion.ease.exit",
+    "motion.entrance",
+    "motion.exit",
+    "motion.stagger",
+    "palette.accent",
+    "palette.ink",
+    "palette.ink_muted",
+    "palette.on_accent",
+    "type.family.body",
+    "type.family.display",
+    "type.leading.normal",
+    "type.leading.tight",
+    "type.size.body",
+    "type.size.display",
+    "type.size.subtitle",
+    "type.size.title",
+    "type.tracking.display",
+    "type.weight.bold",
+    "type.weight.display",
+    "type.weight.regular"
+  ],
+  "templates": {
+    "end_card": ["main"],
+    "full": ["main"]
+  }
+}

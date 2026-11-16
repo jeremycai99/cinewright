@@ -1,0 +1,24 @@
+{
+  "id": "caption_track",
+  "version": "1.0.0",
+  "name": "Caption track",
+  "runtime": "waapi",
+  "catalog": {
+    "summary": "Burned-in captions: each cue appears for its frames, broken into lines by the delivery profile's caption rules.",
+    "use_when": "A deliverable's profile requires burned-in captions. The shot compiler (M3.4) writes the cues from line timestamps; agents rarely place this by hand.",
+    "avoid_when": "Titles or on-screen text that is part of the design (use kinetic_title)."
+  },
+  "tokens": [
+    "layout.gutter",
+    "layout.radius",
+    "palette.ink",
+    "palette.surface",
+    "type.family.body",
+    "type.leading.normal",
+    "type.size.body",
+    "type.weight.regular"
+  ],
+  "templates": {
+    "captions": ["captions"]
+  }
+}

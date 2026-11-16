@@ -1,0 +1,45 @@
+{
+  "id": "bullet_reveal",
+  "version": "1.0.0",
+  "name": "Bullet reveal",
+  "runtime": "waapi",
+  "catalog": {
+    "summary": "A short list that reveals one item at a time, with an optional heading.",
+    "use_when": "The narration walks through a few parallel points: steps, reasons, options, takeaways.",
+    "avoid_when": "There are more items than the pack's density limit, items are long sentences, or the points are not parallel (use separate shots)."
+  },
+  "tokens": [
+    "density.max_bullets",
+    "density.max_words_bullet",
+    "density.min_text_size",
+    "layout.gutter",
+    "motion.distance",
+    "motion.duration.m",
+    "motion.duration.s",
+    "motion.ease.emphasis",
+    "motion.ease.enter",
+    "motion.ease.exit",
+    "motion.entrance",
+    "motion.exit",
+    "motion.stagger",
+    "palette.accent",
+    "palette.ink",
+    "type.family.body",
+    "type.family.display",
+    "type.leading.normal",
+    "type.leading.tight",
+    "type.size.body",
+    "type.size.caption",
+    "type.size.small",
+    "type.size.subtitle",
+    "type.tracking.body",
+    "type.weight.bold",
+    "type.weight.regular"
+  ],
+  "templates": {
+    "title_body": ["body"],
+    "full": ["main"],
+    "split": ["a", "b"],
+    "lower_third": ["main"]
+  }
+}

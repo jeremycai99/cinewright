@@ -25,6 +25,7 @@ export interface ComponentContext {
   align: Alignment;
   justify: Alignment;
   random: () => number;
+  assets?: Record<string, string>;
   captions?: LayerSpec["captions"];
 }
 

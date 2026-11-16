@@ -246,6 +246,7 @@ export interface ComponentExample {
   props: Record<string, unknown>;
   motion?: { preset: string; params?: Record<string, unknown> }[];
   overrides?: Record<string, unknown>;
+  assets?: Record<string, string>;
 }
 
 let examplesValidator: ValidateFunction | undefined;

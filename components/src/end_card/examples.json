@@ -1,0 +1,23 @@
+[
+  {
+    "name": "takeaway",
+    "description": "Headline, supporting line and call to action.",
+    "template": "end_card",
+    "region": "main",
+    "duration_ms": 4000,
+    "props": {
+      "headline": "Fix the pipeline once.",
+      "subline": "Then stop thinking about it.",
+      "cta": "Read the guide"
+    }
+  },
+  {
+    "name": "with_logo",
+    "description": "A logo above a short headline.",
+    "template": "end_card",
+    "region": "main",
+    "duration_ms": 3500,
+    "props": { "headline": "Made with care", "logo": "brand_logo" },
+    "assets": { "brand_logo": "fixtures/logo.svg" }
+  }
+]

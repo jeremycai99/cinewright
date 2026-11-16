@@ -1,0 +1,32 @@
+[
+  {
+    "name": "two_cues",
+    "description": "Two short cues back to back.",
+    "template": "captions",
+    "region": "captions",
+    "duration_ms": 4000,
+    "props": {
+      "cues": [
+        { "text": "Every team hits the same wall.", "start": 0, "end": 55 },
+        { "text": "We rebuilt it three times.", "start": 60, "end": 115 }
+      ]
+    }
+  },
+  {
+    "name": "long_cue",
+    "description": "A cue that needs two lines, and one shorter than the minimum display time.",
+    "template": "captions",
+    "region": "captions",
+    "duration_ms": 4000,
+    "props": {
+      "cues": [
+        {
+          "text": "Pipelines break in the same three places, and almost nobody watches them.",
+          "start": 0,
+          "end": 80
+        },
+        { "text": "Really.", "start": 90, "end": 92 }
+      ]
+    }
+  }
+]

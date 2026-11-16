@@ -39,6 +39,8 @@ export interface LayerSpec {
   motion: MotionEntry[];
   /** mulberry32 seed: the first 32 bits of the SHA-256 of the layer id. */
   seed: number;
+  /** Asset id → path inside the composition, for the assets this layer's props name. */
+  assets?: Record<string, string>;
   /** The delivery profile's caption rules, for caption components. */
   captions?: { max_chars_per_line: number; max_lines: number; min_display_frames: number };
 }
