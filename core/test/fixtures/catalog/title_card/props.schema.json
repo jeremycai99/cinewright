@@ -1,0 +1,17 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "TitleCardProps",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["text"],
+  "properties": {
+    "text": { "type": "string", "minLength": 1 },
+    "tint": {
+      "x-token-type": "color",
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["token"],
+      "properties": { "token": { "type": "string" } }
+    }
+  }
+}

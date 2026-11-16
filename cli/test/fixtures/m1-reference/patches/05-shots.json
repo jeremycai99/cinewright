@@ -73,10 +73,7 @@
             "id": "s03.sh01.title",
             "component": "kinetic_title",
             "props": {
-              "text": "Every team hits the same wall.",
-              "color": {
-                "token": "palette.accent"
-              }
+              "text": "Every team hits the same wall."
             },
             "timing": {
               "enter": {
@@ -88,9 +85,9 @@
           },
           {
             "id": "s03.sh01.bars",
-            "component": "data_bars",
+            "component": "kinetic_title",
             "props": {
-              "series": [3, 5, 9]
+              "text": "Three rebuilds in one year."
             },
             "timing": {
               "enter": {

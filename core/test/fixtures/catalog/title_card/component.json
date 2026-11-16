@@ -1,0 +1,13 @@
+{
+  "id": "title_card",
+  "version": "1.0.0",
+  "name": "Title card (test fixture)",
+  "runtime": "waapi",
+  "catalog": {
+    "summary": "A test component with a text prop and a colour token prop.",
+    "use_when": "Tests.",
+    "avoid_when": "Anything else."
+  },
+  "tokens": ["palette.ink", "type.size.title"],
+  "templates": { "title_body": ["title"], "full": ["main"] }
+}

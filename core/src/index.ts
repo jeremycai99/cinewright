@@ -26,6 +26,16 @@ export {
   type TokenTree,
   tokenLayers,
 } from "./cascade/resolve.js";
+export {
+  Catalog,
+  type CatalogEntry,
+  CatalogError,
+  type CatalogIssue,
+  type ComponentExample,
+  catalogErrors,
+  loadCatalog,
+  loadExamples,
+} from "./catalog/catalog.js";
 export type * from "./generated/ir.js";
 export { dependencyGraph, dirtyNodes, type Graph } from "./graph/deps.js";
 export { type RenderInputs, renderKey, unwrap } from "./graph/render-key.js";
@@ -71,6 +81,9 @@ export {
   checkResolved,
   contrastPairs,
   contrastRatio,
+  cssVar,
+  type EmittedTokens,
+  tokenEmit,
   tokenPointer,
 } from "./pack/tokens.js";
 export {
@@ -101,6 +114,7 @@ export {
   type DocumentKind,
   describeSchemaError,
   explainProject,
+  type ProjectOptions,
   validateDocument,
   validateProject,
 } from "./schema/validate.js";

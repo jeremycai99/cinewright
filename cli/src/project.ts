@@ -2,6 +2,7 @@ import { existsSync } from "node:fs";
 import { dirname, join, resolve } from "node:path";
 import { PROJECT_FILE, Store } from "@cinewright/core";
 import { UsageError } from "./args.js";
+import { firstPartyCatalog } from "./commands/components.js";
 import { type Io, now, sessionId } from "./io.js";
 
 /** `--project`, or the nearest directory upward from the working directory holding cinewright.json. */
@@ -19,6 +20,7 @@ export async function openStore(io: Io, dir: string): Promise<Store> {
   return Store.open(dir, {
     sessionId: sessionId(io),
     now: now(io),
+    catalog: firstPartyCatalog(),
     ...(Number.isFinite(timeout) && timeout > 0 ? { lockTimeoutMs: timeout } : {}),
   });
 }

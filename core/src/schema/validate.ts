@@ -1,4 +1,5 @@
 import { Ajv2020, type ErrorObject, type ValidateFunction } from "ajv/dist/2020.js";
+import { type Catalog, catalogErrors } from "../catalog/catalog.js";
 import { collectEntities, locate } from "../ir/index.js";
 import { type InlinedIr, splitIr } from "../ir/inlined.js";
 import {
@@ -8,13 +9,16 @@ import {
   tokenErrors,
   wrapperErrors,
 } from "../ir/semantic.js";
+import { collapse, errorPointer } from "./ajv-errors.js";
 import {
   type DetailedError,
   normalizeDetailed,
   normalizeErrors,
   type ValidationError,
 } from "./errors.js";
-import { escapeSegment, loadSchemas, type SchemaSet } from "./load.js";
+import { loadSchemas, type SchemaSet } from "./load.js";
+
+export { collapse, errorPointer } from "./ajv-errors.js";
 
 export type DocumentKind =
   | "project"
@@ -57,35 +61,6 @@ function validatorFor(schemas: SchemaSet, rootFile: string): ValidateFunction {
   const fn = byFile.get(rootFile);
   if (!fn) throw new Error(`no schema ${rootFile}`);
   return fn;
-}
-
-/** The absolute pointer an Ajv error is about: the missing or extra property where there is one. */
-export function errorPointer(error: ErrorObject): string {
-  const params = error.params as Record<string, unknown>;
-  if (error.keyword === "required" && typeof params.missingProperty === "string") {
-    return `${error.instancePath}/${escapeSegment(params.missingProperty)}`;
-  }
-  if (error.keyword === "additionalProperties" && typeof params.additionalProperty === "string") {
-    return `${error.instancePath}/${escapeSegment(params.additionalProperty)}`;
-  }
-  const name = error.keyword === "propertyNames" ? params.propertyName : error.propertyName;
-  if (typeof name === "string") return `${error.instancePath}/${escapeSegment(name)}`;
-  return error.instancePath;
-}
-
-/**
- * Keep one error per failure: drop the branch errors under a failing `anyOf` and the inner
- * errors under a failing `propertyNames`, which Ajv reports alongside the outer error.
- */
-export function collapse(errors: readonly ErrorObject[]): ErrorObject[] {
-  const outer = errors
-    .filter((e) => e.keyword === "anyOf" || e.keyword === "propertyNames")
-    .map((e) => e.schemaPath);
-  return errors.filter(
-    (e) =>
-      !outer.some((path) => e.schemaPath !== path && e.schemaPath.startsWith(`${path}/`)) &&
-      !(e.keyword !== "propertyNames" && typeof e.propertyName === "string"),
-  );
 }
 
 /**
@@ -144,9 +119,16 @@ export function validateDocument(
   return normalizeErrors(documentErrors(kind, doc, schemas));
 }
 
+/** Options for whole-IR validation. */
+export interface ProjectOptions {
+  retiredIds?: ReadonlySet<string>;
+  /** When given, layer components and props are checked against it (M2.4a). */
+  catalog?: Catalog;
+}
+
 function projectErrors(
   ir: InlinedIr,
-  options: { retiredIds?: ReadonlySet<string> },
+  options: ProjectOptions,
   schemas: SchemaSet,
 ): DetailedError[] {
   const { project, sequences } = splitIr(ir);
@@ -158,6 +140,7 @@ function projectErrors(
   errors.push(...documentErrors("project", project, schemas));
   for (const sequence of sequences) errors.push(...documentErrors("sequence", sequence, schemas));
   errors.push(...crossDocumentErrors(schemas, docs, options));
+  if (options.catalog) errors.push(...catalogErrors(ir, options.catalog));
   return errors;
 }
 
@@ -167,7 +150,7 @@ function projectErrors(
  */
 export function validateProject(
   ir: InlinedIr,
-  options: { retiredIds?: ReadonlySet<string> } = {},
+  options: ProjectOptions = {},
   schemas: SchemaSet = loadSchemas(),
 ): ValidationError[] {
   return normalizeErrors(projectErrors(ir, options, schemas));
@@ -176,7 +159,7 @@ export function validateProject(
 /** validateProject, with a message on each schema error saying what was expected. */
 export function explainProject(
   ir: InlinedIr,
-  options: { retiredIds?: ReadonlySet<string> } = {},
+  options: ProjectOptions = {},
   schemas: SchemaSet = loadSchemas(),
 ): DetailedError[] {
   return normalizeDetailed(projectErrors(ir, options, schemas));

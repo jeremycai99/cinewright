@@ -2,6 +2,7 @@ import { randomUUID } from "node:crypto";
 import { readFile } from "node:fs/promises";
 import { join } from "node:path";
 import { stateHash } from "../canonical/hash.js";
+import type { Catalog } from "../catalog/catalog.js";
 import type {
   AppliedEntry,
   ApprovedEntry,
@@ -31,7 +32,7 @@ import {
 } from "../project/files.js";
 import { DECISION_LOG, PATCH_LOG } from "../project/layout.js";
 import { escapeSegment, type JsonObject } from "../schema/load.js";
-import { explainProject, validateProject } from "../schema/validate.js";
+import { explainProject, type ProjectOptions, validateProject } from "../schema/validate.js";
 import { applyOps, type OpsResult, restoreSnapshots } from "./apply.js";
 import type { Author } from "./author.js";
 import { type Conflict, findConflicts } from "./conflict.js";
@@ -50,14 +51,17 @@ export interface StoreOptions {
   lockTimeoutMs?: number;
   /** Role write scopes; when given, agent patches outside their role's scope are rejected. */
   writeScopes?: WriteScopes;
+  /** Component catalog; when given, layer components and props are checked on every write (M2.4a). */
+  catalog?: Catalog;
   /** Job names allowed to lock as gates (default: gate.script, gate.storyboard, gate.final). */
   gates?: readonly string[];
 }
 
 export const DEFAULT_GATES = ["gate.script", "gate.storyboard", "gate.final"] as const;
 
-type ResolvedOptions = Required<Omit<StoreOptions, "writeScopes">> & {
+type ResolvedOptions = Required<Omit<StoreOptions, "writeScopes" | "catalog">> & {
   writeScopes: WriteScopes | null;
+  catalog: Catalog | undefined;
 };
 
 export type ApplyResult =
@@ -231,6 +235,7 @@ export class Store {
       now: options.now ?? (() => new Date().toISOString()),
       lockTimeoutMs: options.lockTimeoutMs ?? 10_000,
       writeScopes: options.writeScopes ?? null,
+      catalog: options.catalog,
       gates: options.gates ?? DEFAULT_GATES,
     };
     const state = await withLock(dir, full.lockTimeoutMs, () => Store.load(dir));
@@ -326,6 +331,10 @@ export class Store {
   }
 
   /** Ids removed by any applied patch; never reused (convention 9). */
+  private validationOptions(retiredIds: Set<string>): ProjectOptions {
+    return this.options.catalog ? { retiredIds, catalog: this.options.catalog } : { retiredIds };
+  }
+
   retiredIds(): Set<string> {
     const out = new Set<string>();
     for (const entry of this.state.log) {
@@ -419,7 +428,7 @@ export class Store {
 
   /** Whole-IR errors of `next`, each with the op that wrote there when one did (finding 3). */
   private wholeIrErrors(next: InlinedIr, ops: readonly Op[]): PatchError[] {
-    const errors = explainProject(next, { retiredIds: this.retiredIds() });
+    const errors = explainProject(next, this.validationOptions(this.retiredIds()));
     if (errors.length === 0) return [];
     const index = indexIr(next);
     return errors.map((e) => ({ op: opFor(e, ops, index), ...e }));
@@ -559,7 +568,7 @@ export class Store {
     if (!validated) {
       const retiredIds = this.retiredIds();
       for (const id of extra.restored ?? []) retiredIds.delete(id);
-      const errors = validateProject(next, { retiredIds });
+      const errors = validateProject(next, this.validationOptions(retiredIds));
       if (errors.length > 0) {
         return { status: "rejected", errors: errors.map((e) => ({ op: null, ...e })) };
       }

@@ -4,6 +4,7 @@ packages:
   - plugins/sdk-ts
   - container/render-runner
   - packs
+  - components
 
 allowBuilds:
   esbuild: false
