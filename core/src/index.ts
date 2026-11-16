@@ -66,7 +66,13 @@ export {
   type PackManifest,
 } from "./pack/load.js";
 export { citation, parseRules, type Rule } from "./pack/rules.js";
-export { checkResolved, tokenPointer } from "./pack/tokens.js";
+export {
+  type ContrastPair,
+  checkResolved,
+  contrastPairs,
+  contrastRatio,
+  tokenPointer,
+} from "./pack/tokens.js";
 export {
   checkLiteral,
   isVocabularyPath,

@@ -9,7 +9,7 @@
   "scripts": {
     "lint": "biome ci .",
     "format": "biome format --write .",
-    "typecheck": "tsc -b && tsc -p core/test/tsconfig.json",
+    "typecheck": "tsc -b && tsc -p core/test/tsconfig.json && tsc -p packs/tsconfig.json",
     "test": "pnpm -r --if-present test",
     "gen:types": "pnpm --filter @cinewright/core gen:types",
     "gen:check": "pnpm --filter @cinewright/core gen:check"

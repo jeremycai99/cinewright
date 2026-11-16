@@ -106,6 +106,11 @@
         "source": {
           "type": "string",
           "minLength": 1
+        },
+        "unicode_range": {
+          "description": "The CSS unicode-range this file covers, when a family is split into several files.",
+          "type": "string",
+          "pattern": "^U\\+[0-9A-F?]{1,6}(-[0-9A-F]{1,6})?(,U\\+[0-9A-F?]{1,6}(-[0-9A-F]{1,6})?)*$"
         }
       }
     }

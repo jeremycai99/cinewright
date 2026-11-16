@@ -1,0 +1,13 @@
+{
+  "name": "@cinewright/packs",
+  "version": "0.0.0",
+  "private": true,
+  "license": "Apache-2.0",
+  "type": "module",
+  "scripts": {
+    "test": "vitest run"
+  },
+  "devDependencies": {
+    "@cinewright/core": "workspace:*"
+  }
+}

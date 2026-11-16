@@ -229,6 +229,12 @@ importers:
         specifier: 16.0.0
         version: 16.0.0
 
+  packs:
+    devDependencies:
+      '@cinewright/core':
+        specifier: workspace:*
+        version: link:../core
+
   plugins/sdk-ts:
     dependencies:
       ajv:
