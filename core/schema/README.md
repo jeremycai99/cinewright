@@ -213,3 +213,25 @@ Every entry records `time`, `session_id` and the asserted `author` (D41). A reve
 3. checks that every file is in the stored form.
 
 A file changed outside the store fails to load, naming the file, the entity and the field.
+
+## Authorship (D25, M1.2a)
+
+The store checks every op against the author's rights before it applies anything.
+
+| Author | `set` / `unset` a field or map entry | `insert` / `remove` / `move` in a list | `lock` / `unlock` |
+| --- | --- | --- | --- |
+| agent, job | `open` or `agent` → `agent`; `unset` → `open`. On `user` or `locked`: **blocked**. | Allowed on an `open` or `agent` list (it becomes `agent`). A `user` or `locked` list: **blocked**. Removing a `user` item: **blocked**. | **Rejected**, except a gate job (`gate.script`, `gate.storyboard`, `gate.final`) may `lock`. |
+| user, session | `open`, `agent` or `user` → `user`. On `locked`: **rejected** (unlock first). | Allowed unless the list or an ancestor is locked. The list becomes `user`. | Allowed |
+
+- **Blocked:** the whole patch is stored as a pending suggestion (convention 13), with the blocked ops and their rules.
+- **Rejected:** nothing is stored.
+- **Entity locks:** anything under an entity with `locked: true`, or under a locked ancestor, is blocked for agents and rejected for users. The exception is a user's `unlock` of that entity.
+- **`user` items:** an item a user inserted, or one holding a `user` or `locked` field or lock anywhere in its subtree.
+- **Conflicts come first:** a stale patch reports its conflict before any authorship verdict.
+- **Reverts** are for users only.
+
+Rule codes:
+- `authorship.user_field`, `authorship.locked_field`, `authorship.user_list`, `authorship.locked_list`, `authorship.user_item` and `authorship.locked_entity` (blocked);
+- `authorship.locked` and `authorship.forbidden_op` (rejected).
+
+`core/test/authorship/properties.test.ts` checks the four protections with 1,000 generated cases each.

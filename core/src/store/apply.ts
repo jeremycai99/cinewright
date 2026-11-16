@@ -1,3 +1,10 @@
+import {
+  checkFieldWrite,
+  checkListChange,
+  checkLock,
+  checkRemove,
+  type Verdict,
+} from "../authorship/rules.js";
 import type { Op, Patch, Rational, Snapshot } from "../generated/ir.js";
 import type { InlinedIr } from "../ir/inlined.js";
 import {
@@ -21,8 +28,26 @@ import type { PatchError } from "./patch.js";
 
 /** The outcome of applying ops to a copy of the IR. */
 export type OpsResult =
-  | { ok: true; ir: InlinedIr; before: Snapshot[]; opOf: number[]; retired: string[] }
+  | {
+      ok: true;
+      ir: InlinedIr;
+      before: Snapshot[];
+      opOf: number[];
+      retired: string[];
+      blocked: BlockedOp[];
+    }
   | { ok: false; errors: PatchError[] };
+
+/** An op that a field, list or item state stopped (convention 13). */
+export interface BlockedOp {
+  op: number;
+  rule: string;
+}
+
+/** Enforce the authorship rules (M1.2a); replay and revert apply without them. */
+export interface Enforcement {
+  gates: ReadonlySet<string>;
+}
 
 /** The project's frame rate: every deliverable shares it (D27). */
 export function projectFps(ir: InlinedIr): Rational {
@@ -43,6 +68,12 @@ class OpError extends Error {
 
 function fail(entity: string | null, pointer: string, rule: string, message: string): never {
   throw new OpError({ entity, pointer, rule, message });
+}
+
+/** The current state of a target's wrapper ("absent" for a map entry that does not exist yet). */
+function stateOf(t: Target): string {
+  const wrapper = t.container[t.key];
+  return isObject(wrapper) && typeof wrapper.state === "string" ? wrapper.state : "absent";
 }
 
 /** Take the node at entity + path as it is now (absent → no `before`). */
@@ -97,11 +128,18 @@ function insertIndex(
  * changes (convention 11, revert). Nothing here enforces authorship (M1.2a); states follow the
  * author (convention 10). Errors name the op; on any error the copy is discarded.
  */
-export function applyOps(ir: InlinedIr, ops: readonly Op[], author: Author): OpsResult {
+export function applyOps(
+  ir: InlinedIr,
+  ops: readonly Op[],
+  author: Author,
+  enforce: Enforcement | null = null,
+): OpsResult {
   const next = structuredClone(ir);
   const before: Snapshot[] = [];
   /** The op that took each snapshot, parallel to `before`. */
   const opOf: number[] = [];
+  const blockedOps: BlockedOp[] = [];
+  let current = -1;
   const state = stateFor(author);
   const fps = projectFps(ir);
   const schemas = inlinedSchemas();
@@ -110,6 +148,7 @@ export function applyOps(ir: InlinedIr, ops: readonly Op[], author: Author): Ops
     try {
       const index = indexIr(next);
       const taken = before.length;
+      current = i;
       applyOne(op, index);
       for (let k = taken; k < before.length; k += 1) opOf.push(i);
     } catch (error) {
@@ -142,7 +181,22 @@ export function applyOps(ir: InlinedIr, ops: readonly Op[], author: Author): Ops
   }
   const endIds = entityIds(next);
   const retired = [...startIds].filter((id) => !endIds.has(id)).sort();
-  return { ok: true, ir: next, before, opOf, retired };
+  return { ok: true, ir: next, before, opOf, retired, blocked: blockedOps };
+
+  /** A list's state governs membership and order (convention 7): changing either makes it the author's. */
+  function claimList(list: Target): void {
+    const wrapper = list.container[list.key] as JsonObject;
+    if (wrapper.state !== "locked") wrapper.state = state;
+  }
+
+  /** Apply the authorship verdict: true to go on with the op, false to skip it (blocked). */
+  function allowed(verdict: Verdict, entity: string, pointer: string): boolean {
+    if (!enforce || verdict.ok) return true;
+    if (verdict.kind === "forbidden")
+      fail(entity, pointer, verdict.rule, `${author.kind} may not do this here`);
+    blockedOps.push({ op: current, rule: verdict.rule });
+    return false;
+  }
 
   function applyOne(op: Op, index: Map<string, IrEntity>): void {
     switch (op.op) {
@@ -157,6 +211,8 @@ export function applyOps(ir: InlinedIr, ops: readonly Op[], author: Author): Ops
             "use insert, remove or move on an entity list",
           );
         const valueSchema = wrapperValueSchema(t.schema, t.file, schemas);
+        if (!allowed(checkFieldWrite(index, entity, stateOf(t), author), entity.id, op.path))
+          return;
         before.push(snapshot(entity, op.path, t.container, t.key));
         t.container[t.key] = {
           value: normalizeTimes(op.value, valueSchema.schema, valueSchema.file, fps, schemas),
@@ -169,6 +225,8 @@ export function applyOps(ir: InlinedIr, ops: readonly Op[], author: Author): Ops
         const t = target(entity, op.path);
         if (t.kind === "list")
           fail(entity.id, op.path, "patch.set_on_list", "use remove on an entity list");
+        if (!allowed(checkFieldWrite(index, entity, stateOf(t), author), entity.id, op.path))
+          return;
         before.push(snapshot(entity, op.path, t.container, t.key));
         if (t.kind === "map_entry") delete t.container[t.key];
         else t.container[t.key] = { state: "open" };
@@ -186,6 +244,8 @@ export function applyOps(ir: InlinedIr, ops: readonly Op[], author: Author): Ops
           fps,
           schemas,
         });
+        if (!allowed(checkListChange(index, entity, stateOf(t), author), entity.id, op.path))
+          return;
         before.push(snapshot(entity, op.path, t.container, t.key));
         const list = t.container[t.key] as JsonObject;
         const items = Array.isArray(list.value) ? (list.value as JsonObject[]) : [];
@@ -196,8 +256,18 @@ export function applyOps(ir: InlinedIr, ops: readonly Op[], author: Author): Ops
       case "remove": {
         const entity = findEntity(index, op.entity);
         const { owner, list, items, at } = holder(index, entity);
+        if (
+          !allowed(
+            checkListChange(index, owner, stateOf(list), author),
+            owner.id,
+            entity.list?.path ?? "",
+          )
+        )
+          return;
+        if (!allowed(checkRemove(index, entity, author), entity.id, "")) return;
         before.push(snapshot(owner, entity.list?.path ?? "", list.container, list.key));
         items.splice(at, 1);
+        claimList(list);
         return;
       }
       case "move": {
@@ -205,6 +275,14 @@ export function applyOps(ir: InlinedIr, ops: readonly Op[], author: Author): Ops
         const { owner, list, items, at } = holder(index, entity);
         if (op.after === entity.id)
           fail(entity.id, "", "patch.unknown_after", "an item cannot move after itself");
+        if (
+          !allowed(
+            checkListChange(index, owner, stateOf(list), author),
+            owner.id,
+            entity.list?.path ?? "",
+          )
+        )
+          return;
         before.push(snapshot(owner, entity.list?.path ?? "", list.container, list.key));
         const [item] = items.splice(at, 1);
         items.splice(
@@ -212,12 +290,21 @@ export function applyOps(ir: InlinedIr, ops: readonly Op[], author: Author): Ops
           0,
           item as JsonObject,
         );
+        claimList(list);
         return;
       }
       case "lock":
       case "unlock": {
         const entity = findEntity(index, op.entity);
         const path = op.path ?? "";
+        if (
+          !allowed(
+            checkLock(index, entity, op.op, path === "", author, enforce?.gates ?? new Set()),
+            entity.id,
+            path,
+          )
+        )
+          return;
         if (path === "") {
           before.push(snapshot(entity, "/locked", entity.node, "locked"));
           if (op.op === "lock") entity.node.locked = true;
