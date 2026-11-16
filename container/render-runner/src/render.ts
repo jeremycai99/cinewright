@@ -13,16 +13,24 @@ import {
   type RenderWarning,
   resolveConfig,
 } from "@hyperframes/producer";
-import { type EncoderSettings, hyperframesQuality, type RenderSettings } from "./settings.js";
+import {
+  type EncoderSettings,
+  type FrameRate,
+  hyperframesQuality,
+  type RenderSettings,
+} from "./settings.js";
 
 const run = promisify(execFile);
 
-export type Format = "mp4" | "png-sequence";
+/** `mp4+frames` writes the MP4 and keeps its PNG frames (M3.2a: segments reuse them). */
+export type Format = "mp4" | "png-sequence" | "mp4+frames";
 
 export interface RenderArgs {
   input: string;
   output: string;
   format: Format;
+  /** Overrides the settings' frame rate: the composition's own (its delivery profile's). */
+  fps?: FrameRate;
 }
 
 export const EXIT = { ok: 0, input: 2, network: 3, render: 4 } as const;
@@ -56,7 +64,7 @@ export async function render(args: RenderArgs, settings: RenderSettings): Promis
   await rm(WORK_DIR, { recursive: true, force: true });
   await copyWork(input, project);
 
-  const renderFrames = settings.encode === "ffmpeg" || args.format === "png-sequence";
+  const renderFrames = settings.encode === "ffmpeg" || args.format !== "mp4";
   const target = renderFrames ? frames : join(out, "output.mp4");
   const options = jobOptions(settings, renderFrames ? "png-sequence" : "mp4");
   const producerConfig = resolveConfig({
@@ -87,11 +95,17 @@ export async function render(args: RenderArgs, settings: RenderSettings): Promis
     return EXIT.render;
   }
 
-  if (args.format === "mp4") {
+  if (args.format === "mp4" || args.format === "mp4+frames") {
     const video = join(out, "output.mp4");
     if (renderFrames) await encodeFrames(frames, settings.fps, settings.encoder, video);
     await writeFramemd5(["-i", video], join(out, "framemd5.txt"));
-    writeFileSync(join(out, "sha256.txt"), `${await sha256(video)}  output.mp4\n`);
+    const lines = [`${await sha256(video)}  output.mp4\n`];
+    if (args.format === "mp4+frames") {
+      const names = await collectFrames(frames, join(out, "frames"));
+      for (const name of names)
+        lines.push(`${await sha256(join(out, "frames", name))}  frames/${name}\n`);
+    }
+    writeFileSync(join(out, "sha256.txt"), lines.join(""));
   } else {
     const names = await collectFrames(frames, join(out, "frames"));
     await writeFramemd5(

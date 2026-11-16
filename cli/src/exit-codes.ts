@@ -13,6 +13,8 @@ export const EXIT = {
   load: 6,
   /** The store lock was held by another process until the timeout. */
   lock: 7,
+  /** A render failed: its timeout, its memory limit, or render-job itself (M3.2a). */
+  render: 8,
 } as const;
 
 export type ExitCode = (typeof EXIT)[keyof typeof EXIT];

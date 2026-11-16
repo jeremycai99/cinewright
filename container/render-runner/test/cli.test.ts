@@ -30,6 +30,21 @@ describe("parseArgs", () => {
     });
   });
 
+  it("accepts --format mp4+frames and --fps", () => {
+    expect(parseArgs(["--in", "a", "--out", "b", "--format", "mp4+frames", "--fps", "25"])).toEqual(
+      {
+        input: "a",
+        output: "b",
+        format: "mp4+frames",
+        fps: 25,
+      },
+    );
+  });
+
+  it("rejects a frame rate HyperFrames does not accept", () => {
+    expect(() => parseArgs(["--in", "a", "--out", "b", "--fps", "29.97"])).toThrow(UsageError);
+  });
+
   it("recognises --versions", () => {
     expect(parseArgs(["--versions"])).toEqual({ versions: true });
   });

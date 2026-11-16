@@ -78,3 +78,42 @@ describe("cinewright compile", () => {
     expect(result.code).toBe(EXIT.usage);
   });
 });
+
+describe("cinewright render-shot", () => {
+  it("exits 2 without an image", async () => {
+    const dir = await placed();
+    const result = await run(
+      [
+        "render-shot",
+        "s03.sh01",
+        "--deliverable",
+        "web_landscape",
+        "--timing",
+        TIMING,
+        "--project",
+        dir,
+      ],
+      { CINEWRIGHT_IMAGE: "" },
+    );
+    expect(result.code).toBe(EXIT.usage);
+    expect(result.stderr).toContain("--image");
+  });
+
+  it("exits 3 for a shot that does not compile, before running anything", async () => {
+    const dir = referenceCopy();
+    const result = await run([
+      "render-shot",
+      "s03.sh01",
+      "--deliverable",
+      "web_landscape",
+      "--timing",
+      TIMING,
+      "--image",
+      "x",
+      "--project",
+      dir,
+    ]);
+    expect(result.code).toBe(EXIT.invalid);
+    expect(result.stderr).toContain("compile.unknown_region");
+  });
+});
