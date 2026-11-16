@@ -7,7 +7,7 @@ required-version = "==0.13.8"
 members = ["core/py", "plugins/sdk-py", "tools"]
 
 [dependency-groups]
-dev = ["pytest==9.2.0", "ruff==0.17.5"]
+dev = ["datamodel-code-generator==0.96.0", "pytest==9.2.0", "ruff==0.17.5"]
 
 [tool.pytest.ini_options]
 testpaths = ["core/py/tests", "plugins/sdk-py/tests", "tools/tests"]
@@ -21,7 +21,7 @@ markers = [
 target-version = "py313"
 line-length = 100
 cache-dir = ".cache/ruff"
-extend-exclude = ["**/*.md"]
+extend-exclude = ["**/*.md", "core/py/src/cinewright_ir/models.py"]
 
 [tool.ruff.lint]
 select = ["E", "F", "W", "I", "UP", "B"]

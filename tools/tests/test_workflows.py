@@ -40,6 +40,7 @@ def test_required_checks_read_from_ruleset() -> None:
     assert required_checks(REPO / ".github/rulesets/main.json") == {
         "ts",
         "py",
+        "types",
         "boundaries",
         "workflow-safety",
     }

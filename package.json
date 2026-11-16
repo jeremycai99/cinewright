@@ -9,8 +9,10 @@
   "scripts": {
     "lint": "biome ci .",
     "format": "biome format --write .",
-    "typecheck": "tsc -b",
-    "test": "pnpm -r --if-present test"
+    "typecheck": "tsc -b && tsc -p core/test/tsconfig.json",
+    "test": "pnpm -r --if-present test",
+    "gen:types": "pnpm --filter @cinewright/core gen:types",
+    "gen:check": "pnpm --filter @cinewright/core gen:check"
   },
   "devDependencies": {
     "@biomejs/biome": "2.6.7",

@@ -1,3 +1,4 @@
+export type * from "./generated/ir.js";
 export { collectEntities, type EntityInfo, entityIndex, locate, walkDocument } from "./ir/index.js";
 export { wrapperErrors } from "./ir/semantic.js";
 export { normalizeErrors, type ValidationError } from "./schema/errors.js";
