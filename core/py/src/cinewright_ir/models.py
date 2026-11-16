@@ -7,9 +7,17 @@ from typing import Annotated, Any, Literal
 from pydantic import BaseModel, ConfigDict, Field, RootModel, StringConstraints
 
 
-class Value(Enum):
-    narrator = "narrator"
-    character = "character"
+class Role(Enum):
+    take = "take"
+    music = "music"
+    sfx = "sfx"
+    image = "image"
+    video = "video"
+    font = "font"
+    composition = "composition"
+    reference = "reference"
+    consent = "consent"
+    other = "other"
 
 
 class Id(RootModel[str]):
@@ -154,6 +162,61 @@ class License(BaseModel):
     attribution: str | None = None
 
 
+class JsonValue(RootModel[str | float | bool | list[Any] | dict[str, Any] | None]):
+    root: Annotated[
+        str | float | bool | list[Any] | dict[str, Any] | None,
+        Field(description="Any JSON value.", title="JsonValue"),
+    ]
+
+
+class Provenance(BaseModel):
+    model_config = ConfigDict(
+        extra="forbid",
+    )
+    provider: Annotated[str, Field(min_length=1)]
+    model: str | None = None
+    plan_tier: str | None = None
+    request_hash: Hash | None = None
+
+
+class WordTiming(BaseModel):
+    model_config = ConfigDict(
+        extra="forbid",
+    )
+    text: Annotated[str, Field(min_length=1)]
+    start: Samples
+    end: Samples
+
+
+class Value(Enum):
+    narrator = "narrator"
+    character = "character"
+
+
+class Role1(BaseModel):
+    model_config = ConfigDict(
+        extra="forbid",
+    )
+    state: State
+    value: Value | None = None
+
+
+class DisplayName(BaseModel):
+    model_config = ConfigDict(
+        extra="forbid",
+    )
+    state: State
+    value: Annotated[str | None, Field(max_length=100, min_length=1)] = None
+
+
+class OnScreen(BaseModel):
+    model_config = ConfigDict(
+        extra="forbid",
+    )
+    state: State
+    value: bool | None = None
+
+
 class Baseline(BaseModel):
     model_config = ConfigDict(
         extra="forbid",
@@ -283,6 +346,102 @@ class Insets(BaseModel):
     left: Annotated[float, Field(ge=0.0, le=0.5)]
 
 
+class Component(BaseModel):
+    model_config = ConfigDict(
+        extra="forbid",
+    )
+    state: State
+    value: Id | None = None
+
+
+class Overrides(BaseModel):
+    model_config = ConfigDict(
+        extra="forbid",
+    )
+    state: State
+    value: TokenValue | None = None
+
+
+class StyleOverrides(
+    RootModel[
+        dict[
+            Annotated[
+                str,
+                StringConstraints(
+                    max_length=128, pattern=r"^[a-z][a-z0-9_]*(\.[a-z0-9_]+)*$"
+                ),
+            ],
+            Overrides,
+        ]
+    ]
+):
+    root: Annotated[
+        dict[
+            Annotated[
+                str,
+                StringConstraints(
+                    max_length=128, pattern=r"^[a-z][a-z0-9_]*(\.[a-z0-9_]+)*$"
+                ),
+            ],
+            Overrides,
+        ],
+        Field(
+            description="Token overrides at this level, one wrapper per token path (convention 7).",
+            title="StyleOverrides",
+        ),
+    ]
+
+
+class MotionPreset(BaseModel):
+    model_config = ConfigDict(
+        extra="forbid",
+    )
+    preset: Id
+    params: Annotated[
+        dict[str, Any] | None,
+        Field(description="Preset parameters; durations in frames."),
+    ] = None
+
+
+class LayerTiming(BaseModel):
+    model_config = ConfigDict(
+        extra="forbid",
+    )
+    enter: Anchor
+    exit: Anchor | None = None
+
+
+class Props(BaseModel):
+    model_config = ConfigDict(
+        extra="forbid",
+    )
+    state: State
+    value: Annotated[
+        JsonValue | None,
+        Field(
+            description='Any JSON value. An object {"token": path} is a token reference, resolved by the cascade (M1.3).'
+        ),
+    ] = None
+
+
+class LayerProps(
+    RootModel[
+        dict[Annotated[str, StringConstraints(pattern=r"^[a-z][a-z0-9_]*$")], Props]
+    ]
+):
+    root: Annotated[
+        dict[Annotated[str, StringConstraints(pattern=r"^[a-z][a-z0-9_]*$")], Props],
+        Field(description="Component props, one wrapper per prop.", title="LayerProps"),
+    ]
+
+
+class LayerRegion(BaseModel):
+    model_config = ConfigDict(
+        extra="forbid",
+    )
+    region: Annotated[str, Field(min_length=1)]
+
+
 class Title(BaseModel):
     model_config = ConfigDict(
         extra="forbid",
@@ -342,6 +501,14 @@ class Pack(BaseModel):
     value: Id | None = None
 
 
+class ProjectStyle(BaseModel):
+    model_config = ConfigDict(
+        extra="forbid",
+    )
+    pack: Pack
+    overrides: StyleOverrides
+
+
 class Sequences(BaseModel):
     model_config = ConfigDict(
         extra="forbid",
@@ -380,14 +547,6 @@ class Speaker(BaseModel):
     )
     state: State
     value: Id | None = None
-
-
-class OnScreen(BaseModel):
-    model_config = ConfigDict(
-        extra="forbid",
-    )
-    state: State
-    value: bool | None = None
 
 
 class Lipsync(BaseModel):
@@ -442,44 +601,6 @@ class Policies(BaseModel):
     require_commercial_license: bool
 
 
-class StyleOverrides1(BaseModel):
-    model_config = ConfigDict(
-        extra="forbid",
-    )
-    state: State
-    value: TokenValue | None = None
-
-
-class StyleOverrides(
-    RootModel[
-        dict[
-            Annotated[
-                str,
-                StringConstraints(
-                    max_length=128, pattern=r"^[a-z][a-z0-9_]*(\.[a-z0-9_]+)*$"
-                ),
-            ],
-            StyleOverrides1,
-        ]
-    ]
-):
-    root: Annotated[
-        dict[
-            Annotated[
-                str,
-                StringConstraints(
-                    max_length=128, pattern=r"^[a-z][a-z0-9_]*(\.[a-z0-9_]+)*$"
-                ),
-            ],
-            StyleOverrides1,
-        ],
-        Field(
-            description="Token overrides at this level, one wrapper per token path (convention 7).",
-            title="StyleOverrides",
-        ),
-    ]
-
-
 class Profile(BaseModel):
     model_config = ConfigDict(
         extra="forbid",
@@ -516,20 +637,224 @@ class Deliverable(BaseModel):
     burn_in_captions: BurnInCaptions
 
 
-class Role(BaseModel):
+class Intent(BaseModel):
     model_config = ConfigDict(
         extra="forbid",
     )
     state: State
-    value: Value | None = None
+    value: Annotated[str | None, Field(max_length=1000)] = None
 
 
-class DisplayName(BaseModel):
+class Mood(BaseModel):
     model_config = ConfigDict(
         extra="forbid",
     )
     state: State
-    value: Annotated[str | None, Field(max_length=100, min_length=1)] = None
+    value: list[ValueItem] | None = None
+
+
+class Cast1(BaseModel):
+    model_config = ConfigDict(
+        extra="forbid",
+    )
+    state: State
+    value: list[Id] | None = None
+
+
+class Lines1(BaseModel):
+    model_config = ConfigDict(
+        extra="forbid",
+    )
+    state: State
+    value: list[Id] | None = None
+
+
+class ValueEnum(Enum):
+    script = "script"
+    storyboard = "storyboard"
+    animatic = "animatic"
+    final = "final"
+
+
+class Gates(BaseModel):
+    model_config = ConfigDict(
+        extra="forbid",
+    )
+    state: State
+    value: list[ValueEnum] | None = None
+
+
+class Value2(Enum):
+    motion_graphics = "motion_graphics"
+    generative_footage = "generative_footage"
+    stock = "stock"
+    three_d = "three_d"
+    live_action = "live_action"
+
+
+class Type(BaseModel):
+    model_config = ConfigDict(
+        extra="forbid",
+    )
+    state: State
+    value: Value2 | None = None
+
+
+class Backend(BaseModel):
+    model_config = ConfigDict(
+        extra="forbid",
+    )
+    state: State
+    value: Annotated[str | None, Field(min_length=1)] = None
+
+
+class Framing(BaseModel):
+    model_config = ConfigDict(
+        extra="forbid",
+    )
+    state: State
+    value: Annotated[str | None, Field(min_length=1)] = None
+
+
+class Subject(BaseModel):
+    model_config = ConfigDict(
+        extra="forbid",
+    )
+    state: State
+    value: Id | None = None
+
+
+class Duration1(BaseModel):
+    model_config = ConfigDict(
+        extra="forbid",
+    )
+    state: State
+    value: Frames | None = None
+
+
+class References(BaseModel):
+    model_config = ConfigDict(
+        extra="forbid",
+    )
+    state: State
+    value: list[Id] | None = None
+
+
+class Camera(BaseModel):
+    model_config = ConfigDict(
+        extra="forbid",
+    )
+    move: Annotated[str, Field(min_length=1)]
+    ease: TokenValue | None = None
+    amount: float | None = None
+
+
+class ShotAnchors(BaseModel):
+    model_config = ConfigDict(
+        extra="forbid",
+    )
+    start: Anchor
+    end: Anchor | None = None
+
+
+class ShotTemplate(BaseModel):
+    model_config = ConfigDict(
+        extra="forbid",
+    )
+    template: Annotated[str, Field(min_length=1)]
+
+
+class Sync(Enum):
+    voiceover = "voiceover"
+    music = "music"
+    fixed = "fixed"
+
+
+class SceneDuration(BaseModel):
+    model_config = ConfigDict(
+        extra="forbid",
+    )
+    target: Frames
+    flex: Annotated[float, Field(ge=0.0, le=1.0)]
+    sync: Sync
+
+
+class Type1(Enum):
+    cut = "cut"
+    cross_dissolve = "cross_dissolve"
+    wipe = "wipe"
+    match_cut = "match_cut"
+
+
+class Transition(BaseModel):
+    model_config = ConfigDict(
+        extra="forbid",
+    )
+    type: Type1
+    to: Id | None = None
+    duration: Frames | None = None
+    on: str | None = None
+
+
+class SfxItem(RootModel[str]):
+    root: Annotated[str, Field(min_length=1)]
+
+
+class SceneSound(BaseModel):
+    model_config = ConfigDict(
+        extra="forbid",
+    )
+    music_cue: str | None = None
+    sfx: list[SfxItem]
+    duck_under_vo_db: Annotated[float | None, Field(le=0.0)] = None
+
+
+class Mood1(BaseModel):
+    model_config = ConfigDict(
+        extra="forbid",
+    )
+    state: State
+    value: list[ValueItem] | None = None
+
+
+class MusicBed(BaseModel):
+    model_config = ConfigDict(
+        extra="forbid",
+    )
+    state: State
+    value: Annotated[str | None, Field(min_length=1)] = None
+
+
+class Style(RootModel[Any]):
+    root: Annotated[
+        Any,
+        Field(
+            description="Style references shared by every level of the cascade (M1.3). Pack tokens are a plain token tree; the pack format is M2.1.",
+            title="Style",
+        ),
+    ]
+
+
+class Asset(BaseModel):
+    model_config = ConfigDict(
+        extra="forbid",
+    )
+    id: Id
+    origin: Origin
+    locked: EntityLock | None = None
+    hash: Hash
+    media_type: Annotated[str, Field(pattern="^[a-z]+/[a-z0-9.+-]+$")]
+    bytes: Annotated[int, Field(ge=0)]
+    role: Role
+    line: Annotated[
+        Id | None, Field(description="The line a take performs (takes only, D26).")
+    ] = None
+    provenance: Provenance
+    license: License
+    words: Annotated[
+        list[WordTiming] | None,
+        Field(description="Word timestamps in samples (takes only)."),
+    ] = None
 
 
 class VisualModel(BaseModel):
@@ -619,6 +944,44 @@ class DeliveryProfile(BaseModel):
     captions: Annotated[CaptionRules, Field(title="CaptionRules")]
 
 
+class Motion(BaseModel):
+    model_config = ConfigDict(
+        extra="forbid",
+    )
+    state: State
+    value: list[MotionPreset] | None = None
+
+
+class Timing(BaseModel):
+    model_config = ConfigDict(
+        extra="forbid",
+    )
+    state: State
+    value: LayerTiming | None = None
+
+
+class LevelStyle(BaseModel):
+    model_config = ConfigDict(
+        extra="forbid",
+    )
+    overrides: StyleOverrides
+
+
+class LayerLayout1(BaseModel):
+    model_config = ConfigDict(
+        extra="forbid",
+    )
+    state: State
+    value: LayerRegion | None = None
+
+
+class LayerLayout(RootModel[dict[AspectClass, LayerLayout1]]):
+    root: Annotated[
+        dict[AspectClass, LayerLayout1],
+        Field(description="Placement per aspect class (D28).", title="LayerLayout"),
+    ]
+
+
 class BudgetModel(BaseModel):
     model_config = ConfigDict(
         extra="forbid",
@@ -635,20 +998,20 @@ class PoliciesModel(BaseModel):
     value: Policies | None = None
 
 
-class ProjectStyle(BaseModel):
-    model_config = ConfigDict(
-        extra="forbid",
-    )
-    pack: Pack
-    overrides: StyleOverrides
-
-
 class Deliverables(BaseModel):
     model_config = ConfigDict(
         extra="forbid",
     )
     state: State
     value: list[Deliverable] | None = None
+
+
+class Assets(BaseModel):
+    model_config = ConfigDict(
+        extra="forbid",
+    )
+    state: State
+    value: list[Asset] | None = None
 
 
 class Lines(BaseModel):
@@ -678,6 +1041,61 @@ class ProfileCopy(BaseModel):
     body: DeliveryProfile
 
 
+class Duration(BaseModel):
+    model_config = ConfigDict(
+        extra="forbid",
+    )
+    state: State
+    value: SceneDuration | None = None
+
+
+class TransitionOut(BaseModel):
+    model_config = ConfigDict(
+        extra="forbid",
+    )
+    state: State
+    value: Transition | None = None
+
+
+class Sound(BaseModel):
+    model_config = ConfigDict(
+        extra="forbid",
+    )
+    state: State
+    value: SceneSound | None = None
+
+
+class CameraModel(BaseModel):
+    model_config = ConfigDict(
+        extra="forbid",
+    )
+    state: State
+    value: Camera | None = None
+
+
+class Anchors(BaseModel):
+    model_config = ConfigDict(
+        extra="forbid",
+    )
+    state: State
+    value: ShotAnchors | None = None
+
+
+class ShotLayout1(BaseModel):
+    model_config = ConfigDict(
+        extra="forbid",
+    )
+    state: State
+    value: ShotTemplate | None = None
+
+
+class ShotLayout(RootModel[dict[AspectClass, ShotLayout1]]):
+    root: Annotated[
+        dict[AspectClass, ShotLayout1],
+        Field(description="Layout per aspect class (D28).", title="ShotLayout"),
+    ]
+
+
 class Voice(BaseModel):
     model_config = ConfigDict(
         extra="forbid",
@@ -685,6 +1103,23 @@ class Voice(BaseModel):
     description: Description
     lexicon: Lexicon
     bindings: VoiceBindings
+
+
+class Layer(BaseModel):
+    model_config = ConfigDict(
+        extra="forbid",
+    )
+    id: Id
+    origin: Origin
+    locked: EntityLock | None = None
+    component: Annotated[
+        Component, Field(description="A component id; compilers own the code (D31).")
+    ]
+    motion: Motion
+    timing: Timing
+    props: LayerProps
+    layout: LayerLayout
+    style: LevelStyle
 
 
 class ProfileCopies(
@@ -735,6 +1170,39 @@ class Script(BaseModel):
     beats: Beats
 
 
+class Layers(BaseModel):
+    model_config = ConfigDict(
+        extra="forbid",
+    )
+    state: State
+    value: list[Layer] | None = None
+
+
+class Shot(BaseModel):
+    model_config = ConfigDict(
+        extra="forbid",
+    )
+    id: Id
+    origin: Origin
+    locked: EntityLock | None = None
+    type: Annotated[
+        Type,
+        Field(
+            description="The kind of shot. Which types v0.1 can render is checked at intake (M7.1)."
+        ),
+    ]
+    backend: Backend
+    framing: Framing
+    subject: Subject
+    camera: CameraModel
+    duration: Duration1
+    anchors: Anchors
+    references: References
+    layout: ShotLayout
+    style: LevelStyle
+    layers: Layers
+
+
 class CastMember(BaseModel):
     model_config = ConfigDict(
         extra="forbid",
@@ -742,7 +1210,7 @@ class CastMember(BaseModel):
     id: Id
     origin: Origin
     locked: EntityLock | None = None
-    role: Role
+    role: Role1
     display_name: DisplayName
     voice: Voice
     performance: Performance
@@ -798,13 +1266,76 @@ class Project(BaseModel):
     cast: Annotated[
         Cast, Field(description="The cast bible: narrators and characters (D29).")
     ]
+    assets: Annotated[
+        Assets,
+        Field(
+            description="The asset registry: every asset the IR references, by content hash (AGENTS.md §6)."
+        ),
+    ]
+
+
+class Shots(BaseModel):
+    model_config = ConfigDict(
+        extra="forbid",
+    )
+    state: State
+    value: list[Shot] | None = None
+
+
+class Scene(BaseModel):
+    model_config = ConfigDict(
+        extra="forbid",
+    )
+    id: Id
+    origin: Origin
+    locked: EntityLock | None = None
+    intent: Intent
+    duration: Duration
+    mood: Mood
+    cast: Cast1
+    lines: Annotated[
+        Lines1, Field(description="Script lines in this scene, in order (D26).")
+    ]
+    transition_out: TransitionOut
+    sound: Sound
+    gates: Gates
+    style: LevelStyle
+    shots: Shots
+
+
+class Scenes(BaseModel):
+    model_config = ConfigDict(
+        extra="forbid",
+    )
+    state: State
+    value: list[Scene] | None = None
+
+
+class Sequence(BaseModel):
+    model_config = ConfigDict(
+        extra="forbid",
+    )
+    id: Id
+    origin: Origin
+    locked: EntityLock | None = None
+    title: Title
+    mood: Mood1
+    music_bed: MusicBed
+    style: LevelStyle
+    scenes: Scenes
 
 
 class IrDocuments(BaseModel):
     model_config = ConfigDict(
         extra="forbid",
     )
+    asset: Asset | None = None
     cast: CastMember | None = None
     delivery_profile: DeliveryProfile | None = None
+    layer: Layer | None = None
     project: Project | None = None
+    scene: Scene | None = None
     script: Script | None = None
+    sequence: Sequence | None = None
+    shot: Shot | None = None
+    style: Style | None = None

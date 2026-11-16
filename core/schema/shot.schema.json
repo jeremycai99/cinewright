@@ -1,0 +1,246 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://cinewright.invalid/ir/0/shot.schema.json",
+  "title": "Shot",
+  "description": "A shot: backend, framing, camera, layout per aspect class and timing anchors.",
+  "x-entity": "shot",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "id",
+    "origin",
+    "type",
+    "backend",
+    "framing",
+    "subject",
+    "camera",
+    "duration",
+    "anchors",
+    "references",
+    "layout",
+    "style",
+    "layers"
+  ],
+  "properties": {
+    "id": {
+      "$ref": "common.schema.json#/$defs/id"
+    },
+    "origin": {
+      "$ref": "common.schema.json#/$defs/origin"
+    },
+    "locked": {
+      "$ref": "common.schema.json#/$defs/entity_lock"
+    },
+    "type": {
+      "description": "The kind of shot. Which types v0.1 can render is checked at intake (M7.1).",
+      "x-authorable": "field",
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["state"],
+      "properties": {
+        "state": {
+          "$ref": "common.schema.json#/$defs/state"
+        },
+        "value": {
+          "enum": ["motion_graphics", "generative_footage", "stock", "three_d", "live_action"]
+        }
+      }
+    },
+    "backend": {
+      "x-authorable": "field",
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["state"],
+      "properties": {
+        "state": {
+          "$ref": "common.schema.json#/$defs/state"
+        },
+        "value": {
+          "type": "string",
+          "minLength": 1
+        }
+      }
+    },
+    "framing": {
+      "x-authorable": "field",
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["state"],
+      "properties": {
+        "state": {
+          "$ref": "common.schema.json#/$defs/state"
+        },
+        "value": {
+          "type": "string",
+          "minLength": 1
+        }
+      }
+    },
+    "subject": {
+      "x-authorable": "field",
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["state"],
+      "properties": {
+        "state": {
+          "$ref": "common.schema.json#/$defs/state"
+        },
+        "value": {
+          "$ref": "common.schema.json#/$defs/id",
+          "x-ref": "cast_member"
+        }
+      }
+    },
+    "camera": {
+      "x-authorable": "field",
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["state"],
+      "properties": {
+        "state": {
+          "$ref": "common.schema.json#/$defs/state"
+        },
+        "value": {
+          "$ref": "#/$defs/camera"
+        }
+      }
+    },
+    "duration": {
+      "x-authorable": "field",
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["state"],
+      "properties": {
+        "state": {
+          "$ref": "common.schema.json#/$defs/state"
+        },
+        "value": {
+          "$ref": "common.schema.json#/$defs/frames"
+        }
+      }
+    },
+    "anchors": {
+      "x-authorable": "field",
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["state"],
+      "properties": {
+        "state": {
+          "$ref": "common.schema.json#/$defs/state"
+        },
+        "value": {
+          "$ref": "#/$defs/shot_anchors"
+        }
+      }
+    },
+    "references": {
+      "x-authorable": "field",
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["state"],
+      "properties": {
+        "state": {
+          "$ref": "common.schema.json#/$defs/state"
+        },
+        "value": {
+          "type": "array",
+          "items": {
+            "$ref": "common.schema.json#/$defs/id",
+            "x-ref": ["asset", "cast_member"]
+          }
+        }
+      }
+    },
+    "layout": {
+      "$ref": "#/$defs/shot_layout"
+    },
+    "style": {
+      "$ref": "style.schema.json#/$defs/level_style"
+    },
+    "layers": {
+      "x-authorable": "list",
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["state"],
+      "properties": {
+        "state": {
+          "$ref": "common.schema.json#/$defs/state"
+        },
+        "value": {
+          "type": "array",
+          "items": {
+            "$ref": "layer.schema.json"
+          }
+        }
+      }
+    }
+  },
+  "$defs": {
+    "camera": {
+      "title": "Camera",
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["move"],
+      "properties": {
+        "move": {
+          "type": "string",
+          "minLength": 1
+        },
+        "ease": {
+          "$ref": "common.schema.json#/$defs/token_value"
+        },
+        "amount": {
+          "type": "number"
+        }
+      }
+    },
+    "shot_anchors": {
+      "title": "ShotAnchors",
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["start"],
+      "properties": {
+        "start": {
+          "$ref": "common.schema.json#/$defs/anchor"
+        },
+        "end": {
+          "$ref": "common.schema.json#/$defs/anchor"
+        }
+      }
+    },
+    "shot_layout": {
+      "title": "ShotLayout",
+      "description": "Layout per aspect class (D28).",
+      "x-authorable": "map",
+      "type": "object",
+      "propertyNames": {
+        "$ref": "common.schema.json#/$defs/aspect_class"
+      },
+      "additionalProperties": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["state"],
+        "properties": {
+          "state": {
+            "$ref": "common.schema.json#/$defs/state"
+          },
+          "value": {
+            "$ref": "#/$defs/shot_template"
+          }
+        }
+      }
+    },
+    "shot_template": {
+      "title": "ShotTemplate",
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["template"],
+      "properties": {
+        "template": {
+          "type": "string",
+          "minLength": 1
+        }
+      }
+    }
+  }
+}

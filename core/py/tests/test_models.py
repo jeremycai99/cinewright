@@ -12,10 +12,12 @@ FIXTURES = Path(__file__).resolve().parents[2] / "test" / "fixtures" / "schema"
 
 # Fixture directory -> the generated model its documents parse into.
 MODELS: dict[str, type[BaseModel]] = {
+    "asset": models.Asset,
     "cast": models.CastMember,
     "delivery-profile": models.DeliveryProfile,
     "project": models.Project,
     "script": models.Script,
+    "sequence": models.Sequence,
 }
 
 

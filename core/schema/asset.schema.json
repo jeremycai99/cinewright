@@ -1,0 +1,106 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://cinewright.invalid/ir/0/asset.schema.json",
+  "title": "Asset",
+  "description": "A content-addressed asset (D33). All fields are measured data, so none is authorable; list membership is.",
+  "x-entity": "asset",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["id", "origin", "hash", "media_type", "bytes", "role", "provenance", "license"],
+  "properties": {
+    "id": {
+      "$ref": "common.schema.json#/$defs/id"
+    },
+    "origin": {
+      "$ref": "common.schema.json#/$defs/origin"
+    },
+    "locked": {
+      "$ref": "common.schema.json#/$defs/entity_lock"
+    },
+    "hash": {
+      "$ref": "common.schema.json#/$defs/hash"
+    },
+    "media_type": {
+      "type": "string",
+      "pattern": "^[a-z]+/[a-z0-9.+-]+$"
+    },
+    "bytes": {
+      "type": "integer",
+      "minimum": 0
+    },
+    "role": {
+      "enum": [
+        "take",
+        "music",
+        "sfx",
+        "image",
+        "video",
+        "font",
+        "composition",
+        "reference",
+        "consent",
+        "other"
+      ]
+    },
+    "line": {
+      "description": "The line a take performs (takes only, D26).",
+      "$ref": "common.schema.json#/$defs/id",
+      "x-ref": "line"
+    },
+    "provenance": {
+      "$ref": "#/$defs/provenance"
+    },
+    "license": {
+      "$ref": "common.schema.json#/$defs/license"
+    },
+    "words": {
+      "description": "Word timestamps in samples (takes only).",
+      "type": "array",
+      "items": {
+        "$ref": "#/$defs/word"
+      }
+    }
+  },
+  "$defs": {
+    "provenance": {
+      "description": "Who or what produced the asset (AGENTS.md §6).",
+      "title": "Provenance",
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["provider"],
+      "properties": {
+        "provider": {
+          "type": "string",
+          "minLength": 1
+        },
+        "model": {
+          "type": "string"
+        },
+        "plan_tier": {
+          "type": "string"
+        },
+        "request_hash": {
+          "$ref": "common.schema.json#/$defs/hash"
+        }
+      }
+    },
+    "word": {
+      "title": "WordTiming",
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["text", "start", "end"],
+      "properties": {
+        "text": {
+          "type": "string",
+          "minLength": 1
+        },
+        "start": {
+          "$ref": "common.schema.json#/$defs/samples"
+        },
+        "end": {
+          "$ref": "common.schema.json#/$defs/samples"
+        }
+      }
+    }
+  }
+}

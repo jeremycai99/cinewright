@@ -1,0 +1,7 @@
+[
+  {
+    "entity": "s03.sh02",
+    "pointer": "/type/value",
+    "rule": "schema.enum"
+  }
+]

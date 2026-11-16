@@ -1,0 +1,7 @@
+[
+  {
+    "entity": "s03.sh01.bars",
+    "pointer": "/component",
+    "rule": "schema.required"
+  }
+]

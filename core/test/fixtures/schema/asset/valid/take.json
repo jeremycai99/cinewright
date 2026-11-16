@@ -1,0 +1,30 @@
+{
+  "bytes": 4,
+  "hash": "sha256:d1905cf90af29a5ac3f99e105830eecc5b3b415b24e2d166a7ce4cf72b2f32e6",
+  "id": "take_b01_l01_1",
+  "license": {
+    "commercial_use": true,
+    "terms": "Test fixture"
+  },
+  "line": "b01.l01",
+  "media_type": "audio/wav",
+  "origin": "agent",
+  "provenance": {
+    "model": "stub-1",
+    "provider": "tts_stub",
+    "request_hash": "sha256:0000000000000000000000000000000000000000000000000000000000000000"
+  },
+  "role": "take",
+  "words": [
+    {
+      "end": 9600,
+      "start": 0,
+      "text": "Every"
+    },
+    {
+      "end": 19200,
+      "start": 9600,
+      "text": "team"
+    }
+  ]
+}

@@ -50,8 +50,14 @@
       "additionalProperties": false,
       "required": ["num", "den"],
       "properties": {
-        "num": { "type": "integer", "minimum": 1 },
-        "den": { "type": "integer", "minimum": 1 }
+        "num": {
+          "type": "integer",
+          "minimum": 1
+        },
+        "den": {
+          "type": "integer",
+          "minimum": 1
+        }
       }
     },
     "hash": {
@@ -78,17 +84,27 @@
       "additionalProperties": false,
       "required": ["token"],
       "properties": {
-        "token": { "$ref": "#/$defs/token_path" }
+        "token": {
+          "$ref": "#/$defs/token_path"
+        }
       }
     },
     "token_value": {
       "title": "TokenValue",
       "description": "A literal token value or a reference to another token.",
       "anyOf": [
-        { "type": "string" },
-        { "type": "number" },
-        { "type": "boolean" },
-        { "$ref": "#/$defs/token_ref" }
+        {
+          "type": "string"
+        },
+        {
+          "type": "number"
+        },
+        {
+          "type": "boolean"
+        },
+        {
+          "$ref": "#/$defs/token_ref"
+        }
       ]
     },
     "anchor": {
@@ -98,10 +114,20 @@
       "additionalProperties": false,
       "required": ["line", "point", "offset"],
       "properties": {
-        "line": { "$ref": "#/$defs/id", "x-ref": "line" },
-        "point": { "enum": ["start", "end", "word"] },
-        "word": { "type": "integer", "minimum": 0 },
-        "offset": { "$ref": "#/$defs/frame_offset" }
+        "line": {
+          "$ref": "#/$defs/id",
+          "x-ref": "line"
+        },
+        "point": {
+          "enum": ["start", "end", "word"]
+        },
+        "word": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "offset": {
+          "$ref": "#/$defs/frame_offset"
+        }
       }
     },
     "license": {
@@ -111,10 +137,41 @@
       "additionalProperties": false,
       "required": ["terms", "commercial_use"],
       "properties": {
-        "terms": { "type": "string", "minLength": 1 },
-        "commercial_use": { "type": "boolean" },
-        "attribution": { "type": "string" }
+        "terms": {
+          "type": "string",
+          "minLength": 1
+        },
+        "commercial_use": {
+          "type": "boolean"
+        },
+        "attribution": {
+          "type": "string"
+        }
       }
+    },
+    "json_value": {
+      "title": "JsonValue",
+      "description": "Any JSON value.",
+      "anyOf": [
+        {
+          "type": "string"
+        },
+        {
+          "type": "number"
+        },
+        {
+          "type": "boolean"
+        },
+        {
+          "type": "null"
+        },
+        {
+          "type": "array"
+        },
+        {
+          "type": "object"
+        }
+      ]
     }
   }
 }

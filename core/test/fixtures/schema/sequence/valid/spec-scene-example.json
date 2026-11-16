@@ -1,0 +1,325 @@
+{
+  "id": "seq_main",
+  "mood": {
+    "state": "open"
+  },
+  "music_bed": {
+    "state": "open"
+  },
+  "origin": "agent",
+  "scenes": {
+    "state": "agent",
+    "value": [
+      {
+        "cast": {
+          "state": "user",
+          "value": ["narrator", "dr_lin"]
+        },
+        "duration": {
+          "state": "agent",
+          "value": {
+            "flex": 0.15,
+            "sync": "voiceover",
+            "target": 540
+          }
+        },
+        "gates": {
+          "state": "user",
+          "value": ["storyboard", "animatic"]
+        },
+        "id": "s03_the_problem",
+        "intent": {
+          "state": "user",
+          "value": "Show why legacy pipelines break at scale"
+        },
+        "lines": {
+          "state": "user",
+          "value": ["b01.l01", "b01.l02"]
+        },
+        "mood": {
+          "state": "user",
+          "value": ["tense", "building"]
+        },
+        "origin": "user",
+        "shots": {
+          "state": "agent",
+          "value": [
+            {
+              "anchors": {
+                "state": "agent",
+                "value": {
+                  "start": {
+                    "line": "b01.l01",
+                    "offset": 0,
+                    "point": "start"
+                  }
+                }
+              },
+              "backend": {
+                "state": "agent",
+                "value": "html"
+              },
+              "camera": {
+                "state": "agent",
+                "value": {
+                  "amount": 0.06,
+                  "ease": {
+                    "token": "motion.ease_out_expo"
+                  },
+                  "move": "push_in"
+                }
+              },
+              "duration": {
+                "state": "open"
+              },
+              "framing": {
+                "state": "agent",
+                "value": "full_frame"
+              },
+              "id": "s03.sh01",
+              "layers": {
+                "state": "agent",
+                "value": [
+                  {
+                    "component": {
+                      "state": "agent",
+                      "value": "kinetic_title"
+                    },
+                    "id": "s03.sh01.title",
+                    "layout": {
+                      "landscape": {
+                        "state": "agent",
+                        "value": {
+                          "region": "title_left"
+                        }
+                      },
+                      "portrait": {
+                        "state": "agent",
+                        "value": {
+                          "region": "title_top"
+                        }
+                      }
+                    },
+                    "motion": {
+                      "state": "open"
+                    },
+                    "origin": "agent",
+                    "props": {
+                      "color": {
+                        "state": "agent",
+                        "value": {
+                          "token": "palette.accent"
+                        }
+                      },
+                      "text": {
+                        "state": "agent",
+                        "value": "Every team hits the same wall."
+                      }
+                    },
+                    "style": {
+                      "overrides": {}
+                    },
+                    "timing": {
+                      "state": "agent",
+                      "value": {
+                        "enter": {
+                          "line": "b01.l01",
+                          "offset": 0,
+                          "point": "start"
+                        }
+                      }
+                    }
+                  },
+                  {
+                    "component": {
+                      "state": "agent",
+                      "value": "data_bars"
+                    },
+                    "id": "s03.sh01.bars",
+                    "layout": {},
+                    "motion": {
+                      "state": "agent",
+                      "value": [
+                        {
+                          "params": {
+                            "stagger_frames": 4
+                          },
+                          "preset": "grow_up"
+                        }
+                      ]
+                    },
+                    "origin": "agent",
+                    "props": {
+                      "series": {
+                        "state": "agent",
+                        "value": [3, 5, 9]
+                      }
+                    },
+                    "style": {
+                      "overrides": {}
+                    },
+                    "timing": {
+                      "state": "agent",
+                      "value": {
+                        "enter": {
+                          "line": "b01.l01",
+                          "offset": 6,
+                          "point": "word",
+                          "word": 3
+                        }
+                      }
+                    }
+                  }
+                ]
+              },
+              "layout": {
+                "landscape": {
+                  "state": "agent",
+                  "value": {
+                    "template": "grid.12col/title-left"
+                  }
+                },
+                "portrait": {
+                  "state": "agent",
+                  "value": {
+                    "template": "stack/title-top"
+                  }
+                }
+              },
+              "origin": "agent",
+              "references": {
+                "state": "open"
+              },
+              "style": {
+                "overrides": {}
+              },
+              "subject": {
+                "state": "open"
+              },
+              "type": {
+                "state": "agent",
+                "value": "motion_graphics"
+              }
+            },
+            {
+              "anchors": {
+                "state": "agent",
+                "value": {
+                  "end": {
+                    "line": "b01.l02",
+                    "offset": 12,
+                    "point": "end"
+                  },
+                  "start": {
+                    "line": "b01.l02",
+                    "offset": 0,
+                    "point": "start"
+                  }
+                }
+              },
+              "backend": {
+                "state": "open"
+              },
+              "camera": {
+                "state": "open"
+              },
+              "duration": {
+                "state": "open"
+              },
+              "framing": {
+                "state": "agent",
+                "value": "medium_close, 50mm, shallow DOF"
+              },
+              "id": "s03.sh02",
+              "layers": {
+                "state": "open"
+              },
+              "layout": {},
+              "origin": "agent",
+              "references": {
+                "state": "agent",
+                "value": ["dr_lin", "dr_lin_sheet_front"]
+              },
+              "style": {
+                "overrides": {}
+              },
+              "subject": {
+                "state": "user",
+                "value": "dr_lin"
+              },
+              "type": {
+                "state": "agent",
+                "value": "generative_footage"
+              }
+            }
+          ]
+        },
+        "sound": {
+          "state": "agent",
+          "value": {
+            "duck_under_vo_db": -12,
+            "music_cue": "tension_rise",
+            "sfx": ["whoosh_soft", "tick_loop"]
+          }
+        },
+        "style": {
+          "overrides": {
+            "palette.accent": {
+              "state": "user",
+              "value": "#FF4D2E"
+            }
+          }
+        },
+        "transition_out": {
+          "state": "agent",
+          "value": {
+            "on": "data_bars → server racks",
+            "to": "s04",
+            "type": "match_cut"
+          }
+        }
+      },
+      {
+        "cast": {
+          "state": "open"
+        },
+        "duration": {
+          "state": "open"
+        },
+        "gates": {
+          "state": "open"
+        },
+        "id": "s04",
+        "intent": {
+          "state": "open"
+        },
+        "lines": {
+          "state": "open"
+        },
+        "mood": {
+          "state": "open"
+        },
+        "origin": "agent",
+        "shots": {
+          "state": "open"
+        },
+        "sound": {
+          "state": "open"
+        },
+        "style": {
+          "overrides": {}
+        },
+        "transition_out": {
+          "state": "open"
+        }
+      }
+    ]
+  },
+  "style": {
+    "overrides": {}
+  },
+  "title": {
+    "state": "agent",
+    "value": "The problem"
+  }
+}

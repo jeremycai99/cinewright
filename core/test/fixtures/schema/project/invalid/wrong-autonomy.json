@@ -1,4 +1,7 @@
 {
+  "assets": {
+    "state": "open"
+  },
   "autonomy": {
     "state": "user",
     "value": "chaotic"

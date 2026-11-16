@@ -1,0 +1,15 @@
+{
+  "bytes": 11,
+  "hash": "md5:abc",
+  "id": "dr_lin_sheet_front",
+  "license": {
+    "commercial_use": true,
+    "terms": "Supplied by the project author"
+  },
+  "media_type": "image/png",
+  "origin": "user",
+  "provenance": {
+    "provider": "user_upload"
+  },
+  "role": "reference"
+}

@@ -1,0 +1,7 @@
+[
+  {
+    "entity": "s03.sh02",
+    "pointer": "/anchors/value/start",
+    "rule": "anchor.word_presence"
+  }
+]
