@@ -20,6 +20,13 @@ export const CHECK_EXIT = { ok: 0, input: 2, error: 4, findings: 5 } as const;
 const WORK_DIR = "/tmp/cinewright-check";
 const SECTIONS = ["lint", "runtime", "layout", "contrast", "motion", "audio"] as const;
 
+/**
+ * Lint rules that ask authors to split a hand-written HTML file (HyperFrames 0.9.58: more than 3
+ * timed elements, or more than 300 lines). Compositions here are compiled and never hand-edited,
+ * so these say nothing about the output.
+ */
+export const IGNORED_LINT = new Set(["timeline_track_too_dense", "composition_file_too_large"]);
+
 /** A finding that fails the check (M2.4b): an error or warning, or a report that is not ok. */
 export interface Failure {
   section: string;
@@ -30,7 +37,11 @@ export interface Failure {
   time?: number;
 }
 
-/** HyperFrames 0.9.58 `check`, with every option explicit (craft warnings depend on the film). */
+/**
+ * HyperFrames 0.9.58 `check`, with every option explicit. Craft warnings depend on the film, and
+ * safe areas come from the delivery profile (D27): HyperFrames' default applies the TikTok, Reels
+ * and Shorts zones to every 9:16 frame, wherever it is delivered.
+ */
 export function checkArgs(dir: string, at: readonly number[]): string[] {
   return [
     "check",
@@ -40,6 +51,8 @@ export function checkArgs(dir: string, at: readonly number[]): string[] {
     "--no-craft",
     "--no-cache",
     "--no-browser-gpu",
+    "--safe-zone",
+    "off",
     "--at",
     at.join(","),
   ];
@@ -61,11 +74,16 @@ type Finding = {
  */
 export function failures(report: Record<string, unknown>): Failure[] {
   const out: Failure[] = [];
+  let ignored = 0;
   for (const section of SECTIONS) {
     const findings = ((report[section] as { findings?: Finding[] } | undefined)?.findings ??
       []) as Finding[];
     for (const f of findings) {
       if (f.severity !== "error" && f.severity !== "warning") continue;
+      if (section === "lint" && IGNORED_LINT.has(f.code ?? "")) {
+        ignored += 1;
+        continue;
+      }
       // The component host reports its markers as console warnings: `cinewright.<marker> …`.
       const marker = /^(cinewright\.[a-z_]+)\b/.exec(f.message ?? "")?.[1];
       out.push({
@@ -78,7 +96,8 @@ export function failures(report: Record<string, unknown>): Failure[] {
       });
     }
   }
-  if (out.length === 0 && report.ok !== true) {
+  // An ignored warning also makes a strict report not ok; only an unexplained not-ok fails.
+  if (out.length === 0 && ignored === 0 && report.ok !== true) {
     out.push({
       section: "report",
       code: "not_ok",

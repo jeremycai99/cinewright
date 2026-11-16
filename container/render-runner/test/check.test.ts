@@ -35,6 +35,8 @@ describe("render-job check arguments", () => {
       "--no-craft",
       "--no-cache",
       "--no-browser-gpu",
+      "--safe-zone",
+      "off",
       "--at",
       "0.5,1.5",
     ]);
@@ -117,6 +119,20 @@ describe("failures", () => {
       audio: { findings: [{ code: "a", severity: "error", message: "audio" }] },
     };
     expect(failures(report).map((f) => `${f.section}:${f.code}`)).toEqual(["motion:m", "audio:a"]);
+  });
+
+  it("ignores lint rules about splitting hand-written files, which compiled output never is", () => {
+    const report = {
+      ...clean,
+      ok: false,
+      lint: {
+        findings: [
+          { code: "timeline_track_too_dense", severity: "warning", message: "4 timed elements" },
+          { code: "composition_file_too_large", severity: "warning", message: "301 lines" },
+        ],
+      },
+    };
+    expect(failures(report)).toEqual([]);
   });
 
   it("fails a report that is not ok even without findings", () => {

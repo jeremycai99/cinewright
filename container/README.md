@@ -59,7 +59,7 @@ uv run cinewright-check-in-container --image cinewright-render:dev --in <composi
 `render-job check --in /job/in --out /job/out --at <seconds,…>` runs HyperFrames 0.9.58's own `check` on a copy of the composition, with the network off:
 
 ```
-hyperframes check <dir> --json --strict --no-craft --no-cache --no-browser-gpu --at <seconds,…>
+hyperframes check <dir> --json --strict --no-craft --no-cache --no-browser-gpu --safe-zone off --at <seconds,…>
 ```
 
 It audits each time for:
@@ -67,12 +67,12 @@ It audits each time for:
 - layout overflow, clipping and overlaps;
 - WCAG AA contrast.
 
-Craft warnings (dead stretches, unread lines) are skipped, because they depend on the film, not the composition. It writes three files to `/job/out`:
+Craft warnings (dead stretches, unread lines) are skipped, because they depend on the film, not the composition. Platform safe zones are off (`--safe-zone off`): HyperFrames' default applies the TikTok, Reels and Shorts zones (`@hyperframes/core` `safeAreas.js`) to every 9:16 frame, but safe areas belong to the delivery profile (D27), whose title-safe insets place every layout region; a social delivery profile (M5.3) encodes those platform zones in its insets. It writes three files to `/job/out`:
 - `check.json`: the full report;
 - `failures.json`: every error or warning in the lint, runtime, layout, contrast, motion and audio sections, or a not-ok report;
 - `check-log.txt`.
 
-HyperFrames demotes a contrast failure seen at one sample to a warning and still reports `ok`, so warnings count as failures here. The component host reports its markers as console warnings (`cinewright.overflow …`, `cinewright.density …`); `failures.json` gives those findings their marker as the code.
+HyperFrames demotes a contrast failure seen at one sample to a warning and still reports `ok`, so warnings count as failures here. Two lint rules are ignored: `timeline_track_too_dense` (more than 3 timed elements in a file) and `composition_file_too_large` (more than 300 lines), added after 0.9.41. They ask authors to split hand-written files; compositions here are compiled and never hand-edited. The component host reports its markers as console warnings (`cinewright.overflow …`, `cinewright.density …`); `failures.json` gives those findings their marker as the code.
 
 Exit codes: 0 nothing fails, 2 usage or input error, 4 no report, 5 failures.
 
@@ -107,7 +107,7 @@ Every behaviour Cinewright relies on, checked in the published 0.9.58 packages (
 | Frame rates are `DISTRIBUTED_FPS = [24, 25, 30, 60]` | `@hyperframes/core` `distributedFps.js:2`, used by `@hyperframes/engine` `config.js:105` |
 | Quality levels: `draft` `ultrafast`/28, `standard` `medium`/18, `high` `fast`/15 | `@hyperframes/engine` `services/chunkEncoder.js:23-27` |
 | `png-sequence` output writes frames, not an MP4 | `@hyperframes/producer` `index.js:14425`, `:14981` |
-| `check` flags `--json`, `--strict`, `--no-craft`, `--no-cache`, `--no-browser-gpu`, `--at` | `hyperframes` `chunk-ROESFEBP.js:2734-2826` |
+| `check` flags `--json`, `--strict`, `--no-craft`, `--no-cache`, `--no-browser-gpu`, `--safe-zone` (default: all social zones on 9:16), `--at` | `hyperframes` `chunk-ROESFEBP.js:2734-2842`, `:3113` |
 | `check` JSON: `ok`, `strict`, and sections `lint`, `runtime`, `layout`, `motion`, `contrast`, `craft`, `audio`, each with `findings`; `ok` is false in strict mode when any non-craft warning remains. both already existed in 0.9.41. Since M3.0 `motion` (active only with a motion spec) and `audio` count as failures too | `hyperframes` `chunk-ROESFEBP.js:2193-2240` |
 | `snapshot` command | `hyperframes` `snapshot-EVSKTVDG.js:1878` |
 
