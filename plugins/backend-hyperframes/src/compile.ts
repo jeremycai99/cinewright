@@ -29,6 +29,7 @@ import {
   UnsafeValueError,
   unwrap,
 } from "@cinewright/core";
+import { captionCues } from "./captions.js";
 import { CompileError, type CompileIssue } from "./errors.js";
 import { COMPILER_VERSION } from "./version.js";
 
@@ -399,6 +400,44 @@ export async function planShot(options: PlanOptions): Promise<Plan> {
       captions: profile.captions,
       ...(Object.keys(layerAssets).length > 0 ? { assets: layerAssets } : {}),
     });
+  }
+  // Burned-in captions (M3.4, D35): one caption_track layer on top, styled from the sequence
+  // and placed in the pack's captions region, so a cue split by a cut looks the same on both sides.
+  if (deliverable?.burn_in_captions?.value === true) {
+    const cues = captionCues(ir, timing, { start: span.start, end: span.end });
+    const captionRegion = pack.layouts.templates.captions?.variants[aspect]?.regions.captions;
+    if (!captionRegion) {
+      issues.push({
+        entity: deliverableId,
+        pointer: "/burn_in_captions",
+        rule: "compile.unknown_region",
+        message: `pack ${pack.id} has no captions region for ${aspect}`,
+      });
+    } else if (cues.length > 0) {
+      const sequenceStyle = attempt(issues, entry.sequence, () =>
+        resolveEntity(ir, entry.sequence, deliverableId, pack.tokens),
+      );
+      const emitted = sequenceStyle
+        ? attempt(issues, entry.sequence, () => tokenEmit(sequenceStyle.tokens, profile))
+        : undefined;
+      if (emitted) {
+        const id = `${shotId}.captions`;
+        layers.push({
+          id,
+          component: "caption_track",
+          box: regionBox(pack, "captions", "captions", profile),
+          align: captionRegion.align ?? "end",
+          justify: captionRegion.justify ?? "center",
+          props: { cues },
+          css: emitted.css,
+          js: emitted.js,
+          timing: { enter: 0, end: span.end - span.start },
+          motion: [],
+          seed: layerSeed(id),
+          captions: profile.captions,
+        });
+      }
+    }
   }
   if (issues.length > 0) throw new CompileError(issues);
 
