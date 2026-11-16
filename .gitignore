@@ -13,6 +13,8 @@ dist/
 .cache/
 .pytest_cache/
 .ruff_cache/
+__pycache__/
+*.py[cod]
 .superpowers/
 .claude/settings.local.json
 
