@@ -21,11 +21,38 @@ afterEach(() => {
   for (const dir of dirs.splice(0)) rmSync(dir, { recursive: true, force: true });
 });
 
-/** Every file under `dir` except `.cinewright/`, with its content. */
+/**
+ * The names in `dir` that git does not ignore, so stray local files (sync-tool duplicates) never
+ * change what a test lists or copies (audit F6). Outside a git work tree every name is kept.
+ */
+export function notIgnored(dir: string, names: readonly string[]): string[] {
+  if (names.length === 0) return [];
+  try {
+    const out = execFileSync("git", ["check-ignore", "--stdin"], {
+      cwd: dir,
+      input: names.join("\n"),
+      encoding: "utf8",
+      stdio: ["pipe", "pipe", "ignore"],
+    });
+    const ignored = new Set(out.split("\n").filter(Boolean));
+    return names.filter((n) => !ignored.has(n));
+  } catch {
+    return [...names];
+  }
+}
+
+/** Every file under `dir` except `.cinewright/` and git-ignored names, with its content. */
 export function tree(dir: string): Map<string, string> {
   const out = new Map<string, string>();
   const walk = (rel: string) => {
-    for (const entry of readdirSync(join(dir, rel), { withFileTypes: true })) {
+    const entries = readdirSync(join(dir, rel), { withFileTypes: true });
+    const keep = new Set(
+      notIgnored(
+        join(dir, rel),
+        entries.map((e) => e.name),
+      ),
+    );
+    for (const entry of entries.filter((e) => keep.has(e.name))) {
       const path = rel ? `${rel}/${entry.name}` : entry.name;
       if (path === ".cinewright") continue;
       if (entry.isDirectory()) walk(path);
@@ -48,7 +75,17 @@ export function buildReference(): string {
 /** A writable copy of the checked-in reference project. */
 export function referenceCopy(): string {
   const out = join(tempDir(), "demo");
-  cpSync(join(REFERENCE, "project"), out, { recursive: true });
+  const source = join(REFERENCE, "project");
+  cpSync(source, out, {
+    recursive: true,
+    filter: (path) => {
+      const rel = path.slice(source.length + 1);
+      if (rel === "") return true;
+      const at = rel.lastIndexOf("/");
+      const parent = at === -1 ? source : join(source, rel.slice(0, at));
+      return notIgnored(parent, [rel.slice(at + 1)]).length === 1;
+    },
+  });
   return out;
 }
 

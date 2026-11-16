@@ -2,7 +2,7 @@ import { readdirSync } from "node:fs";
 import { join } from "node:path";
 import { describe, expect, it } from "vitest";
 import { run } from "./run.js";
-import { golden, PROFILES, REFERENCE, tempDir } from "./tree.js";
+import { golden, notIgnored, PROFILES, REFERENCE, tempDir } from "./tree.js";
 
 const ENV = {
   CINEWRIGHT_SESSION_ID: "m1-reference",
@@ -27,7 +27,8 @@ describe("the readable diff of each reference patch", () => {
       ],
       ENV,
     );
-    const patches = readdirSync(join(REFERENCE, "patches")).sort();
+    const patchDir = join(REFERENCE, "patches");
+    const patches = notIgnored(patchDir, readdirSync(patchDir)).sort();
     for (const [i, name] of patches.entries()) {
       const command = name.startsWith("08-") ? "propose" : "apply";
       const result = await run(
