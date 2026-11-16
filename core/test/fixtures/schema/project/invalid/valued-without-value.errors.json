@@ -1,0 +1,7 @@
+[
+  {
+    "entity": "demo",
+    "pointer": "/title",
+    "rule": "wrapper.value_presence"
+  }
+]

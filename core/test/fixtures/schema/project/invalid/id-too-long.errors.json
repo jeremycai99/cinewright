@@ -1,0 +1,7 @@
+[
+  {
+    "entity": "paaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+    "pointer": "/id",
+    "rule": "schema.maxLength"
+  }
+]

@@ -1,0 +1,7 @@
+[
+  {
+    "entity": "demo",
+    "pointer": "/colour",
+    "rule": "schema.additionalProperties"
+  }
+]

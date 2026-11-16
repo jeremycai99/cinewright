@@ -1,0 +1,7 @@
+[
+  {
+    "entity": "Demo",
+    "pointer": "/id",
+    "rule": "schema.pattern"
+  }
+]

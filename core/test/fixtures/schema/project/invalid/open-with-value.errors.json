@@ -1,0 +1,7 @@
+[
+  {
+    "entity": "demo",
+    "pointer": "/brief",
+    "rule": "wrapper.value_presence"
+  }
+]

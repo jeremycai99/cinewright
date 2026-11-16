@@ -1,0 +1,7 @@
+[
+  {
+    "entity": "demo",
+    "pointer": "/sequences",
+    "rule": "wrapper.value_presence"
+  }
+]

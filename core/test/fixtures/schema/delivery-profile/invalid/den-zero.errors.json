@@ -1,0 +1,7 @@
+[
+  {
+    "entity": null,
+    "pointer": "/frame_rate/den",
+    "rule": "schema.minimum"
+  }
+]
