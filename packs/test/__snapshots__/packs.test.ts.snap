@@ -28,3 +28,25 @@ exports[`first-party packs > neutral > keeps its rule ids (a removed id moves to
   "retired": [],
 }
 `;
+
+exports[`first-party packs > playful > keeps its rule ids (a removed id moves to retired_rules) 1`] = `
+{
+  "live": [
+    "color.one_focus",
+    "color.warm_ground",
+    "density.fewer_items",
+    "layout.centred_focus",
+    "layout.rounded_shapes",
+    "motion.lively_but_brief",
+    "motion.overshoot_for_emphasis",
+    "motion.word_by_word",
+    "sound.effects_mark_moments",
+    "sound.upbeat_bed",
+    "transition.dissolve_for_time",
+    "transition.wipe_by_default",
+    "type.big_and_round",
+    "type.short_lines",
+  ],
+  "retired": [],
+}
+`;

@@ -117,3 +117,37 @@ describe("first-party packs", () => {
       expect(readme.toLowerCase(), use).toContain(use);
   });
 });
+
+describe("the contrasting pack (D39)", () => {
+  it("exists", () => {
+    expect(PACKS).toContain("playful");
+  });
+  if (!PACKS.includes("playful")) return;
+  const neutral = resolvePackTokens(loadPack("neutral", [ROOT]), "landscape");
+  const playful = resolvePackTokens(loadPack("playful", [ROOT]), "landscape");
+  const differs = (path: string) => neutral[path]?.value !== playful[path]?.value;
+
+  it("differs in type", () => {
+    expect(differs("type.family.display")).toBe(true);
+  });
+
+  it("differs in palette: at least 4 of the 7 non-data roles", () => {
+    const roles = ["bg", "surface", "ink", "ink_muted", "accent", "on_accent", "line"];
+    expect(roles.filter((r) => differs(`palette.${r}`)).length).toBeGreaterThanOrEqual(4);
+  });
+
+  it("differs in motion grammar", () => {
+    expect(differs("motion.ease.enter")).toBe(true);
+    expect(neutral["motion.preset.pop.enabled"]?.value).toBe(false);
+    expect(playful["motion.preset.pop.enabled"]?.value).toBe(true);
+  });
+
+  it("differs in transitions", () => {
+    expect(differs("transition.default")).toBe(true);
+  });
+
+  it("differs in sound palette", () => {
+    expect(differs("sound.music.genre")).toBe(true);
+    expect(differs("sound.music.bpm_min") || differs("sound.music.bpm_max")).toBe(true);
+  });
+});
