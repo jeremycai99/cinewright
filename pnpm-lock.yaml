@@ -184,9 +184,25 @@ importers:
 
   cli:
     dependencies:
+      '@cinewright/components':
+        specifier: workspace:*
+        version: link:../components
       '@cinewright/core':
         specifier: workspace:*
         version: link:../core
+
+  components:
+    dependencies:
+      '@cinewright/core':
+        specifier: workspace:*
+        version: link:../core
+      esbuild:
+        specifier: 0.28.2
+        version: 0.28.2
+    devDependencies:
+      fast-check:
+        specifier: 4.10.2
+        version: 4.10.2
 
   container/render-runner:
     dependencies:

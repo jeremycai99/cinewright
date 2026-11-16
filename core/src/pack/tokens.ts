@@ -105,3 +105,59 @@ export function contrastPairs(tokens: Record<string, ResolvedToken>): ContrastPa
   pairs.push({ kind: "graphic", fg: "palette.line", bg: "palette.bg", min: graphic });
   return pairs;
 }
+
+/** CSS custom properties and a JS object for one set of resolved tokens (M2.4a). */
+export interface EmittedTokens {
+  /** `--palette-accent` → `#0057B8`, `--type-size-body` → `34.56px`, … */
+  css: Record<string, string>;
+  /** `palette.accent` → `#0057B8`, `type.size.body` → 34.56 (px), `motion.duration.m` → 400 (ms), … */
+  js: Record<string, string | number | boolean>;
+}
+
+/** `palette.data.1` → `--palette-data-1` (token segments never contain `-`). */
+export function cssVar(path: string): string {
+  return `--${path.split(".").join("-")}`;
+}
+
+/**
+ * Resolved tokens as CSS variables and JS values for one deliverable's frame. A dimension is
+ * percent of the frame's shorter side, emitted in px rounded to 0.01; a duration is ms; a font
+ * family gets a generic fallback in CSS. Components never convert units, so they need no literal.
+ */
+export function tokenEmit(
+  tokens: Record<string, ResolvedToken>,
+  profile: { width: number; height: number },
+): EmittedTokens {
+  const unit = Math.min(profile.width, profile.height) / 100;
+  const css: Record<string, string> = {};
+  const js: Record<string, string | number | boolean> = {};
+  for (const [path, { value }] of Object.entries(tokens).sort(([a], [b]) => (a < b ? -1 : 1))) {
+    const type = vocabulary().get(path)?.type;
+    const name = cssVar(path);
+    if (type === "dimension") {
+      const px = Math.round((value as number) * unit * 100) / 100;
+      js[path] = px;
+      css[name] = `${px}px`;
+    } else if (type === "duration") {
+      js[path] = value as number;
+      css[name] = `${value}ms`;
+    } else if (type === "font_family") {
+      js[path] = value as string;
+      css[name] = `${JSON.stringify(value)}, sans-serif`;
+    } else if (type === "boolean") {
+      js[path] = value as boolean;
+      css[name] = value ? "1" : "0";
+    } else if (type === "enum" || type === "string") {
+      js[path] = value as string;
+      css[name] = JSON.stringify(value);
+    } else if (
+      typeof value === "string" ||
+      typeof value === "number" ||
+      typeof value === "boolean"
+    ) {
+      js[path] = value;
+      css[name] = String(value);
+    }
+  }
+  return { css, js };
+}

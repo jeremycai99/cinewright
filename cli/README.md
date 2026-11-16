@@ -15,6 +15,7 @@ cinewright patch revert <revision> [--project <dir>] [--json]
 cinewright show [<id>] [--depth <n>] [--frames] [--resolved --pack <tokens.json> [--deliverable <id>]] [--json] [--project <dir>]
 cinewright status [--project <dir>] [--json]
 cinewright schema [<kind> | tokens [--json]]
+cinewright components [<id>] [--json]
 ```
 
 Without `--project`, a command uses the nearest directory upward that holds `cinewright.json`. `--file -` reads the patch from stdin.
@@ -103,6 +104,11 @@ A status line follows: `applied revision N (sha256:…)`, `pending pN (reason)`,
 `schema` lists the entity kinds; `schema <kind>` prints every authorable path of that kind as patch ops address it, generated from `core/schema`: `field`, `list` (its item kind) or `map entry` (`<name>` is the entry), the value's type and allowed values, and an object's keys indented below, `(optional)` when they may be left out.
 
 `schema tokens` prints every style token path with its type, bounds and allowed values (the core vocabulary, `core/schema/pack/README.md`); `--json` prints them as `[{ path, type, enum?, minimum?, maximum? }]`. A style override (`/style/overrides/<path>`) and a `{ "token": <path> }` reference must use one of these paths or one under `ext.`, with a value of that type, or the patch is rejected (`semantic.unknown_token`, `semantic.token_type`, `semantic.token_bounds`).
+
+`components` lists the component catalog (D31) with each summary. `components <id>` prints the component's props, with each type, whether it is required and its description, plus the template regions it fits; `--json` prints its catalog entry and props schema. Every patch is checked against this catalog:
+- **Unknown component:** a layer's component must be in the catalog (`semantic.unknown_component`).
+- **Props:** each prop set must be one the component declares (`props.unknown`), with a valid value (`props.<keyword>`).
+- **Required props:** a missing required prop is caught when the shot compiles, not when a patch applies.
 
 `show` prints the readable view (convention 14):
 - the entity's kind and id;

@@ -1,0 +1,4 @@
+.a {
+  transition: opacity 300ms;
+  animation-duration: 1s;
+}

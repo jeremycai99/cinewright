@@ -1,0 +1,38 @@
+[
+  {
+    "name": "short",
+    "description": "A one-line statement.",
+    "template": "title",
+    "region": "title",
+    "duration_ms": 3000,
+    "props": { "text": "Every team hits the same wall." }
+  },
+  {
+    "name": "with_subtitle",
+    "description": "Two lines with a subtitle and one accented word.",
+    "template": "title",
+    "region": "title",
+    "duration_ms": 3500,
+    "props": {
+      "text": "Pipelines break in the same three places",
+      "subtitle": "A field guide for the rest of us",
+      "emphasis": [5]
+    }
+  },
+  {
+    "name": "long_word",
+    "description": "A 42-character compound word: it must wrap at the minimum size or be marked, never clipped (Review Focus 1).",
+    "template": "title",
+    "region": "title",
+    "duration_ms": 3000,
+    "props": { "text": "Donaudampfschifffahrtsgesellschaftskapitän" }
+  },
+  {
+    "name": "brief",
+    "description": "On screen for 300 ms: entrance and exit shrink and never overlap (Review Focus 5).",
+    "template": "title_body",
+    "region": "title",
+    "duration_ms": 300,
+    "props": { "text": "Fast" }
+  }
+]

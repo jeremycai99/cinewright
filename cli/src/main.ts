@@ -1,5 +1,6 @@
 import { LockTimeoutError, ProjectLoadError } from "@cinewright/core";
 import { UsageError } from "./args.js";
+import { COMPONENTS_USAGE, components } from "./commands/components.js";
 import { INIT_USAGE, init } from "./commands/init.js";
 import { PATCH_USAGE, patch } from "./commands/patch.js";
 import { SCHEMA_USAGE, schema } from "./commands/schema.js";
@@ -15,6 +16,7 @@ const COMMANDS: Record<string, (argv: string[], io: Io) => Promise<number>> = {
   show,
   status,
   schema,
+  components,
 };
 const USAGE = [
   `cinewright ${VERSION}`,
@@ -24,6 +26,7 @@ const USAGE = [
   SHOW_USAGE,
   STATUS_USAGE,
   SCHEMA_USAGE,
+  COMPONENTS_USAGE,
 ].join("\n");
 
 /** Run one CLI invocation and return its exit code (cli/README.md). */

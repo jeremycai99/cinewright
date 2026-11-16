@@ -105,12 +105,6 @@
                     },
                     "origin": "agent",
                     "props": {
-                      "color": {
-                        "state": "agent",
-                        "value": {
-                          "token": "palette.accent"
-                        }
-                      },
                       "text": {
                         "state": "agent",
                         "value": "Every team hits the same wall."
@@ -133,7 +127,7 @@
                   {
                     "component": {
                       "state": "agent",
-                      "value": "data_bars"
+                      "value": "kinetic_title"
                     },
                     "id": "s03.sh01.bars",
                     "layout": {},
@@ -142,13 +136,9 @@
                     },
                     "origin": "agent",
                     "props": {
-                      "series": {
+                      "text": {
                         "state": "agent",
-                        "value": [
-                          3,
-                          5,
-                          9
-                        ]
+                        "value": "Three rebuilds in one year."
                       }
                     },
                     "style": {

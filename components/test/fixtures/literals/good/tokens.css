@@ -1,0 +1,9 @@
+/* Tokens only: #ff0000 in a comment is fine. */
+.a {
+  color: var(--palette-ink);
+  background: transparent;
+  font-family: var(--type-family-body);
+  padding: 0;
+  width: 100%;
+  transition-duration: 0s;
+}

@@ -1,0 +1,27 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "KineticTitleProps",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["text"],
+  "properties": {
+    "text": {
+      "description": "The headline. Words are separated by spaces.",
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 200
+    },
+    "subtitle": {
+      "description": "A supporting line under the headline.",
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 200
+    },
+    "emphasis": {
+      "description": "Indices (from 0) of headline words drawn in the accent colour.",
+      "type": "array",
+      "uniqueItems": true,
+      "items": { "type": "integer", "minimum": 0 }
+    }
+  }
+}

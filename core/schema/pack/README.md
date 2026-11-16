@@ -99,6 +99,23 @@ An IR check (`semantic.unknown_template`, `semantic.unknown_region`) rejects a t
 - **Citations:** a decision-log entry cites a rule as `pack:<pack id>@<version>#<rule id>` (`citation()`).
 - **Removing a rule:** its id moves to `retired_rules`, so old citations still resolve, and it is never reused.
 
+## Components
+
+`catalog.schema.json` is a component's catalog entry (`component.json`), and `examples.schema.json` its specimen examples (`examples.json`). `components/README.md` describes both.
+
+`loadCatalog(dir)` checks every component folder and throws `CatalogError`, listing each problem as `{ component, file, pointer, rule }`:
+
+| Rule | Meaning |
+| --- | --- |
+| `catalog.schema.<keyword>` | `component.json` or `examples.json` fails its schema. |
+| `catalog.missing_file`, `catalog.invalid_json` | A file is missing or is not JSON. |
+| `catalog.id_mismatch` | The id is not the folder name. |
+| `catalog.license_required` | A `gsap` component states no licence. |
+| `catalog.unknown_token` | A `tokens` entry is not a vocabulary path. |
+| `catalog.unknown_template`, `catalog.unknown_region` | A `templates` entry names a template that is neither core nor `ext_*`, or a region its core template lacks. |
+| `catalog.props_schema` | `props.schema.json` does not compile, or is not an object schema with `properties`. |
+| `catalog.design_prop` | A prop marked `x-token-type` accepts more than a `{ token }` reference. |
+
 ## Errors
 
 `loadPack` throws `PackError` listing every problem as `{ pack, file, pointer, rule }`. The pointer is a JSON Pointer into the file, or `/<line>` in `rules.md`. Problems are sorted by those four fields.

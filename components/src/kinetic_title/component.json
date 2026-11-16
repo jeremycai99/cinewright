@@ -1,0 +1,48 @@
+{
+  "id": "kinetic_title",
+  "version": "1.0.0",
+  "name": "Kinetic title",
+  "runtime": "waapi",
+  "catalog": {
+    "summary": "A headline that reveals as a whole, line by line or word by word, with an optional subtitle and accented words.",
+    "use_when": "A shot's main message is a short statement: an opening title, a chapter heading, a key claim the narration makes.",
+    "avoid_when": "The text is longer than about two short sentences, is a list (use bullet_reveal), or names a person on screen (use lower_third)."
+  },
+  "tokens": [
+    "density.max_lines_title",
+    "density.min_text_size",
+    "layout.gutter",
+    "motion.distance",
+    "motion.duration.m",
+    "motion.duration.s",
+    "motion.ease.emphasis",
+    "motion.ease.enter",
+    "motion.ease.exit",
+    "motion.entrance",
+    "motion.exit",
+    "motion.stagger",
+    "motion.text_reveal",
+    "palette.accent",
+    "palette.ink",
+    "palette.ink_muted",
+    "type.family.body",
+    "type.family.display",
+    "type.leading.normal",
+    "type.leading.tight",
+    "type.size.body",
+    "type.size.display",
+    "type.size.subtitle",
+    "type.size.title",
+    "type.tracking.body",
+    "type.tracking.display",
+    "type.transform.display",
+    "type.weight.display",
+    "type.weight.regular"
+  ],
+  "templates": {
+    "title": ["title"],
+    "title_body": ["title"],
+    "full": ["main"],
+    "end_card": ["main"]
+  }
+}
