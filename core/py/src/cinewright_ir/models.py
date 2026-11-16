@@ -169,6 +169,199 @@ class JsonValue(RootModel[str | float | bool | list[Any] | dict[str, Any] | None
     ]
 
 
+class UserAuthor(BaseModel):
+    model_config = ConfigDict(
+        extra="forbid",
+    )
+    kind: Literal["user"]
+
+
+class AgentAuthor(BaseModel):
+    model_config = ConfigDict(
+        extra="forbid",
+    )
+    kind: Literal["agent"]
+    role: Id
+
+
+class JobAuthor(BaseModel):
+    model_config = ConfigDict(
+        extra="forbid",
+    )
+    kind: Literal["job"]
+    name: Id
+
+
+class SessionAuthor(BaseModel):
+    model_config = ConfigDict(
+        extra="forbid",
+    )
+    kind: Literal["session"]
+
+
+class Author(RootModel[UserAuthor | AgentAuthor | JobAuthor | SessionAuthor]):
+    root: Annotated[
+        UserAuthor | AgentAuthor | JobAuthor | SessionAuthor,
+        Field(
+            description="Who sends the patch. In v0.1 the caller asserts it (D41).",
+            title="Author",
+        ),
+    ]
+
+
+class SetOp(BaseModel):
+    model_config = ConfigDict(
+        extra="forbid",
+    )
+    op: Literal["set"]
+    entity: Id
+    path: Annotated[
+        str,
+        Field(
+            description="JSON Pointer relative to the entity (RFC 6901).",
+            pattern="^(/([^~]|~[01])*)*$",
+        ),
+    ]
+    value: JsonValue | None
+
+
+class UnsetOp(BaseModel):
+    model_config = ConfigDict(
+        extra="forbid",
+    )
+    op: Literal["unset"]
+    entity: Id
+    path: Annotated[
+        str,
+        Field(
+            description="JSON Pointer relative to the entity (RFC 6901).",
+            pattern="^(/([^~]|~[01])*)*$",
+        ),
+    ]
+
+
+class InsertOp(BaseModel):
+    model_config = ConfigDict(
+        extra="forbid",
+    )
+    op: Literal["insert"]
+    entity: Id
+    path: Annotated[
+        str,
+        Field(
+            description="JSON Pointer relative to the entity (RFC 6901).",
+            pattern="^(/([^~]|~[01])*)*$",
+        ),
+    ]
+    value: Annotated[
+        dict[str, Any],
+        Field(description="The new entity, with bare values and its id."),
+    ]
+    after: Annotated[
+        Id | None,
+        Field(
+            description="Insert or move after this item; null means first. Absent on insert means last."
+        ),
+    ] = None
+
+
+class RemoveOp(BaseModel):
+    model_config = ConfigDict(
+        extra="forbid",
+    )
+    op: Literal["remove"]
+    entity: Id
+
+
+class MoveOp(BaseModel):
+    model_config = ConfigDict(
+        extra="forbid",
+    )
+    op: Literal["move"]
+    entity: Id
+    after: Annotated[
+        Id | None,
+        Field(
+            description="Insert or move after this item; null means first. Absent on insert means last."
+        ),
+    ]
+
+
+class LockOp(BaseModel):
+    model_config = ConfigDict(
+        extra="forbid",
+    )
+    op: Literal["lock"]
+    entity: Id
+    path: Annotated[
+        str | None,
+        Field(
+            description="JSON Pointer relative to the entity (RFC 6901).",
+            pattern="^(/([^~]|~[01])*)*$",
+        ),
+    ] = None
+
+
+class UnlockOp(BaseModel):
+    model_config = ConfigDict(
+        extra="forbid",
+    )
+    op: Literal["unlock"]
+    entity: Id
+    path: Annotated[
+        str | None,
+        Field(
+            description="JSON Pointer relative to the entity (RFC 6901).",
+            pattern="^(/([^~]|~[01])*)*$",
+        ),
+    ] = None
+
+
+class SuggestOp(BaseModel):
+    model_config = ConfigDict(
+        extra="forbid",
+    )
+    op: Literal["suggest"]
+    entity: Id
+    path: Annotated[
+        str,
+        Field(
+            description="JSON Pointer relative to the entity (RFC 6901).",
+            pattern="^(/([^~]|~[01])*)*$",
+        ),
+    ]
+    value: JsonValue | None
+    note: str | None = None
+
+
+class Op(
+    RootModel[
+        SetOp | UnsetOp | InsertOp | RemoveOp | MoveOp | LockOp | UnlockOp | SuggestOp
+    ]
+):
+    root: Annotated[
+        SetOp | UnsetOp | InsertOp | RemoveOp | MoveOp | LockOp | UnlockOp | SuggestOp,
+        Field(title="Op"),
+    ]
+
+
+class Op1(RootModel[int]):
+    root: Annotated[int, Field(ge=0)]
+
+
+class Citation(RootModel[str]):
+    root: Annotated[str, Field(min_length=1)]
+
+
+class Decision(BaseModel):
+    model_config = ConfigDict(
+        extra="forbid",
+    )
+    ops: Annotated[list[Op1], Field(min_length=1)]
+    choice: Annotated[str, Field(min_length=1)]
+    citations: list[Citation]
+
+
 class Provenance(BaseModel):
     model_config = ConfigDict(
         extra="forbid",
@@ -440,6 +633,168 @@ class LayerRegion(BaseModel):
         extra="forbid",
     )
     region: Annotated[str, Field(min_length=1)]
+
+
+class Snapshot(BaseModel):
+    model_config = ConfigDict(
+        extra="forbid",
+    )
+    entity: Id
+    path: Annotated[
+        str,
+        Field(
+            description="JSON Pointer relative to the entity (RFC 6901).",
+            pattern="^(/([^~]|~[01])*)*$",
+        ),
+    ]
+    before: Annotated[
+        JsonValue | None,
+        Field(
+            description="The node before the patch; absent when the node did not exist."
+        ),
+    ] = None
+
+
+class Touched(BaseModel):
+    model_config = ConfigDict(
+        extra="forbid",
+    )
+    entity: Id
+    path: Annotated[
+        str,
+        Field(
+            description="JSON Pointer relative to the entity (RFC 6901).",
+            pattern="^(/([^~]|~[01])*)*$",
+        ),
+    ]
+
+
+class InitEntry(BaseModel):
+    model_config = ConfigDict(
+        extra="forbid",
+    )
+    kind: Literal["init"]
+    seq: Annotated[int, Field(ge=1)]
+    time: Annotated[str, Field(min_length=1)]
+    session_id: Annotated[str, Field(min_length=1)]
+    author: Author
+    revision: Literal[0]
+    ir: Annotated[dict[str, Any], Field(description="The inlined IR init created.")]
+    state_hash: Hash
+
+
+class AppliedEntry(BaseModel):
+    model_config = ConfigDict(
+        extra="forbid",
+    )
+    kind: Literal["applied"]
+    seq: Annotated[int, Field(ge=1)]
+    time: Annotated[str, Field(min_length=1)]
+    session_id: Annotated[str, Field(min_length=1)]
+    author: Author
+    revision: Annotated[int, Field(ge=1)]
+    base_revision: Annotated[int, Field(ge=0)]
+    reason: str
+    ops: list[Op]
+    touched: list[Touched]
+    before: list[Snapshot]
+    retired: Annotated[
+        list[Id],
+        Field(
+            description="Entity ids this patch removed; never reused (convention 9)."
+        ),
+    ]
+    state_hash: Hash
+    revert_of: Annotated[int | None, Field(ge=1)] = None
+    pending_id: Annotated[
+        str | None,
+        Field(
+            description="The pending patch this applies, after approval.",
+            pattern="^p[1-9][0-9]*$",
+        ),
+    ] = None
+    restored: Annotated[
+        list[Id] | None,
+        Field(
+            description="Entity ids a revert brought back; they are no longer retired."
+        ),
+    ] = None
+
+
+class Mode(Enum):
+    apply = "apply"
+    propose = "propose"
+
+
+class ReasonCode(Enum):
+    proposed = "proposed"
+    session_propose_first = "session_propose_first"
+    authorship_blocked = "authorship_blocked"
+    suggest = "suggest"
+
+
+class BlockedOp(BaseModel):
+    model_config = ConfigDict(
+        extra="forbid",
+    )
+    op: Annotated[int, Field(ge=0)]
+    rule: str
+
+
+class PendingEntry(BaseModel):
+    model_config = ConfigDict(
+        extra="forbid",
+    )
+    kind: Literal["pending"]
+    seq: Annotated[int, Field(ge=1)]
+    time: Annotated[str, Field(min_length=1)]
+    session_id: Annotated[str, Field(min_length=1)]
+    author: Author
+    pending_id: Annotated[str, Field(pattern="^p[1-9][0-9]*$")]
+    base_revision: Annotated[int, Field(ge=0)]
+    reason: str
+    mode: Mode
+    ops: list[Op]
+    decisions: list[Decision] | None = None
+    reason_code: ReasonCode
+    blocked: list[BlockedOp] | None = None
+
+
+class ApprovedEntry(BaseModel):
+    model_config = ConfigDict(
+        extra="forbid",
+    )
+    kind: Literal["approved"]
+    seq: Annotated[int, Field(ge=1)]
+    time: Annotated[str, Field(min_length=1)]
+    session_id: Annotated[str, Field(min_length=1)]
+    author: Author
+    pending_id: Annotated[str, Field(pattern="^p[1-9][0-9]*$")]
+
+
+class RejectedEntry(BaseModel):
+    model_config = ConfigDict(
+        extra="forbid",
+    )
+    kind: Literal["rejected"]
+    seq: Annotated[int, Field(ge=1)]
+    time: Annotated[str, Field(min_length=1)]
+    session_id: Annotated[str, Field(min_length=1)]
+    author: Author
+    pending_id: Annotated[str, Field(pattern="^p[1-9][0-9]*$")]
+    note: str | None = None
+
+
+class Patch(BaseModel):
+    model_config = ConfigDict(
+        extra="forbid",
+    )
+    base_revision: Annotated[int, Field(ge=0)]
+    author: Author
+    mode: Mode
+    reason: Annotated[str, Field(max_length=2000, min_length=1)]
+    ops: Annotated[list[Op], Field(min_length=1)]
+    decisions: list[Decision] | None = None
 
 
 class Title(BaseModel):
@@ -1333,6 +1688,14 @@ class IrDocuments(BaseModel):
     cast: CastMember | None = None
     delivery_profile: DeliveryProfile | None = None
     layer: Layer | None = None
+    snapshot: Snapshot | None = None
+    touched: Touched | None = None
+    init_entry: InitEntry | None = None
+    applied_entry: AppliedEntry | None = None
+    pending_entry: PendingEntry | None = None
+    approved_entry: ApprovedEntry | None = None
+    rejected_entry: RejectedEntry | None = None
+    patch: Patch | None = None
     project: Project | None = None
     scene: Scene | None = None
     script: Script | None = None

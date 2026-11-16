@@ -1,0 +1,346 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://cinewright.invalid/ir/0/log-entry.schema.json",
+  "title": "LogEntry",
+  "description": "One line of log/patches.jsonl (M1 convention 12), written in the hash form.",
+  "oneOf": [
+    {
+      "$ref": "#/$defs/init_entry"
+    },
+    {
+      "$ref": "#/$defs/applied_entry"
+    },
+    {
+      "$ref": "#/$defs/pending_entry"
+    },
+    {
+      "$ref": "#/$defs/approved_entry"
+    },
+    {
+      "$ref": "#/$defs/rejected_entry"
+    }
+  ],
+  "$defs": {
+    "snapshot": {
+      "description": "A node as it was before a patch: a field or list wrapper, a map entry, or an entity's lock.",
+      "title": "Snapshot",
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["entity", "path"],
+      "properties": {
+        "entity": {
+          "$ref": "common.schema.json#/$defs/id"
+        },
+        "path": {
+          "type": "string",
+          "pattern": "^(/([^~]|~[01])*)*$",
+          "description": "JSON Pointer relative to the entity (RFC 6901)."
+        },
+        "before": {
+          "$ref": "common.schema.json#/$defs/json_value",
+          "description": "The node before the patch; absent when the node did not exist."
+        }
+      }
+    },
+    "touched": {
+      "title": "Touched",
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["entity", "path"],
+      "properties": {
+        "entity": {
+          "$ref": "common.schema.json#/$defs/id"
+        },
+        "path": {
+          "type": "string",
+          "pattern": "^(/([^~]|~[01])*)*$",
+          "description": "JSON Pointer relative to the entity (RFC 6901)."
+        }
+      }
+    },
+    "init_entry": {
+      "description": "The project as init created it.",
+      "title": "InitEntry",
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["kind", "seq", "time", "session_id", "author", "revision", "ir", "state_hash"],
+      "properties": {
+        "kind": {
+          "const": "init"
+        },
+        "seq": {
+          "type": "integer",
+          "minimum": 1
+        },
+        "time": {
+          "type": "string",
+          "minLength": 1
+        },
+        "session_id": {
+          "type": "string",
+          "minLength": 1
+        },
+        "author": {
+          "$ref": "common.schema.json#/$defs/author"
+        },
+        "revision": {
+          "const": 0
+        },
+        "ir": {
+          "type": "object",
+          "description": "The inlined IR init created."
+        },
+        "state_hash": {
+          "$ref": "common.schema.json#/$defs/hash"
+        }
+      }
+    },
+    "applied_entry": {
+      "description": "An applied patch: a new revision.",
+      "title": "AppliedEntry",
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "kind",
+        "seq",
+        "time",
+        "session_id",
+        "author",
+        "revision",
+        "base_revision",
+        "reason",
+        "ops",
+        "touched",
+        "before",
+        "retired",
+        "state_hash"
+      ],
+      "properties": {
+        "kind": {
+          "const": "applied"
+        },
+        "seq": {
+          "type": "integer",
+          "minimum": 1
+        },
+        "time": {
+          "type": "string",
+          "minLength": 1
+        },
+        "session_id": {
+          "type": "string",
+          "minLength": 1
+        },
+        "author": {
+          "$ref": "common.schema.json#/$defs/author"
+        },
+        "revision": {
+          "type": "integer",
+          "minimum": 1
+        },
+        "base_revision": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "reason": {
+          "type": "string"
+        },
+        "ops": {
+          "type": "array",
+          "items": {
+            "$ref": "common.schema.json#/$defs/op"
+          }
+        },
+        "touched": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/touched"
+          }
+        },
+        "before": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/snapshot"
+          }
+        },
+        "retired": {
+          "type": "array",
+          "items": {
+            "$ref": "common.schema.json#/$defs/id"
+          },
+          "description": "Entity ids this patch removed; never reused (convention 9)."
+        },
+        "state_hash": {
+          "$ref": "common.schema.json#/$defs/hash"
+        },
+        "revert_of": {
+          "type": "integer",
+          "minimum": 1
+        },
+        "pending_id": {
+          "type": "string",
+          "pattern": "^p[1-9][0-9]*$",
+          "description": "The pending patch this applies, after approval."
+        },
+        "restored": {
+          "type": "array",
+          "items": {
+            "$ref": "common.schema.json#/$defs/id"
+          },
+          "description": "Entity ids a revert brought back; they are no longer retired."
+        }
+      }
+    },
+    "pending_entry": {
+      "description": "A patch stored for approval instead of applied (D25, convention 13).",
+      "title": "PendingEntry",
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "kind",
+        "seq",
+        "time",
+        "session_id",
+        "author",
+        "pending_id",
+        "base_revision",
+        "reason",
+        "mode",
+        "ops",
+        "reason_code"
+      ],
+      "properties": {
+        "kind": {
+          "const": "pending"
+        },
+        "seq": {
+          "type": "integer",
+          "minimum": 1
+        },
+        "time": {
+          "type": "string",
+          "minLength": 1
+        },
+        "session_id": {
+          "type": "string",
+          "minLength": 1
+        },
+        "author": {
+          "$ref": "common.schema.json#/$defs/author"
+        },
+        "pending_id": {
+          "type": "string",
+          "pattern": "^p[1-9][0-9]*$"
+        },
+        "base_revision": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "reason": {
+          "type": "string"
+        },
+        "mode": {
+          "enum": ["apply", "propose"]
+        },
+        "ops": {
+          "type": "array",
+          "items": {
+            "$ref": "common.schema.json#/$defs/op"
+          }
+        },
+        "decisions": {
+          "type": "array",
+          "items": {
+            "$ref": "common.schema.json#/$defs/decision"
+          }
+        },
+        "reason_code": {
+          "enum": ["proposed", "session_propose_first", "authorship_blocked", "suggest"]
+        },
+        "blocked": {
+          "type": "array",
+          "items": {
+            "title": "BlockedOp",
+            "type": "object",
+            "additionalProperties": false,
+            "required": ["op", "rule"],
+            "properties": {
+              "op": {
+                "type": "integer",
+                "minimum": 0
+              },
+              "rule": {
+                "type": "string"
+              }
+            }
+          }
+        }
+      }
+    },
+    "approved_entry": {
+      "description": "The user approved a pending patch; the applied entry follows.",
+      "title": "ApprovedEntry",
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["kind", "seq", "time", "session_id", "author", "pending_id"],
+      "properties": {
+        "kind": {
+          "const": "approved"
+        },
+        "seq": {
+          "type": "integer",
+          "minimum": 1
+        },
+        "time": {
+          "type": "string",
+          "minLength": 1
+        },
+        "session_id": {
+          "type": "string",
+          "minLength": 1
+        },
+        "author": {
+          "$ref": "common.schema.json#/$defs/author"
+        },
+        "pending_id": {
+          "type": "string",
+          "pattern": "^p[1-9][0-9]*$"
+        }
+      }
+    },
+    "rejected_entry": {
+      "description": "The user rejected a pending patch; nothing changed.",
+      "title": "RejectedEntry",
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["kind", "seq", "time", "session_id", "author", "pending_id"],
+      "properties": {
+        "kind": {
+          "const": "rejected"
+        },
+        "seq": {
+          "type": "integer",
+          "minimum": 1
+        },
+        "time": {
+          "type": "string",
+          "minLength": 1
+        },
+        "session_id": {
+          "type": "string",
+          "minLength": 1
+        },
+        "author": {
+          "$ref": "common.schema.json#/$defs/author"
+        },
+        "pending_id": {
+          "type": "string",
+          "pattern": "^p[1-9][0-9]*$"
+        },
+        "note": {
+          "type": "string"
+        }
+      }
+    }
+  }
+}
