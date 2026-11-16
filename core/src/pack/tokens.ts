@@ -1,4 +1,4 @@
-import type { ResolvedToken } from "../cascade/resolve.js";
+import type { Origin, ResolvedToken } from "../cascade/resolve.js";
 import type { ValidationError } from "../schema/errors.js";
 import { escapeSegment } from "../schema/load.js";
 import { checkLiteral, vocabulary } from "./vocabulary.js";
@@ -119,6 +119,33 @@ export function cssVar(path: string): string {
   return `--${path.split(".").join("-")}`;
 }
 
+/** Characters a token value may never carry into CSS: they could end a rule or the style element. */
+export const UNSAFE_CSS = /[<>{};\\"]/;
+
+/** A token value that would add markup or rules to CSS (audit F5). */
+export class UnsafeValueError extends Error {
+  override name = "UnsafeValueError";
+  constructor(
+    readonly token: string,
+    readonly origin?: Origin,
+  ) {
+    super(
+      `token ${token}${origin ? ` (set at ${origin.level === "pack" ? "the pack" : `${origin.level} ${origin.entity}`})` : ""} holds a character that is not allowed in CSS (< > { } ; \\ or ")`,
+    );
+  }
+}
+
+/**
+ * The one way a token value is written into CSS: `css` is what will be written, `raw` the token's
+ * own value when it is a string. Throws UnsafeValueError when either could end a declaration, a
+ * rule or the style element.
+ */
+export function cssValue(token: string, css: string, raw: unknown = css): string {
+  if ((typeof raw === "string" && UNSAFE_CSS.test(raw)) || /[<>{};\\]/.test(css))
+    throw new UnsafeValueError(token);
+  return css;
+}
+
 /**
  * Resolved tokens as CSS variables and JS values for one deliverable's frame. A dimension is
  * percent of the frame's shorter side, emitted in px rounded to 0.01; a duration is ms; a font
@@ -157,6 +184,16 @@ export function tokenEmit(
     ) {
       js[path] = value;
       css[name] = String(value);
+    }
+  }
+  // Every CSS value goes through cssValue; the error names the token and where it was set.
+  for (const [path, { value, origin }] of Object.entries(tokens)) {
+    const text = css[cssVar(path)];
+    if (text === undefined) continue;
+    try {
+      cssValue(path, text, value);
+    } catch {
+      throw new UnsafeValueError(path, origin);
     }
   }
   return { css, js };

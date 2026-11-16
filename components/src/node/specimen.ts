@@ -1,4 +1,3 @@
-import { createHash } from "node:crypto";
 import { copyFileSync, mkdirSync, writeFileSync } from "node:fs";
 import { basename, join } from "node:path";
 import {
@@ -12,7 +11,7 @@ import {
 } from "@cinewright/core";
 import { catalogDir } from "../catalog-dir.js";
 import type { LayerSpec, MountSpec } from "../host/spec.js";
-import { bundleRuntime } from "./bundle.js";
+import { layerSeed, writeComposition } from "./composition.js";
 
 export interface SpecimenItem {
   component: string;
@@ -56,37 +55,6 @@ function copyAssets(
     }
   }
   return out;
-}
-
-function seedOf(id: string): number {
-  return Number.parseInt(createHash("sha256").update(id).digest("hex").slice(0, 8), 16);
-}
-
-function fontFaces(pack: Pack): string {
-  return pack.fonts
-    .map((font) =>
-      [
-        "@font-face {",
-        `  font-family: ${JSON.stringify(font.family)};`,
-        `  src: url("fonts/${basename(font.file)}") format("woff2");`,
-        `  font-weight: ${font.weight[0]} ${font.weight[1]};`,
-        `  font-style: ${font.style};`,
-        "  font-display: block;",
-        ...(font.unicode_range ? [`  unicode-range: ${font.unicode_range};`] : []),
-        "}",
-      ].join("\n"),
-    )
-    .join("\n");
-}
-
-function declarations(vars: Record<string, string>): string {
-  return Object.entries(vars)
-    .map(([name, value]) => `${name}: ${value};`)
-    .join(" ");
-}
-
-function escapeAttr(text: string): string {
-  return text.replace(/&/g, "&amp;").replace(/"/g, "&quot;");
 }
 
 /**
@@ -140,7 +108,7 @@ export async function buildSpecimen(options: {
       js: emitted.js,
       timing: { enter, end },
       motion: (example.motion ?? []) as LayerSpec["motion"],
-      seed: seedOf(id),
+      seed: layerSeed(id),
       captions: profile.captions,
       ...(example.assets
         ? { assets: copyAssets(component, example.assets, outDir, generated) }
@@ -157,43 +125,14 @@ export async function buildSpecimen(options: {
   }
   const spec: MountSpec = { fps, width: profile.width, height: profile.height, aspect, layers };
 
-  mkdirSync(join(outDir, "fonts"), { recursive: true });
-  for (const font of pack.fonts)
-    copyFileSync(join(pack.dir, font.file), join(outDir, "fonts", basename(font.file)));
-  await bundleRuntime(join(outDir, "runtime.js"));
-
-  const rate = fps.den === 1 ? String(fps.num) : `${fps.num}/${fps.den}`;
-  const clips = layers
-    .map((layer, i) => {
-      const box = `left: ${layer.box.x}px; top: ${layer.box.y}px; width: ${layer.box.width}px; height: ${layer.box.height}px;`;
-      const style = escapeAttr(`${box} ${declarations(layer.css)}`.trim());
-      return `      <div id="cw-${layer.id}" class="clip cw-layer" data-start="${seconds(layer.timing.enter)}" data-duration="${seconds(layer.timing.end) - seconds(layer.timing.enter)}" data-track-index="${i}" style="${style}"></div>`;
-    })
-    .join("\n");
-  const html = `<!doctype html>
-<html lang="en">
-  <head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=${profile.width}, height=${profile.height}" />
-    <style>
-${fontFaces(pack)}
-:root { ${declarations(baseCss)} }
-* { margin: 0; padding: 0; box-sizing: border-box; }
-html, body { width: ${profile.width}px; height: ${profile.height}px; overflow: hidden; background: var(--palette-bg); }
-#root { position: relative; width: 100%; height: 100%; background: var(--palette-bg); }
-.cw-layer { position: absolute; }
-    </style>
-    <script src="runtime.js"></script>
-  </head>
-  <body>
-    <div id="root" data-composition-id="specimen" data-start="0" data-duration="${seconds(cursor)}" data-width="${profile.width}" data-height="${profile.height}" data-fps="${rate}" data-no-timeline>
-${clips}
-    </div>
-    <script>window.cinewright.mount(${JSON.stringify(spec).replace(/</g, "\\u003c")});</script>
-  </body>
-</html>
-`;
-  writeFileSync(join(outDir, "index.html"), html);
+  await writeComposition({
+    pack,
+    spec,
+    rootCss: baseCss,
+    compositionId: "specimen",
+    frames: cursor,
+    outDir,
+  });
   if (generated.length > 0)
     writeFileSync(join(outDir, "generated.json"), `${JSON.stringify(generated, null, 2)}\n`);
   return { dir: outDir, samples: [...samples].sort((a, b) => a - b), spec };

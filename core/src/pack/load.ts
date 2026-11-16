@@ -8,7 +8,7 @@ import type { JsonObject } from "../schema/load.js";
 import { collapse, errorPointer } from "../schema/validate.js";
 import { parseRules, type Rule } from "./rules.js";
 import { CORE_TEMPLATES, isExtTemplate } from "./templates.js";
-import { tokenPointer } from "./tokens.js";
+import { tokenPointer, UNSAFE_CSS } from "./tokens.js";
 import {
   checkLiteral,
   compatible,
@@ -257,6 +257,10 @@ export function loadPack(id: string, searchPath: readonly string[]): Pack {
           const targetSpec = v.get(target);
           if (spec && targetSpec && !compatible(spec, targetSpec))
             issue("tokens.json", at, "pack.token_type");
+          continue;
+        }
+        if (typeof value === "string" && UNSAFE_CSS.test(value)) {
+          issue("tokens.json", at, "pack.token_unsafe");
           continue;
         }
         if (!spec) continue;
