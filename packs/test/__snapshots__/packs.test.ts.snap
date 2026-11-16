@@ -1,0 +1,30 @@
+// Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
+
+exports[`first-party packs > neutral > keeps its rule ids (a removed id moves to retired_rules) 1`] = `
+{
+  "live": [
+    "color.data_order",
+    "color.one_accent",
+    "color.text_pairs",
+    "density.hold_time",
+    "density.one_idea",
+    "layout.breathing_room",
+    "layout.grid",
+    "layout.safe_area",
+    "motion.consistent_entrances",
+    "motion.no_overshoot",
+    "motion.purpose",
+    "motion.short_durations",
+    "sound.duck_under_voice",
+    "sound.music_supports",
+    "sound.sparse_effects",
+    "transition.cut_by_default",
+    "transition.dissolve_between_ideas",
+    "transition.wipe_for_sequence",
+    "type.hierarchy",
+    "type.no_shrink_to_fit",
+    "type.weight_for_emphasis",
+  ],
+  "retired": [],
+}
+`;

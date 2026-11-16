@@ -1,0 +1,288 @@
+{
+  "schema_version": 1,
+  "templates": {
+    "full": {
+      "description": "The whole safe area.",
+      "variants": {
+        "landscape": {
+          "regions": {
+            "main": {
+              "col": 1,
+              "row": 1,
+              "col_span": 12,
+              "row_span": 6,
+              "align": "start",
+              "justify": "start"
+            }
+          }
+        },
+        "portrait": {
+          "regions": {
+            "main": {
+              "col": 1,
+              "row": 1,
+              "col_span": 4,
+              "row_span": 8,
+              "align": "start",
+              "justify": "start"
+            }
+          }
+        }
+      }
+    },
+    "title": {
+      "description": "A centred title with an optional subtitle beneath it.",
+      "variants": {
+        "landscape": {
+          "regions": {
+            "title": {
+              "col": 2,
+              "row": 2,
+              "col_span": 10,
+              "row_span": 2,
+              "align": "end",
+              "justify": "center"
+            },
+            "subtitle": {
+              "col": 3,
+              "row": 4,
+              "col_span": 8,
+              "row_span": 1,
+              "align": "start",
+              "justify": "center"
+            }
+          }
+        },
+        "portrait": {
+          "regions": {
+            "title": {
+              "col": 1,
+              "row": 3,
+              "col_span": 4,
+              "row_span": 2,
+              "align": "end",
+              "justify": "center"
+            },
+            "subtitle": {
+              "col": 1,
+              "row": 5,
+              "col_span": 4,
+              "row_span": 1,
+              "align": "start",
+              "justify": "center"
+            }
+          }
+        }
+      }
+    },
+    "title_body": {
+      "description": "A title across the top, then a body area.",
+      "variants": {
+        "landscape": {
+          "regions": {
+            "title": {
+              "col": 1,
+              "row": 1,
+              "col_span": 12,
+              "row_span": 2,
+              "align": "end",
+              "justify": "start"
+            },
+            "body": {
+              "col": 1,
+              "row": 3,
+              "col_span": 8,
+              "row_span": 4,
+              "align": "start",
+              "justify": "start"
+            }
+          }
+        },
+        "portrait": {
+          "regions": {
+            "title": {
+              "col": 1,
+              "row": 1,
+              "col_span": 4,
+              "row_span": 2,
+              "align": "end",
+              "justify": "start"
+            },
+            "body": {
+              "col": 1,
+              "row": 3,
+              "col_span": 4,
+              "row_span": 4,
+              "align": "start",
+              "justify": "start"
+            }
+          }
+        }
+      }
+    },
+    "split": {
+      "description": "Two equal areas: side by side in landscape, stacked in portrait.",
+      "variants": {
+        "landscape": {
+          "regions": {
+            "a": {
+              "col": 1,
+              "row": 1,
+              "col_span": 6,
+              "row_span": 6,
+              "align": "center",
+              "justify": "start"
+            },
+            "b": {
+              "col": 7,
+              "row": 1,
+              "col_span": 6,
+              "row_span": 6,
+              "align": "center",
+              "justify": "start"
+            }
+          }
+        },
+        "portrait": {
+          "regions": {
+            "a": {
+              "col": 1,
+              "row": 1,
+              "col_span": 4,
+              "row_span": 4,
+              "align": "center",
+              "justify": "start"
+            },
+            "b": {
+              "col": 1,
+              "row": 5,
+              "col_span": 4,
+              "row_span": 4,
+              "align": "center",
+              "justify": "start"
+            }
+          }
+        }
+      }
+    },
+    "lower_third": {
+      "description": "A main area with a name strap in the lower third.",
+      "variants": {
+        "landscape": {
+          "regions": {
+            "main": {
+              "col": 1,
+              "row": 1,
+              "col_span": 12,
+              "row_span": 4,
+              "align": "start",
+              "justify": "start"
+            },
+            "lower_third": {
+              "col": 1,
+              "row": 5,
+              "col_span": 7,
+              "row_span": 2,
+              "align": "end",
+              "justify": "start"
+            }
+          }
+        },
+        "portrait": {
+          "regions": {
+            "main": {
+              "col": 1,
+              "row": 1,
+              "col_span": 4,
+              "row_span": 5,
+              "align": "start",
+              "justify": "start"
+            },
+            "lower_third": {
+              "col": 1,
+              "row": 6,
+              "col_span": 4,
+              "row_span": 2,
+              "align": "end",
+              "justify": "start"
+            }
+          }
+        }
+      }
+    },
+    "end_card": {
+      "description": "A centred closing message with a footer line.",
+      "variants": {
+        "landscape": {
+          "regions": {
+            "main": {
+              "col": 2,
+              "row": 2,
+              "col_span": 10,
+              "row_span": 3,
+              "align": "center",
+              "justify": "center"
+            },
+            "footer": {
+              "col": 3,
+              "row": 5,
+              "col_span": 8,
+              "row_span": 2,
+              "align": "center",
+              "justify": "center"
+            }
+          }
+        },
+        "portrait": {
+          "regions": {
+            "main": {
+              "col": 1,
+              "row": 3,
+              "col_span": 4,
+              "row_span": 3,
+              "align": "center",
+              "justify": "center"
+            },
+            "footer": {
+              "col": 1,
+              "row": 6,
+              "col_span": 4,
+              "row_span": 2,
+              "align": "center",
+              "justify": "center"
+            }
+          }
+        }
+      }
+    },
+    "captions": {
+      "description": "Burned-in captions near the bottom, clear of portrait platform controls.",
+      "variants": {
+        "landscape": {
+          "regions": {
+            "captions": {
+              "col": 2,
+              "row": 6,
+              "col_span": 10,
+              "row_span": 1,
+              "align": "end",
+              "justify": "center"
+            }
+          }
+        },
+        "portrait": {
+          "regions": {
+            "captions": {
+              "col": 1,
+              "row": 7,
+              "col_span": 4,
+              "row_span": 1,
+              "align": "end",
+              "justify": "center"
+            }
+          }
+        }
+      }
+    }
+  }
+}

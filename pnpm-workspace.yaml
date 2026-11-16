@@ -3,6 +3,7 @@ packages:
   - cli
   - plugins/sdk-ts
   - container/render-runner
+  - packs
 
 allowBuilds:
   esbuild: false

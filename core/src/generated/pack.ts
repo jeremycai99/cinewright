@@ -34,6 +34,10 @@ export interface PackFont {
   sha256: string;
   license: string;
   source: string;
+  /**
+   * The CSS unicode-range this file covers, when a family is split into several files.
+   */
+  unicode_range?: string;
 }
 
 /**

@@ -14,7 +14,7 @@ A pack is a folder `<id>/` holding:
 | `tokens.json` | Every core token (`tokens.schema.json`), plus pack-specific tokens under `ext`. |
 | `layouts.json` | Layout templates (`layouts.schema.json`). |
 | `rules.md` | The pack's rules, each with a stable id. |
-| `fonts/` | Every font the tokens name, plus its licence text. Each font's `sha256`, `source` and `license` are recorded in `pack.json`. Renders load fonts only from here. |
+| `fonts/` | Every font the tokens name, plus its licence text. Each font's `sha256`, `source` and `license` are recorded in `pack.json`. When a family is split into several files, each records the CSS `unicode_range` it covers. Renders load fonts only from here. |
 | `README.md` | What the pack is for. |
 
 A pack's example frames are its component specimens rendered on demand (`pnpm specimens`, M2.4b). They are never committed.
