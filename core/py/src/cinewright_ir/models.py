@@ -706,6 +706,12 @@ class AppliedEntry(BaseModel):
     ]
     state_hash: Hash
     revert_of: Annotated[int | None, Field(ge=1)] = None
+    revert_lists: Annotated[
+        Literal["membership"] | None,
+        Field(
+            description="How the revert restored lists of entities: by membership and order only, keeping later edits to items that still exist (M2.5a). Reverts recorded before M2.5a lack it and restored lists whole; replay honours both."
+        ),
+    ] = None
     pending_id: Annotated[
         str | None,
         Field(

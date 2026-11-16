@@ -354,11 +354,41 @@ export function applyOps(
   }
 }
 
+function entityItems(value: unknown): JsonObject[] | null {
+  if (!isObject(value) || !Array.isArray(value.value)) return null;
+  const items = value.value as unknown[];
+  return items.every((i) => isObject(i) && typeof i.id === "string")
+    ? (items as JsonObject[])
+    : null;
+}
+
+/**
+ * A list of entities as a snapshot had it, by membership and order only (audit F1): an item that
+ * still exists keeps its current body, so later edits to it survive; an item the patch removed
+ * comes back from the snapshot. Non-entity lists and other nodes are restored whole.
+ */
+function mergeList(snapshot: unknown, current: unknown): unknown {
+  const was = entityItems(snapshot);
+  const now = entityItems(current);
+  if (!was || !now) return structuredClone(snapshot);
+  const byId = new Map(now.map((item) => [item.id as string, item]));
+  return {
+    ...(structuredClone(snapshot) as JsonObject),
+    value: was.map((item) => structuredClone(byId.get(item.id as string) ?? item)),
+  };
+}
+
 /**
  * Put back the nodes a patch changed, newest first (revert, replay of a revert). Each snapshot
- * names an entity that exists once the later snapshots are restored.
+ * names an entity that exists once the later snapshots are restored. With `mergeLists` (every
+ * revert since M2.5a, marked `revert_lists: "membership"` in the log), a list of entities is
+ * restored by membership and order only; without it (older log entries), it is restored whole.
  */
-export function restoreSnapshots(ir: InlinedIr, snapshots: readonly Snapshot[]): InlinedIr {
+export function restoreSnapshots(
+  ir: InlinedIr,
+  snapshots: readonly Snapshot[],
+  options: { mergeLists?: boolean } = {},
+): InlinedIr {
   const next = structuredClone(ir);
   for (const snap of [...snapshots].reverse()) {
     const index = indexIr(next);
@@ -370,8 +400,9 @@ export function restoreSnapshots(ir: InlinedIr, snapshots: readonly Snapshot[]):
       continue;
     }
     const t = resolveTarget(entity, snap.path);
-    if ("before" in snap) t.container[t.key] = structuredClone(snap.before);
-    else delete t.container[t.key];
+    if (!("before" in snap)) delete t.container[t.key];
+    else if (options.mergeLists) t.container[t.key] = mergeList(snap.before, t.container[t.key]);
+    else t.container[t.key] = structuredClone(snap.before);
   }
   return next;
 }

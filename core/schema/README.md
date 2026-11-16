@@ -215,7 +215,7 @@ Errors are sorted by entity, then pointer, then rule. For a missing or unexpecte
 | `approved` / `rejected` | The user decides on a pending patch (M1.2b). | The pending id. |
 | `approve_failed` | An approval fails; the patch stays pending. | The pending id, the revision it was tried at, and its `conflicts` or `errors`. |
 
-Every entry records `time`, `session_id` and the asserted `author` (D41). A revert is a new revision whose `revert_of` names its target; replaying the log re-applies the target's `before` snapshots. On open, the store:
+Every entry records `time`, `session_id` and the asserted `author` (D41). A revert is a new revision whose `revert_of` names its target; replaying the log re-applies the target's `before` snapshots. A revert restores a list of entities by membership and order only: items that still exist keep their current bodies, so a later edit to a sibling survives, and only items the target removed come back from the snapshot (M2.5a, audit F1). Such reverts carry `revert_lists: "membership"`; reverts recorded earlier lack it and replay with the old whole-list restore, so their state hashes still reproduce. A revert conflicts when a later revision changed the same list, or edited an entity the revert would delete. On open, the store:
 1. finishes or discards an interrupted journal (`.cinewright/txn/`);
 2. compares the files' `state_hash` with the last applied entry;
 3. checks that every file is in the stored form.
@@ -236,7 +236,7 @@ The store checks every op against the author's rights before it applies anything
 - **Entity locks:** anything under an entity with `locked: true`, or under a locked ancestor, is blocked for agents and rejected for users. The exception is a user's `unlock` of that entity.
 - **`user` items:** an item a user inserted, or one holding a `user` or `locked` field or lock anywhere in its subtree.
 - **Conflicts come first:** a stale patch reports its conflict before any authorship verdict.
-- **Reverts** are for users only.
+- **Reverts** are for users only, and agent harnesses never run `patch revert` without asking the user (D41).
 
 Rule codes:
 - `authorship.user_field`, `authorship.locked_field`, `authorship.user_list`, `authorship.locked_list`, `authorship.user_item` and `authorship.locked_entity` (blocked);
