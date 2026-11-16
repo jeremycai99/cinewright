@@ -135,6 +135,10 @@ What the spike shows:
 
 **Decision:** `render-settings.json` sets `encode: "ffmpeg"`. `encode: "hyperframes"` stays available for experiments, but baselines never use it.
 
+### Re-run on HyperFrames 0.9.58 (M3.0, 2026-11-16)
+
+`hello-world`, now animated with WAAPI, was rendered 3 times with `encode: "ffmpeg"` and once with `--cpus 1`, locally (Apple M2 Max, amd64 under Rosetta). The sha256 of `framemd5.txt` was `7d22ebb050631c97` and the output's sha256 `2cde779a9020252d` (both truncated) in all four runs. The fixture changed from GSAP to WAAPI, so these values differ from the table above. The two-render determinism tests (`tools/tests/test_container.py`) passed, and CI repeats them on its runner.
+
 ## Runner classes
 
 A runner class is CPU architecture + image digest + render settings. Baselines are rendered on `linux/amd64` in CI. On Apple Silicon the amd64 image runs under emulation; those renders prove behaviour, never baselines.
