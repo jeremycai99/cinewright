@@ -55,6 +55,33 @@ describe("parseArgs", () => {
     expect(() => parseArgs(["--in", "a", "--out", "b", "--fps", "29.97"])).toThrow(UsageError);
   });
 
+  it("reads boxes --in --out --at --size --fps", () => {
+    expect(
+      parseArgs([
+        "boxes",
+        "--in",
+        "a",
+        "--out",
+        "b",
+        "--at",
+        "0.5,1",
+        "--size",
+        "1080x1920",
+        "--fps",
+        "30",
+      ]),
+    ).toEqual({
+      boxes: true,
+      input: "a",
+      output: "b",
+      at: [0.5, 1],
+      width: 1080,
+      height: 1920,
+      fps: 30,
+    });
+    expect(() => parseArgs(["boxes", "--in", "a", "--out", "b", "--at", "1"])).toThrow(UsageError);
+  });
+
   it("recognises --versions", () => {
     expect(parseArgs(["--versions"])).toEqual({ versions: true });
   });
