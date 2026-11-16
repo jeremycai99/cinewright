@@ -58,6 +58,37 @@ describe("cinewright init", () => {
     expect(out.state_hash).toMatch(/^sha256:[0-9a-f]{64}$/);
   });
 
+  it("resolves a registry profile by name", async () => {
+    const dir = join(tempDir(), "demo");
+    const result = await run([
+      "init",
+      dir,
+      "--id",
+      "demo",
+      "--deliverable",
+      "web=landscape_web",
+      "--deliverable",
+      "social=vertical_social",
+    ]);
+    expect(result.code).toBe(EXIT.ok);
+    const project = JSON.parse(readFileSync(join(dir, "cinewright.json"), "utf8"));
+    expect(Object.keys(project.profiles).sort()).toEqual(["landscape_web", "vertical_social"]);
+  });
+
+  it("exits 2 for an unknown profile name, listing the registry's names", async () => {
+    const result = await run([
+      "init",
+      join(tempDir(), "demo"),
+      "--id",
+      "demo",
+      "--deliverable",
+      "web=cinema_4k",
+    ]);
+    expect(result.code).toBe(EXIT.usage);
+    expect(result.stderr).toContain("unknown delivery profile cinema_4k");
+    expect(result.stderr).toContain("landscape_web, vertical_social");
+  });
+
   it("exits 2 without a deliverable", async () => {
     const result = await run(["init", join(tempDir(), "demo"), "--id", "demo"]);
     expect(result.code).toBe(EXIT.usage);

@@ -154,7 +154,7 @@ def test_an_override_that_breaks_contrast_fails_naming_the_element(
         "--pack",
         "neutral",
         "--profile",
-        "landscape_1080p30",
+        "landscape_web",
         "--examples",
         str(examples),
     )
@@ -175,7 +175,7 @@ def _one_example(tmp_path: Path, component: str, example: dict[str, object]) -> 
         "--pack",
         "neutral",
         "--profile",
-        "landscape_1080p30",
+        "landscape_web",
         "--examples",
         str(examples),
     )

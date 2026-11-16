@@ -1,11 +1,11 @@
 import { resolve } from "node:path";
-import { InitError, initProject } from "@cinewright/core";
+import { InitError, initProject, profileRefPath, UnknownProfileError } from "@cinewright/core";
 import { parse, UsageError } from "../args.js";
 import { EXIT } from "../exit-codes.js";
 import { type Io, now, printJson, sessionId } from "../io.js";
 
 export const INIT_USAGE =
-  "usage: cinewright init <dir> --id <project_id> --deliverable <id>=<profile.json> [--deliverable …] [--title <text>] [--json]";
+  "usage: cinewright init <dir> --id <project_id> --deliverable <id>=<profile name or path> [--deliverable …] [--title <text>] [--json]";
 
 export async function init(argv: string[], io: Io): Promise<number> {
   const { values, positionals } = parse(argv, {
@@ -19,13 +19,18 @@ export async function init(argv: string[], io: Io): Promise<number> {
   if (!values.id) throw new UsageError("--id is required");
   const pairs = values.deliverable ?? [];
   if (pairs.length === 0)
-    throw new UsageError("at least one --deliverable <id>=<profile.json> is required");
+    throw new UsageError("at least one --deliverable <id>=<profile name or path> is required");
   const deliverables = pairs.map((pair) => {
     const at = pair.indexOf("=");
     if (at < 1 || at === pair.length - 1) {
-      throw new UsageError(`--deliverable must be <id>=<profile.json>, got ${pair}`);
+      throw new UsageError(`--deliverable must be <id>=<profile name or path>, got ${pair}`);
     }
-    return { id: pair.slice(0, at), profilePath: resolve(io.cwd, pair.slice(at + 1)) };
+    try {
+      return { id: pair.slice(0, at), profilePath: profileRefPath(pair.slice(at + 1), io.cwd) };
+    } catch (error) {
+      if (error instanceof UnknownProfileError) throw new UsageError(error.message);
+      throw error;
+    }
   });
   const dir = resolve(io.cwd, target);
   try {

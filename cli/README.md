@@ -5,7 +5,7 @@
 ## Commands
 
 ```
-cinewright init <dir> --id <project_id> --deliverable <id>=<profile.json> [--deliverable …] [--title <text>] [--json]
+cinewright init <dir> --id <project_id> --deliverable <id>=<profile name or path> [--deliverable …] [--title <text>] [--json]
 cinewright patch apply   --file <patch.json> [--project <dir>] [--frames] [--json]
 cinewright patch propose --file <patch.json> [--project <dir>] [--frames] [--json]
 cinewright patch approve <pending_id> [--project <dir>] [--json]
@@ -17,6 +17,8 @@ cinewright status [--project <dir>] [--json]
 cinewright schema [<kind> | tokens [--json]]
 cinewright components [<id>] [--json]
 ```
+
+`--deliverable` takes a delivery profile name from `registry/profiles/` (`landscape_web`, `vertical_social`; see `registry/README.md`) or a path to a profile file: anything with a `/` or ending in `.json`. An unknown name exits 2 and lists the names.
 
 Without `--project`, a command uses the nearest directory upward that holds `cinewright.json`. `--file -` reads the patch from stdin.
 

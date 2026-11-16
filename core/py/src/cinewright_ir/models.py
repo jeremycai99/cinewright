@@ -529,6 +529,42 @@ class CaptionRules(BaseModel):
     min_display_frames: Frames
 
 
+class Codec(Enum):
+    libx264 = "libx264"
+
+
+class Preset(Enum):
+    ultrafast = "ultrafast"
+    superfast = "superfast"
+    veryfast = "veryfast"
+    faster = "faster"
+    fast = "fast"
+    medium = "medium"
+    slow = "slow"
+    slower = "slower"
+    veryslow = "veryslow"
+
+
+class PixFmt(Enum):
+    yuv420p = "yuv420p"
+
+
+class AudioCodec(Enum):
+    aac = "aac"
+
+
+class EncodingSettings(BaseModel):
+    model_config = ConfigDict(
+        extra="forbid",
+    )
+    codec: Codec
+    crf: Annotated[int, Field(ge=0, le=51)]
+    preset: Preset
+    pix_fmt: PixFmt
+    audio_codec: AudioCodec
+    audio_bitrate_kbps: Annotated[int, Field(ge=32, le=512)]
+
+
 class Insets(BaseModel):
     model_config = ConfigDict(
         extra="forbid",
@@ -1352,6 +1388,19 @@ class DeliveryProfile(BaseModel):
     safe_zones: Annotated[SafeZones, Field(title="SafeZones")]
     loudness: Annotated[LoudnessTarget, Field(title="LoudnessTarget")]
     captions: Annotated[CaptionRules, Field(title="CaptionRules")]
+    max_duration: Annotated[
+        Frames | None,
+        Field(
+            description="The longest deliverable this profile accepts, in frames at its frame rate. Absent means no limit."
+        ),
+    ] = None
+    encoding: Annotated[
+        EncodingSettings | None,
+        Field(
+            description="How the final file is encoded (M5). Absent until a profile states it.",
+            title="EncodingSettings",
+        ),
+    ] = None
 
 
 class Motion(BaseModel):

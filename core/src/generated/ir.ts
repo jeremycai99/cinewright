@@ -42,6 +42,10 @@ export type AspectClass = "landscape" | "portrait" | "square";
  */
 export type Frames = number;
 /**
+ * A time or duration in integer frames at the project rate (D27).
+ */
+export type Frames1 = number;
+/**
  * Project-unique entity id (convention 9). Immutable and never reused.
  */
 export type Id4 = string;
@@ -287,6 +291,8 @@ export interface DeliveryProfile {
   safe_zones: SafeZones;
   loudness: LoudnessTarget;
   captions: CaptionRules;
+  max_duration?: Frames1;
+  encoding?: EncodingSettings;
 }
 /**
  * A rational number such as a frame rate (30000/1001).
@@ -317,6 +323,17 @@ export interface CaptionRules {
   max_chars_per_line: number;
   max_lines: number;
   min_display_frames: Frames;
+}
+/**
+ * How the final file is encoded (M5). Absent until a profile states it.
+ */
+export interface EncodingSettings {
+  codec: "libx264";
+  crf: number;
+  preset: "ultrafast" | "superfast" | "veryfast" | "faster" | "fast" | "medium" | "slow" | "slower" | "veryslow";
+  pix_fmt: "yuv420p";
+  audio_codec: "aac";
+  audio_bitrate_kbps: number;
 }
 /**
  * One element of a shot (D31): a component with props, token references, motion presets and anchor-relative timing, per aspect class.
