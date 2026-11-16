@@ -5,6 +5,7 @@ export {
   type PluginErrorCode,
   pluginError,
 } from "./errors.js";
+export { createSubprocessPlugin, SubprocessPlugin } from "./host.js";
 export {
   type CheckResult,
   type ConformanceReport,
@@ -25,5 +26,6 @@ export {
   validateManifest,
 } from "./manifest.js";
 export type { Plugin, PluginContext, PluginRequest, PluginResponse } from "./plugin.js";
+export { RpcClient, RpcError } from "./rpc.js";
 
 export const VERSION = "0.0.0";
