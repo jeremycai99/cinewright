@@ -39,6 +39,14 @@ export const EXIT = { ok: 0, input: 2, network: 3, render: 4 } as const;
 const WORK_DIR = "/tmp/cinewright-render";
 const FFMPEG = process.env.HYPERFRAMES_FFMPEG_PATH ?? "ffmpeg";
 
+/**
+ * Where HyperFrames captures frames. Kept frames go to the output mount: under /tmp they would
+ * count against the container's memory limit and cap a shot's length by its content.
+ */
+export function framesDir(format: Format, out: string): string {
+  return format === "mp4" ? join(WORK_DIR, "frames") : join(out, ".frames");
+}
+
 /** Copy the composition to the work folder as it is; render-job adds no runtime to it. */
 export async function copyWork(input: string, project: string): Promise<void> {
   await cp(input, project, { recursive: true });
@@ -60,7 +68,7 @@ export async function render(args: RenderArgs, settings: RenderSettings): Promis
   }
 
   const project = join(WORK_DIR, "project");
-  const frames = join(WORK_DIR, "frames");
+  const frames = framesDir(args.format, out);
   await rm(WORK_DIR, { recursive: true, force: true });
   await copyWork(input, project);
 
@@ -102,6 +110,8 @@ export async function render(args: RenderArgs, settings: RenderSettings): Promis
     const lines = [`${await sha256(video)}  output.mp4\n`];
     if (args.format === "mp4+frames") {
       const names = await collectFrames(frames, join(out, "frames"));
+      await rm(frames, { recursive: true, force: true });
+      await rm(frames, { recursive: true, force: true });
       for (const name of names)
         lines.push(`${await sha256(join(out, "frames", name))}  frames/${name}\n`);
     }

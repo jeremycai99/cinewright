@@ -154,3 +154,26 @@ describe.skipIf(!ENABLED)("renderShot in the container (M3.2a)", () => {
     SLOW,
   );
 });
+
+describe.skipIf(!ENABLED)("renderShot at its memory limit (Review Focus 5)", () => {
+  it(
+    "reports render.memory, names the shot and the limit, and writes no cache entry",
+    async () => {
+      const compiled = await compileReference();
+      const cacheDir = tempDir();
+      const limits = { ...DEFAULT_LIMITS, memoryMb: 160, tmpfsMb: 64 };
+      const error = await renderShot({
+        compiled,
+        shotId: "s03.sh01",
+        image: IMAGE,
+        cacheDir,
+        limits,
+      }).catch((e) => e);
+      expect(error).toBeInstanceOf(RenderError);
+      expect((error as RenderError).rule).toBe("render.memory");
+      expect((error as Error).message).toContain("160 MB");
+      expect(readdirSync(cacheDir)).toEqual([]);
+    },
+    SLOW,
+  );
+});

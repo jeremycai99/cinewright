@@ -11,6 +11,7 @@ import {
 import { catalogDir } from "@cinewright/components";
 import {
   CACHE_DIR,
+  isEntityId,
   loadCatalog,
   PackError,
   packSearchPath,
@@ -155,6 +156,9 @@ export async function renderShotCommand(argv: string[], io: Io): Promise<number>
   const image = values.image ?? io.env.CINEWRIGHT_IMAGE;
   if (!image) throw new UsageError("--image <ref> (or CINEWRIGHT_IMAGE) is required");
   const t = target("render-shot", positionals, values, io);
+  // Both ids become a folder name that is cleared below.
+  if (!isEntityId(t.shotId) || !isEntityId(t.deliverable))
+    throw new UsageError("the shot and deliverable must be entity ids");
   const work = join(t.project, CACHE_DIR, "compiled", `${t.shotId}.${t.deliverable}`);
   rmSync(work, { recursive: true, force: true });
   const compiled = await compileOrReport("render-shot", t, work, io);

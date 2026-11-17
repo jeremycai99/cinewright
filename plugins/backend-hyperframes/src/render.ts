@@ -3,7 +3,7 @@ import { existsSync, mkdirSync, readFileSync, renameSync, rmSync, writeFileSync 
 import { join } from "node:path";
 import { sha256Bytes, sha256Hash } from "@cinewright/core";
 import type { Compiled } from "./compile.js";
-import { dockerRunArgs, runDocker } from "./docker.js";
+import { dockerRunArgs, oomKilled, removeContainer, runDocker } from "./docker.js";
 import { DEFAULT_LIMITS, type RunLimits, timeoutMs } from "./limits.js";
 
 /** Frame rates the render image accepts (HyperFrames 0.9.58 `DISTRIBUTED_FPS`). */
@@ -95,6 +95,7 @@ export async function renderShot(options: RenderOptions): Promise<Rendered> {
     ],
     ...(user ? { user } : {}),
     limits,
+    keep: true,
     command: [
       "--in",
       "/job/in",
@@ -109,8 +110,12 @@ export async function renderShot(options: RenderOptions): Promise<Rendered> {
   const budget = timeoutMs(compiled.frames, limits);
   try {
     const run = await runDocker(args, name, budget);
+    // The cgroup OOM killer usually kills Chrome, not render-job, so the exit code alone does not
+    // say why a run died: the kept container's state does.
+    const oom = await oomKilled(name);
+    await removeContainer(name);
     if (run.timedOut) throw new RenderError("render.timeout", shotId, `killed after ${budget} ms`);
-    if (run.code === 137)
+    if (oom || run.code === 137)
       throw new RenderError(
         "render.memory",
         shotId,

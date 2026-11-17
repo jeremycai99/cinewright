@@ -47,6 +47,21 @@ describe("dockerRunArgs (audit F17)", () => {
   });
 });
 
+describe("kept containers", () => {
+  it("leaves --rm out when the caller inspects the container after it exits", () => {
+    const kept = dockerRunArgs({
+      image: "i",
+      name: "n",
+      mounts: [],
+      limits: DEFAULT_LIMITS,
+      keep: true,
+      command: [],
+    });
+    expect(kept).not.toContain("--rm");
+    expect(kept.slice(0, 1)).toEqual(["run"]);
+  });
+});
+
 describe("timeoutMs", () => {
   it("grows with the frame count from a fixed base", () => {
     expect(timeoutMs(0)).toBe(DEFAULT_LIMITS.baseTimeoutMs);

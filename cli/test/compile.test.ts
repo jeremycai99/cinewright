@@ -1,4 +1,4 @@
-import { existsSync, readFileSync } from "node:fs";
+import { existsSync, mkdirSync, readFileSync, writeFileSync } from "node:fs";
 import { join } from "node:path";
 import { describe, expect, it } from "vitest";
 import { EXIT } from "../src/exit-codes.js";
@@ -80,6 +80,28 @@ describe("cinewright compile", () => {
 });
 
 describe("cinewright render-shot", () => {
+  it("rejects a shot id that is not an entity id before touching any file", async () => {
+    const dir = await placed();
+    // render-shot clears .cinewright/compiled/<shot>.<deliverable>; "../../victim" would reach here.
+    const victim = join(dir, "victim.web_landscape");
+    mkdirSync(victim);
+    writeFileSync(join(victim, "keep.txt"), "x");
+    const result = await run([
+      "render-shot",
+      "../../victim",
+      "--deliverable",
+      "web_landscape",
+      "--timing",
+      TIMING,
+      "--image",
+      "x",
+      "--project",
+      dir,
+    ]);
+    expect(result.code).toBe(EXIT.usage);
+    expect(existsSync(join(victim, "keep.txt"))).toBe(true);
+  });
+
   it("exits 2 without an image", async () => {
     const dir = await placed();
     const result = await run(

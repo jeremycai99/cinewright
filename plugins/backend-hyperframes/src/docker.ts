@@ -42,12 +42,14 @@ export function dockerRunArgs(options: {
   user?: { uid: number; gid: number };
   limits: RunLimits;
   entrypoint?: string;
+  /** Keep the container after it exits, so the caller can inspect it (then remove it). */
+  keep?: boolean;
   command: readonly string[];
 }): string[] {
   const { image, name, mounts, user, limits, entrypoint, command } = options;
   return [
     "run",
-    "--rm",
+    ...(options.keep ? [] : ["--rm"]),
     "--name",
     name,
     "--network",
@@ -80,6 +82,17 @@ export interface RunResult {
   stdout: string;
   stderr: string;
   timedOut: boolean;
+}
+
+/** Whether the kernel killed the named (kept) container for exceeding its memory limit. */
+export async function oomKilled(name: string): Promise<boolean> {
+  const r = await runDocker(["inspect", "--format", "{{.State.OOMKilled}}", name], name, 30_000);
+  return r.code === 0 && r.stdout.trim() === "true";
+}
+
+/** Remove a kept container. */
+export async function removeContainer(name: string): Promise<void> {
+  await runDocker(["rm", "--force", name], name, 30_000);
 }
 
 /** Run docker with `args`; past `timeout` ms the named container is killed. */
