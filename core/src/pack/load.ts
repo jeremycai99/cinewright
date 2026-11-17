@@ -222,6 +222,12 @@ export function loadPack(id: string, searchPath: readonly string[]): Pack {
 
   if (manifestOk) {
     manifest.fonts.forEach((font, index) => {
+      // A font's family and unicode range are written into the composition's CSS (F5).
+      for (const field of ["family", "unicode_range"] as const) {
+        const value = font[field];
+        if (typeof value === "string" && UNSAFE_CSS.test(value))
+          issue("pack.json", `/fonts/${index}/${field}`, "pack.token_unsafe");
+      }
       const path = join(dir, font.file);
       if (!existsSync(path)) issue("pack.json", `/fonts/${index}/file`, "pack.missing_file");
       else if (sha256Bytes(readFileSync(path)) !== font.sha256)

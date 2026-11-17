@@ -1,7 +1,7 @@
 import { createHash } from "node:crypto";
 import { copyFileSync, mkdirSync, writeFileSync } from "node:fs";
 import { basename, join } from "node:path";
-import type { Pack } from "@cinewright/core";
+import { cssValue, type Pack } from "@cinewright/core";
 import type { MountSpec } from "../host/spec.js";
 import { bundleRuntime } from "./bundle.js";
 
@@ -10,12 +10,14 @@ function fontFaces(pack: Pack): string {
     .map((font) =>
       [
         "@font-face {",
-        `  font-family: ${JSON.stringify(font.family)};`,
+        `  font-family: ${cssValue("font.family", JSON.stringify(font.family), font.family)};`,
         `  src: url("fonts/${basename(font.file)}") format("woff2");`,
         `  font-weight: ${font.weight[0]} ${font.weight[1]};`,
         `  font-style: ${font.style};`,
         "  font-display: block;",
-        ...(font.unicode_range ? [`  unicode-range: ${font.unicode_range};`] : []),
+        ...(font.unicode_range
+          ? [`  unicode-range: ${cssValue("font.unicode_range", font.unicode_range)};`]
+          : []),
         "}",
       ].join("\n"),
     )

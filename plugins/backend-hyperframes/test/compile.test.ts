@@ -1,8 +1,9 @@
-import { readdirSync, readFileSync, writeFileSync } from "node:fs";
-import { join, relative } from "node:path";
+import { mkdirSync, readdirSync, readFileSync, writeFileSync } from "node:fs";
+import { dirname, join, relative } from "node:path";
 import { fileURLToPath } from "node:url";
+import { Cas } from "@cinewright/core";
 import { describe, expect, it } from "vitest";
-import { CompileError, compileShot } from "../src/index.js";
+import { CompileError, compileShot, projectAssets } from "../src/index.js";
 import { catalog, pack, reference, tempDir, timing, USER } from "./helpers.js";
 
 const GOLDEN = fileURLToPath(new URL("./golden/", import.meta.url));
@@ -151,6 +152,68 @@ describe("compileShot (M3.1b)", () => {
         outDir: tempDir(),
       }),
     ).rejects.toThrow(/pack\.(unpinned|pin_mismatch)/);
+  });
+
+  it("refuses a timing table at another frame rate than the project", async () => {
+    const store = await reference();
+    const table = { ...timing(), fps: { num: 25, den: 1 } };
+    const error = await compileShot({
+      ir: store.ir(),
+      shotId: "s03.sh01",
+      deliverableId: "web_landscape",
+      pack: pack("neutral"),
+      catalog: catalog(),
+      timing: table,
+      outDir: tempDir(),
+    }).catch((e) => e);
+    expect(compileError(error)[0]).toMatchObject({ rule: "compile.fps_mismatch" });
+    expect((error as Error).message).toContain("25");
+  });
+
+  it("names a layer whose prop names a registered asset with no file", async () => {
+    const error = await compile("web_landscape", {
+      extraOps: [
+        { op: "set", entity: "s03.sh01.bars", path: "/component", value: "plate" },
+        { op: "unset", entity: "s03.sh01.bars", path: "/props/kind" },
+        { op: "unset", entity: "s03.sh01.bars", path: "/props/categories" },
+        { op: "unset", entity: "s03.sh01.bars", path: "/props/series" },
+        { op: "set", entity: "s03.sh01.bars", path: "/props/asset", value: "dr_lin_sheet_front" },
+        { op: "set", entity: "s03.sh01.bars", path: "/props/fit", value: "cover" },
+      ],
+    }).catch((e) => e);
+    expect(compileError(error)).toContainEqual(
+      expect.objectContaining({ entity: "s03.sh01.bars", rule: "compile.missing_asset" }),
+    );
+  });
+
+  it("copies a project's assets from the CAS, named by media type", async () => {
+    const store = await reference([
+      { op: "set", entity: "s03.sh01.bars", path: "/component", value: "plate" },
+      { op: "unset", entity: "s03.sh01.bars", path: "/props/kind" },
+      { op: "unset", entity: "s03.sh01.bars", path: "/props/categories" },
+      { op: "unset", entity: "s03.sh01.bars", path: "/props/series" },
+      { op: "set", entity: "s03.sh01.bars", path: "/props/asset", value: "dr_lin_sheet_front" },
+      { op: "set", entity: "s03.sh01.bars", path: "/props/fit", value: "cover" },
+    ]);
+    const ir = store.ir();
+    const hash = (ir.assets.value ?? []).find((a) => a.id === "dr_lin_sheet_front")?.hash as string;
+    const cas = new Cas(store.dir);
+    mkdirSync(dirname(cas.pathOf(hash)), { recursive: true });
+    writeFileSync(cas.pathOf(hash), "not really a png");
+    const compiled = await compileShot({
+      ir,
+      shotId: "s03.sh01",
+      deliverableId: "web_landscape",
+      pack: pack("neutral"),
+      catalog: catalog(),
+      timing: timing(),
+      assets: projectAssets(ir, store.dir),
+      outDir: tempDir(),
+    });
+    expect(readdirSync(join(compiled.dir, "assets"))).toEqual(["dr_lin_sheet_front.png"]);
+    expect(compiled.spec.layers[1]?.assets).toEqual({
+      dr_lin_sheet_front: "assets/dr_lin_sheet_front.png",
+    });
   });
 
   it("names the shot when it has no span", async () => {

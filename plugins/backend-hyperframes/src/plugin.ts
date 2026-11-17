@@ -1,3 +1,4 @@
+import { delimiter } from "node:path";
 import { catalogDir } from "@cinewright/components";
 import {
   loadCatalog,
@@ -9,6 +10,7 @@ import {
   validateTimingTable,
 } from "@cinewright/core";
 import type { Plugin, PluginRequest, PluginResponse } from "@cinewright/plugin-sdk";
+import { projectAssets } from "./assets.js";
 import { compileShot } from "./compile.js";
 import { CompileError } from "./errors.js";
 
@@ -49,7 +51,7 @@ export function createPlugin(): Plugin {
       try {
         const store = await Store.open(p.project);
         const ir = store.ir();
-        const env = { CINEWRIGHT_PACK_PATH: (p.pack_path ?? []).join(":") };
+        const env = { CINEWRIGHT_PACK_PATH: (p.pack_path ?? []).join(delimiter) };
         const compiled = await compileShot({
           ir,
           shotId: p.shot,
@@ -57,6 +59,7 @@ export function createPlugin(): Plugin {
           pack: resolveProjectPack(ir, packSearchPath(env)),
           catalog: loadCatalog(catalogDir),
           timing: p.timing,
+          assets: projectAssets(ir, p.project),
           outDir: p.out_dir,
         });
         return { ok: true, result: { dir: compiled.dir, inputs: compiled.inputs } };

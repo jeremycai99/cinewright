@@ -1,6 +1,6 @@
 import { readFileSync } from "node:fs";
 import { resolve } from "node:path";
-import { CompileError, compileShot } from "@cinewright/backend-hyperframes";
+import { CompileError, compileShot, projectAssets } from "@cinewright/backend-hyperframes";
 import { catalogDir } from "@cinewright/components";
 import {
   loadCatalog,
@@ -61,6 +61,7 @@ export async function compile(argv: string[], io: Io): Promise<number> {
       pack: resolveProjectPack(ir, packSearchPath(io.env)),
       catalog: loadCatalog(catalogDir),
       timing,
+      assets: projectAssets(ir, findProject(io, values.project)),
       outDir: resolve(io.cwd, values.out),
     });
     const { frames } = compiled;

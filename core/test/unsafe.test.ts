@@ -67,3 +67,30 @@ describe("pack.token_unsafe", () => {
     }
   });
 });
+
+describe("pack font fields (M3.1b review)", () => {
+  // unicode_range already has a strict pattern in pack.schema.json; family is free text.
+  it.each([
+    ["family", "x</style><script>alert(1)</script>"],
+    ["family", 'Inter"; } body { display: none'],
+  ])("the loader rejects a font %s holding markup or rules (%j)", (field, value) => {
+    const root = mkdtempSync(join(tmpdir(), "cinewright-unsafe-"));
+    cpSync(join(FIXTURES, "minimal"), join(root, "minimal"), { recursive: true });
+    const file = join(root, "minimal", "pack.json");
+    const manifest = JSON.parse(readFileSync(file, "utf8"));
+    manifest.fonts[0][field] = value;
+    writeFileSync(file, JSON.stringify(manifest));
+    try {
+      loadPack("minimal", [root]);
+      expect.unreachable();
+    } catch (error) {
+      expect(error).toBeInstanceOf(PackError);
+      expect((error as PackError).errors).toContainEqual({
+        pack: "minimal",
+        file: "pack.json",
+        pointer: `/fonts/0/${field}`,
+        rule: "pack.token_unsafe",
+      });
+    }
+  });
+});

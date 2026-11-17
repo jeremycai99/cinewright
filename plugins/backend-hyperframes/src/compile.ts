@@ -103,6 +103,26 @@ function attempt<T>(issues: CompileIssue[], entity: string, fn: () => T): T | un
   }
 }
 
+const EXTENSIONS: Record<string, string> = {
+  "image/png": ".png",
+  "image/jpeg": ".jpg",
+  "image/webp": ".webp",
+  "image/gif": ".gif",
+  "image/svg+xml": ".svg",
+  "video/mp4": ".mp4",
+  "video/webm": ".webm",
+  "video/quicktime": ".mov",
+  "audio/mpeg": ".mp3",
+  "audio/wav": ".wav",
+  "audio/x-wav": ".wav",
+  "audio/ogg": ".ogg",
+};
+
+/** A file extension for a media type, so the browser can tell what a CAS file is. */
+function extensionFor(mediaType: string | undefined): string {
+  return (mediaType && EXTENSIONS[mediaType]) ?? "";
+}
+
 /** String prop values that name a given asset id, anywhere in the props. */
 function assetIdsIn(value: Json, assets: Readonly<Record<string, string>>, out: Set<string>): void {
   if (typeof value === "string" && value in assets) out.add(value);
@@ -160,6 +180,18 @@ export async function compileShot(options: CompileOptions): Promise<Compiled> {
   if (!entry)
     throw new CompileError([{ entity: shotId, pointer: "", rule: "compile.unknown_shot" }]);
   const shot = entry.shot;
+  const rate = (f: { num: number; den: number }) => f.num / f.den;
+  if (rate(timing.fps) !== rate(profile.frame_rate)) {
+    throw new CompileError([
+      {
+        entity: deliverableId,
+        pointer: "",
+        rule: "compile.fps_mismatch",
+        message: `the timing table is at ${timing.fps.num}/${timing.fps.den} fps, the project at ${profile.frame_rate.num}/${profile.frame_rate.den}`,
+      },
+    ]);
+  }
+  const registered = new Map((ir.assets.value ?? []).map((a) => [a.id, a]));
 
   const issues: CompileIssue[] = [];
   const span = attempt(issues, shotId, () => shotSpan(ir, shotId, timing));
@@ -229,10 +261,20 @@ export async function compileShot(options: CompileOptions): Promise<Compiled> {
 
     const named = new Set<string>();
     assetIdsIn(props, assets, named);
+    const wanted = new Set<string>();
+    assetIdsIn(props, Object.fromEntries([...registered.keys()].map((k) => [k, k])), wanted);
+    for (const assetId of [...wanted].sort())
+      if (!(assetId in assets))
+        issues.push({
+          entity: id,
+          pointer: "/props",
+          rule: "compile.missing_asset",
+          message: `asset ${assetId} has no file (it is not in the project's CAS)`,
+        });
     const layerAssets: Record<string, string> = {};
     for (const assetId of [...named].sort()) {
       const source = assets[assetId] as string;
-      const target = `assets/${assetId}${extname(source)}`;
+      const target = `assets/${assetId}${extname(source) || extensionFor(registered.get(assetId)?.media_type)}`;
       if (!(assetId in copied)) {
         mkdirSync(join(outDir, "assets"), { recursive: true });
         copyFileSync(source, join(outDir, target));
