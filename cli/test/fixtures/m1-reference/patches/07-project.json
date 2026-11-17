@@ -4,7 +4,7 @@
     "kind": "user"
   },
   "mode": "apply",
-  "reason": "Brief and style",
+  "reason": "Brief and autonomy",
   "ops": [
     {
       "op": "set",
@@ -17,12 +17,6 @@
       "entity": "demo",
       "path": "/autonomy",
       "value": "guided"
-    },
-    {
-      "op": "set",
-      "entity": "demo",
-      "path": "/style/pack",
-      "value": "editorial"
     }
   ]
 }

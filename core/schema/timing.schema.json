@@ -1,0 +1,40 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://cinewright.invalid/ir/0/timing.schema.json",
+  "title": "TimingTable",
+  "description": "When each script line and word is spoken, in frames on its sequence's timeline (M3.1a). Derived data, not an IR entity: narration writes it (M4.2); until then a fixture or `--timing <file>` supplies it.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["fps", "lines"],
+  "properties": {
+    "fps": { "$ref": "common.schema.json#/$defs/rational" },
+    "lines": {
+      "type": "object",
+      "propertyNames": { "$ref": "common.schema.json#/$defs/id" },
+      "additionalProperties": { "$ref": "#/$defs/line_timing" }
+    }
+  },
+  "$defs": {
+    "span": {
+      "title": "FrameSpan",
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["start", "end"],
+      "properties": {
+        "start": { "$ref": "common.schema.json#/$defs/frames" },
+        "end": { "$ref": "common.schema.json#/$defs/frames" }
+      }
+    },
+    "line_timing": {
+      "title": "LineTiming",
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["start", "end", "words"],
+      "properties": {
+        "start": { "$ref": "common.schema.json#/$defs/frames" },
+        "end": { "$ref": "common.schema.json#/$defs/frames" },
+        "words": { "type": "array", "items": { "$ref": "#/$defs/span" } }
+      }
+    }
+  }
+}

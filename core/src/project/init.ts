@@ -3,6 +3,7 @@ import { join } from "node:path";
 import { type HashString, sha256Hash, stateHash } from "../canonical/hash.js";
 import type { Deliverable, DeliveryProfile, ProfileCopy } from "../generated/ir.js";
 import type { InlinedIr } from "../ir/inlined.js";
+import type { Pack } from "../pack/load.js";
 import type { ValidationError } from "../schema/errors.js";
 import { validateDocument, validateProject } from "../schema/validate.js";
 import { appendLog, type InitEntry } from "../store/log.js";
@@ -25,6 +26,8 @@ export interface InitInput {
   title?: string;
   /** At least one: the frame rate comes from a delivery profile (D27). */
   deliverables: { id: string; profilePath: string }[];
+  /** The style pack to pin and select (M3.1a); without one, `style.pack` stays open. */
+  pack?: Pack;
 }
 
 export interface InitOptions {
@@ -98,13 +101,21 @@ export async function initProject(
     origin: "user",
     schema_version: 1,
     profiles,
+    ...(input.pack
+      ? {
+          packs: { [input.pack.id]: { version: input.pack.version, hash: input.pack.contentHash } },
+        }
+      : {}),
     title: input.title === undefined ? { state: "open" } : { value: input.title, state: "user" },
     brief: { state: "open" },
     autonomy: { state: "open" },
     budget: { state: "open" },
     policies: { state: "open" },
     settings: { propose_conversational_edits: { value: true, state: "user" } },
-    style: { pack: { state: "open" }, overrides: {} },
+    style: {
+      pack: input.pack ? { state: "user", value: input.pack.id } : { state: "open" },
+      overrides: {},
+    },
     deliverables: { value: deliverables, state: "user" },
     sequences: { state: "open" },
     script: { id: "script", origin: "user", beats: { state: "open" } },

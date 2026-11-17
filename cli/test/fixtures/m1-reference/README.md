@@ -12,7 +12,7 @@ The spec's scene and cast examples (`docs/DESIGN_SPEC.md`, "What a scene spec ho
 | `04-sequence` | user | Scene 3 as the user scoped it: intent, mood, cast, lines, gates, style accent; scene 4 |
 | `05-shots` | agent (scene planner) | Duration, transition, sound, and the two shots, with a decision-log entry |
 | `06-subject` | user | Dr Lin is the subject of shot 2 |
-| `07-project` | user | Brief, autonomy, style pack |
+| `07-project` | user | Brief and autonomy (the style pack is pinned by `init --pack neutral`, M3.1a) |
 | `08-proposal` | session, proposed | "Make scene 3 tenser" (the user approves it as `p1`) |
 
 ## Prose description, for the agent trial

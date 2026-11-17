@@ -7,6 +7,7 @@ import type {
   ApproveFailedEntry,
   InitEntry,
   PendingEntry,
+  PinnedEntry,
   RejectedEntry,
 } from "../generated/ir.js";
 import { PATCH_LOG } from "../project/layout.js";
@@ -18,7 +19,8 @@ export type LogEntry =
   | PendingEntry
   | ApprovedEntry
   | RejectedEntry
-  | ApproveFailedEntry;
+  | ApproveFailedEntry
+  | PinnedEntry;
 
 export type {
   AppliedEntry,
@@ -26,6 +28,7 @@ export type {
   ApproveFailedEntry,
   InitEntry,
   PendingEntry,
+  PinnedEntry,
   RejectedEntry,
 };
 

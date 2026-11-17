@@ -25,12 +25,20 @@ export interface PackIssue {
   file: string;
   pointer: string;
   rule: string;
+  /** A sentence for people, when the rule alone does not say enough. */
+  message?: string;
 }
 
 export class PackError extends Error {
   override name = "PackError";
   constructor(readonly errors: PackIssue[]) {
-    super(errors.map((e) => `${e.pack} ${e.file}${e.pointer}: ${e.rule}`).join("; "));
+    super(
+      errors
+        .map(
+          (e) => `${e.pack} ${e.file}${e.pointer}: ${e.rule}${e.message ? ` (${e.message})` : ""}`,
+        )
+        .join("; "),
+    );
   }
 }
 
@@ -41,6 +49,12 @@ export interface Pack {
   dir: string;
   /** `sha256:` of the JCS form of `{ path: sha256 of file }` over every file (for render keys). */
   hash: string;
+  /**
+   * `sha256:` of the JCS form of `{ path: sha256 }` over the files that define the pack:
+   * pack.json, tokens.json, layouts.json, rules.md and each declared font. Project pins use it,
+   * so a README edit or a stray file never breaks a pin.
+   */
+  contentHash: string;
   manifest: PackManifest;
   tokens: TokenTree;
   rules: Rule[];
@@ -107,6 +121,16 @@ function packHash(dir: string): string {
   const files: Record<string, string> = {};
   for (const path of filesUnder(dir)) {
     files[relative(dir, path).split(sep).join("/")] = sha256Bytes(readFileSync(path));
+  }
+  return sha256Hash(files);
+}
+
+const DEFINING_FILES = ["pack.json", "tokens.json", "layouts.json", "rules.md"];
+
+function contentHash(dir: string, fonts: readonly PackFont[]): string {
+  const files: Record<string, string> = {};
+  for (const file of [...DEFINING_FILES, ...fonts.map((f) => f.file)]) {
+    files[file] = sha256Bytes(readFileSync(join(dir, file)));
   }
   return sha256Hash(files);
 }
@@ -259,6 +283,7 @@ export function loadPack(id: string, searchPath: readonly string[]): Pack {
     version: manifest.version,
     dir,
     hash: packHash(dir),
+    contentHash: contentHash(dir, manifest.fonts),
     manifest,
     tokens,
     rules,

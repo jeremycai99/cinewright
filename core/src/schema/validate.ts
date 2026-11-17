@@ -26,7 +26,8 @@ export type DocumentKind =
   | "delivery_profile"
   | "script"
   | "cast_member"
-  | "asset";
+  | "asset"
+  | "timing_table";
 
 export const ROOT_FILES: Readonly<Record<DocumentKind, string>> = {
   project: "project.schema.json",
@@ -35,6 +36,7 @@ export const ROOT_FILES: Readonly<Record<DocumentKind, string>> = {
   script: "script.schema.json",
   cast_member: "cast.schema.json",
   asset: "asset.schema.json",
+  timing_table: "timing.schema.json",
 };
 
 const SCHEMA_BASE = "https://cinewright.invalid/ir/0/";

@@ -876,6 +876,22 @@ class ApproveFailedEntry(BaseModel):
     errors: list[ApprovalError] | None = None
 
 
+class PinnedEntry(BaseModel):
+    model_config = ConfigDict(
+        extra="forbid",
+    )
+    kind: Literal["pinned"]
+    seq: Annotated[int, Field(ge=1)]
+    time: Annotated[str, Field(min_length=1)]
+    session_id: Annotated[str, Field(min_length=1)]
+    author: Author
+    revision: Annotated[int, Field(ge=1)]
+    pack: Id
+    version: Annotated[str, Field(min_length=1)]
+    hash: Hash
+    state_hash: Hash
+
+
 class Patch(BaseModel):
     model_config = ConfigDict(
         extra="forbid",
@@ -1083,6 +1099,14 @@ class Deliverable(BaseModel):
     burn_in_captions: BurnInCaptions
 
 
+class PackPin(BaseModel):
+    model_config = ConfigDict(
+        extra="forbid",
+    )
+    version: Annotated[str, Field(min_length=1)]
+    hash: Hash
+
+
 class Intent(BaseModel):
     model_config = ConfigDict(
         extra="forbid",
@@ -1281,6 +1305,23 @@ class Style(RootModel[Any]):
     ]
 
 
+class FrameSpan(BaseModel):
+    model_config = ConfigDict(
+        extra="forbid",
+    )
+    start: Frames
+    end: Frames
+
+
+class LineTiming(BaseModel):
+    model_config = ConfigDict(
+        extra="forbid",
+    )
+    start: Frames
+    end: Frames
+    words: list[FrameSpan]
+
+
 class Asset(BaseModel):
     model_config = ConfigDict(
         extra="forbid",
@@ -1441,6 +1482,36 @@ class LayerLayout(RootModel[dict[AspectClass, LayerLayout1]]):
     ]
 
 
+class PackPins(
+    RootModel[
+        dict[
+            Annotated[
+                str,
+                StringConstraints(
+                    max_length=64, pattern=r"^[a-z][a-z0-9_]*(\.[a-z0-9_]+)*$"
+                ),
+            ],
+            PackPin,
+        ]
+    ]
+):
+    root: Annotated[
+        dict[
+            Annotated[
+                str,
+                StringConstraints(
+                    max_length=64, pattern=r"^[a-z][a-z0-9_]*(\.[a-z0-9_]+)*$"
+                ),
+            ],
+            PackPin,
+        ],
+        Field(
+            description="The style packs this project is pinned to, keyed by pack id: each pack's version and content hash (M3.1a, audit decision 5). Written only by init and `cinewright pack pin`; compiling fails when the pack on disk no longer matches its pin.",
+            title="PackPins",
+        ),
+    ]
+
+
 class BudgetModel(BaseModel):
     model_config = ConfigDict(
         extra="forbid",
@@ -1552,6 +1623,22 @@ class ShotLayout(RootModel[dict[AspectClass, ShotLayout1]]):
     root: Annotated[
         dict[AspectClass, ShotLayout1],
         Field(description="Layout per aspect class (D28).", title="ShotLayout"),
+    ]
+
+
+class TimingTable(BaseModel):
+    model_config = ConfigDict(
+        extra="forbid",
+    )
+    fps: Rational
+    lines: dict[
+        Annotated[
+            str,
+            StringConstraints(
+                max_length=64, pattern=r"^[a-z][a-z0-9_]*(\.[a-z0-9_]+)*$"
+            ),
+        ],
+        LineTiming,
     ]
 
 
@@ -1701,6 +1788,13 @@ class Project(BaseModel):
             title="ProfileCopies",
         ),
     ]
+    packs: Annotated[
+        PackPins | None,
+        Field(
+            description="The style packs this project is pinned to, keyed by pack id: each pack's version and content hash (M3.1a, audit decision 5). Written only by init and `cinewright pack pin`; compiling fails when the pack on disk no longer matches its pin.",
+            title="PackPins",
+        ),
+    ] = None
     title: Title
     brief: Brief
     autonomy: Autonomy
@@ -1800,6 +1894,7 @@ class IrDocuments(BaseModel):
     approved_entry: ApprovedEntry | None = None
     rejected_entry: RejectedEntry | None = None
     approve_failed_entry: ApproveFailedEntry | None = None
+    pinned_entry: PinnedEntry | None = None
     patch: Patch | None = None
     project: Project | None = None
     scene: Scene | None = None
@@ -1807,3 +1902,4 @@ class IrDocuments(BaseModel):
     sequence: Sequence | None = None
     shot: Shot | None = None
     style: Style | None = None
+    timing: TimingTable | None = None

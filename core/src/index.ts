@@ -75,7 +75,9 @@ export {
   type PackLayouts,
   type PackManifest,
 } from "./pack/load.js";
+export { resolveProjectPack } from "./pack/pin.js";
 export { citation, parseRules, type Rule } from "./pack/rules.js";
+export { builtinPacksDir, packSearchPath } from "./pack/search.js";
 export {
   type ContrastPair,
   checkResolved,
@@ -146,5 +148,8 @@ export {
   type StoreOptions,
 } from "./store/store.js";
 export { parseTime, TimeError } from "./time.js";
+export { resolveAnchor, TimingError } from "./timing/anchor.js";
+export { layerTiming, type Span, shotSpan, shotsInOrder } from "./timing/span.js";
+export { type TimingTable, validateTimingTable } from "./timing/table.js";
 
 export const VERSION = "0.0.0";
