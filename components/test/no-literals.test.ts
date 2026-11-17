@@ -2,6 +2,7 @@ import { readdirSync, readFileSync, statSync } from "node:fs";
 import { join, relative } from "node:path";
 import { fileURLToPath } from "node:url";
 import { describe, expect, it } from "vitest";
+import { notIgnored } from "./ignored.js";
 import { type Finding, scanLiterals } from "./literals.js";
 
 const HERE = fileURLToPath(new URL(".", import.meta.url));
@@ -53,7 +54,7 @@ describe("literal lint (M2 AC)", () => {
   };
 
   it("has a bad fixture for every category", () => {
-    expect(readdirSync(bad).sort()).toEqual(Object.keys(expected).sort());
+    expect(notIgnored(bad, readdirSync(bad)).sort()).toEqual(Object.keys(expected).sort());
   });
 
   for (const [file, want] of Object.entries(expected)) {
@@ -79,7 +80,7 @@ describe("literal lint (M2 AC)", () => {
   it("finds no literal design value in components/src", () => {
     const files: string[] = [];
     const walk = (dir: string) => {
-      for (const name of readdirSync(dir)) {
+      for (const name of notIgnored(dir, readdirSync(dir))) {
         const path = join(dir, name);
         if (statSync(path).isDirectory()) walk(path);
         else if (/\.(ts|css)$/.test(name)) files.push(path);

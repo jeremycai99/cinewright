@@ -145,6 +145,23 @@ function generatePy(rootPath, outPath) {
   return readFileSync(outPath, "utf8");
 }
 
+/** The names in `dir` git does not ignore, so stray local files never reach the output (audit F6). */
+function notIgnored(dir, names) {
+  if (names.length === 0) return [];
+  try {
+    const out = execFileSync("git", ["check-ignore", "--stdin"], {
+      cwd: dir,
+      input: names.join("\n"),
+      encoding: "utf8",
+      stdio: ["pipe", "pipe", "ignore"],
+    });
+    const ignored = new Set(out.split("\n").filter(Boolean));
+    return names.filter((n) => !ignored.has(n));
+  } catch {
+    return [...names];
+  }
+}
+
 function exportName(dir, name) {
   const words = `${dir}-${name.replace(/\.json$/, "")}`.split(/[^a-zA-Z0-9]+/).filter(Boolean);
   return words.map((w, i) => (i === 0 ? w : w[0].toUpperCase() + w.slice(1))).join("");
@@ -153,13 +170,14 @@ function exportName(dir, name) {
 function generateFixtures() {
   const used = new Set();
   const lines = [];
-  for (const dir of readdirSync(FIXTURE_DIR).sort()) {
+  for (const dir of notIgnored(FIXTURE_DIR, readdirSync(FIXTURE_DIR)).sort()) {
     const type = FIXTURE_TYPES[dir];
     if (!type)
       throw new Error(`gen-types: no type for fixture directory ${dir}; add it to FIXTURE_TYPES`);
     let names = [];
     try {
-      names = readdirSync(join(FIXTURE_DIR, dir, "valid")).filter((n) => n.endsWith(".json"));
+      const valid = join(FIXTURE_DIR, dir, "valid");
+      names = notIgnored(valid, readdirSync(valid)).filter((n) => n.endsWith(".json"));
     } catch {
       continue;
     }

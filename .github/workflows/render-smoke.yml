@@ -20,6 +20,7 @@ on:
       - packs/**
       - components/**
       - core/src/pack/**
+      - core/src/cascade/**
       - core/schema/pack/**
       - .github/workflows/render-smoke.yml
   push:
@@ -38,6 +39,7 @@ on:
       - packs/**
       - components/**
       - core/src/pack/**
+      - core/src/cascade/**
       - core/schema/pack/**
       - .github/workflows/render-smoke.yml
 

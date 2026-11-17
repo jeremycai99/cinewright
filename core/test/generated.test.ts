@@ -3,16 +3,17 @@ import { join } from "node:path";
 import { fileURLToPath } from "node:url";
 import { describe, expect, it } from "vitest";
 import * as typed from "./generated/fixtures.js";
+import { notIgnored } from "./ignored.js";
 
 const ROOT = fileURLToPath(new URL("./fixtures/schema/", import.meta.url));
 
 function validFixtures(): { dir: string; name: string; path: string }[] {
   const out: { dir: string; name: string; path: string }[] = [];
-  for (const dir of readdirSync(ROOT).sort()) {
+  for (const dir of notIgnored(ROOT, readdirSync(ROOT)).sort()) {
     const valid = join(ROOT, dir, "valid");
     let names: string[] = [];
     try {
-      names = readdirSync(valid).filter((n) => n.endsWith(".json"));
+      names = notIgnored(valid, readdirSync(valid)).filter((n) => n.endsWith(".json"));
     } catch {
       continue;
     }

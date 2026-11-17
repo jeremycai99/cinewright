@@ -3,6 +3,7 @@ import { join } from "node:path";
 import { fileURLToPath } from "node:url";
 import { describe, expect, it } from "vitest";
 import { type DocumentKind, validateDocument } from "../../src/schema/validate.js";
+import { notIgnored } from "../ignored.js";
 
 const ROOT = fileURLToPath(new URL("../fixtures/schema/", import.meta.url));
 
@@ -19,7 +20,7 @@ const KINDS: Record<string, DocumentKind> = {
 function cases(dir: string, sub: "valid" | "invalid"): string[] {
   const path = join(ROOT, dir, sub);
   if (!existsSync(path)) return [];
-  return readdirSync(path)
+  return notIgnored(path, readdirSync(path))
     .filter((name) => name.endsWith(".json") && !name.endsWith(".errors.json"))
     .sort();
 }

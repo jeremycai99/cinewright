@@ -9,10 +9,11 @@ import {
   resolvePackTokens,
 } from "@cinewright/core";
 import { describe, expect, it } from "vitest";
+import { notIgnored } from "./ignored.js";
 
 /** Every first-party pack: a folder in packs/ with a pack.json. */
 const ROOT = fileURLToPath(new URL("..", import.meta.url));
-const PACKS = readdirSync(ROOT)
+const PACKS = notIgnored(ROOT, readdirSync(ROOT))
   .filter((name) => existsSync(join(ROOT, name, "pack.json")))
   .sort();
 

@@ -15,6 +15,7 @@ $CW init "$OUT" --id demo --title "Why pipelines break" \
   --deliverable "web_landscape=$PROFILES/landscape_1080p30.json" \
   --deliverable "social_portrait=$PROFILES/portrait_1080p30.json"
 for patch in "$HERE"/patches/0[1-7]-*.json; do
+  case "$patch" in *" "*) continue ;; esac # patch names have no spaces; skip stray copies
   $CW patch apply --project "$OUT" --file "$patch"
 done
 $CW patch propose --project "$OUT" --file "$HERE/patches/08-proposal.json"
