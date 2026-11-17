@@ -57,6 +57,10 @@ CI renders the reference shot twice on each of two runners (`.github/scripts/ref
 - **Rendering:** `renderSegment` blends the two shots' cached PNG frames over the overlap with the image's FFmpeg (`blend`, one weight per frame from the scene's easing, `easingWeights`; a wipe moves a soft edge in its `direction`, `softness` of the frame wide), encoded with the render settings' encoder, bit-exact and single-threaded. Nothing re-renders in the browser. It is cached in `.cinewright/cache/segments/<key>/` by both shots' render keys and the blend.
 - **Checked:** the segment's first frame matches the outgoing shot's frame at that time and its last frame the incoming shot's (PSNR over 38 dB); two renders are identical.
 
+## Burned-in captions (M3.4, D35)
+
+When the deliverable's `burn_in_captions` is true, `planShot` adds a `caption_track` layer, `<shot>.captions`, on top of the shot's layers. Its cues are the lines of the shot's own sequence (its scenes' `lines` and every line its shots and layers anchor to) that the timing table places in the shot's compile span, clipped to it (`captionCues`). A line too long for the profile's caption rules is split into several cues at word boundaries, each starting at its first word's frame; the component breaks each cue into lines. The layer is styled from the sequence's tokens (all of them, not a difference from the shot's) and placed in the pack's `captions` region, so a cue split by a cut has the same text, box and size on both sides. A deliverable that does not burn captions in gets no layer; a pack with no `captions` region fails with `compile.unknown_region` at `/burn_in_captions`.
+
 ## Plugin
 
 `manifest.json` declares a `backend` plugin with the capability `render.composition`. `createPlugin()` answers it with `{ project, shot, deliverable, timing, out_dir, pack_path? }` and returns `{ dir, inputs }`; compile and pack errors are `invalid_request`.
