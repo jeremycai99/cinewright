@@ -1,6 +1,6 @@
 import { dirtyNodes } from "@cinewright/core";
 import { describe, expect, it } from "vitest";
-import { CompileError, planShot, shotRenderKey } from "../src/index.js";
+import { CompileError, planShot, renderJobCommand, shotRenderKey } from "../src/index.js";
 import { blendExpression, easingWeights } from "../src/segment.js";
 import { catalog, pack, reference, segmentOps, timing, USER } from "./helpers.js";
 
@@ -31,11 +31,22 @@ describe("segments in the compiler (M3.3)", () => {
     });
   });
 
-  it("starts the incoming shot h frames early, keeping its layers at their own frames", async () => {
+  it("starts the incoming shot h frames early, with layers that start with it on from the overlap", async () => {
     const p = await plan("s04.sh01", "cross_dissolve");
     expect(p.timeline).toEqual({ start: 156, before: 6, after: 0 });
     expect(p.frames).toBe(66);
-    expect(p.spec.layers[0]?.timing).toEqual({ enter: 6, end: 66 });
+    // It starts with its shot, so it enters at the overlap's start: the transition is its entrance.
+    expect(p.spec.layers[0]?.timing).toEqual({ enter: 0, end: 66 });
+  });
+
+  it("encodes only the body: the outgoing body stops at the segment, the incoming one starts after it", async () => {
+    expect(renderJobCommand(await plan("s03.sh02", "cross_dissolve"))).toEqual(
+      expect.arrayContaining(["--format", "mp4+frames", "--body", "0,72"]),
+    );
+    expect(renderJobCommand(await plan("s04.sh01", "cross_dissolve"))).toEqual(
+      expect.arrayContaining(["--body", "6,66"]),
+    );
+    expect(renderJobCommand(await plan("s03.sh02", "cut"))).not.toContain("--body");
   });
 
   it("compiles a cut with no overlap", async () => {

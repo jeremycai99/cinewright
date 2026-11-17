@@ -20,6 +20,7 @@ export {
   type Rendered,
   type RenderOptions,
   renderCacheKey,
+  renderJobCommand,
   renderShot,
   resolveRenderer,
   shotRenderKey,

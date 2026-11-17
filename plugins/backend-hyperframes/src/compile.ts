@@ -343,7 +343,9 @@ export async function planShot(options: PlanOptions): Promise<Plan> {
     // and the segment is its exit (decision 6).
     const length = span.end - span.after - (span.start + span.before);
     const times: LayerSpec["timing"] | undefined = own && {
-      enter: own.enter + span.before,
+      // A layer that starts with a shot that has an incoming segment is on from the overlap's
+      // start: the transition is its entrance, mirroring the exit rule.
+      enter: span.incoming && own.enter === 0 ? 0 : own.enter + span.before,
       end: own.end + span.before,
       ...(span.outgoing && own.end === length
         ? { end: own.end + span.before + span.after, exit: false as const }

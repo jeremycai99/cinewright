@@ -1,3 +1,4 @@
+import { readdirSync, readFileSync } from "node:fs";
 import { join } from "node:path";
 import type { RendererInfo, Segment } from "@cinewright/core";
 import { describe, expect, it } from "vitest";
@@ -89,6 +90,14 @@ describe.skipIf(!ENABLED)("transition segments in the container (M3.3)", () => {
         const renderer = await resolveRenderer(IMAGE);
         const { from, to, segment } = await shots(type, renderer);
         expect(segment).toMatchObject({ start: 156, end: 168 });
+        // Bodies leave out the overlap: 78 - 6 and 66 - 6 frames, while every PNG is kept.
+        const bodyFrames = (dir: string) =>
+          readFileSync(join(dir, "framemd5.txt"), "utf8")
+            .split("\n")
+            .filter((l) => /^\d/.test(l)).length;
+        expect(bodyFrames(from.rendered.dir)).toBe(72);
+        expect(bodyFrames(to.rendered.dir)).toBe(60);
+        expect(readdirSync(join(from.rendered.dir, "frames"))).toHaveLength(78);
         const options = {
           segment,
           from,

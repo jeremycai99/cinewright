@@ -69,6 +69,19 @@ export async function resolveRenderer(image: string): Promise<RendererInfo> {
   };
 }
 
+/**
+ * The render-job arguments for a shot: every frame kept as PNG, and an MP4 of its body only,
+ * without the overlaps its transition segments render (M3.3, D34).
+ */
+export function renderJobCommand(shot: Pick<Compiled, "frames" | "timeline" | "spec">): string[] {
+  const { before, after } = shot.timeline;
+  return [
+    ...["--in", "/job/in", "--out", "/job/out", "--format", "mp4+frames"],
+    ...["--fps", String(shot.spec.fps.num)],
+    ...(before > 0 || after > 0 ? ["--body", `${before},${shot.frames - after}`] : []),
+  ];
+}
+
 /** Render key v1 of a compiled shot (M3.2b): its compile inputs and the renderer. */
 export function renderCacheKey(compiled: Compiled, renderer: RendererInfo): string {
   return renderKeyV1({ compile: compiled.inputs, renderer }).slice("sha256:".length);
@@ -132,16 +145,7 @@ export async function renderShot(options: RenderOptions): Promise<Rendered> {
     ...(user ? { user } : {}),
     limits,
     keep: true,
-    command: [
-      "--in",
-      "/job/in",
-      "--out",
-      "/job/out",
-      "--format",
-      "mp4+frames",
-      "--fps",
-      String(fps.num),
-    ],
+    command: renderJobCommand(compiled),
   });
   const budget = timeoutMs(compiled.frames, limits);
   try {
