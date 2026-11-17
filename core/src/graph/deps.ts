@@ -4,7 +4,12 @@ import { indexIr, isObject } from "../ir/paths.js";
 import type { JsonObject } from "../schema/load.js";
 import { type RenderInputs, renderKey, unwrap } from "./render-key.js";
 
-export { type RenderInputs, renderKey } from "./render-key.js";
+export {
+  type RendererInfo,
+  type RenderInputs,
+  renderKey,
+  renderKeyV1,
+} from "./render-key.js";
 
 /** Nodes and edges (dependency → dependents). */
 export interface Graph {
@@ -161,7 +166,8 @@ function contents(ir: InlinedIr, graph: Graph, inputs: RenderInputs): Map<string
     else if (kind === "anchors")
       content = [unwrap(node(rest)?.anchors), anchorLines(unwrap(node(rest)?.layers)).size];
     else if (kind === "duration") content = unwrap(node(rest)?.duration);
-    else if (kind === "render") content = renderKey(ir, rest, d, inputs);
+    else if (kind === "render")
+      content = inputs.renderKey ? inputs.renderKey(ir, rest, d) : renderKey(ir, rest, d, inputs);
     else if (kind === "transition") content = [unwrap(node(rest)?.transition_out), profileHash(d)];
     else if (id.startsWith("mix@")) {
       content = [

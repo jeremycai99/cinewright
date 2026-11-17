@@ -7,6 +7,7 @@ import {
   projectAssets,
   RenderError,
   renderShot,
+  resolveRenderer,
 } from "@cinewright/backend-hyperframes";
 import { catalogDir } from "@cinewright/components";
 import {
@@ -167,7 +168,7 @@ export async function renderShotCommand(argv: string[], io: Io): Promise<number>
     const rendered = await renderShot({
       compiled,
       shotId: t.shotId,
-      image,
+      renderer: await resolveRenderer(image),
       cacheDir: join(t.project, RENDER_CACHE_DIR),
     });
     if (t.json) printJson(io, { status: "ok", ...rendered });

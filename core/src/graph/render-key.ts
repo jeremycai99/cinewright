@@ -10,6 +10,28 @@ export interface RenderInputs {
   componentVersions: Readonly<Record<string, string>>;
   backendVersion: string;
   containerDigest: string;
+  /**
+   * The render key of a shot for a deliverable, when the caller has a better one than the M1.5
+   * IR key: the engine passes the backend's render key v1, computed from what the compiler emits.
+   */
+  renderKey?: (ir: InlinedIr, shotId: string, deliverableId: string) => string;
+}
+
+/** What renders a compiled composition: the image (by content digest), HyperFrames, settings. */
+export interface RendererInfo {
+  image: string;
+  hyperframes: string;
+  settings: unknown;
+}
+
+/**
+ * Render key v1 (M3.2b, audit F3): the hash of everything a shot's frames depend on. `compile` is
+ * the backend's compile inputs (mount spec, root CSS, font, runtime and asset hashes, compiler
+ * version, profile hash); `renderer` is the image digest, HyperFrames version and render settings.
+ * A pack's README never enters it; its content hash (which covers rules.md) does, so re-pinning a pack re-renders its shots.
+ */
+export function renderKeyV1(inputs: { compile: unknown; renderer: RendererInfo }): HashString {
+  return sha256Hash({ render_key: 1, compile: inputs.compile, renderer: inputs.renderer });
 }
 
 const STATES = new Set(["open", "agent", "user", "locked"]);

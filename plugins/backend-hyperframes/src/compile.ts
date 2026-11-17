@@ -1,6 +1,8 @@
-import { copyFileSync, mkdirSync, readFileSync } from "node:fs";
+import { copyFileSync, mkdirSync, mkdtempSync, readFileSync, rmSync } from "node:fs";
+import { tmpdir } from "node:os";
 import { basename, extname, join } from "node:path";
 import {
+  bundleRuntime,
   type LayerSpec,
   layerSeed,
   type MountSpec,
@@ -45,7 +47,7 @@ export interface CompileInputs {
   pack: { id: string; version: string; content_hash: string };
 }
 
-export interface CompileOptions {
+export interface PlanOptions {
   ir: InlinedIr;
   shotId: string;
   deliverableId: string;
@@ -55,7 +57,20 @@ export interface CompileOptions {
   timing: TimingTable;
   /** Asset id → file, for assets the shot's layers name in their props. */
   assets?: Readonly<Record<string, string>>;
+}
+
+export interface CompileOptions extends PlanOptions {
   outDir: string;
+}
+
+/** A compiled shot before anything is written: what `compileShot` writes, and its inputs. */
+export interface Plan {
+  frames: number;
+  spec: MountSpec;
+  rootCss: Record<string, string>;
+  /** Asset id → the file to copy into `assets/`. */
+  copies: Record<string, { source: string; target: string }>;
+  inputs: CompileInputs;
 }
 
 export interface Compiled {
@@ -131,14 +146,30 @@ function assetIdsIn(value: Json, assets: Readonly<Record<string, string>>, out: 
     for (const v of Object.values(value)) assetIdsIn(v, assets, out);
 }
 
+let runtime: Promise<string> | undefined;
+
+/** sha256 of the bundled runtime (the host and every core component), built once per process. */
+export function runtimeHash(): Promise<string> {
+  runtime ??= (async () => {
+    const dir = mkdtempSync(join(tmpdir(), "cw-runtime-"));
+    try {
+      await bundleRuntime(join(dir, "runtime.js"));
+      return sha256Bytes(readFileSync(join(dir, "runtime.js")));
+    } finally {
+      rmSync(dir, { recursive: true, force: true });
+    }
+  })();
+  return runtime;
+}
+
 /**
- * Compile one shot for one deliverable into a HyperFrames composition (M3.1b, D31): span → layer
- * timing → region boxes → each layer's tokens through the cascade → CSS through `cssValue` →
- * mount spec, written by the components package's `writeComposition`. Throws CompileError listing
- * every problem it found, or PackError when `pack` is not the project's pinned pack.
+ * Plan one shot for one deliverable without writing anything (M3.1b, M3.2b): span → layer timing
+ * → region boxes → each layer's tokens through the cascade → CSS through `cssValue` → mount spec,
+ * and the compile inputs render key v1 hashes. Throws CompileError listing every problem it
+ * found, or PackError when `pack` is not the project's pinned pack.
  */
-export async function compileShot(options: CompileOptions): Promise<Compiled> {
-  const { ir, shotId, deliverableId, pack, catalog, timing, outDir } = options;
+export async function planShot(options: PlanOptions): Promise<Plan> {
+  const { ir, shotId, deliverableId, pack, catalog, timing } = options;
   const assets = options.assets ?? {};
 
   const pinned = ir.style?.pack?.value;
@@ -218,6 +249,7 @@ export async function compileShot(options: CompileOptions): Promise<Compiled> {
 
   const layers: LayerSpec[] = [];
   const copied: Record<string, string> = {};
+  const copies: Plan["copies"] = {};
   for (const layer of shot.layers?.value ?? []) {
     const id = layer.id;
     const component = layer.component?.value;
@@ -276,8 +308,7 @@ export async function compileShot(options: CompileOptions): Promise<Compiled> {
       const source = assets[assetId] as string;
       const target = `assets/${assetId}${extname(source) || extensionFor(registered.get(assetId)?.media_type)}`;
       if (!(assetId in copied)) {
-        mkdirSync(join(outDir, "assets"), { recursive: true });
-        copyFileSync(source, join(outDir, target));
+        copies[assetId] = { source, target };
         copied[assetId] = sha256Bytes(readFileSync(source));
       }
       layerAssets[assetId] = target;
@@ -309,18 +340,43 @@ export async function compileShot(options: CompileOptions): Promise<Compiled> {
     aspect,
     layers,
   };
-  mkdirSync(outDir, { recursive: true });
-  await writeComposition({ pack, spec, rootCss, compositionId: shotId, frames, outDir });
   const inputs: CompileInputs = {
     schema_version: 1,
     compiler: COMPILER_VERSION,
     spec,
     root_css: rootCss,
     fonts: Object.fromEntries(pack.fonts.map((f) => [basename(f.file), f.sha256])),
-    runtime: sha256Bytes(readFileSync(join(outDir, "runtime.js"))),
+    runtime: await runtimeHash(),
     assets: copied,
     profile: copy.hash,
     pack: { id: pack.id, version: pack.version, content_hash: pack.contentHash },
   };
-  return { dir: outDir, frames, spec, inputs };
+  return { frames, spec, rootCss, copies, inputs };
+}
+
+/**
+ * Compile one shot for one deliverable into a HyperFrames composition (M3.1b, D31): `planShot`,
+ * then the mount spec written by the components package's `writeComposition`, with the assets
+ * its layers name copied in. Throws as `planShot` does.
+ */
+export async function compileShot(options: CompileOptions): Promise<Compiled> {
+  const { pack, shotId, outDir } = options;
+  const plan = await planShot(options);
+  mkdirSync(outDir, { recursive: true });
+  for (const { source, target } of Object.values(plan.copies)) {
+    mkdirSync(join(outDir, "assets"), { recursive: true });
+    copyFileSync(source, join(outDir, target));
+  }
+  await writeComposition({
+    pack,
+    spec: plan.spec,
+    rootCss: plan.rootCss,
+    compositionId: shotId,
+    frames: plan.frames,
+    outDir,
+  });
+  const written = sha256Bytes(readFileSync(join(outDir, "runtime.js")));
+  if (written !== plan.inputs.runtime)
+    throw new Error(`runtime.js hash ${written} differs from the planned ${plan.inputs.runtime}`);
+  return { dir: outDir, frames: plan.frames, spec: plan.spec, inputs: plan.inputs };
 }

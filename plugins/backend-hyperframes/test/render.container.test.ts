@@ -4,7 +4,7 @@ import { describe, expect, it } from "vitest";
 import { compileShot } from "../src/compile.js";
 import { dockerRunArgs, runDocker } from "../src/docker.js";
 import { DEFAULT_LIMITS } from "../src/limits.js";
-import { RenderError, renderShot } from "../src/render.js";
+import { RenderError, renderShot, resolveRenderer } from "../src/render.js";
 import { catalog, pack, reference, tempDir, timing } from "./helpers.js";
 
 const ENABLED = process.env.CINEWRIGHT_CONTAINER_TESTS === "1";
@@ -44,7 +44,12 @@ describe.skipIf(!ENABLED)("renderShot in the container (M3.2a)", () => {
     async () => {
       const compiled = await compileReference();
       const cacheDir = tempDir();
-      const rendered = await renderShot({ compiled, shotId: "s03.sh01", image: IMAGE, cacheDir });
+      const rendered = await renderShot({
+        compiled,
+        shotId: "s03.sh01",
+        renderer: await resolveRenderer(IMAGE),
+        cacheDir,
+      });
       expect(rendered.hit).toBe(false);
       expect(readdirSync(rendered.dir).sort()).toEqual([
         "body.mp4",
@@ -74,7 +79,7 @@ describe.skipIf(!ENABLED)("renderShot in the container (M3.2a)", () => {
       const error = await renderShot({
         compiled,
         shotId: "s03.sh01",
-        image: IMAGE,
+        renderer: await resolveRenderer(IMAGE),
         cacheDir,
         limits,
       }).catch((e) => e);
@@ -143,7 +148,7 @@ describe.skipIf(!ENABLED)("renderShot in the container (M3.2a)", () => {
       const rendered = await renderShot({
         compiled,
         shotId: "s03.sh01",
-        image: IMAGE,
+        renderer: await resolveRenderer(IMAGE),
         cacheDir: tempDir(),
       });
       const frames = frameHashes(rendered.dir);
@@ -165,7 +170,7 @@ describe.skipIf(!ENABLED)("renderShot at its memory limit (Review Focus 5)", () 
       const error = await renderShot({
         compiled,
         shotId: "s03.sh01",
-        image: IMAGE,
+        renderer: await resolveRenderer(IMAGE),
         cacheDir,
         limits,
       }).catch((e) => e);

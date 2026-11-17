@@ -38,7 +38,13 @@ export {
 } from "./catalog/catalog.js";
 export type * from "./generated/ir.js";
 export { dependencyGraph, dirtyNodes, type Graph } from "./graph/deps.js";
-export { type RenderInputs, renderKey, unwrap } from "./graph/render-key.js";
+export {
+  type RendererInfo,
+  type RenderInputs,
+  renderKey,
+  renderKeyV1,
+  unwrap,
+} from "./graph/render-key.js";
 export {
   collectEntities,
   type EntityInfo,

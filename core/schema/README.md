@@ -290,3 +290,5 @@ Locking or approving a field never changes the key. Key order never matters.
 - Planning nodes (`script`, `plan:<scene>`) sit beside the chain.
 
 `dirtyNodes(before, after, inputs)` returns the nodes whose own inputs changed, plus everything downstream of them.
+
+**Render key v1 (M3.2b, audit F3).** The M1.5 key sees only what the IR states, so it misses tokens a component reads implicitly, region geometry, fonts and component code. `renderKeyV1({ compile, renderer })` hashes the backend's compile inputs (mount spec, root CSS, font, runtime and asset hashes, compiler version, profile hash, pack content hash) and the renderer (image content digest, HyperFrames version, render settings). A pack's README never enters it. `inputs.renderKey`, when given, replaces the M1.5 key for `render:` nodes: the engine passes the backend's `shotRenderKey`, so dirty sets follow v1 keys while core stays free of the backend.
