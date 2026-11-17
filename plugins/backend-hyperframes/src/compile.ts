@@ -404,7 +404,13 @@ export async function planShot(options: PlanOptions): Promise<Plan> {
   // Burned-in captions (M3.4, D35): one caption_track layer on top, styled from the sequence
   // and placed in the pack's captions region, so a cue split by a cut looks the same on both sides.
   if (deliverable?.burn_in_captions?.value === true) {
-    const cues = captionCues(ir, timing, { start: span.start, end: span.end });
+    const cues = captionCues(
+      ir,
+      timing,
+      { start: span.start, end: span.end },
+      entry.sequence,
+      profile.captions,
+    );
     const captionRegion = pack.layouts.templates.captions?.variants[aspect]?.regions.captions;
     if (!captionRegion) {
       issues.push({

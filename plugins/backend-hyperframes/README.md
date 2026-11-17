@@ -59,7 +59,7 @@ CI renders the reference shot twice on each of two runners (`.github/scripts/ref
 
 ## Burned-in captions (M3.4, D35)
 
-When the deliverable's `burn_in_captions` is true, `planShot` adds a `caption_track` layer, `<shot>.captions`, on top of the shot's layers. Its cues are the script lines the timing table places in the shot's compile span, clipped to it (`captionCues`), with the line text; the component breaks them into lines by the profile's caption rules. The layer is styled from the sequence's tokens (all of them, not a difference from the shot's) and placed in the pack's `captions` region, so a cue split by a cut has the same text, box and size on both sides. A deliverable that does not burn captions in gets no layer; a pack with no `captions` region fails with `compile.unknown_region` at `/burn_in_captions`.
+When the deliverable's `burn_in_captions` is true, `planShot` adds a `caption_track` layer, `<shot>.captions`, on top of the shot's layers. Its cues are the lines of the shot's own sequence (its scenes' `lines` and every line its shots and layers anchor to) that the timing table places in the shot's compile span, clipped to it (`captionCues`). A line too long for the profile's caption rules is split into several cues at word boundaries, each starting at its first word's frame; the component breaks each cue into lines. The layer is styled from the sequence's tokens (all of them, not a difference from the shot's) and placed in the pack's `captions` region, so a cue split by a cut has the same text, box and size on both sides. A deliverable that does not burn captions in gets no layer; a pack with no `captions` region fails with `compile.unknown_region` at `/burn_in_captions`.
 
 ## Plugin
 

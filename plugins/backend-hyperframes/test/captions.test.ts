@@ -1,3 +1,4 @@
+import { breakCaption } from "@cinewright/components";
 import { dirtyNodes, type TimingTable } from "@cinewright/core";
 import { describe, expect, it } from "vitest";
 import { planShot, shotRenderKey } from "../src/index.js";
@@ -67,6 +68,62 @@ describe("burned-in captions (M3.4)", () => {
     expect(b?.box).toEqual(a?.box);
     expect(b?.css).toEqual(a?.css);
     expect(b?.js).toEqual(a?.js);
+  });
+
+  it("takes cues only from the shot's own sequence", async () => {
+    const table = timing();
+    table.lines["b02.l01"] = { start: 20, end: 40, words: [{ start: 20, end: 40 }] };
+    const layer = captionsOf(
+      await plan("s03.sh01", "social_portrait", table, [
+        BURN,
+        FULL,
+        {
+          op: "insert",
+          entity: "script",
+          path: "/beats",
+          value: {
+            id: "b02",
+            summary: "Other",
+            lines: [{ id: "b02.l01", text: "Elsewhere.", speaker: "narrator" }],
+          },
+        },
+        {
+          op: "insert",
+          entity: "demo",
+          path: "/sequences",
+          value: {
+            id: "seq_b",
+            title: "B",
+            scenes: [{ id: "sb1", intent: "Other", lines: ["b02.l01"] }],
+          },
+        },
+      ]),
+    );
+    expect(((layer?.props.cues ?? []) as { text: string }[]).map((c) => c.text)).toEqual([
+      "Every team hits the same wall.",
+    ]);
+  });
+
+  it("splits a line too long for the caption rules at word timings, so no cue overflows", async () => {
+    const text = "Continuous integration pipelines inevitably accumulate complexity.";
+    const layer = captionsOf(
+      await plan("s03.sh01", "social_portrait", timing(), [
+        BURN,
+        FULL,
+        { op: "set", entity: "b01.l01", path: "/text", value: text },
+      ]),
+    );
+    const cues = layer?.props.cues as { text: string; start: number; end: number }[];
+    expect(cues.length).toBeGreaterThan(1);
+    expect(cues.map((c) => c.text).join(" ")).toBe(text);
+    // Words start at 15, 25, 34, 43, 50, 59 on the timeline; the shot starts at 15.
+    expect(cues[0]?.start).toBe(0);
+    expect(cues.at(-1)?.end).toBe(60);
+    for (const [i, cue] of cues.entries()) {
+      expect(breakCaption(cue.text, 32, 2).overflow).toBe(false);
+      if (i > 0) expect(cue.start).toBe(cues[i - 1]?.end);
+      expect([0, 10, 19, 28, 35, 44]).toContain(cue.start);
+    }
   });
 
   it("a caption edit dirties only the shots it touches", async () => {
