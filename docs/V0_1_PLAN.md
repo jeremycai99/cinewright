@@ -163,7 +163,7 @@ Detailed task plan (approved 2026-11-16): `docs/plans/m3-hyperframes-backend.md`
 
 ### M4 — Audio
 
-Detailed task plan (awaiting approval): `docs/plans/m4-audio.md`. It decides the audio image, the Kokoro licence boundary and the generative music provider.
+Detailed task plan (approved 2026-11-17): `docs/plans/m4-audio.md`, revised after the audit `docs/plans/audit-m3-m4-plan-2026-11-16.md`. It starts with **M3.6**, the audit's M3 fixes (body ranges, render key, caption overlap, container tests in CI), and moves M4.3b (generative music) after the alpha gate.
 
 - **M4.1 TTS provider interface** + ElevenLabs plugin (with character/word timestamps) + Kokoro local plugin (a Python subprocess plugin, M1.8b; word timestamps come from M4.5 alignment where the provider returns none). The voice comes from the narrator's provider binding (D29); plugins translate the pronunciation lexicon. Takes are frozen in the CAS with provenance (D33).
   - AC: the same narration renders through either plugin and yields timing anchors in the IR; re-running the pipeline reuses frozen takes.
