@@ -18,11 +18,12 @@ cinewright schema [<kind> | tokens [--json]]
 cinewright components [<id>] [--json]
 cinewright pack pin <pack_id> [--project <dir>] [--json]
 cinewright compile <shot_id> --deliverable <id> --timing <timing.json> --out <dir> [--project <dir>] [--json]
+cinewright render-shot <shot_id> --deliverable <id> --timing <timing.json> [--image <ref>] [--project <dir>] [--json]
 ```
 
 `--deliverable` takes a delivery profile name from `registry/profiles/` (`landscape_web`, `vertical_social`; see `registry/README.md`) or a path to a profile file: anything with a `/` or ending in `.json`. An unknown name exits 2 and lists the names. `--pack` chooses the style pack (default `neutral`): `init` sets `style.pack` and pins the pack's version and content hash in `packs`, so a later change to the pack never silently changes the project. When a pack changes on disk, compiling fails with `pack.pin_mismatch` until `cinewright pack pin <id>` records the new pin as a new revision. Packs are found in each folder of `CINEWRIGHT_PACK_PATH` (separated like `PATH`), then in the repository's `packs/`.
 
-`compile` is a developer tool until `cinewright render` (M5.4): it compiles one shot for one deliverable into a HyperFrames composition (`plugins/backend-hyperframes`), and exits 3 listing every compile error with its entity, field and rule.
+`compile` is a developer tool until `cinewright render` (M5.4): it compiles one shot for one deliverable into a HyperFrames composition (`plugins/backend-hyperframes`), and exits 3 listing every compile error with its entity, field and rule. `render-shot` compiles the shot into `.cinewright/compiled/` and renders it in the render image (`--image` or `CINEWRIGHT_IMAGE`) with the network off and run limits, into the disposable cache `.cinewright/cache/renders/<key>/`; a cached render runs no container. A failed render exits 8 naming the shot and the limit or error.
 
 Without `--project`, a command uses the nearest directory upward that holds `cinewright.json`. `--file -` reads the patch from stdin.
 
@@ -138,6 +139,7 @@ A status line follows: `applied revision N (sha256:…)`, `pending pN (reason)`,
 | 5 | Blocked by authorship and stored as a pending suggestion |
 | 6 | The project failed to load: edited outside the store, a corrupt or missing file |
 | 7 | The store lock stayed held by another process (`CINEWRIGHT_LOCK_TIMEOUT_MS`, default 10 s) |
+| 8 | A render failed: it hit its timeout or memory limit, or `render-job` failed (`render-shot`) |
 
 ## Test switches
 

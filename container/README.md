@@ -40,7 +40,11 @@ The image carries the label `org.cinewright.inputs-hash`: a SHA-256 over every f
 uv run cinewright-render-in-container --image cinewright-render:dev --in container/fixtures/hello-world --out out/hello
 ```
 
-The host runs `docker run --rm --network none --platform linux/amd64` as the host user, with the composition mounted read-only at `/job/in` and the output folder at `/job/out`. Every argument is a list element, never passed through a shell, and the bind mounts are CSV-quoted, so paths with spaces, commas or non-ASCII characters work. Inside the image, `render-job`:
+The host runs `docker run --rm --network none --platform linux/amd64` as the host user, with the composition mounted read-only at `/job/in` and the output folder at `/job/out`. Every argument is a list element, never passed through a shell, and the bind mounts are CSV-quoted, so paths with spaces, commas or non-ASCII characters work.
+
+**Run limits (audit F17).** User assets enter the container, so every run (render, check, asset generation) adds `--memory 4096m --memory-swap 4096m --pids-limit 512 --cap-drop ALL --security-opt no-new-privileges --read-only --tmpfs /tmp:rw,exec,size=2048m`: no capabilities, no writes outside `/tmp` and `/job/out`, bounded memory and processes. `renderShot` (`plugins/backend-hyperframes`) also kills a run after 120 s plus 1 s per frame. The Python tools (`container.py` `RUN_LIMITS`) and the plugin (`src/limits.ts`) use the same values.
+
+Inside the image, `render-job`:
 
 1. Copies `/job/in` to a fixed work folder, adding nothing to it.
 2. Calls `@hyperframes/producer`'s `createRenderJob` and `executeRenderJob`, passing every setting explicitly.
@@ -48,7 +52,9 @@ The host runs `docker run --rm --network none --platform linux/amd64` as the hos
 
 Exit codes: 0 ok, 2 usage or input error, 3 blocked network request, 4 render failure.
 
-With `--format png-sequence`, `render-job` moves HyperFrames' frames from its work folder to `/job/out/frames/`. The two are on different devices (the output is a bind mount), so a rename that fails with `EXDEV` falls back to copy and delete.
+`--format mp4+frames` writes `output.mp4` and keeps its PNG frames in `frames/` (shot renders keep them for transition segments, M3.3). `--fps 24|25|30|60` sets the frame rate to the composition's own; without it the settings' `fps` applies.
+
+With `--format png-sequence` (or `mp4+frames`), `render-job` moves HyperFrames' frames from its work folder to `/job/out/frames/`. The two are on different devices (the output is a bind mount), so a rename that fails with `EXDEV` falls back to copy and delete.
 
 ## Checking
 

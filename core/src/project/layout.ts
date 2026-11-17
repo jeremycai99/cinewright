@@ -9,6 +9,8 @@ export const CACHE_DIR = ".cinewright";
 export const CAS_DIR = ".cinewright/cas";
 export const RUNS_DIR = ".cinewright/runs";
 export const TXN_DIR = ".cinewright/txn";
+/** Disposable shot renders, one folder per render key (M3.2a); deleting it only costs time. */
+export const RENDER_CACHE_DIR = ".cinewright/cache/renders";
 export const GITIGNORE = ".cinewright/\n";
 
 const ID = /^[a-z][a-z0-9_]*(\.[a-z0-9_]+)*$/;

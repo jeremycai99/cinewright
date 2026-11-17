@@ -4,17 +4,17 @@ import { dirname, join } from "node:path";
 import { fileURLToPath } from "node:url";
 import { type CheckArgs, check } from "./check.js";
 import { EXIT, type Format, type RenderArgs, render } from "./render.js";
-import { loadSettings } from "./settings.js";
+import { FRAME_RATES, type FrameRate, loadSettings } from "./settings.js";
 import { reportVersions } from "./versions.js";
 
 export type { Format, RenderArgs };
 
 export class UsageError extends Error {}
 
-const FORMATS: readonly Format[] = ["mp4", "png-sequence"];
-const FLAGS = ["--in", "--out", "--format"];
+const FORMATS: readonly Format[] = ["mp4", "png-sequence", "mp4+frames"];
+const FLAGS = ["--in", "--out", "--format", "--fps"];
 const USAGE = [
-  "usage: render-job --in <composition dir> --out <output dir> [--format mp4|png-sequence]",
+  "usage: render-job --in <composition dir> --out <output dir> [--format mp4|png-sequence|mp4+frames] [--fps 24|25|30|60]",
   "       render-job check --in <composition dir> --out <output dir> --at <seconds,...>",
   "       render-job --versions",
 ].join("\n");
@@ -74,7 +74,15 @@ export function parseArgs(argv: readonly string[]): RenderArgs | CheckArgs | { v
   if (!(FORMATS as readonly string[]).includes(format)) {
     throw new UsageError(`--format must be one of ${FORMATS.join(", ")}`);
   }
-  return { input, output, format: format as Format };
+  const fps = values.get("--fps");
+  if (fps !== undefined && !(FRAME_RATES as readonly number[]).includes(Number(fps)))
+    throw new UsageError(`--fps must be one of ${FRAME_RATES.join(", ")}`);
+  return {
+    input,
+    output,
+    format: format as Format,
+    ...(fps ? { fps: Number(fps) as FrameRate } : {}),
+  };
 }
 
 export async function main(argv: readonly string[]): Promise<number> {
@@ -91,7 +99,8 @@ export async function main(argv: readonly string[]): Promise<number> {
     return EXIT.ok;
   }
   if ("check" in parsed) return check(parsed);
-  return render(parsed, loadSettings(SETTINGS_PATH));
+  const settings = loadSettings(SETTINGS_PATH);
+  return render(parsed, parsed.fps ? { ...settings, fps: parsed.fps } : settings);
 }
 
 const invokedPath = process.argv[1];

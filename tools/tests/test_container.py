@@ -5,7 +5,7 @@ from pathlib import Path
 
 import pytest
 
-from cinewright_tools.container import inputs_hash, main, run_render
+from cinewright_tools.container import docker_run_base, inputs_hash, main, run_render
 
 FIXTURES = Path(__file__).resolve().parents[2] / "container/fixtures"
 HELLO = FIXTURES / "hello-world"
@@ -85,3 +85,15 @@ def test_remote_url_fails_and_names_it(image: str, tmp_path: Path) -> None:
     r = run_render(image, REMOTE, tmp_path / "o")
     assert r.exit_code == 3, r.stderr
     assert "blocked network request: https://example.com/cinewright-network-probe.png" in r.stderr
+
+
+def test_every_run_has_the_limits() -> None:
+    command = docker_run_base("docker")
+    after = lambda flag: command[command.index(flag) + 1]  # noqa: E731
+    assert after("--network") == "none"
+    assert after("--memory") == after("--memory-swap") == "4096m"
+    assert after("--pids-limit") == "512"
+    assert after("--cap-drop") == "ALL"
+    assert after("--security-opt") == "no-new-privileges"
+    assert "--read-only" in command
+    assert after("--tmpfs") == "/tmp:rw,exec,size=2048m"

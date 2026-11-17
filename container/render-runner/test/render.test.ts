@@ -2,7 +2,7 @@ import { existsSync, mkdirSync, mkdtempSync, readdirSync, rmSync, writeFileSync 
 import { tmpdir } from "node:os";
 import { join } from "node:path";
 import { describe, expect, it } from "vitest";
-import { copyWork, jobOptions, outcomeAccepted } from "../src/render.js";
+import { copyWork, framesDir, jobOptions, outcomeAccepted } from "../src/render.js";
 import { loadSettings } from "../src/settings.js";
 
 const settings = loadSettings(new URL("../render-settings.json", import.meta.url).pathname);
@@ -53,5 +53,13 @@ describe("copyWork", () => {
     expect(readdirSync(project)).toEqual(["index.html"]);
     expect(existsSync(join(project, "vendor", "gsap.min.js"))).toBe(false);
     rmSync(root, { recursive: true, force: true });
+  });
+});
+
+describe("framesDir", () => {
+  it("captures kept frames on the output mount, not in the memory-backed /tmp", () => {
+    expect(framesDir("mp4+frames", "/job/out")).toBe("/job/out/.frames");
+    expect(framesDir("png-sequence", "/job/out")).toBe("/job/out/.frames");
+    expect(framesDir("mp4", "/job/out")).toBe("/tmp/cinewright-render/frames");
   });
 });

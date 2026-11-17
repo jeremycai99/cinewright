@@ -99,8 +99,27 @@ class CheckResult:
     stderr: str
 
 
+# Limits on every container run (audit F17), the same as plugins/backend-hyperframes/src/limits.ts.
+RUN_LIMITS = [
+    "--memory",
+    "4096m",
+    "--memory-swap",
+    "4096m",
+    "--pids-limit",
+    "512",
+    "--cap-drop",
+    "ALL",
+    "--security-opt",
+    "no-new-privileges",
+    "--read-only",
+    "--tmpfs",
+    "/tmp:rw,exec,size=2048m",
+]
+
+
 def docker_run_base(docker: str) -> list[str]:
     command = [docker, "run", "--rm", "--network", "none", "--platform", IMAGE_PLATFORM]
+    command += RUN_LIMITS
     if hasattr(os, "getuid"):
         # Outputs belong to the host user; HOME must be writable for Chrome.
         command += ["--user", f"{os.getuid()}:{os.getgid()}", "--env", "HOME=/tmp"]
