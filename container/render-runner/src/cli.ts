@@ -2,6 +2,7 @@
 import { realpathSync } from "node:fs";
 import { dirname, join } from "node:path";
 import { fileURLToPath } from "node:url";
+import { type BoxesArgs, boxes } from "./boxes.js";
 import { type CheckArgs, check } from "./check.js";
 import { EXIT, type Format, type RenderArgs, render } from "./render.js";
 import { FRAME_RATES, type FrameRate, loadSettings } from "./settings.js";
@@ -16,6 +17,7 @@ const FLAGS = ["--in", "--out", "--format", "--fps", "--body"];
 const USAGE = [
   "usage: render-job --in <composition dir> --out <output dir> [--format mp4|png-sequence|mp4+frames] [--fps 24|25|30|60] [--body <start>,<end>]",
   "       render-job check --in <composition dir> --out <output dir> --at <seconds,...>",
+  "       render-job boxes --in <composition dir> --out <output dir> --at <seconds,...> --size <W>x<H> [--fps <n>]",
   "       render-job --versions",
 ].join("\n");
 
@@ -53,9 +55,33 @@ function parseCheck(argv: readonly string[]): CheckArgs {
   return { check: true, input, output, at: times };
 }
 
-export function parseArgs(argv: readonly string[]): RenderArgs | CheckArgs | { versions: true } {
+function parseBoxes(argv: readonly string[]): BoxesArgs {
+  const values = flagValues(argv, ["--in", "--out", "--at", "--size", "--fps"]);
+  const { input, output, at } = parseCheck(
+    ["--in", "--out", "--at"].flatMap((f) => (values.has(f) ? [f, values.get(f) as string] : [])),
+  );
+  const size = /^(\d+)x(\d+)$/.exec(values.get("--size") ?? "");
+  if (!size) throw new UsageError("--size <width>x<height> is required");
+  const fps = values.get("--fps");
+  if (fps !== undefined && !(FRAME_RATES as readonly number[]).includes(Number(fps)))
+    throw new UsageError(`--fps must be one of ${FRAME_RATES.join(", ")}`);
+  return {
+    boxes: true,
+    input,
+    output,
+    at,
+    width: Number(size[1]),
+    height: Number(size[2]),
+    ...(fps ? { fps: Number(fps) } : {}),
+  };
+}
+
+export function parseArgs(
+  argv: readonly string[],
+): RenderArgs | CheckArgs | BoxesArgs | { versions: true } {
   if (argv.length === 1 && argv[0] === "--versions") return { versions: true };
   if (argv[0] === "check") return parseCheck(argv.slice(1));
+  if (argv[0] === "boxes") return parseBoxes(argv.slice(1));
   const values = new Map<string, string>();
   for (let i = 0; i < argv.length; i += 2) {
     const flag = argv[i] ?? "";
@@ -96,7 +122,7 @@ export function parseArgs(argv: readonly string[]): RenderArgs | CheckArgs | { v
 }
 
 export async function main(argv: readonly string[]): Promise<number> {
-  let parsed: RenderArgs | CheckArgs | { versions: true };
+  let parsed: RenderArgs | CheckArgs | BoxesArgs | { versions: true };
   try {
     parsed = parseArgs(argv);
   } catch (error) {
@@ -109,6 +135,10 @@ export async function main(argv: readonly string[]): Promise<number> {
     return EXIT.ok;
   }
   if ("check" in parsed) return check(parsed);
+  if ("boxes" in parsed) {
+    const base = loadSettings(SETTINGS_PATH);
+    return boxes(parsed, parsed.fps ? { ...base, fps: parsed.fps as FrameRate } : base);
+  }
   const settings = loadSettings(SETTINGS_PATH);
   return render(parsed, parsed.fps ? { ...settings, fps: parsed.fps } : settings);
 }
