@@ -19,6 +19,7 @@
     "test": "vitest run"
   },
   "dependencies": {
+    "@cinewright/backend-hyperframes": "workspace:*",
     "@cinewright/components": "workspace:*",
     "@cinewright/core": "workspace:*"
   }

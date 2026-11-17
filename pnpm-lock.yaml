@@ -184,6 +184,9 @@ importers:
 
   cli:
     dependencies:
+      '@cinewright/backend-hyperframes':
+        specifier: workspace:*
+        version: link:../plugins/backend-hyperframes
       '@cinewright/components':
         specifier: workspace:*
         version: link:../components
@@ -247,6 +250,18 @@ importers:
       '@cinewright/core':
         specifier: workspace:*
         version: link:../core
+
+  plugins/backend-hyperframes:
+    dependencies:
+      '@cinewright/components':
+        specifier: workspace:*
+        version: link:../../components
+      '@cinewright/core':
+        specifier: workspace:*
+        version: link:../../core
+      '@cinewright/plugin-sdk':
+        specifier: workspace:*
+        version: link:../sdk-ts
 
   plugins/sdk-ts:
     dependencies:

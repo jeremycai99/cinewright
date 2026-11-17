@@ -1,0 +1,32 @@
+{
+  "base_revision": 8,
+  "author": { "kind": "user" },
+  "mode": "apply",
+  "reason": "Place the reference shot's layers in its template's regions",
+  "ops": [
+    {
+      "op": "set",
+      "entity": "s03.sh01.title",
+      "path": "/layout/landscape",
+      "value": { "region": "title" }
+    },
+    {
+      "op": "set",
+      "entity": "s03.sh01.title",
+      "path": "/layout/portrait",
+      "value": { "region": "title" }
+    },
+    {
+      "op": "set",
+      "entity": "s03.sh01.bars",
+      "path": "/layout/landscape",
+      "value": { "region": "body" }
+    },
+    {
+      "op": "set",
+      "entity": "s03.sh01.bars",
+      "path": "/layout/portrait",
+      "value": { "region": "body" }
+    }
+  ]
+}

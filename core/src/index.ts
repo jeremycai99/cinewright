@@ -83,10 +83,13 @@ export {
   checkResolved,
   contrastPairs,
   contrastRatio,
+  cssValue,
   cssVar,
   type EmittedTokens,
   tokenEmit,
   tokenPointer,
+  UNSAFE_CSS,
+  UnsafeValueError,
 } from "./pack/tokens.js";
 export {
   checkLiteral,
