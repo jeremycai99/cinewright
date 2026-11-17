@@ -35,6 +35,7 @@ async function editable() {
       RENDERER,
     );
   };
+  // biome-ignore lint/suspicious/noExplicitAny: tests edit pack JSON freely
   const edit = (file: string, change: (doc: Record<string, any>) => void) => {
     const path = join(root, "neutral", file);
     const doc = JSON.parse(readFileSync(path, "utf8"));
