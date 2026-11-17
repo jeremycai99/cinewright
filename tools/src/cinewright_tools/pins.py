@@ -50,7 +50,6 @@ def expected_pins(repo_root: Path) -> dict[str, Pin]:
             (repo_root / ".node-version").read_text(encoding="utf-8").strip(), ".node-version"
         ),
         "hyperframes": Pin(deps["hyperframes"], RUNNER_MANIFEST),
-        "gsap": Pin(deps["gsap"], RUNNER_MANIFEST),
         "chrome_headless_shell": Pin(str(pins["chrome_headless_shell"]), PINS_FILE),
     }
     for key, package in APT_REPORT_KEYS.items():

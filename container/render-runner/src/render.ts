@@ -29,8 +29,12 @@ export const EXIT = { ok: 0, input: 2, network: 3, render: 4 } as const;
 
 /** Each container runs one job, so a fixed work path keeps paths identical between runs. */
 const WORK_DIR = "/tmp/cinewright-render";
-const VENDOR_GSAP = process.env.CINEWRIGHT_GSAP_PATH ?? "/opt/cinewright/vendor/gsap.min.js";
 const FFMPEG = process.env.HYPERFRAMES_FFMPEG_PATH ?? "ffmpeg";
+
+/** Copy the composition to the work folder as it is; render-job adds no runtime to it. */
+export async function copyWork(input: string, project: string): Promise<void> {
+  await cp(input, project, { recursive: true });
+}
 
 /**
  * Render the composition in `args.input` into `args.output`: `output.mp4` (or `frames/`),
@@ -50,9 +54,7 @@ export async function render(args: RenderArgs, settings: RenderSettings): Promis
   const project = join(WORK_DIR, "project");
   const frames = join(WORK_DIR, "frames");
   await rm(WORK_DIR, { recursive: true, force: true });
-  await cp(input, project, { recursive: true });
-  await mkdir(join(project, "vendor"), { recursive: true });
-  await cp(VENDOR_GSAP, join(project, "vendor", "gsap.min.js"));
+  await copyWork(input, project);
 
   const renderFrames = settings.encode === "ffmpeg" || args.format === "png-sequence";
   const target = renderFrames ? frames : join(out, "output.mp4");

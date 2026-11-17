@@ -1,5 +1,8 @@
+import { existsSync, mkdirSync, mkdtempSync, readdirSync, rmSync, writeFileSync } from "node:fs";
+import { tmpdir } from "node:os";
+import { join } from "node:path";
 import { describe, expect, it } from "vitest";
-import { jobOptions, outcomeAccepted } from "../src/render.js";
+import { copyWork, jobOptions, outcomeAccepted } from "../src/render.js";
 import { loadSettings } from "../src/settings.js";
 
 const settings = loadSettings(new URL("../render-settings.json", import.meta.url).pathname);
@@ -36,5 +39,19 @@ describe("outcomeAccepted", () => {
   it("never accepts a failed or missing outcome", () => {
     expect(outcomeAccepted("failed", false)).toBe(false);
     expect(outcomeAccepted(undefined, false)).toBe(false);
+  });
+});
+
+describe("copyWork", () => {
+  it("copies the composition and adds nothing to it", async () => {
+    const root = mkdtempSync(join(tmpdir(), "cw-work-"));
+    const input = join(root, "in");
+    mkdirSync(input);
+    writeFileSync(join(input, "index.html"), "<html></html>");
+    const project = join(root, "work", "project");
+    await copyWork(input, project);
+    expect(readdirSync(project)).toEqual(["index.html"]);
+    expect(existsSync(join(project, "vendor", "gsap.min.js"))).toBe(false);
+    rmSync(root, { recursive: true, force: true });
   });
 });

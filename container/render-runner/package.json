@@ -12,10 +12,9 @@
     "test": "vitest run"
   },
   "dependencies": {
-    "@hyperframes/producer": "0.9.41",
+    "@hyperframes/producer": "0.9.58",
     "@puppeteer/browsers": "3.2.7",
-    "gsap": "3.15.1",
-    "hyperframes": "0.9.41"
+    "hyperframes": "0.9.58"
   },
   "devDependencies": {
     "@types/node": "24.19.2",
