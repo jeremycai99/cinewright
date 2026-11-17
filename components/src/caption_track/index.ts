@@ -1,5 +1,5 @@
 import type { Build } from "../host/context.js";
-import { breakCaption, type Cue, cueTimes } from "./lines.js";
+import { breakCaption, type Cue, displayCues } from "./lines.js";
 
 const FLEX = { start: "flex-start", center: "center", end: "flex-end" } as const;
 
@@ -15,7 +15,10 @@ export const captionTrack: Build = (ctx) => {
   root.style.flexDirection = "column";
   root.style.justifyContent = FLEX[ctx.align];
   root.style.alignItems = FLEX[ctx.justify];
-  for (const cue of (props.cues as Cue[] | undefined) ?? []) {
+  for (const cue of displayCues(
+    (props.cues as Cue[] | undefined) ?? [],
+    rules.min_display_frames,
+  )) {
     const { lines, overflow } = breakCaption(cue.text, rules.max_chars_per_line, rules.max_lines);
     const box = document.createElement("div");
     box.className = "cw-caption";
@@ -38,9 +41,8 @@ export const captionTrack: Build = (ctx) => {
     }
     if (overflow) box.dataset.cwOverflow = "true";
     root.append(box);
-    const times = cueTimes(cue, rules.min_display_frames);
-    const start = ctx.timing.enterMs + ctx.frameMs(times.start);
-    const end = Math.min(ctx.timing.enterMs + ctx.frameMs(times.end), ctx.timing.endMs);
+    const start = ctx.timing.enterMs + ctx.frameMs(cue.start);
+    const end = Math.min(ctx.timing.enterMs + ctx.frameMs(cue.end), ctx.timing.endMs);
     const hold = box.animate([{ visibility: "visible" }, { visibility: "visible" }], {
       delay: start,
       duration: Math.max(end - start, 0),

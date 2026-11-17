@@ -3,6 +3,7 @@ import { tmpdir } from "node:os";
 import { basename, extname, join } from "node:path";
 import {
   bundleRuntime,
+  compositionHtml,
   type LayerSpec,
   layerSeed,
   type MountSpec,
@@ -39,6 +40,13 @@ export interface CompileInputs {
   compiler: string;
   /** The composition's length in frames, overlaps included. */
   frames: number;
+  /**
+   * The frames the body MP4 holds, relative to the composition's start: everything outside its
+   * transition segments (D34). Two transitions can share a compiled span yet differ here.
+   */
+  body: { start: number; end: number };
+  /** sha256 of `index.html`, so a change to the composition template is a new key (audit G4). */
+  html: string;
   spec: MountSpec;
   root_css: Record<string, string>;
   /** Font file name → sha256. */
@@ -76,6 +84,8 @@ export interface Timeline {
   /** Overlap frames before the shot's own span (an incoming segment) and after it (outgoing). */
   before: number;
   after: number;
+  /** The frames outside every segment, relative to `start`: what the body MP4 holds (D34). */
+  body: { start: number; end: number };
 }
 
 export interface Plan {
@@ -411,6 +421,8 @@ export async function planShot(options: PlanOptions): Promise<Plan> {
       entry.sequence,
       profile.captions,
     );
+    // The cues are final: `captionCues` applied the minimum display time (audit G3).
+    const trackRules = { ...profile.captions, min_display_frames: 0 };
     const captionRegion = pack.layouts.templates.captions?.variants[aspect]?.regions.captions;
     if (!captionRegion) {
       issues.push({
@@ -440,7 +452,7 @@ export async function planShot(options: PlanOptions): Promise<Plan> {
           timing: { enter: 0, end: span.end - span.start },
           motion: [],
           seed: layerSeed(id),
-          captions: profile.captions,
+          captions: trackRules,
         });
       }
     }
@@ -448,7 +460,8 @@ export async function planShot(options: PlanOptions): Promise<Plan> {
   if (issues.length > 0) throw new CompileError(issues);
 
   const frames = span.end - span.start;
-  const timeline: Timeline = { start: span.start, before: span.before, after: span.after };
+  const body = { start: span.body.start - span.start, end: span.body.end - span.start };
+  const timeline: Timeline = { start: span.start, before: span.before, after: span.after, body };
   const shotSegments = {
     ...(span.incoming ? { incoming: span.incoming } : {}),
     ...(span.outgoing ? { outgoing: span.outgoing } : {}),
@@ -464,6 +477,12 @@ export async function planShot(options: PlanOptions): Promise<Plan> {
     schema_version: 1,
     compiler: COMPILER_VERSION,
     frames,
+    body,
+    html: sha256Bytes(
+      new TextEncoder().encode(
+        compositionHtml({ pack, spec, rootCss, compositionId: shotId, frames }),
+      ),
+    ),
     spec,
     root_css: rootCss,
     fonts: Object.fromEntries(pack.fonts.map((f) => [basename(f.file), f.sha256])),
@@ -499,6 +518,9 @@ export async function compileShot(options: CompileOptions): Promise<Compiled> {
   const written = sha256Bytes(readFileSync(join(outDir, "runtime.js")));
   if (written !== plan.inputs.runtime)
     throw new Error(`runtime.js hash ${written} differs from the planned ${plan.inputs.runtime}`);
+  const html = sha256Bytes(readFileSync(join(outDir, "index.html")));
+  if (html !== plan.inputs.html)
+    throw new Error(`index.html hash ${html} differs from the planned ${plan.inputs.html}`);
   return {
     dir: outDir,
     frames: plan.frames,

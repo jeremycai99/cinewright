@@ -74,11 +74,12 @@ export async function resolveRenderer(image: string): Promise<RendererInfo> {
  * without the overlaps its transition segments render (M3.3, D34).
  */
 export function renderJobCommand(shot: Pick<Compiled, "frames" | "timeline" | "spec">): string[] {
-  const { before, after } = shot.timeline;
+  const { body } = shot.timeline;
+  const whole = body.start === 0 && body.end === shot.frames;
   return [
     ...["--in", "/job/in", "--out", "/job/out", "--format", "mp4+frames"],
     ...["--fps", String(shot.spec.fps.num)],
-    ...(before > 0 || after > 0 ? ["--body", `${before},${shot.frames - after}`] : []),
+    ...(whole ? [] : ["--body", `${body.start},${body.end}`]),
   ];
 }
 

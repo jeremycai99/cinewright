@@ -28,7 +28,17 @@ export function breakCaption(
   return { lines, overflow: lines.length > maxLines };
 }
 
-/** A cue's on-screen frames, extended to at least `minFrames` (the profile's caption rule). */
-export function cueTimes(cue: Cue, minFrames: number): { start: number; end: number } {
-  return { start: cue.start, end: Math.max(cue.end, cue.start + minFrames) };
+/**
+ * Cues as they show on screen, in start order: each held for at least `minFrames` (the profile's
+ * caption rule), but never past the next cue's start, so two cues never draw at once.
+ */
+export function displayCues<T extends Cue>(cues: readonly T[], minFrames: number): T[] {
+  const sorted = [...cues].sort((a, b) => a.start - b.start);
+  return sorted.map((cue, i) => {
+    const next = sorted[i + 1]?.start ?? Number.POSITIVE_INFINITY;
+    return {
+      ...cue,
+      end: Math.max(cue.start, Math.min(Math.max(cue.end, cue.start + minFrames), next)),
+    };
+  });
 }

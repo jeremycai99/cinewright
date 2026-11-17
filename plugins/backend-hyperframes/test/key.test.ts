@@ -1,6 +1,6 @@
 import { cpSync, mkdirSync, readFileSync, writeFileSync } from "node:fs";
 import { join } from "node:path";
-import { dirtyNodes, loadPack, type RendererInfo } from "@cinewright/core";
+import { dirtyNodes, loadPack, type RendererInfo, sha256Bytes } from "@cinewright/core";
 import { describe, expect, it } from "vitest";
 import { compileShot, planShot } from "../src/compile.js";
 import { renderShot, shotRenderKey } from "../src/render.js";
@@ -97,6 +97,21 @@ describe("render key v1 (M3.2b, audit F3)", () => {
     expect(
       await shotRenderKey(options, { ...RENDERER, settings: { encode: "hyperframes" } }),
     ).not.toBe(base);
+  });
+
+  it("includes the composition HTML's hash, so a template change is a new key (audit G4)", async () => {
+    const store = await reference();
+    const options = {
+      ir: store.ir(),
+      shotId: "s03.sh01",
+      deliverableId: "web_landscape",
+      pack: pack("neutral"),
+      catalog: catalog(),
+      timing: timing(),
+    };
+    const plan = await planShot(options);
+    const compiled = await compileShot({ ...options, outDir: tempDir() });
+    expect(plan.inputs.html).toBe(sha256Bytes(readFileSync(join(compiled.dir, "index.html"))));
   });
 
   it("includes the runtime bundle's hash", async () => {

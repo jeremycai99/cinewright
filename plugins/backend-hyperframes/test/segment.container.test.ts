@@ -90,13 +90,14 @@ describe.skipIf(!ENABLED)("transition segments in the container (M3.3)", () => {
         const renderer = await resolveRenderer(IMAGE);
         const { from, to, segment } = await shots(type, renderer);
         expect(segment).toMatchObject({ start: 156, end: 168 });
-        // Bodies leave out the overlap: 78 - 6 and 66 - 6 frames, while every PNG is kept.
+        // Bodies leave out the whole segment: 78 - 12 and 66 - 12 frames, while every PNG is kept.
+        // With the 12-frame segment they add up to the two shots' own spans (72 + 60, audit G1).
         const bodyFrames = (dir: string) =>
           readFileSync(join(dir, "framemd5.txt"), "utf8")
             .split("\n")
             .filter((l) => /^\d/.test(l)).length;
-        expect(bodyFrames(from.rendered.dir)).toBe(72);
-        expect(bodyFrames(to.rendered.dir)).toBe(60);
+        expect(bodyFrames(from.rendered.dir)).toBe(66);
+        expect(bodyFrames(to.rendered.dir)).toBe(54);
         expect(readdirSync(join(from.rendered.dir, "frames"))).toHaveLength(78);
         const options = {
           segment,
@@ -111,6 +112,10 @@ describe.skipIf(!ENABLED)("transition segments in the container (M3.3)", () => {
         expect(b.key).toBe(a.key);
         expect(b.framemd5).toBe(a.framemd5);
         expect(b.sha256).toBe(a.sha256);
+        // What assembly concatenates covers the timeline exactly: [90, 222).
+        expect(
+          bodyFrames(from.rendered.dir) + bodyFrames(a.dir) + bodyFrames(to.rendered.dir),
+        ).toBe(222 - 90);
         const firstA = segment.start - from.compiled.timeline.start + 1;
         const lastB = segment.end - 1 - to.compiled.timeline.start + 1;
         expect(

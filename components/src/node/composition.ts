@@ -44,31 +44,25 @@ export function escapeAttr(text: string): string {
     .replace(/>/g, "&gt;");
 }
 
-/**
- * Write a HyperFrames composition for a mount spec (M3.1b): `index.html`, `runtime.js` (the host
- * and every core component) and the pack's fonts. Specimens and the shot compiler both call it,
- * so the background on `#root`, `data-no-timeline` and the readiness promise hold for both.
- * `rootCss` is the frame-wide CSS variables; each layer's own differ from it (`LayerSpec.css`).
- * Every value must already be safe for CSS (core's `cssValue`).
- */
-export async function writeComposition(options: {
+export interface CompositionOptions {
   pack: Pack;
   spec: MountSpec;
   rootCss: Record<string, string>;
   compositionId: string;
   /** The composition's length in frames. */
   frames: number;
-  outDir: string;
-}): Promise<void> {
-  const { pack, spec, rootCss, compositionId, frames, outDir } = options;
+}
+
+/**
+ * The composition's `index.html` for a mount spec. Pure, so the shot compiler can hash it into
+ * the render key (audit G4): a change to the template is a change to every render.
+ * `rootCss` is the frame-wide CSS variables; each layer's own differ from it (`LayerSpec.css`).
+ * Every value must already be safe for CSS (core's `cssValue`).
+ */
+export function compositionHtml(options: CompositionOptions): string {
+  const { pack, spec, rootCss, compositionId, frames } = options;
   const { fps, width, height } = spec;
   const seconds = (f: number) => (f * fps.den) / fps.num;
-
-  mkdirSync(join(outDir, "fonts"), { recursive: true });
-  for (const font of pack.fonts)
-    copyFileSync(join(pack.dir, font.file), join(outDir, "fonts", basename(font.file)));
-  await bundleRuntime(join(outDir, "runtime.js"));
-
   const rate = fps.den === 1 ? String(fps.num) : `${fps.num}/${fps.den}`;
   const clips = spec.layers
     .map((layer, i) => {
@@ -77,7 +71,7 @@ export async function writeComposition(options: {
       return `      <div id="cw-${escapeAttr(layer.id)}" class="clip cw-layer" data-start="${seconds(layer.timing.enter)}" data-duration="${seconds(layer.timing.end) - seconds(layer.timing.enter)}" data-track-index="${i}" style="${style}"></div>`;
     })
     .join("\n");
-  const html = `<!doctype html>
+  return `<!doctype html>
 <html lang="en">
   <head>
     <meta charset="UTF-8" />
@@ -100,5 +94,21 @@ ${clips}
   </body>
 </html>
 `;
-  writeFileSync(join(outDir, "index.html"), html);
+}
+
+/**
+ * Write a HyperFrames composition for a mount spec (M3.1b): `index.html` (`compositionHtml`),
+ * `runtime.js` (the host and every core component) and the pack's fonts. Specimens and the shot
+ * compiler both call it, so the background on `#root`, `data-no-timeline` and the readiness
+ * promise hold for both.
+ */
+export async function writeComposition(
+  options: CompositionOptions & { outDir: string },
+): Promise<void> {
+  const { pack, outDir } = options;
+  mkdirSync(join(outDir, "fonts"), { recursive: true });
+  for (const font of pack.fonts)
+    copyFileSync(join(pack.dir, font.file), join(outDir, "fonts", basename(font.file)));
+  await bundleRuntime(join(outDir, "runtime.js"));
+  writeFileSync(join(outDir, "index.html"), compositionHtml(options));
 }

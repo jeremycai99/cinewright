@@ -40,10 +40,12 @@ describe("burned-in captions (M3.4)", () => {
       cues: [{ text: "Every team hits the same wall.", start: 0, end: 60 }],
     });
     expect(layer?.timing).toEqual({ enter: 0, end: 75 });
+    // The compiler applies the profile's minimum display time itself (audit G3), so the
+    // component adds none.
     expect(layer?.captions).toEqual({
       max_chars_per_line: 32,
       max_lines: 2,
-      min_display_frames: 30,
+      min_display_frames: 0,
     });
   });
 
@@ -52,17 +54,33 @@ describe("burned-in captions (M3.4)", () => {
   });
 
   it("splits a cue at a cut and draws both halves identically", async () => {
+    // The cut at frame 90 falls inside the first line, which now runs to 100; the second line
+    // follows it, so the two cues never overlap (audit G3).
     const table = timing();
     (table.lines["b01.l01"] as { end: number }).end = 100;
-    const a = captionsOf(await plan("s03.sh01", "social_portrait", table));
-    const b = captionsOf(await plan("s03.sh02", "social_portrait", table));
+    (table.lines["b01.l02"] as { start: number }).start = 100;
+    const ops = [
+      BURN,
+      FULL,
+      {
+        op: "set",
+        entity: "s03.sh02",
+        path: "/anchors",
+        value: {
+          start: { line: "b01.l01", point: "end", offset: -10 },
+          end: { line: "b01.l02", point: "end", offset: 12 },
+        },
+      },
+    ];
+    const a = captionsOf(await plan("s03.sh01", "social_portrait", table, ops));
+    const b = captionsOf(await plan("s03.sh02", "social_portrait", table, ops));
     expect(a?.props).toEqual({
       cues: [{ text: "Every team hits the same wall.", start: 0, end: 75 }],
     });
     expect(b?.props).toEqual({
       cues: [
         { text: "Every team hits the same wall.", start: 0, end: 10 },
-        { text: "We rebuilt it three times.", start: 0, end: 60 },
+        { text: "We rebuilt it three times.", start: 10, end: 60 },
       ],
     });
     expect(b?.box).toEqual(a?.box);
@@ -118,12 +136,58 @@ describe("burned-in captions (M3.4)", () => {
     expect(cues.map((c) => c.text).join(" ")).toBe(text);
     // Words start at 15, 25, 34, 43, 50, 59 on the timeline; the shot starts at 15.
     expect(cues[0]?.start).toBe(0);
-    expect(cues.at(-1)?.end).toBe(60);
+    // The last piece starts at 44 and is held for 30 frames, ending before the next line (75).
+    expect(cues.at(-1)?.end).toBe(74);
     for (const [i, cue] of cues.entries()) {
       expect(breakCaption(cue.text, 32, 2).overflow).toBe(false);
       if (i > 0) expect(cue.start).toBe(cues[i - 1]?.end);
       expect([0, 10, 19, 28, 35, 44]).toContain(cue.start);
     }
+  });
+
+  it("holds a short cue for the minimum display time, but never past the next cue (audit G3)", async () => {
+    const table = timing();
+    // "Every team…" is spoken over [15, 20); a short line follows 10 frames later, inside the shot.
+    table.lines["b01.l01"] = {
+      ...(table.lines["b01.l01"] as TimingTable["lines"][string]),
+      end: 20,
+    };
+    table.lines["b01.l03"] = { start: 25, end: 70, words: [] };
+    const cues = captionsOf(
+      await plan("s03.sh01", "social_portrait", table, [
+        BURN,
+        FULL,
+        {
+          op: "insert",
+          entity: "b01",
+          path: "/lines",
+          value: { id: "b01.l03", text: "Then it moves.", speaker: "narrator" },
+        },
+        {
+          op: "set",
+          entity: "s03_the_problem",
+          path: "/lines",
+          value: ["b01.l01", "b01.l02", "b01.l03"],
+        },
+      ]),
+    )?.props.cues as { start: number; end: number }[];
+    expect(cues.map((c) => [c.start, c.end])).toEqual([
+      [0, 10],
+      [10, 55],
+    ]);
+  });
+
+  it("holds a cue for the minimum display time when nothing follows it", async () => {
+    const table = timing();
+    table.lines["b01.l01"] = {
+      ...(table.lines["b01.l01"] as TimingTable["lines"][string]),
+      end: 20,
+    };
+    const cues = captionsOf(await plan("s03.sh01", "social_portrait", table))?.props.cues as {
+      start: number;
+      end: number;
+    }[];
+    expect(cues[0]).toMatchObject({ start: 0, end: 30 });
   });
 
   it("a caption edit dirties only the shots it touches", async () => {

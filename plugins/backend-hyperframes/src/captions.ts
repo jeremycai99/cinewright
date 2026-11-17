@@ -1,4 +1,4 @@
-import { breakCaption } from "@cinewright/components";
+import { breakCaption, displayCues } from "@cinewright/components";
 import type { InlinedIr, Span, TimingTable } from "@cinewright/core";
 
 export interface Cue {
@@ -11,6 +11,7 @@ export interface Cue {
 export interface CaptionRules {
   max_chars_per_line: number;
   max_lines: number;
+  min_display_frames: number;
 }
 
 /** Every script line's text, by line id. */
@@ -73,8 +74,10 @@ function pieces(
 
 /**
  * Caption cues for a compiled span (M3.4): the lines of the shot's sequence that the timing table
- * places in the span, split to fit the caption rules, clipped to the span, in spoken order, with
- * frames relative to its start. A line that runs across a cut gives a cue on each side.
+ * places in the span, split to fit the caption rules, held for the minimum display time but never
+ * past the next cue (audit G3), clipped to the span, in spoken order, with frames relative to its
+ * start. The hold is applied on the sequence timeline before clipping, so a line that runs across
+ * a cut gives the same cue times on each side, and the cues are final: the component adds no hold.
  */
 export function captionCues(
   ir: InlinedIr,
@@ -85,15 +88,15 @@ export function captionCues(
 ): Cue[] {
   const texts = lineTexts(ir);
   const used = sequenceLines(ir, sequenceId);
-  return Object.entries(table.lines)
+  const spoken = Object.entries(table.lines)
     .filter(([id]) => texts.has(id) && used.has(id))
     .sort(([a, x], [b, y]) => x.start - y.start || (a < b ? -1 : 1))
-    .flatMap(([id, line]) => pieces(texts.get(id) as string, line, rules))
-    .flatMap((piece) => {
-      const start = Math.max(piece.start, span.start);
-      const end = Math.min(piece.end, span.end);
-      return end > start
-        ? [{ text: piece.text, start: start - span.start, end: end - span.start }]
-        : [];
-    });
+    .flatMap(([id, line]) => pieces(texts.get(id) as string, line, rules));
+  return displayCues(spoken, rules.min_display_frames).flatMap((piece) => {
+    const start = Math.max(piece.start, span.start);
+    const end = Math.min(piece.end, span.end);
+    return end > start
+      ? [{ text: piece.text, start: start - span.start, end: end - span.start }]
+      : [];
+  });
 }
