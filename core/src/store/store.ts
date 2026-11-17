@@ -647,6 +647,7 @@ export class Store {
    */
   async pinPack(pack: Pack, author: Author): Promise<ApplyResult> {
     return withLock(this.dir, this.options.lockTimeoutMs, async () => {
+      this.state = await Store.load(this.dir);
       const next = withPin(this.state.ir, pack.id, pack.version, pack.contentHash);
       const revision = this.revision() + 1;
       const hash = stateHash(next);

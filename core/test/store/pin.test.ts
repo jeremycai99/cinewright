@@ -103,6 +103,21 @@ describe("pack pins (M3.1a)", () => {
     expect(reopened.ir().packs).toEqual(store.ir().packs);
   });
 
+  it("pins on top of a patch another process applied since this store opened", async () => {
+    const packs = packCopy();
+    const { dir, store } = await pinnedProject("neutral", packs);
+    const other = await Store.open(dir, OPTIONS);
+    const applied = await other.apply(
+      patch(other, [{ op: "set", entity: "demo", path: "/brief", value: "From elsewhere." }]),
+    );
+    expect(applied).toMatchObject({ status: "applied", revision: 1 });
+    const result = await store.pinPack(loadPack("neutral", [packs]), USER);
+    expect(result).toMatchObject({ status: "applied", revision: 2 });
+    const reopened = await Store.open(dir, OPTIONS);
+    expect(reopened.revision()).toBe(2);
+    expect(reopened.ir().brief).toEqual({ state: "user", value: "From elsewhere." });
+  });
+
   it("is pack.unpinned when style.pack names a pack with no pin", async () => {
     const packs = packCopy();
     const { store } = await pinnedProject("neutral", packs);
