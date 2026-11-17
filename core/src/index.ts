@@ -158,7 +158,15 @@ export {
 } from "./store/store.js";
 export { parseTime, TimeError } from "./time.js";
 export { resolveAnchor, TimingError } from "./timing/anchor.js";
-export { layerTiming, type Span, shotSpan, shotsInOrder } from "./timing/span.js";
+export {
+  compileSpan,
+  layerTiming,
+  type Segment,
+  type Span,
+  segmentsOf,
+  shotSpan,
+  shotsInOrder,
+} from "./timing/span.js";
 export { type TimingTable, validateTimingTable } from "./timing/table.js";
 
 export const VERSION = "0.0.0";

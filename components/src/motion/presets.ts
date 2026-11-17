@@ -83,6 +83,8 @@ export function animateOut(
   phase: Phase,
   ctx: ComponentContext,
 ): Animation {
+  // An outgoing transition segment is the layer's exit (M3.3): nothing animates out.
+  if (ctx.timing.exit === false) return el.animate([], { duration: 0 });
   const preset = checkPreset(name, ctx);
   const animation = el.animate(keyframes(preset, el, ctx).reverse(), {
     delay: phase.startMs,

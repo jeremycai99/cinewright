@@ -11,6 +11,7 @@ import {
 import {
   CascadeError,
   type Catalog,
+  compileSpan,
   type InlinedIr,
   layerTiming,
   type Pack,
@@ -18,8 +19,9 @@ import {
   type ResolvedToken,
   regionBox,
   resolveEntity,
+  type Segment,
+  segmentsOf,
   sha256Bytes,
-  shotSpan,
   shotsInOrder,
   TimingError,
   type TimingTable,
@@ -34,6 +36,8 @@ import { COMPILER_VERSION } from "./version.js";
 export interface CompileInputs {
   schema_version: 1;
   compiler: string;
+  /** The composition's length in frames, overlaps included. */
+  frames: number;
   spec: MountSpec;
   root_css: Record<string, string>;
   /** Font file name → sha256. */
@@ -64,8 +68,19 @@ export interface CompileOptions extends PlanOptions {
 }
 
 /** A compiled shot before anything is written: what `compileShot` writes, and its inputs. */
+/** Where a compiled shot sits on its sequence's timeline (M3.3). */
+export interface Timeline {
+  /** The first compiled frame, on the sequence timeline. */
+  start: number;
+  /** Overlap frames before the shot's own span (an incoming segment) and after it (outgoing). */
+  before: number;
+  after: number;
+}
+
 export interface Plan {
   frames: number;
+  timeline: Timeline;
+  segments: { incoming?: Segment; outgoing?: Segment };
   spec: MountSpec;
   rootCss: Record<string, string>;
   /** Asset id → the file to copy into `assets/`. */
@@ -75,6 +90,8 @@ export interface Plan {
 
 export interface Compiled {
   dir: string;
+  timeline: Timeline;
+  segments: { incoming?: Segment; outgoing?: Segment };
   /** The composition's length: the shot's span, in frames. */
   frames: number;
   spec: MountSpec;
@@ -87,7 +104,12 @@ function timingIssue(error: TimingError): CompileIssue {
   return {
     entity: error.entity ?? null,
     pointer: "",
-    rule: error.rule === "timing.unknown_span" ? "compile.unknown_span" : error.rule,
+    rule:
+      error.rule === "timing.unknown_span"
+        ? "compile.unknown_span"
+        : error.rule === "timing.transition_too_long"
+          ? "compile.transition_too_long"
+          : error.rule,
     message: error.message,
   };
 }
@@ -144,6 +166,37 @@ function assetIdsIn(value: Json, assets: Readonly<Record<string, string>>, out: 
   else if (Array.isArray(value)) for (const v of value) assetIdsIn(v, assets, out);
   else if (value && typeof value === "object")
     for (const v of Object.values(value)) assetIdsIn(v, assets, out);
+}
+
+/**
+ * Which scene transitions render as segments for a deliverable (M3.3): `cross_dissolve` and
+ * `wipe`, unless the scene's resolved `transition.<type>.enabled` is false. The duration is the
+ * transition's own `duration` in frames, else `transition.<type>.duration` (ms) at the profile's
+ * frame rate. Cuts and match cuts are not segments.
+ */
+export function transitionsFor(
+  ir: InlinedIr,
+  deliverableId: string,
+  pack: Pack,
+  fps: { num: number; den: number },
+): (sceneId: string) => { type: Segment["type"]; frames: number } | null {
+  const scenes = new Map<string, { type?: string; duration?: number }>();
+  for (const sequence of ir.sequences.value ?? [])
+    for (const scene of sequence.scenes?.value ?? [])
+      scenes.set(
+        scene.id,
+        (unwrap(scene.transition_out) ?? {}) as { type?: string; duration?: number },
+      );
+  return (sceneId) => {
+    const transition = scenes.get(sceneId);
+    const type = transition?.type;
+    if (type !== "cross_dissolve" && type !== "wipe") return null;
+    const tokens = resolveEntity(ir, sceneId, deliverableId, pack.tokens).tokens;
+    if (tokens[`transition.${type}.enabled`]?.value === false) return null;
+    const ms = tokens[`transition.${type}.duration`]?.value as number;
+    const frames = transition?.duration ?? Math.round((ms * fps.num) / (fps.den * 1000));
+    return frames > 0 ? { type, frames } : null;
+  };
 }
 
 let runtime: Promise<string> | undefined;
@@ -225,7 +278,12 @@ export async function planShot(options: PlanOptions): Promise<Plan> {
   const registered = new Map((ir.assets.value ?? []).map((a) => [a.id, a]));
 
   const issues: CompileIssue[] = [];
-  const span = attempt(issues, shotId, () => shotSpan(ir, shotId, timing));
+  const segments = attempt(issues, shotId, () =>
+    segmentsOf(ir, timing, transitionsFor(ir, deliverableId, pack, profile.frame_rate)),
+  );
+  const span = segments
+    ? attempt(issues, shotId, () => compileSpan(ir, shotId, timing, segments))
+    : undefined;
   const shotStyle = attempt(issues, shotId, () =>
     resolveEntity(ir, shotId, deliverableId, pack.tokens),
   );
@@ -280,7 +338,19 @@ export async function planShot(options: PlanOptions): Promise<Plan> {
       });
       continue;
     }
-    const times = attempt(issues, id, () => layerTiming(ir, id, timing));
+    const own = attempt(issues, id, () => layerTiming(ir, id, timing));
+    // Shift into the compiled span; a layer that lasts to an outgoing segment stays to its end,
+    // and the segment is its exit (decision 6).
+    const length = span.end - span.after - (span.start + span.before);
+    const times: LayerSpec["timing"] | undefined = own && {
+      // A layer that starts with a shot that has an incoming segment is on from the overlap's
+      // start: the transition is its entrance, mirroring the exit rule.
+      enter: span.incoming && own.enter === 0 ? 0 : own.enter + span.before,
+      end: own.end + span.before,
+      ...(span.outgoing && own.end === length
+        ? { end: own.end + span.before + span.after, exit: false as const }
+        : {}),
+    };
     const style = attempt(issues, id, () => resolveEntity(ir, id, deliverableId, pack.tokens));
     if (!times || !style) continue;
     const emitted = attempt(issues, id, () =>
@@ -333,6 +403,11 @@ export async function planShot(options: PlanOptions): Promise<Plan> {
   if (issues.length > 0) throw new CompileError(issues);
 
   const frames = span.end - span.start;
+  const timeline: Timeline = { start: span.start, before: span.before, after: span.after };
+  const shotSegments = {
+    ...(span.incoming ? { incoming: span.incoming } : {}),
+    ...(span.outgoing ? { outgoing: span.outgoing } : {}),
+  };
   const spec: MountSpec = {
     fps: profile.frame_rate,
     width: profile.width,
@@ -343,6 +418,7 @@ export async function planShot(options: PlanOptions): Promise<Plan> {
   const inputs: CompileInputs = {
     schema_version: 1,
     compiler: COMPILER_VERSION,
+    frames,
     spec,
     root_css: rootCss,
     fonts: Object.fromEntries(pack.fonts.map((f) => [basename(f.file), f.sha256])),
@@ -351,7 +427,7 @@ export async function planShot(options: PlanOptions): Promise<Plan> {
     profile: copy.hash,
     pack: { id: pack.id, version: pack.version, content_hash: pack.contentHash },
   };
-  return { frames, spec, rootCss, copies, inputs };
+  return { frames, timeline, segments: shotSegments, spec, rootCss, copies, inputs };
 }
 
 /**
@@ -378,5 +454,12 @@ export async function compileShot(options: CompileOptions): Promise<Compiled> {
   const written = sha256Bytes(readFileSync(join(outDir, "runtime.js")));
   if (written !== plan.inputs.runtime)
     throw new Error(`runtime.js hash ${written} differs from the planned ${plan.inputs.runtime}`);
-  return { dir: outDir, frames: plan.frames, spec: plan.spec, inputs: plan.inputs };
+  return {
+    dir: outDir,
+    frames: plan.frames,
+    timeline: plan.timeline,
+    segments: plan.segments,
+    spec: plan.spec,
+    inputs: plan.inputs,
+  };
 }

@@ -33,7 +33,11 @@ export function mount(spec: MountSpec): Promise<void> {
         root,
         props: layer.props,
         tokens: tokenReader(layer.js),
-        timing: { enterMs: frameMs(layer.timing.enter), endMs: frameMs(layer.timing.end) },
+        timing: {
+          enterMs: frameMs(layer.timing.enter),
+          endMs: frameMs(layer.timing.end),
+          ...(layer.timing.exit === false ? { exit: false as const } : {}),
+        },
         frameMs,
         motion: layer.motion,
         aspect: spec.aspect,

@@ -41,6 +41,16 @@ describe("parseArgs", () => {
     );
   });
 
+  it("accepts --body <start>,<end> with mp4+frames: the frames the MP4 holds", () => {
+    expect(
+      parseArgs(["--in", "a", "--out", "b", "--format", "mp4+frames", "--body", "6,72"]),
+    ).toMatchObject({ format: "mp4+frames", body: { start: 6, end: 72 } });
+    expect(() =>
+      parseArgs(["--in", "a", "--out", "b", "--format", "mp4+frames", "--body", "72,6"]),
+    ).toThrow(UsageError);
+    expect(() => parseArgs(["--in", "a", "--out", "b", "--body", "0,6"])).toThrow(UsageError);
+  });
+
   it("rejects a frame rate HyperFrames does not accept", () => {
     expect(() => parseArgs(["--in", "a", "--out", "b", "--fps", "29.97"])).toThrow(UsageError);
   });

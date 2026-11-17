@@ -31,6 +31,11 @@ export interface RenderArgs {
   format: Format;
   /** Overrides the settings' frame rate: the composition's own (its delivery profile's). */
   fps?: FrameRate;
+  /**
+   * With `mp4+frames`: the frames `[start, end)` the MP4 holds; every frame is still kept. A
+   * shot's body leaves out its transition overlaps, which segments render (M3.3, D34).
+   */
+  body?: { start: number; end: number };
 }
 
 export const EXIT = { ok: 0, input: 2, network: 3, render: 4 } as const;
@@ -105,7 +110,7 @@ export async function render(args: RenderArgs, settings: RenderSettings): Promis
 
   if (args.format === "mp4" || args.format === "mp4+frames") {
     const video = join(out, "output.mp4");
-    if (renderFrames) await encodeFrames(frames, settings.fps, settings.encoder, video);
+    if (renderFrames) await encodeFrames(frames, settings.fps, settings.encoder, video, args.body);
     await writeFramemd5(["-i", video], join(out, "framemd5.txt"));
     const lines = [`${await sha256(video)}  output.mp4\n`];
     if (args.format === "mp4+frames") {
@@ -185,10 +190,14 @@ async function encodeFrames(
   fps: number,
   encoder: EncoderSettings,
   output: string,
+  body?: { start: number; end: number },
 ): Promise<void> {
   await run(FFMPEG, [
     ...["-nostdin", "-v", "error", "-y", "-filter_threads", "1"],
+    // HyperFrames numbers frames from 1.
+    ...(body ? ["-start_number", String(body.start + 1)] : []),
     ...["-framerate", String(fps), "-i", join(framesDir, "frame_%06d.png")],
+    ...(body ? ["-frames:v", String(body.end - body.start)] : []),
     ...["-c:v", encoder.codec, "-preset", encoder.preset, "-crf", String(encoder.crf)],
     ...["-pix_fmt", encoder.pix_fmt, "-threads", String(encoder.threads)],
     ...["-g", String(encoder.keyint), "-keyint_min", String(encoder.keyint), "-sc_threshold", "0"],

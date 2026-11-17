@@ -12,9 +12,9 @@ export type { Format, RenderArgs };
 export class UsageError extends Error {}
 
 const FORMATS: readonly Format[] = ["mp4", "png-sequence", "mp4+frames"];
-const FLAGS = ["--in", "--out", "--format", "--fps"];
+const FLAGS = ["--in", "--out", "--format", "--fps", "--body"];
 const USAGE = [
-  "usage: render-job --in <composition dir> --out <output dir> [--format mp4|png-sequence|mp4+frames] [--fps 24|25|30|60]",
+  "usage: render-job --in <composition dir> --out <output dir> [--format mp4|png-sequence|mp4+frames] [--fps 24|25|30|60] [--body <start>,<end>]",
   "       render-job check --in <composition dir> --out <output dir> --at <seconds,...>",
   "       render-job --versions",
 ].join("\n");
@@ -77,11 +77,21 @@ export function parseArgs(argv: readonly string[]): RenderArgs | CheckArgs | { v
   const fps = values.get("--fps");
   if (fps !== undefined && !(FRAME_RATES as readonly number[]).includes(Number(fps)))
     throw new UsageError(`--fps must be one of ${FRAME_RATES.join(", ")}`);
+  const bodyText = values.get("--body");
+  const body = bodyText === undefined ? undefined : /^(\d+),(\d+)$/.exec(bodyText);
+  if (bodyText !== undefined) {
+    if (format !== "mp4+frames") throw new UsageError("--body needs --format mp4+frames");
+    if (!body || Number(body[2]) <= Number(body[1]))
+      throw new UsageError(
+        `--body must be <start>,<end> frames with end after start, got "${bodyText}"`,
+      );
+  }
   return {
     input,
     output,
     format: format as Format,
     ...(fps ? { fps: Number(fps) as FrameRate } : {}),
+    ...(body ? { body: { start: Number(body[1]), end: Number(body[2]) } } : {}),
   };
 }
 

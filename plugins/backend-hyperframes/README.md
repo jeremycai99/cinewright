@@ -48,6 +48,15 @@ Runs `render-job --format mp4+frames --fps <rate>` in the render image with the 
 
 CI renders the reference shot twice on each of two runners (`.github/scripts/reference-shot.sh`): both renders and both runners must give identical `framemd5.txt` and `sha256.txt`, and a third run must be a cache hit.
 
+## Transition segments (M3.3, D34)
+
+`transitionsFor(ir, deliverable, pack, fps)` says which scene transitions render as segments: `cross_dissolve` and `wipe`, unless the scene's resolved `transition.<type>.enabled` is false, over the transition's own `duration` (frames) or `transition.<type>.duration` (ms). Core's `segmentsOf` places each overlap centred on the cut (`h = floor(d / 2)` frames before, `d − h` after; total length unchanged) and fails with `compile.transition_too_long`, naming the scene and both shots, when it is longer than either shot.
+
+- **Compiling:** `planShot` compiles each shot over its span plus its overlaps (`timeline: { start, before, after }`, `segments: { incoming, outgoing }`). A layer that lasts to an outgoing segment stays to the end of the overlap with `timing.exit: false`: the segment is its exit. A layer that starts with a shot that has an incoming segment is on from the overlap's start: the segment is its entrance.
+- **Bodies:** `renderShot` keeps every frame as PNG but encodes `body.mp4` from the frames outside the overlaps only (`render-job --body <start>,<end>`), so assembly concatenates bodies and segments without re-encoding.
+- **Rendering:** `renderSegment` blends the two shots' cached PNG frames over the overlap with the image's FFmpeg (`blend`, one weight per frame from the scene's easing, `easingWeights`; a wipe moves a soft edge in its `direction`, `softness` of the frame wide), encoded with the render settings' encoder, bit-exact and single-threaded. Nothing re-renders in the browser. It is cached in `.cinewright/cache/segments/<key>/` by both shots' render keys and the blend.
+- **Checked:** the segment's first frame matches the outgoing shot's frame at that time and its last frame the incoming shot's (PSNR over 38 dB); two renders are identical.
+
 ## Plugin
 
 `manifest.json` declares a `backend` plugin with the capability `render.composition`. `createPlugin()` answers it with `{ project, shot, deliverable, timing, out_dir, pack_path? }` and returns `{ dir, inputs }`; compile and pack errors are `invalid_request`.
