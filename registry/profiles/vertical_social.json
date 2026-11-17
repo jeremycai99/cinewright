@@ -1,0 +1,45 @@
+{
+  "aspect_class": "portrait",
+  "captions": {
+    "max_chars_per_line": 32,
+    "max_lines": 2,
+    "min_display_frames": 30
+  },
+  "encoding": {
+    "audio_bitrate_kbps": 256,
+    "audio_codec": "aac",
+    "codec": "libx264",
+    "crf": 18,
+    "pix_fmt": "yuv420p",
+    "preset": "medium"
+  },
+  "frame_rate": {
+    "den": 1,
+    "num": 30
+  },
+  "height": 1920,
+  "id": "vertical_social",
+  "loudness": {
+    "integrated_lufs": -14,
+    "tolerance_lu": 1,
+    "true_peak_dbtp": -1
+  },
+  "name": "Vertical social, 1080x1920 30 fps",
+  "safe_zones": {
+    "action": {
+      "bottom": 0.35,
+      "left": 0.06,
+      "right": 0.18,
+      "top": 0.14
+    },
+    "title": {
+      "bottom": 0.35,
+      "left": 0.12,
+      "right": 0.28,
+      "top": 0.15
+    }
+  },
+  "sample_rate": 48000,
+  "schema_version": 1,
+  "width": 1080
+}

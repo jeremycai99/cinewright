@@ -8,13 +8,13 @@ import {
   loadCatalog,
   loadExamples,
   loadPack,
+  profileRefPath,
+  registryProfileNames,
 } from "@cinewright/core";
 import { catalogDir } from "../catalog-dir.js";
 import { buildSpecimen } from "./specimen.js";
 
 const PACKS = fileURLToPath(new URL("../../../packs/", import.meta.url));
-/** Delivery profiles for specimens: the M1 fixture profiles until M5.3 ships real ones. */
-const PROFILES = fileURLToPath(new URL("../../../core/test/fixtures/profiles/", import.meta.url));
 
 export interface SpecimenOptions {
   out: string;
@@ -38,9 +38,7 @@ export async function writeSpecimens(
   options: SpecimenOptions,
 ): Promise<{ dir: string; samples: number[] }[]> {
   const packIds = options.packs ?? names(PACKS, (n) => existsSync(join(PACKS, n, "pack.json")));
-  const profileNames =
-    options.profiles ??
-    names(PROFILES, (n) => n.endsWith(".json")).map((n) => n.replace(/\.json$/, ""));
+  const profileRefs = options.profiles ?? registryProfileNames();
   const catalog = loadCatalog(catalogDir);
   const componentIds = options.components ?? catalog.ids();
   const override = options.examples
@@ -55,12 +53,12 @@ export async function writeSpecimens(
   const written: { dir: string; samples: number[] }[] = [];
   for (const packId of packIds) {
     const pack = loadPack(packId, [PACKS]);
-    for (const profileName of profileNames) {
+    for (const ref of profileRefs) {
       const profile = JSON.parse(
-        readFileSync(join(PROFILES, `${profileName}.json`), "utf8"),
+        readFileSync(profileRefPath(ref, process.cwd()), "utf8"),
       ) as DeliveryProfile;
       if (!pack.manifest.aspect_classes.includes(profile.aspect_class)) continue;
-      const dir = join(options.out, packId, profileName);
+      const dir = join(options.out, packId, profile.id);
       mkdirSync(dir, { recursive: true });
       const result = await buildSpecimen({ pack, profile, examples: items, outDir: dir });
       const layers = result.spec.layers.map((l) => ({ id: l.id, ...l.timing }));

@@ -78,7 +78,7 @@ pnpm --filter @cinewright/components specimens -- --out out/specimens [--pack <i
 uv run cinewright-check-specimens --image cinewright-render:dev out/specimens
 ```
 
-**Building.** The first command writes `out/specimens/<pack>/<profile>/` for every pack and every profile whose aspect class that pack supports. Each folder holds `index.html`, `runtime.js`, `fonts/` and `samples.json`: the frame rate, the times to check (each example's entrance midpoint, hold midpoint and last frame) and each layer's frames. The profiles are the M1 fixture profiles until delivery profiles ship (M5.3).
+**Building.** The first command writes `out/specimens/<pack>/<profile>/` for every pack and every profile whose aspect class that pack supports. Each folder holds `index.html`, `runtime.js`, `fonts/` and `samples.json`: the frame rate, the times to check (each example's entrance midpoint, hold midpoint and last frame) and each layer's frames. The profiles are the registry's delivery profiles (`registry/profiles/`); `--profile` takes a name or a path.
 
 **Checking.** The second command:
 1. runs `render-job check` on each folder at its sample times;

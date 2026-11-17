@@ -10,20 +10,33 @@ describe("writeSpecimens", () => {
     const written = await writeSpecimens({
       out,
       packs: ["neutral"],
-      profiles: ["landscape_1080p30", "portrait_1080p30"],
+      profiles: ["landscape_web", "vertical_social"],
       components: ["kinetic_title"],
     });
     expect(written.map((w) => w.dir.slice(out.length + 1)).sort()).toEqual([
-      "neutral/landscape_1080p30",
-      "neutral/portrait_1080p30",
+      "neutral/landscape_web",
+      "neutral/vertical_social",
     ]);
     const samples = JSON.parse(
-      readFileSync(join(out, "neutral/landscape_1080p30/samples.json"), "utf8"),
+      readFileSync(join(out, "neutral/landscape_web/samples.json"), "utf8"),
     );
     expect(samples.fps).toEqual({ num: 30, den: 1 });
     expect(samples.layers.map((l: { id: string }) => l.id)).toContain("kinetic_title.short");
     expect(samples.samples.length).toBeGreaterThan(0);
-    expect(existsSync(join(out, "neutral/landscape_1080p30/index.html"))).toBe(true);
+    expect(existsSync(join(out, "neutral/landscape_web/index.html"))).toBe(true);
+  });
+
+  it("uses the registry profiles by default", async () => {
+    const out = mkdtempSync(join(tmpdir(), "cw-specimens-"));
+    const written = await writeSpecimens({
+      out,
+      packs: ["neutral"],
+      components: ["kinetic_title"],
+    });
+    expect(written.map((w) => w.dir.slice(out.length + 1)).sort()).toEqual([
+      "neutral/landscape_web",
+      "neutral/vertical_social",
+    ]);
   });
 
   it("uses an examples file in place of a component's own examples", async () => {
@@ -45,7 +58,7 @@ describe("writeSpecimens", () => {
     const [written] = await writeSpecimens({
       out,
       packs: ["neutral"],
-      profiles: ["landscape_1080p30"],
+      profiles: ["landscape_web"],
       components: ["kinetic_title"],
       examples: file,
     });

@@ -19,22 +19,46 @@
     "captions"
   ],
   "properties": {
-    "schema_version": { "const": 1 },
-    "id": { "$ref": "common.schema.json#/$defs/id" },
-    "name": { "type": "string", "minLength": 1 },
-    "frame_rate": { "$ref": "common.schema.json#/$defs/rational" },
-    "sample_rate": { "type": "integer", "minimum": 8000 },
-    "width": { "type": "integer", "minimum": 16 },
-    "height": { "type": "integer", "minimum": 16 },
-    "aspect_class": { "$ref": "common.schema.json#/$defs/aspect_class" },
+    "schema_version": {
+      "const": 1
+    },
+    "id": {
+      "$ref": "common.schema.json#/$defs/id"
+    },
+    "name": {
+      "type": "string",
+      "minLength": 1
+    },
+    "frame_rate": {
+      "$ref": "common.schema.json#/$defs/rational"
+    },
+    "sample_rate": {
+      "type": "integer",
+      "minimum": 8000
+    },
+    "width": {
+      "type": "integer",
+      "minimum": 16
+    },
+    "height": {
+      "type": "integer",
+      "minimum": 16
+    },
+    "aspect_class": {
+      "$ref": "common.schema.json#/$defs/aspect_class"
+    },
     "safe_zones": {
       "title": "SafeZones",
       "type": "object",
       "additionalProperties": false,
       "required": ["action", "title"],
       "properties": {
-        "action": { "$ref": "#/$defs/insets" },
-        "title": { "$ref": "#/$defs/insets" }
+        "action": {
+          "$ref": "#/$defs/insets"
+        },
+        "title": {
+          "$ref": "#/$defs/insets"
+        }
       }
     },
     "loudness": {
@@ -43,9 +67,18 @@
       "additionalProperties": false,
       "required": ["integrated_lufs", "true_peak_dbtp", "tolerance_lu"],
       "properties": {
-        "integrated_lufs": { "type": "number", "maximum": 0 },
-        "true_peak_dbtp": { "type": "number", "maximum": 0 },
-        "tolerance_lu": { "type": "number", "minimum": 0 }
+        "integrated_lufs": {
+          "type": "number",
+          "maximum": 0
+        },
+        "true_peak_dbtp": {
+          "type": "number",
+          "maximum": 0
+        },
+        "tolerance_lu": {
+          "type": "number",
+          "minimum": 0
+        }
       }
     },
     "captions": {
@@ -54,9 +87,62 @@
       "additionalProperties": false,
       "required": ["max_chars_per_line", "max_lines", "min_display_frames"],
       "properties": {
-        "max_chars_per_line": { "type": "integer", "minimum": 1 },
-        "max_lines": { "type": "integer", "minimum": 1 },
-        "min_display_frames": { "$ref": "common.schema.json#/$defs/frames" }
+        "max_chars_per_line": {
+          "type": "integer",
+          "minimum": 1
+        },
+        "max_lines": {
+          "type": "integer",
+          "minimum": 1
+        },
+        "min_display_frames": {
+          "$ref": "common.schema.json#/$defs/frames"
+        }
+      }
+    },
+    "max_duration": {
+      "description": "The longest deliverable this profile accepts, in frames at its frame rate. Absent means no limit.",
+      "$ref": "common.schema.json#/$defs/frames"
+    },
+    "encoding": {
+      "title": "EncodingSettings",
+      "description": "How the final file is encoded (M5). Absent until a profile states it.",
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["codec", "crf", "preset", "pix_fmt", "audio_codec", "audio_bitrate_kbps"],
+      "properties": {
+        "codec": {
+          "enum": ["libx264"]
+        },
+        "crf": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 51
+        },
+        "preset": {
+          "enum": [
+            "ultrafast",
+            "superfast",
+            "veryfast",
+            "faster",
+            "fast",
+            "medium",
+            "slow",
+            "slower",
+            "veryslow"
+          ]
+        },
+        "pix_fmt": {
+          "enum": ["yuv420p"]
+        },
+        "audio_codec": {
+          "enum": ["aac"]
+        },
+        "audio_bitrate_kbps": {
+          "type": "integer",
+          "minimum": 32,
+          "maximum": 512
+        }
       }
     }
   },
@@ -68,10 +154,26 @@
       "additionalProperties": false,
       "required": ["top", "right", "bottom", "left"],
       "properties": {
-        "top": { "type": "number", "minimum": 0, "maximum": 0.5 },
-        "right": { "type": "number", "minimum": 0, "maximum": 0.5 },
-        "bottom": { "type": "number", "minimum": 0, "maximum": 0.5 },
-        "left": { "type": "number", "minimum": 0, "maximum": 0.5 }
+        "top": {
+          "type": "number",
+          "minimum": 0,
+          "maximum": 0.5
+        },
+        "right": {
+          "type": "number",
+          "minimum": 0,
+          "maximum": 0.5
+        },
+        "bottom": {
+          "type": "number",
+          "minimum": 0,
+          "maximum": 0.5
+        },
+        "left": {
+          "type": "number",
+          "minimum": 0,
+          "maximum": 0.5
+        }
       }
     }
   }

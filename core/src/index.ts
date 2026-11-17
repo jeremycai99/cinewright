@@ -107,6 +107,12 @@ export {
   initProject,
 } from "./project/init.js";
 export * from "./project/layout.js";
+export {
+  profileRefPath,
+  registryProfileNames,
+  registryProfilesDir,
+  UnknownProfileError,
+} from "./registry/profiles.js";
 export { describeKind, entitySchemas } from "./schema/describe.js";
 export { type DetailedError, normalizeErrors, type ValidationError } from "./schema/errors.js";
 export { type JsonObject, loadSchemas, resolveRef, type SchemaSet } from "./schema/load.js";
