@@ -28,7 +28,7 @@ export interface RendererInfo {
  * Render key v1 (M3.2b, audit F3): the hash of everything a shot's frames depend on. `compile` is
  * the backend's compile inputs (mount spec, root CSS, font, runtime and asset hashes, compiler
  * version, profile hash); `renderer` is the image digest, HyperFrames version and render settings.
- * A pack's README or rules never enter it.
+ * A pack's README never enters it; its content hash (which covers rules.md) does, so re-pinning a pack re-renders its shots.
  */
 export function renderKeyV1(inputs: { compile: unknown; renderer: RendererInfo }): HashString {
   return sha256Hash({ render_key: 1, compile: inputs.compile, renderer: inputs.renderer });
