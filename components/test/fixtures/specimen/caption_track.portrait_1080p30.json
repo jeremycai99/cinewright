@@ -145,7 +145,7 @@
       "props": {
         "cues": [
           {
-            "text": "Pipelines break in the same three places, and almost nobody watches them.",
+            "text": "Pipelines break in the same three places, every time.",
             "start": 0,
             "end": 80
           },

@@ -65,7 +65,9 @@ The presets are `fade`, `rise`, `slide`, `scale`, `wipe` and `pop` (`src/motion/
 `fitText` tries the type-scale steps a component allows, largest first:
 1. **Whole words:** it keeps the largest step at which the text fits with words whole, within the box and the pack's line limit.
 2. **Broken words:** only when no step fits whole words does it let words break, at the smallest allowed step. It never goes below `density.min_text_size`.
-3. **Overflow:** if even that overflows, the element is marked `data-cw-overflow` and the specimen check fails. Text is never clipped silently.
+3. **Overflow:** if even that overflows, the element is marked `data-cw-overflow`. Text is never clipped silently.
+
+**Markers fail the check.** Once every layer has built, the host logs one console warning per marked element: `cinewright.overflow` or `cinewright.density`, with the layer id and the element. HyperFrames' check reports console warnings, and `render-job check` fails on them under their marker's name (M2.5b).
 
 ## Specimens
 
@@ -84,7 +86,7 @@ uv run cinewright-check-specimens --image cinewright-render:dev out/specimens
 3. writes `summary.json`;
 4. fails if any check fails.
 
-A specimen fails on any lint, runtime, layout or contrast error or warning, including text overflowing its box. The `specimens` CI job (`render-smoke.yml`) runs both commands on every change to `packs/`, `components/` or the pack format, and uploads the folder, contact sheets included, for the reviewer.
+A specimen fails on any lint, runtime, layout or contrast error or warning, including text overflowing its box and a component marker (`cinewright.overflow`, `cinewright.density`). A root with no specimens fails too, so CI can never pass having checked nothing. The `specimens` CI job (`render-smoke.yml`) runs both commands on every change to `packs/`, `components/` or the pack format, and uploads the folder, contact sheets included, for the reviewer.
 
 ## Catalog
 

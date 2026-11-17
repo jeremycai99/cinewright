@@ -14,14 +14,14 @@
   },
   {
     "name": "long_cue",
-    "description": "A cue that needs two lines, and one shorter than the minimum display time.",
+    "description": "A cue that needs two lines in both profiles (32 and 42 characters per line), and one shorter than the minimum display time.",
     "template": "captions",
     "region": "captions",
     "duration_ms": 4000,
     "props": {
       "cues": [
         {
-          "text": "Pipelines break in the same three places, and almost nobody watches them.",
+          "text": "Pipelines break in the same three places, every time.",
           "start": 0,
           "end": 80
         },
