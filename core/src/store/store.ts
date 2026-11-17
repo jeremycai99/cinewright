@@ -112,7 +112,7 @@ export function replayLog(log: readonly LogEntry[]): InlinedIr {
       const target = byRevision.get(entry.revert_of);
       if (!target)
         throw new Error(`revision ${entry.revision} reverts unknown revision ${entry.revert_of}`);
-      ir = restoreSnapshots(ir, target.before);
+      ir = restoreSnapshots(ir, target.before, { mergeLists: entry.revert_lists === "membership" });
       continue;
     }
     const result = applyOps(ir, entry.ops, entry.author);
@@ -561,7 +561,12 @@ export class Store {
     before: Snapshot[],
     touched: Touched[],
     retired: string[],
-    extra: { revert_of?: number; pending_id?: string; restored?: string[] } = {},
+    extra: {
+      revert_of?: number;
+      revert_lists?: "membership";
+      pending_id?: string;
+      restored?: string[];
+    } = {},
     /** The whole IR was already validated (evaluate). */
     validated = false,
   ): Promise<ApplyResult> {
@@ -667,11 +672,18 @@ export class Store {
       const conflicts = findConflicts(this.appliedAfter(revision), target.touched, index);
       if (conflicts.length > 0) return { status: "conflict", conflicts };
       const before: Snapshot[] = target.before.map((snap) => this.currentSnapshot(snap));
-      const next = restoreSnapshots(this.state.ir, target.before);
+      const next = restoreSnapshots(this.state.ir, target.before, { mergeLists: true });
       const nowIds = new Set(index.keys());
       const nextIds = new Set(indexIr(next).keys());
       const retired = [...nowIds].filter((id) => !nextIds.has(id)).sort();
       const restored = [...nextIds].filter((id) => !nowIds.has(id)).sort();
+      // Deleting an entity that a later revision edited would lose that edit silently.
+      const lost = this.appliedAfter(revision).flatMap((entry) =>
+        entry.touched
+          .filter((t) => retired.includes(t.entity))
+          .map((t) => ({ entity: t.entity, path: t.path, revision: entry.revision })),
+      );
+      if (lost.length > 0) return { status: "conflict", conflicts: lost };
       return this.commitApplied(
         { base_revision: this.revision(), reason: `revert revision ${revision}`, ops: [] },
         author,
@@ -679,7 +691,11 @@ export class Store {
         before,
         target.touched,
         retired,
-        { revert_of: revision, ...(restored.length > 0 ? { restored } : {}) },
+        {
+          revert_of: revision,
+          revert_lists: "membership",
+          ...(restored.length > 0 ? { restored } : {}),
+        },
       );
     });
   }

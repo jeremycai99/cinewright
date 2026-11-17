@@ -482,6 +482,10 @@ export interface AppliedEntry {
   state_hash: Hash;
   revert_of?: number;
   /**
+   * How the revert restored lists of entities: by membership and order only, keeping later edits to items that still exist (M2.5a). Reverts recorded before M2.5a lack it and restored lists whole; replay honours both.
+   */
+  revert_lists?: "membership";
+  /**
    * The pending patch this applies, after approval.
    */
   pending_id?: string;
