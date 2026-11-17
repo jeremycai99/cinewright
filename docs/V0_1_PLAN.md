@@ -51,7 +51,7 @@ Order: M0.0 → M0.1 → M0.2 and M0.3 in either order. Whichever lands second a
 
 ### M1 — IR v0 (the contract everything else depends on)
 
-Implements D25–D32 and D40. Detailed task plan (approved 2026-11-14): `docs/plans/m1-ir-v0.md`. M1 also creates the `cinewright` CLI package with `init`, `patch` and `show`; M8.1 adds the other commands.
+Implements D25–D32 and D40. Detailed task plan (approved 2026-11-14): `docs/plans/m1-ir-v0.md`. M1 also creates the `cinewright` CLI package with `init`, `patch` and `show`; M8.1 adds the other commands. **Done 2026-11-15** (PRs #10–#25).
 
 **Order.** M1.1a → M1.6 → M1.1b → M1.1c → M1.7 → M1.4a → M1.4b → M1.2a → M1.2b → M1.9. M1.6 lands straight after M1.1a so the wrapper encoding is proven on both code generators before more schema is written. M1.3 can start after M1.1c; M1.5 needs M1.3 and M1.7. M1.8a and M1.8b need only M0.
 
@@ -130,7 +130,7 @@ Items 1–4 restate decisions. Items 5–16 settle what the decisions left open 
 
 ### M2 — Style system v0
 
-Detailed task plan (approved 2026-11-15): `docs/plans/m2-style-v0.md`. It splits the shared AC per task and resolves Open issue 6.
+Detailed task plan (approved 2026-11-15): `docs/plans/m2-style-v0.md`. It splits the shared AC per task and resolves Open issue 6. **Done 2026-11-16** (PRs #26–#34).
 
 - **M2.1 Style pack format** (tokens JSON + rules Markdown + example frames) and loader. Every rule has a stable id, which agents cite in decision-log entries.
 - **M2.2 Neutral default pack**: deliberately restrained and legible (see AGENTS.md §2.2). Define grid, safe areas and layout templates per aspect class, type scale, motion grammar (easing set, duration scale, entrances/exits), transition set and when each applies, density limits, sound palette and ducking depth. Loudness targets come from delivery profiles, not the pack.
@@ -138,9 +138,21 @@ Detailed task plan (approved 2026-11-15): `docs/plans/m2-style-v0.md`. It splits
 - **M2.4 Component library v0** (HyperFrames/GSAP; settle Open issue 6 on the GSAP licence before this task). Each component ships a props JSON Schema and a catalog description, because agents choose components from that catalog (D31). Alpha set: kinetic title, bullet reveal, end card, caption track. Beta set: lower third, bar/line chart, quote card, image/video plate with Ken Burns. Components read tokens only; no literal colors, fonts or easings.
   - AC (M2 overall): a lint rule fails any component containing literal design values; every component renders correctly in both aspect ratios and both packs; the same IR renders under either pack by changing only the style reference.
 
+### M2.5 — Audit fixes
+
+The implementation audit of 2026-11-16 (`docs/plans/roadmap-audit-2026-11-16.md`) found M0–M2 sound, with one data-loss bug and four places where the code enforces less than the docs claim. These land before M3.
+
+- **M2.5a Store revert** (audit F1): a list op snapshots the list's order and the bodies of removed items only, so reverting it never discards later edits to other items; a revert after a later change to the same list conflicts.
+  - AC: for each list op, a revert after a later edit to a sibling keeps that edit; a revert after a later change to the same list conflicts; replay still reproduces every `state_hash`, including old logs.
+- **M2.5b Markers enforced** (F2, F7): `render-job check` reads `data-cw-overflow` and `data-cw-density` at each sample and reports them as failures; `cinewright-check-specimens` fails on a root with no specimens.
+  - AC: a 7-bullet example under a limit of 5 fails, naming the element; an empty root exits non-zero.
+- **M2.5c Hermetic tests** (F6, F20): a shared Vitest timeout; tests that list folders ignore untracked names; the specimens job also triggers on the cascade.
+  - AC: the suite passes with stray untracked files present, 10 runs in a row.
+- **M2.5d Plan and docs** (F8, F15): this plan revision; status lines; `patch revert` named alongside `patch approve` in D41.
+
 ### M3 — HyperFrames backend
 
-- **M3.1 Shot compiler**: resolved shot IR (typed layers) + pack → HyperFrames composition (HTML + GSAP timelines registered for deterministic seeking), once per deliverable. The compiler is the only producer of HTML (D31).
+- **M3.1 Shot compiler**: resolved shot IR (typed layers) + pack → HyperFrames composition (HTML, the component host bundle and a mount spec; components animate with WAAPI, which HyperFrames seeks, per Open issue 6), once per deliverable. The compiler is the only producer of HTML (D31).
 - **M3.2 Renderer adapter**: render per shot × deliverable inside the container with the network disabled; collect logs, timings, `framemd5` and output hash; cache by render key.
 - **M3.3 Transition segments** (D34): render cross-dissolve and mask/wipe segments from the tail of the outgoing and the head of the incoming composition; hard cuts need no segment.
 - **M3.4 Caption layer** (D35): when a deliverable's profile requires burn-in, compile captions from line timestamps into each shot; a cue spanning a cut is split and drawn identically on both sides.
@@ -200,6 +212,27 @@ Implements §Multi-agent orchestration (D5, D9, D37).
 - **M8.3 Eval harness**: tier A on every PR (no paid APIs, safe for forks); tier B nightly and on maintainer trigger, 3 runs per brief, budget-capped. Reports per-brief deterministic pass rate, rubric mean and variance, cost and latency, stored per commit with the critic model and rubric version.
 - **M8.4 Personal fixtures**: `fixtures/personal/` for the maintainer's dogfooding briefs; never imported by core, never gating.
   - AC: the exit gate above passes.
+
+## Revised task breakdown and order (audit, 2026-11-16)
+
+The 2026-11-16 audit (`docs/plans/roadmap-audit-2026-11-16.md`, §4) refined the milestones above into PR-sized tasks, added tasks for gaps it found, and moved some work earlier. Where it differs from a milestone's text above, this section wins; each milestone still gets its own detailed plan and approval before its first PR. New tasks are marked *new*.
+
+| Milestone | Tasks (in order) | Changes from the text above |
+| --- | --- | --- |
+| M2.5 *new* | M2.5a store revert · M2.5b markers enforced · M2.5c hermetic tests · M2.5d plan and docs | Audit fixes, before M3 |
+| M3 | **M3.0** *new* pin refresh (HyperFrames, Chrome; rebuild and lock the image; re-verify readiness, `data-no-timeline` and PNG output) · **M5.3** moved here (delivery profiles in `registry/`; `init` by profile name) · **M3.1a** compile inputs (pack resolved by id and pinned in the project; a timing table, line id → frames, from a fixture until M4.2; compile-time prop checks) · **M3.1b** shot compiler (goldens; both packs by changing only `style.pack`; hostile pack strings cannot add markup; deterministic output) · **M3.2a** backend interface and renderer adapter (run limits on Docker; a video plate's frames change over time) · **M3.2b** render key v1 and cache (key on the compiled composition's inputs, not `Pack.hash`) · **M3.3** transition segments (the timing rule is settled in the M3 plan) · **M3.4** caption layer · **M3.5** keyframe capture | M5.3 moves forward; M3.1 and M3.2 split; the render key is redefined (F3); pack resolution and pinning (F4); escaping (F5); Docker limits (F17) |
+| M4 | **M4.0** *new* audio spike and a second pinned `audio` image (mixer repeatability, Kokoro and WhisperX on CPU, models baked in, the PCM contract written into D33) · **M4.5a** STT/alignment interface, transcripts frozen as assets · **M4.5b** WhisperX plugin (digits get interpolated times) · **M4.1a** TTS interface, takes, narration job · **M4.1b** ElevenLabs (word times derived from character times) · **M4.1c** Kokoro (its own Python, below 3.13) · **M4.2** timing solver · **M4.3a** music/SFX interface, library, Composer job · **M4.3b** one music plugin · **M4.4** mixer | Spike first; M4.1, M4.3 and M4.5 split; alignment against the script for timing, transcription only for the STT check |
+| M5 | **M5.1** assembly · **M5.2** sidecar captions · **M5.4** `cinewright render` | M5.3 moved to M3 |
+| M6.1 | **M6.1a** critic interface, finding schema, DOM critics (wrapping `render-job check`) · **M6.1b** media critics · **M6.1c** STT-vs-script critic on frozen transcripts | Split |
+| Alpha gate | **A.1** *new* CAS remote (Open issue 7) · **A.2** *new* alpha fixtures (built only through `cinewright patch`; Kokoro takes; CC0 music) · **M8.3a** tier A harness as a required check | The tier A harness moves from M8 to the gate |
+| M7 | **M7.1a** runtime interface, run ledger and event log, a plain loop runtime · **M7.1b** reconciler, templates, P0 intake · **M7.1c** LangGraph runtime and gate pauses · **M7.2** · **M7.3** (model-name boundary rule) · **M7.4** (per-task entity scopes, inserted-subtree checks) · **M7.5a** Producer and Writer · **M7.5b** Director · **M7.5c** Shot Builder and Editor · **M7.6** · **M7.7** · then **M6.2**, **M6.3a** fix routing and deterministic fixers, **M6.3b** bounds, oscillation, escalation | M7.1 and M7.5 split; a loop runtime before LangGraph (decide D5 at M7.1c) |
+| M8 | **M8.1** · **M8.2** · **M8.3b** tier B harness · **M8.4** · **M8.5** *new* clean-machine setup tested in CI | M8.3 split |
+
+**Order.** M2.5a–d → M3.0, M5.3 → M3.1a → M3.1b → M3.2a → M3.2b → M4.0 → M4.5a → M4.5b, M4.1a → M4.1c, M4.2 → M3.3, M3.4, M3.5, M4.1b, M4.3a, M4.3b, M4.4 → M5.1, M5.2 → M5.4 → M6.1a–c → A.1, A.2, M8.3a → **alpha gate** → M7.1a → M7.1b → M7.2, M7.3 → M7.4 → M7.1c, M7.6, M7.7 → M7.5a → M7.5b → M7.5c → M6.2 → M6.3a → M6.3b → M8.1, M8.2, M8.4 → M8.3b, M8.5 → **exit gate**. Tasks separated by commas can run in parallel.
+
+**Exit gate clarifications.** "Byte-identical shot files" is checked per runner class, and the rubric baseline records the HyperFrames version with the critic model and rubric versions.
+
+**Decisions the audit asks of the maintainer** (recommendations in the audit, §7): bump policy for HyperFrames (M3.0); keep GSAP in the image (M3.1b); pin the pack in the project (M3.1a); the transition timing rule (M3 plan); a second image for audio (M4.0); Kokoro's espeak-ng (GPL-3.0) behind a process boundary (M4.1c); going public or a public mirror for tier A on forks (alpha gate); who writes the benchmark briefs (M8.2); the evaluation budget and tier B cadence (M8.3b); LangGraph after M7.1a (M7.1c); splitting v0.3 and scheduling schema migrations in v0.2 (v0.1 exit); paid raters (v0.2); name, organisation and npm scope (v0.1 exit). Moving the checkout out of iCloud is due now: its duplicate files break local tests.
 
 ## Multi-agent orchestration (v0.1)
 
@@ -414,6 +447,8 @@ Escalated findings go to the next gate with attempts and evidence attached; in t
 
 ## Suggested order for the first Claude Code sessions
 
+Superseded from M2.5 on by §Revised task breakdown and order; kept for history.
+
 1. M0, then M1 completely, in the order given under M1 (schema, IR store, plugin contract, patch and show commands, with tests).
 2. One IR shot, built through `cinewright patch`, rendered through HyperFrames (M2.1, M2.2, one alpha component, M3.1–M3.2) before any agent exists.
 3. M4.5 and M4.1–M4.2 so timing comes from real narration.
@@ -432,14 +467,23 @@ From the readiness review of 2026-11-13. Items marked resolved were approved wit
 | 4 | **Repository host, CI provider, container registry.** M0.2 must publish a digest and M0.3 must run CI. Only GPU CI can wait. | M0.2, M0.3 | **Resolved:** GitHub, GitHub Actions and GHCR (M0.0). The repository was created private on 2026-11-13. |
 | 5 | **Byte-identical output.** D33 requires byte-identical files on one runner class. HyperFrames promises identical pixels, not bytes, and uses a different browser binary on arm64. | M0.2 | **Resolved 2026-11-14 (M0.2 spike):** HyperFrames' own encode is repeatable on one machine but changes with the CPU count, so the backend renders a PNG sequence and encodes it with the pinned FFmpeg (`-threads 1`, bitexact), which was byte-identical across runs, CPU quotas and machines. amd64 and arm64 are separate runner classes; see `container/README.md`. M3.2 and M5.1 follow this. |
 | 6 | **GSAP licence.** GSAP is free but not open source. Its licence bars use in tools that let users build visual animations without code in competition with Webflow. The spec keeps source-available code out of core. | M2.4 | **Resolved 2026-11-15 (M2 plan):** core components animate with WAAPI, which HyperFrames 0.9.41 seeks natively, and never import GSAP. A user-authored composition or an opt-in component may use GSAP and declares its licence. Whether the image keeps vendoring GSAP for those is decided in M3.1. |
-| 7 | **Tier A assets.** Tier A needs frozen takes and music on every PR, including forks, but generated media stays out of git and the CAS is ignored by git. | Alpha gate, M8.3 | A public read-only CAS remote fetched by hash, with small fixtures. Keep the M1.7 CAS interface open to a remote. |
-| 8 | **STT in tier A.** The STT-vs-script check must be deterministic and need no paid API. WhisperX on CPU has not been shown to be repeatable, and it adds a large model to the image. | M4.5, M6.1 | Freeze transcripts as assets; run live STT only when a take is new. |
+| 7 | **Tier A assets.** Tier A needs frozen takes and music on every PR, including forks, but generated media stays out of git and the CAS is ignored by git. | Alpha gate, M8.3 | A public read-only CAS remote fetched by hash, with small fixtures. Keep the M1.7 CAS interface open to a remote. The audit (2026-11-16) adds: Kokoro takes and CC0 music, a few megabytes per fixture, as static files addressed by hash (for example release assets); the CAS gets a verified remote read path. Forks can fetch nothing while the repository and image are private: going public or a public mirror is due at the alpha gate (A.1). |
+| 8 | **STT in tier A.** The STT-vs-script check must be deterministic and need no paid API. WhisperX on CPU has not been shown to be repeatable, and it adds a large model to the image. | M4.5, M6.1 | Freeze transcripts as assets; run live STT only when a take is new. The audit adds: use forced alignment against the script for word times and transcription only for the STT check; WhisperX gives digits and symbols no timing, so the plugin interpolates them; models download at run time, so they are baked into the audio image (M4.0). |
 | 9 | **Timing anchors.** Layers are timed against narration anchors, but no doc says how an anchor is addressed (line start or end, word index, named marker) or what happens to a word anchor when the line's text changes. The invalidation table assumes no Shot Builder call. | M1.1c | **Resolved:** M1 convention 15. |
 | 10 | **Delivery profile pinning.** Profiles are data files, and the frame rate comes from one. If a profile file changes, stored frame values change meaning. | M1.1a | **Resolved:** M1 convention 16. |
 | 11 | **Roadmap vs plan.** The spec's roadmap lists cost estimating under v0.3 and budget caps and capability routing under v0.4, but D17, M7.2 and M7.7 put a budget cap, an estimate and routing fallback in v0.1. The spec's CLI row lists `board` and omits `status`, `tasks` and `log`. | None | **Resolved 2026-11-13:** the spec's roadmap and CLI row now match the plan. |
 | 12 | **Checks that cannot run yet.** Neutrality-test item 4 (validated on the benchmark) cannot be met before the alpha gate creates the first tier A fixtures. M6.2's AC "score well on their own terms" has no pass condition. | M0.1 (first PR), M6.2 | **Resolved:** AGENTS.md §2.3 item 4 applies from the alpha gate on; M6.2's AC now uses a threshold recorded in the baseline. |
 
 ## External facts
+
+**Re-checked 2026-11-15 by the audit** (`roadmap-audit-2026-11-16.md` §3.5; sources there):
+- **HyperFrames** is at 0.9.56; the image pins 0.9.41. Releases 0.9.48–0.9.56 carry security fixes (file servers, Host checks, media playlist paths). 0.9.44 and 0.9.47 change `check` output. M3.0 refreshes the pin and re-verifies WAAPI seeking, `buildReady`, `data-no-timeline` and PNG output.
+- **LangGraph.js** 1.7.4 and the SQLite checkpointer 1.1.0 are unchanged.
+- **ElevenLabs** returns character-level timestamps only (word times are derived), the default model is `eleven_multilingual_v2`, and a seed is best effort ("determinism is not guaranteed").
+- **Kokoro** 0.9.4 needs Python 3.10–3.12 and espeak-ng (GPL-3.0); its README shows no timestamps.
+- **WhisperX** 3.8.6 (BSD-2-Clause, Python below 3.14) downloads models at run time and does not align digits or symbols.
+
+The facts below were checked on 2026-11-13.
 
 Checked against primary sources on 2026-11-13. Re-check before coding against any of them, and pin.
 
