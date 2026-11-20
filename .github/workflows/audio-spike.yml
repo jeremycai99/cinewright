@@ -28,14 +28,10 @@ jobs:
         with:
           version-file: pyproject.toml
       - run: uv sync --locked
-      - name: Render image (locked) and audio image (built)
-        env:
-          GH_TOKEN: ${{ github.token }}
+      - name: Render and audio images, built from the tree
         run: |
-          echo "$GH_TOKEN" | docker login ghcr.io --username "$GITHUB_ACTOR" --password-stdin
-          render="$(jq -r '.image + "@" + .digest' container/image.lock.json)"
-          docker pull --platform linux/amd64 "$render"
-          echo "RENDER=$render" >> "$GITHUB_ENV"
+          uv run --locked cinewright-build-image --tag cinewright-render:spike
+          echo "RENDER=cinewright-render:spike" >> "$GITHUB_ENV"
           start=$(date +%s)
           uv run --locked cinewright-build-image --kind audio --tag cinewright-audio:spike
           echo "audio image build: $(( $(date +%s) - start )) s"
