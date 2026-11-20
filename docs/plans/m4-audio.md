@@ -248,6 +248,7 @@ A spike modelled on M0.2.
 **Interfaces:**
 - **`tts.synthesize`:** `{ text, words, language, direction?, binding, lexicon, seed, sample_rate, output }` → `{ file, sample_rate, channels: 1, words: { start, end }[] | null (samples at the returned sample_rate), model, request, license }`.
 - **Core:** `takeKey(ir, lineId, providerId)` and `selectedTake(ir, lineId): { take?: Asset; stale: boolean }`.
+- **Derived ids and seeds (decision 16, approved 2026-11-20):** `takeId(lineId, key, n)` = `take_<line>_<first 8 hex of sha256(key + ":" + n)>`, and `takeSeed(key, n)` = the first 4 bytes of `sha256(key + ":seed:" + n)` as an unsigned integer, where `n` is the count of existing takes with that key (0 for the first). Nothing in the job is random, so replaying recorded provider responses reproduces `state_hash` (M7, H8). Music beds follow the same rule in Task 10 (`music_<cue>_<8 hex>`).
 - **Engine:** `narrate(store, { lines?, retake?, provider? }): { made; reused; findings }`.
 
 - [ ] **Step 1: Write the failing tests, using the stub TTS.**
@@ -257,6 +258,7 @@ A spike modelled on M0.2.
     - A lexicon entry the line uses does the same; one it doesn't use changes nothing.
   - **Provider switch (Review Focus 1):** narrating with A, then B, then A selects A's take again and reports reuse.
   - **Re-takes:** `--retake` makes a new take and selects it.
+  - **Derived ids (decision 16):** two fresh projects narrated with the stub give identical take ids, seeds and `state_hash`; a re-take gets `n = 1` and a different id and seed.
   - **User selection:** a user-set `line.take` is kept by narration while it is valid.
   - **Fallback alignment:** `words: null` triggers alignment and interpolation.
   - **Failures (Review Focus 3):** a failure on line 3 of 5 exits 9. Lines 1–2 are committed, and the re-run makes only lines 3–5.
