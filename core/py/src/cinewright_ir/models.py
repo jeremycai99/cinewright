@@ -1758,6 +1758,21 @@ class TimingTable(BaseModel):
         ],
         LineTiming,
     ]
+    shots: Annotated[
+        dict[
+            Annotated[
+                str,
+                StringConstraints(
+                    max_length=64, pattern=r"^[a-z][a-z0-9_]*(\.[a-z0-9_]+)*$"
+                ),
+            ],
+            FrameSpan,
+        ]
+        | None,
+        Field(
+            description="Every shot's span on its sequence's timeline, as the solver tiled them (M4.2). When present, shot spans come from here; a hand-written table without it uses the M3 rule (anchors, then duration, then the next shot)."
+        ),
+    ] = None
 
 
 class Voice(BaseModel):

@@ -1163,6 +1163,12 @@ export interface TimingTable {
   lines: {
     [k: string]: LineTiming;
   };
+  /**
+   * Every shot's span on its sequence's timeline, as the solver tiled them (M4.2). When present, shot spans come from here; a hand-written table without it uses the M3 rule (anchors, then duration, then the next shot).
+   */
+  shots?: {
+    [k: string]: FrameSpan;
+  };
 }
 export interface LineTiming {
   start: Frames;

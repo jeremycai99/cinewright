@@ -10,6 +10,7 @@ A deliberately contrasting pack (D39): warm, rounded and energetic. It suits chi
 | Motion | `pop` enabled, with an overshoot easing for emphasis only (never on body text). Words reveal one by one. |
 | Transitions | Wipe by default; a cross-dissolve when time passes. |
 | Sound | An upbeat ukulele-and-percussion bed at 110–140 BPM, ducked 10 dB under the voice. Soft pops and chimes are enabled. |
+| Pacing | Brisker than the neutral pack: 250 ms before a scene's first line, 200 ms between lines, 400 ms after the last (`sound.voice`, 1.1.0). |
 
 ## Fonts
 

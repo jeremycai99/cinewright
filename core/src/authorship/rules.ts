@@ -72,6 +72,16 @@ export function checkFieldWrite(
   return OK;
 }
 
+/**
+ * A job appending a new entity to the project's asset registry (`/assets`). Allowed even when
+ * the list is `user` (D25 as amended in M4.2): registering a generated asset (a take, a music
+ * bed) records content and makes no creative choice; which asset is used is a separate field
+ * (`line.take`, `sequence.music`) that keeps its own state. Removing or reordering stays blocked.
+ */
+export function isRegistryAppend(owner: IrEntity, path: string, author: Author): boolean {
+  return author.kind === "job" && owner.kind === "project" && path === "/assets";
+}
+
 /** `insert`, `remove` or `move` changing the membership or order of `owner`'s list in state `state`. */
 export function checkListChange(
   index: ReadonlyMap<string, IrEntity>,

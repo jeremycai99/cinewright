@@ -6,6 +6,7 @@ import { run } from "./run.js";
 import { REFERENCE, referenceCopy, tempDir } from "./tree.js";
 
 const TIMING = join(REFERENCE, "timing.json");
+const PLUGINS = new URL("../../engine/test/fixtures/plugins/", import.meta.url).pathname;
 const REGIONS = new URL(
   "../../plugins/backend-hyperframes/test/fixtures/regions.json",
   import.meta.url,
@@ -63,8 +64,33 @@ describe("cinewright compile", () => {
     expect(result.stderr).toContain("s03.sh01.title /layout/landscape: compile.unknown_region");
   });
 
-  it("exits 2 without --timing", async () => {
+  it("uses the solved timing without --timing (M4.2)", async () => {
     const dir = await placed();
+    const status = await run(["status", "--project", dir, "--json"]);
+    const bind = join(tempDir(), "bind.json");
+    writeFileSync(
+      bind,
+      JSON.stringify({
+        base_revision: JSON.parse(status.stdout).revision,
+        author: { kind: "user" },
+        mode: "apply",
+        reason: "bind the stub voice",
+        ops: [
+          { op: "set", entity: "dr_lin", path: "/voice/description", value: { language: "en" } },
+          ...["narrator", "dr_lin"].map((id) => ({
+            op: "set",
+            entity: id,
+            path: "/voice/bindings/stub_tts_a",
+            value: { voice: "test" },
+          })),
+        ],
+      }),
+    );
+    expect((await run(["patch", "apply", "--project", dir, "--file", bind])).code).toBe(EXIT.ok);
+    const narrated = await run(["narrate", "--project", dir, "--plugins", PLUGINS]);
+    expect(narrated.code, narrated.stderr).toBe(EXIT.ok);
+    const solved = JSON.parse((await run(["timing", "--project", dir, "--json"])).stdout);
+    const span = solved.shots["s03.sh01"];
     const result = await run([
       "compile",
       "s03.sh01",
@@ -74,8 +100,10 @@ describe("cinewright compile", () => {
       join(tempDir(), "o"),
       "--project",
       dir,
+      "--json",
     ]);
-    expect(result.code).toBe(EXIT.usage);
+    expect(result.code, result.stdout + result.stderr).toBe(EXIT.ok);
+    expect(JSON.parse(result.stdout).frames).toBe(span.end - span.start);
   });
 });
 

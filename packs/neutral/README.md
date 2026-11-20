@@ -10,6 +10,7 @@ The neutral default pack. Projects use it until they choose another pack. It is 
 | Motion | Decelerating easing with no overshoot; `pop` is disabled. Durations from 120 ms to 800 ms. Rise in, fade out; lines reveal in order. |
 | Transitions | Cross-dissolve by default between scenes, cut within a scene, and wipe for stepping through a sequence (see `rules.md`). |
 | Sound | An unobtrusive ambient bed at 70–110 BPM, ducked 12 dB under the voice. Sound effects are off by default. |
+| Pacing | 400 ms before a scene's first line, 300 ms between lines, 600 ms after the last (`sound.voice`, 1.1.0). |
 
 Loudness targets come from delivery profiles, not from this pack.
 

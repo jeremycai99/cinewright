@@ -6,12 +6,14 @@
   "required": ["quote"],
   "properties": {
     "quote": {
+      "x-readable": true,
       "description": "The quoted words, without quotation marks.",
       "type": "string",
       "minLength": 1,
       "maxLength": 280
     },
     "attribution": {
+      "x-readable": true,
       "description": "Who said it, and where.",
       "type": "string",
       "minLength": 1,

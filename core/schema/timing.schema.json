@@ -12,6 +12,12 @@
       "type": "object",
       "propertyNames": { "$ref": "common.schema.json#/$defs/id" },
       "additionalProperties": { "$ref": "#/$defs/line_timing" }
+    },
+    "shots": {
+      "description": "Every shot's span on its sequence's timeline, as the solver tiled them (M4.2). When present, shot spans come from here; a hand-written table without it uses the M3 rule (anchors, then duration, then the next shot).",
+      "type": "object",
+      "propertyNames": { "$ref": "common.schema.json#/$defs/id" },
+      "additionalProperties": { "$ref": "#/$defs/span" }
     }
   },
   "$defs": {

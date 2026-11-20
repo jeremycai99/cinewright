@@ -536,7 +536,7 @@
     "sound": {
       "type": "object",
       "additionalProperties": false,
-      "required": ["bus", "duck", "music", "sfx"],
+      "required": ["bus", "duck", "music", "sfx", "voice"],
       "properties": {
         "music": {
           "type": "object",
@@ -593,6 +593,26 @@
               "x-token-type": "duration"
             },
             "release": {
+              "$ref": "#/$defs/leaf",
+              "x-token-type": "duration"
+            }
+          }
+        },
+        "voice": {
+          "description": "Narration pacing (M4.2): the pad before a scene's first line, between lines, and after its last line.",
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["head", "line_gap", "tail"],
+          "properties": {
+            "head": {
+              "$ref": "#/$defs/leaf",
+              "x-token-type": "duration"
+            },
+            "line_gap": {
+              "$ref": "#/$defs/leaf",
+              "x-token-type": "duration"
+            },
+            "tail": {
               "$ref": "#/$defs/leaf",
               "x-token-type": "duration"
             }

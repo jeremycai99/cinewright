@@ -51,3 +51,46 @@ describe("plain-data objects on inserted entities (M4)", () => {
     expect(result.status).toBe("rejected");
   });
 });
+
+describe("jobs append to the asset registry (D25 as amended in M4.2)", () => {
+  const JOB = { kind: "job", name: "narration" } as const;
+  const AGENT = { kind: "agent", role: "composer" } as const;
+
+  it("lets a job append to a user-owned registry, which stays user", async () => {
+    const { store } = await setupProject();
+    await store.apply(
+      patch(store, [{ op: "insert", entity: "demo", path: "/assets", value: asset("upload") }]),
+    );
+    expect((store.ir() as Loose).assets.state).toBe("user");
+    const result = await store.apply(
+      patch(
+        store,
+        [{ op: "insert", entity: "demo", path: "/assets", value: asset("take_job") }],
+        JOB,
+      ),
+    );
+    expect(result.status).toBe("applied");
+    expect((store.ir() as Loose).assets.state).toBe("user");
+    expect((store.ir() as Loose).assets.value.map((a: Loose) => a.id)).toEqual([
+      "upload",
+      "take_job",
+    ]);
+  });
+
+  it("still blocks an agent's insert, and a job's removal of a user item", async () => {
+    const { store } = await setupProject();
+    await store.apply(
+      patch(store, [{ op: "insert", entity: "demo", path: "/assets", value: asset("upload") }]),
+    );
+    const agent = await store.apply(
+      patch(
+        store,
+        [{ op: "insert", entity: "demo", path: "/assets", value: asset("take_agent") }],
+        AGENT,
+      ),
+    );
+    expect(agent.status).toBe("pending");
+    const removal = await store.apply(patch(store, [{ op: "remove", entity: "upload" }], JOB));
+    expect(removal.status).toBe("pending");
+  });
+});

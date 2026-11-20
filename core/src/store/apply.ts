@@ -3,6 +3,7 @@ import {
   checkListChange,
   checkLock,
   checkRemove,
+  isRegistryAppend,
   type Verdict,
 } from "../authorship/rules.js";
 import type { Op, Patch, Rational, Snapshot } from "../generated/ir.js";
@@ -262,13 +263,19 @@ export function applyOps(
             message: e.message,
           });
         }
-        if (!allowed(checkListChange(index, entity, stateOf(t), author), entity.id, op.path))
+        const registry = isRegistryAppend(entity, op.path, author) && stateOf(t) !== "locked";
+        if (
+          !registry &&
+          !allowed(checkListChange(index, entity, stateOf(t), author), entity.id, op.path)
+        )
           return;
         before.push(snapshot(entity, op.path, t.container, t.key));
         const list = t.container[t.key] as JsonObject;
         const items = Array.isArray(list.value) ? (list.value as JsonObject[]) : [];
         items.splice(insertIndex(items, op.after, entity.id, op.path), 0, wrapped);
-        t.container[t.key] = { value: items, state: list.state === "locked" ? "locked" : state };
+        // A job's append to a user registry leaves it `user`.
+        const kept = list.state === "locked" || (registry && list.state === "user");
+        t.container[t.key] = { value: items, state: kept ? list.state : state };
         return;
       }
       case "remove": {
