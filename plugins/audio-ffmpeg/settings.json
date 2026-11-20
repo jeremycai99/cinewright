@@ -1,0 +1,31 @@
+{
+  "$comment": "Mixer FFmpeg settings from the M4.0b spike (container/audio/README.md §Determinism). Task 11 (M4.4) builds plugins/audio-ffmpeg around them. These produced one PCM hash and one MP4 hash on an Intel and an AMD CI runner and an emulated Apple Silicon host, so no -cpuflags restriction is set.",
+  "image": "render",
+  "internal_format": "float64 for gain envelopes (aeval), float32 between stages",
+  "resampler": "aresample with FFmpeg's default swr resampler",
+  "measure": "ebur128=peak=true, summary parsed on the host",
+  "gain": "volume=<target - measured>dB:precision=double",
+  "limiter": {
+    "when": "measured true peak + gain > target true peak",
+    "oversample": 4,
+    "filter": "aresample=<4 x rate>,alimiter=limit=<10^(target_dbtp/20)>:level=0:attack=1:release=50:asc=0,aresample=<rate>"
+  },
+  "pcm_contract": {
+    "format": "s24le",
+    "channels": 2,
+    "dither": false,
+    "hash": "sha256 of the raw interleaved samples"
+  },
+  "wav": [
+    "-c:a",
+    "pcm_s24le",
+    "-fflags",
+    "+bitexact",
+    "-flags",
+    "+bitexact",
+    "-map_metadata",
+    "-1"
+  ],
+  "aac": ["-c:a", "aac", "-fflags", "+bitexact", "-flags", "+bitexact", "-map_metadata", "-1"],
+  "aac_bitrate": "from the delivery profile (encoding.audio_bitrate_kbps)"
+}
