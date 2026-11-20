@@ -353,8 +353,11 @@ function wrapContainer(
     } else if (
       child.type === "object" &&
       isObject(child.properties) &&
-      typeof child["x-entity"] !== "string"
+      typeof child["x-entity"] !== "string" &&
+      (given || holdsAuthorable(child, at, ctx.schemas, new Set()))
     ) {
+      // An absent container is materialized only when it holds authorable fields (their
+      // `open` wrappers); an absent plain-data object, such as an asset's `audio`, stays absent.
       let inner = given ? bare[key] : {};
       if (!isObject(inner)) {
         problem(ctx, new ShapeError("patch.container_value", here, `${key} must be an object`));
@@ -366,6 +369,29 @@ function wrapContainer(
     }
   }
   return out;
+}
+
+/** Whether an object schema has an authorable property, directly or in a nested container. */
+function holdsAuthorable(
+  node: JsonObject,
+  file: string,
+  schemas: SchemaSet,
+  seen: Set<JsonObject>,
+): boolean {
+  if (seen.has(node)) return false;
+  seen.add(node);
+  const props = isObject(node.properties) ? node.properties : {};
+  for (const raw of Object.values(props)) {
+    const { schema: child, file: at } = resolveNode(schemas, file, raw as JsonObject);
+    if (typeof child["x-authorable"] === "string") return true;
+    if (
+      child.type === "object" &&
+      typeof child["x-entity"] !== "string" &&
+      holdsAuthorable(child, at, schemas, seen)
+    )
+      return true;
+  }
+  return false;
 }
 
 /** The kind of entity an entity list holds, or null for the sequence id list's body schema. */

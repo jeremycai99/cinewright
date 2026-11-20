@@ -21,6 +21,18 @@ export type Hash = string;
  */
 export type Id1 = string;
 /**
+ * Project-unique entity id (convention 9). Immutable and never reused.
+ */
+export type Id2 = string;
+/**
+ * Project-unique entity id (convention 9). Immutable and never reused.
+ */
+export type Id3 = string;
+/**
+ * Project-unique entity id (convention 9). Immutable and never reused.
+ */
+export type Id4 = string;
+/**
  * An audio offset in integer samples at the profile's sample rate (D27).
  */
 export type Samples = number;
@@ -31,11 +43,11 @@ export type State = "open" | "agent" | "user" | "locked";
 /**
  * Project-unique entity id (convention 9). Immutable and never reused.
  */
-export type Id2 = string;
+export type Id5 = string;
 /**
  * Project-unique entity id (convention 9). Immutable and never reused.
  */
-export type Id3 = string;
+export type Id6 = string;
 export type AspectClass = "landscape" | "portrait" | "square";
 /**
  * A time or duration in integer frames at the project rate (D27).
@@ -48,7 +60,7 @@ export type Frames1 = number;
 /**
  * Project-unique entity id (convention 9). Immutable and never reused.
  */
-export type Id4 = string;
+export type Id7 = string;
 /**
  * A signed offset in integer frames.
  */
@@ -81,18 +93,6 @@ export type JsonValue2 = string | number | boolean | null | unknown[] | {};
 /**
  * Project-unique entity id (convention 9). Immutable and never reused.
  */
-export type Id5 = string;
-/**
- * Project-unique entity id (convention 9). Immutable and never reused.
- */
-export type Id6 = string;
-/**
- * Project-unique entity id (convention 9). Immutable and never reused.
- */
-export type Id7 = string;
-/**
- * Project-unique entity id (convention 9). Immutable and never reused.
- */
 export type Id8 = string;
 /**
  * Project-unique entity id (convention 9). Immutable and never reused.
@@ -103,13 +103,25 @@ export type Id9 = string;
  */
 export type Id10 = string;
 /**
+ * Project-unique entity id (convention 9). Immutable and never reused.
+ */
+export type Id11 = string;
+/**
+ * Project-unique entity id (convention 9). Immutable and never reused.
+ */
+export type Id12 = string;
+/**
+ * Project-unique entity id (convention 9). Immutable and never reused.
+ */
+export type Id13 = string;
+/**
  * A literal token value or a reference to another token.
  */
 export type TokenValue1 = string | number | boolean | TokenRef;
 /**
  * Project-unique entity id (convention 9). Immutable and never reused.
  */
-export type Id11 = string;
+export type Id14 = string;
 
 /**
  * Every IR document schema; exists only so each type is generated once.
@@ -147,12 +159,31 @@ export interface Asset {
   hash: Hash;
   media_type: string;
   bytes: number;
-  role: "take" | "music" | "sfx" | "image" | "video" | "font" | "composition" | "reference" | "consent" | "other";
+  role:
+    | "take"
+    | "music"
+    | "sfx"
+    | "image"
+    | "video"
+    | "font"
+    | "composition"
+    | "reference"
+    | "consent"
+    | "transcript"
+    | "other";
   line?: Id1;
+  take?: Id2;
+  sequence?: Id3;
+  scene?: Id4;
   provenance: Provenance;
   license: License;
+  audio?: AudioInfo;
   /**
-   * Word timestamps in samples (takes only).
+   * The plugin and model that aligned the take's words, when they are not the TTS provider's own (takes only).
+   */
+  aligned_by?: string;
+  /**
+   * Word timestamps in samples at the asset's own audio.sample_rate (takes only), one per script word (lineWords).
    */
   words?: WordTiming[];
 }
@@ -173,10 +204,25 @@ export interface License {
   commercial_use: boolean;
   attribution?: string;
 }
+/**
+ * Measured format of an audio asset. Word times are in samples at this sample_rate.
+ */
+export interface AudioInfo {
+  sample_rate: number;
+  channels: number;
+  /**
+   * Length in samples per channel.
+   */
+  samples: number;
+}
 export interface WordTiming {
   text: string;
   start: Samples;
   end: Samples;
+  /**
+   * True when the aligner gave this word no time and it was interpolated from its neighbours (M4: digits, symbols).
+   */
+  interpolated?: boolean;
 }
 /**
  * A narrator or character, defined once and referenced by id (AGENTS.md invariant 4). v0.1 casts only a narrator (checked at intake, M7.1); the schema is ready for more.
@@ -267,7 +313,7 @@ export interface Performance {
   };
 }
 export interface Visual {
-  sheet: Id2[];
+  sheet: Id5[];
   wardrobe?: string;
   style?: string;
 }
@@ -276,7 +322,7 @@ export interface Visual {
  */
 export interface Consent {
   synthetic: boolean;
-  record?: Id3;
+  record?: Id6;
 }
 /**
  * A delivery profile: a data file, not an IR entity, so it has no wrappers. The project stores a copy and its hash (convention 16).
@@ -381,7 +427,7 @@ export interface LayerTiming {
  * A timing anchor (convention 15): a line's start, end or word, plus a frame offset. `word` is present exactly when `point` is `word`.
  */
 export interface Anchor {
-  line: Id4;
+  line: Id7;
   point: "start" | "end" | "word";
   word?: number;
   offset: FrameOffset;
@@ -767,7 +813,7 @@ export interface Project {
    */
   sequences: {
     state: State;
-    value?: Id5[];
+    value?: Id8[];
   };
   script: Script;
   /**
@@ -820,6 +866,19 @@ export interface ProjectSettings {
     state: State;
     value?: boolean;
   };
+  /**
+   * Provider routing (D29): for each plugin kind, the plugin ids to use, in order. Unset means the free-first rule (free plugins, then paid plugins whose secrets are present, then by id).
+   */
+  providers?: {
+    state: State;
+    value?: ProviderRouting;
+  };
+}
+export interface ProviderRouting {
+  /**
+   * @minItems 1
+   */
+  [k: string]: [string, ...string[]];
 }
 /**
  * The style pack and project-level token overrides (M1.3, M2.1).
@@ -899,7 +958,7 @@ export interface Line {
   };
   speaker: {
     state: State;
-    value?: Id6;
+    value?: Id9;
   };
   /**
    * The speaker is visible while delivering the line.
@@ -941,14 +1000,14 @@ export interface Scene {
   };
   cast: {
     state: State;
-    value?: Id7[];
+    value?: Id10[];
   };
   /**
    * Script lines in this scene, in order (D26).
    */
   lines: {
     state: State;
-    value?: Id8[];
+    value?: Id11[];
   };
   transition_out: {
     state: State;
@@ -975,7 +1034,7 @@ export interface SceneDuration {
 }
 export interface Transition {
   type: "cut" | "cross_dissolve" | "wipe" | "match_cut";
-  to?: Id9;
+  to?: Id12;
   duration?: Frames;
   on?: string;
 }
@@ -1008,7 +1067,7 @@ export interface Shot {
   };
   subject: {
     state: State;
-    value?: Id10;
+    value?: Id13;
   };
   camera: {
     state: State;
@@ -1024,7 +1083,7 @@ export interface Shot {
   };
   references: {
     state: State;
-    value?: Id11[];
+    value?: Id14[];
   };
   layout: ShotLayout;
   style: LevelStyle;

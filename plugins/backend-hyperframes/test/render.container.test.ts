@@ -1,9 +1,8 @@
 import { existsSync, mkdirSync, readdirSync, readFileSync, writeFileSync } from "node:fs";
 import { join } from "node:path";
+import { DEFAULT_LIMITS, dockerRunArgs, runDocker } from "@cinewright/plugin-sdk";
 import { describe, expect, it } from "vitest";
 import { compileShot } from "../src/compile.js";
-import { dockerRunArgs, runDocker } from "../src/docker.js";
-import { DEFAULT_LIMITS } from "../src/limits.js";
 import { RenderError, renderShot, resolveRenderer } from "../src/render.js";
 import { catalog, pack, reference, tempDir, timing } from "./helpers.js";
 

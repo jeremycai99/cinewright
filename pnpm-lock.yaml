@@ -245,6 +245,15 @@ importers:
         specifier: 16.0.0
         version: 16.0.0
 
+  engine:
+    dependencies:
+      '@cinewright/core':
+        specifier: workspace:*
+        version: link:../core
+      '@cinewright/plugin-sdk':
+        specifier: workspace:*
+        version: link:../plugins/sdk-ts
+
   packs:
     devDependencies:
       '@cinewright/core':

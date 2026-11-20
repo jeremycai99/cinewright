@@ -1,6 +1,7 @@
 packages:
   - core
   - cli
+  - engine
   - plugins/sdk-ts
   - plugins/backend-hyperframes
   - container/render-runner

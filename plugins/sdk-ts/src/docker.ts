@@ -32,7 +32,7 @@ export function bindMount(mount: Mount): string {
 }
 
 /**
- * The `docker` arguments for one render-container run: network off, the host user, every limit,
+ * The `docker` arguments for one container run (renders and containerized plugins): network off, the host user, every limit,
  * a read-only root with a tmpfs at /tmp, and the given mounts. Never through a shell.
  */
 export function dockerRunArgs(options: {
@@ -44,12 +44,21 @@ export function dockerRunArgs(options: {
   entrypoint?: string;
   /** Keep the container after it exits, so the caller can inspect it (then remove it). */
   keep?: boolean;
+  /** Keep stdin open (`-i`), for plugins that speak JSON-RPC on stdio. */
+  interactive?: boolean;
+  /** Run an init process as PID 1, so signals reach the plugin and zombies are reaped. */
+  init?: boolean;
+  /** `NAME=value` pairs, or a bare `NAME` that docker copies from its own environment. */
+  env?: readonly string[];
+  workdir?: string;
   command: readonly string[];
 }): string[] {
   const { image, name, mounts, user, limits, entrypoint, command } = options;
   return [
     "run",
     ...(options.keep ? [] : ["--rm"]),
+    ...(options.interactive ? ["-i"] : []),
+    ...(options.init ? ["--init"] : []),
     "--name",
     name,
     "--network",
@@ -71,7 +80,9 @@ export function dockerRunArgs(options: {
     "--tmpfs",
     `/tmp:rw,exec,size=${limits.tmpfsMb}m`,
     ...mounts.flatMap((m) => ["--mount", bindMount(m)]),
-    ...(entrypoint ? ["--entrypoint", entrypoint] : []),
+    ...(options.env ?? []).flatMap((e) => ["--env", e]),
+    ...(options.workdir ? ["--workdir", options.workdir] : []),
+    ...(entrypoint !== undefined ? ["--entrypoint", entrypoint] : []),
     image,
     ...command,
   ];

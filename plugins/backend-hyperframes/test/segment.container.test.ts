@@ -1,10 +1,9 @@
 import { readdirSync, readFileSync } from "node:fs";
 import { join } from "node:path";
 import type { RendererInfo, Segment } from "@cinewright/core";
+import { DEFAULT_LIMITS, dockerRunArgs, runDocker } from "@cinewright/plugin-sdk";
 import { describe, expect, it } from "vitest";
 import { compileShot } from "../src/compile.js";
-import { dockerRunArgs, runDocker } from "../src/docker.js";
-import { DEFAULT_LIMITS } from "../src/limits.js";
 import { renderShot, resolveRenderer } from "../src/render.js";
 import { type Blend, renderSegment } from "../src/segment.js";
 import { catalog, pack, reference, segmentOps, tempDir, timing } from "./helpers.js";

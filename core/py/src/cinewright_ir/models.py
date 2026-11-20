@@ -5,6 +5,7 @@ from __future__ import annotations
 from enum import Enum
 from typing import Annotated, Any, Literal
 from pydantic import BaseModel, ConfigDict, Field, RootModel, StringConstraints
+from typing_extensions import TypeAliasType
 
 
 class Role(Enum):
@@ -17,6 +18,7 @@ class Role(Enum):
     composition = "composition"
     reference = "reference"
     consent = "consent"
+    transcript = "transcript"
     other = "other"
 
 
@@ -379,6 +381,21 @@ class WordTiming(BaseModel):
     text: Annotated[str, Field(min_length=1)]
     start: Samples
     end: Samples
+    interpolated: Annotated[
+        bool | None,
+        Field(
+            description="True when the aligner gave this word no time and it was interpolated from its neighbours (M4: digits, symbols)."
+        ),
+    ] = None
+
+
+class AudioInfo(BaseModel):
+    model_config = ConfigDict(
+        extra="forbid",
+    )
+    sample_rate: Annotated[int, Field(ge=1)]
+    channels: Annotated[int, Field(ge=1)]
+    samples: Annotated[int, Field(description="Length in samples per channel.", ge=0)]
 
 
 class Value(Enum):
@@ -943,6 +960,67 @@ class ProposeConversationalEdits(BaseModel):
     value: bool | None = None
 
 
+class ProviderRoutingAdditionalPropertyItem(RootModel[str]):
+    root: Annotated[
+        str, Field(max_length=64, pattern="^[a-z][a-z0-9_]*(\\.[a-z0-9_]+)*$")
+    ]
+
+
+ProviderRoutingAdditionalProperty = TypeAliasType(
+    "ProviderRoutingAdditionalProperty",
+    Annotated[list[ProviderRoutingAdditionalPropertyItem], Field(min_length=1)],
+)
+
+
+class ProviderRouting(
+    RootModel[
+        dict[
+            Literal[
+                "llm",
+                "tts",
+                "music",
+                "sfx",
+                "image",
+                "video",
+                "lipsync",
+                "stt",
+                "stock",
+                "critic",
+                "exporter",
+            ],
+            ProviderRoutingAdditionalProperty,
+        ]
+    ]
+):
+    root: Annotated[
+        dict[
+            Literal[
+                "llm",
+                "tts",
+                "music",
+                "sfx",
+                "image",
+                "video",
+                "lipsync",
+                "stt",
+                "stock",
+                "critic",
+                "exporter",
+            ],
+            ProviderRoutingAdditionalProperty,
+        ],
+        Field(title="ProviderRouting"),
+    ]
+
+
+class Providers(BaseModel):
+    model_config = ConfigDict(
+        extra="forbid",
+    )
+    state: State
+    value: Annotated[ProviderRouting | None, Field(title="ProviderRouting")] = None
+
+
 class ProjectSettings(BaseModel):
     model_config = ConfigDict(
         extra="forbid",
@@ -953,6 +1031,12 @@ class ProjectSettings(BaseModel):
             description="Conversational edits are proposed first and applied after the user approves (D25). On by default."
         ),
     ]
+    providers: Annotated[
+        Providers | None,
+        Field(
+            description="Provider routing (D29): for each plugin kind, the plugin ids to use, in order. Unset means the free-first rule (free plugins, then paid plugins whose secrets are present, then by id)."
+        ),
+    ] = None
 
 
 class Pack(BaseModel):
@@ -1336,11 +1420,31 @@ class Asset(BaseModel):
     line: Annotated[
         Id | None, Field(description="The line a take performs (takes only, D26).")
     ] = None
+    take: Annotated[
+        Id | None,
+        Field(description="The take a transcript transcribes (transcripts only)."),
+    ] = None
+    sequence: Annotated[
+        Id | None, Field(description="The sequence a music bed scores (music only).")
+    ] = None
+    scene: Annotated[
+        Id | None, Field(description="The scene a sound effect plays in (SFX only).")
+    ] = None
     provenance: Provenance
     license: License
+    audio: AudioInfo | None = None
+    aligned_by: Annotated[
+        str | None,
+        Field(
+            description="The plugin and model that aligned the take's words, when they are not the TTS provider's own (takes only).",
+            min_length=1,
+        ),
+    ] = None
     words: Annotated[
         list[WordTiming] | None,
-        Field(description="Word timestamps in samples (takes only)."),
+        Field(
+            description="Word timestamps in samples at the asset's own audio.sample_rate (takes only), one per script word (lineWords)."
+        ),
     ] = None
 
 

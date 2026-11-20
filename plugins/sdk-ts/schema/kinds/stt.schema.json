@@ -1,0 +1,87 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://cinewright.invalid/plugin/0/kinds/stt.schema.json",
+  "title": "SttKind",
+  "description": "Requests and results of STT plugins (M4). Files are paths relative to the plugin's work folder. Times are integer samples at the result's sample_rate.",
+  "$defs": {
+    "file": {
+      "description": "A path relative to the work folder, with no '..' segment.",
+      "type": "string",
+      "minLength": 1,
+      "pattern": "^(?!/)(?!.*(^|/)\\.\\.(/|$)).+$"
+    },
+    "language": {
+      "description": "A BCP 47 language tag.",
+      "type": "string",
+      "pattern": "^[a-z]{2,3}(-[A-Za-z0-9]{2,8})*$"
+    },
+    "time": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["start", "end"],
+      "properties": {
+        "start": { "type": "integer", "minimum": 0 },
+        "end": { "type": "integer", "minimum": 0 }
+      }
+    },
+    "align_request": {
+      "description": "stt.align: time each script word in the audio. `words` are the line's words (lineWords); `spoken`, when given, is each word's spoken form (\"2014\" -> \"twenty fourteen\") for the aligner to match.",
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["audio", "text", "words", "language"],
+      "properties": {
+        "audio": { "$ref": "#/$defs/file" },
+        "text": { "type": "string", "minLength": 1 },
+        "words": { "type": "array", "minItems": 1, "items": { "type": "string", "minLength": 1 } },
+        "spoken": { "type": "array", "items": { "type": "string", "minLength": 1 } },
+        "language": { "$ref": "#/$defs/language" }
+      }
+    },
+    "align_result": {
+      "description": "One entry per request word: its time, or null when the aligner could not time it.",
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["words", "sample_rate", "model"],
+      "properties": {
+        "words": {
+          "type": "array",
+          "items": { "oneOf": [{ "$ref": "#/$defs/time" }, { "type": "null" }] }
+        },
+        "sample_rate": { "type": "integer", "minimum": 1 },
+        "model": { "type": "string", "minLength": 1 }
+      }
+    },
+    "transcribe_request": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["audio", "language"],
+      "properties": {
+        "audio": { "$ref": "#/$defs/file" },
+        "language": { "$ref": "#/$defs/language" }
+      }
+    },
+    "transcribe_result": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["text", "words", "sample_rate", "model"],
+      "properties": {
+        "text": { "type": "string" },
+        "words": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": ["text", "start", "end"],
+            "properties": {
+              "text": { "type": "string", "minLength": 1 },
+              "start": { "type": "integer", "minimum": 0 },
+              "end": { "type": "integer", "minimum": 0 }
+            }
+          }
+        },
+        "sample_rate": { "type": "integer", "minimum": 1 },
+        "model": { "type": "string", "minLength": 1 }
+      }
+    }
+  }
+}

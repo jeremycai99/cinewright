@@ -1,10 +1,22 @@
-import { type ChildProcessWithoutNullStreams, spawn } from "node:child_process";
-import { resolve } from "node:path";
-import { pluginError } from "./errors.js";
+import { type ChildProcessWithoutNullStreams, spawn, spawnSync } from "node:child_process";
+import { randomUUID } from "node:crypto";
+import { mkdtempSync, rmSync } from "node:fs";
+import { tmpdir } from "node:os";
+import { join, resolve } from "node:path";
+import {
+  CONTAINER_START_TIMEOUT_MS,
+  CONTAINER_WORK_DIR,
+  containerCommand,
+  DEFAULT_SDK_DIR,
+  resolveContainerImage,
+} from "./container.js";
+import { type PluginError, pluginError } from "./errors.js";
+import { DEFAULT_LIMITS } from "./limits.js";
 import { setSubprocessFactory } from "./loader.js";
 import type { PluginManifest } from "./manifest.js";
 import type { Plugin, PluginContext, PluginRequest, PluginResponse } from "./plugin.js";
 import { RpcClient } from "./rpc.js";
+import { StderrTail } from "./stderr.js";
 
 const HEALTH_TIMEOUT_MS = 5000;
 const CANCEL_GRACE_MS = 1000;
@@ -12,11 +24,19 @@ const STOP_STEP_MS = 2000;
 
 /** Every child this process started, so none outlives it (M1.8b). */
 const children = new Set<ChildProcessWithoutNullStreams>();
+/** Every container this process started (G14): killing the docker CLI does not stop them. */
+const containers = new Set<string>();
 let hooked = false;
+
+function killContainer(name: string): void {
+  spawnSync("docker", ["kill", name], { stdio: "ignore", timeout: 30_000 });
+  containers.delete(name);
+}
 
 function killAll(): void {
   for (const child of children) child.kill("SIGKILL");
   children.clear();
+  for (const name of [...containers]) killContainer(name);
 }
 
 function hookExit(): void {
@@ -34,19 +54,34 @@ function hookExit(): void {
   }
 }
 
+/** Where a host-side subprocess plugin's container settings come from (tests override them). */
+export interface SubprocessOptions {
+  /** The image reference; default `resolveContainerImage(runtime.container.image)`. */
+  image?: string;
+  sdkDir?: string;
+}
+
 /**
  * A plugin in a child process speaking JSON-RPC 2.0 on stdio (D32, M1.8b). Python and GPL
  * plugins run this way. A call that outlives its timeout is cancelled, given a second, then the
  * process is killed and the call reports `timeout`.
+ *
+ * A manifest with `runtime.container` runs the command in a pinned image (M4): the child is the
+ * docker CLI, the container has a unique name, and every stop (timeout, shutdown, host exit)
+ * is a `docker kill` of that name, so no container outlives the host (G14).
  */
 export class SubprocessPlugin implements Plugin {
   private child: ChildProcessWithoutNullStreams | undefined;
   private rpc: RpcClient | undefined;
   private context: PluginContext = { secrets: {}, callTimeoutMs: 60_000 };
+  private stderr: StderrTail = new StderrTail({});
+  private ownedWorkDir: string | undefined;
+  private name: string | undefined;
 
   constructor(
     readonly manifest: PluginManifest,
     readonly dir: string,
+    private readonly options: SubprocessOptions = {},
   ) {}
 
   /** The child's pid while it runs. */
@@ -54,35 +89,104 @@ export class SubprocessPlugin implements Plugin {
     return this.child?.pid;
   }
 
+  /** The container's name while a containerized plugin runs. */
+  get containerName(): string | undefined {
+    return this.name;
+  }
+
+  /** The work folder files cross the boundary through. */
+  get workDir(): string | undefined {
+    return this.context.workDir;
+  }
+
   async init(context: PluginContext): Promise<void> {
     const runtime = this.manifest.runtime;
     if (runtime.kind !== "subprocess")
       throw new Error(`${this.manifest.id} is not a subprocess plugin`);
-    this.context = context;
-    const [command, ...args] = runtime.command;
-    const child = spawn(command as string, args, {
-      cwd: resolve(this.dir, runtime.cwd ?? "."),
-      // Only what the plugin needs: a PATH and the secrets its manifest declares (D32).
-      env: { PATH: process.env.PATH ?? "", ...context.secrets },
-      stdio: ["pipe", "pipe", "pipe"],
-    });
-    child.stderr.on("data", () => {});
+    let workDir = context.workDir;
+    if (workDir === undefined) {
+      workDir = mkdtempSync(join(tmpdir(), `cinewright-${this.manifest.id}-`));
+      this.ownedWorkDir = workDir;
+    }
+    this.context = { ...context, workDir };
+    this.stderr = new StderrTail(context.secrets, undefined, context.onLog);
+    // Only what the plugin needs: a PATH and the secrets its manifest declares (D32).
+    const env = { PATH: process.env.PATH ?? "", ...context.secrets };
+    let child: ChildProcessWithoutNullStreams;
+    let pluginWorkDir = workDir;
+    if (runtime.container) {
+      const name = `cinewright-plugin-${randomUUID()}`;
+      const args = containerCommand(this.manifest, workDir, DEFAULT_LIMITS, name, {
+        image: this.options.image ?? resolveContainerImage(runtime.container.image),
+        pluginDir: resolve(this.dir),
+        sdkDir: this.options.sdkDir ?? DEFAULT_SDK_DIR,
+        ...(typeof process.getuid === "function" && typeof process.getgid === "function"
+          ? { user: { uid: process.getuid(), gid: process.getgid() } }
+          : {}),
+      });
+      // DOCKER_* and HOME let the CLI find its daemon and config; the container gets none of it.
+      const dockerEnv = Object.fromEntries(
+        Object.entries(process.env).filter(([key]) => key.startsWith("DOCKER_") || key === "HOME"),
+      ) as Record<string, string>;
+      child = spawn("docker", args, {
+        env: { ...dockerEnv, ...env },
+        stdio: ["pipe", "pipe", "pipe"],
+      });
+      this.name = name;
+      containers.add(name);
+      pluginWorkDir = CONTAINER_WORK_DIR;
+    } else {
+      const [command, ...args] = runtime.command;
+      child = spawn(command as string, args, {
+        cwd: resolve(this.dir, runtime.cwd ?? "."),
+        env,
+        stdio: ["pipe", "pipe", "pipe"],
+      });
+    }
+    child.stderr.setEncoding("utf8");
+    child.stderr.on("data", (chunk: string) => this.stderr.push(chunk));
     hookExit();
     children.add(child);
-    child.on("exit", () => children.delete(child));
+    child.on("exit", () => {
+      children.delete(child);
+      if (this.name) containers.delete(this.name);
+    });
     this.child = child;
     this.rpc = new RpcClient(child);
+    const startMs = runtime.container ? CONTAINER_START_TIMEOUT_MS : HEALTH_TIMEOUT_MS;
     try {
-      await this.rpc.request("health", null, HEALTH_TIMEOUT_MS);
+      await this.rpc.request("health", null, startMs);
       await this.rpc.request(
         "initialize",
-        { secrets: context.secrets, callTimeoutMs: context.callTimeoutMs },
+        { secrets: context.secrets, callTimeoutMs: context.callTimeoutMs, workDir: pluginWorkDir },
         HEALTH_TIMEOUT_MS,
       );
     } catch (error) {
-      child.kill("SIGKILL");
-      throw new Error(`${this.manifest.id} did not start: ${(error as Error).message}`);
+      this.kill();
+      const tail = this.stderr.text();
+      throw new Error(
+        `${this.manifest.id} did not start: ${(error as Error).message}${tail ? `\n${tail}` : ""}`,
+      );
     }
+  }
+
+  /** Stop the process now; a container is killed by name. */
+  private kill(): void {
+    if (this.name) killContainer(this.name);
+    this.child?.kill("SIGKILL");
+  }
+
+  /** A failed call's error, with the stderr tail in `data.stderr` (F18). */
+  private withStderr(error: PluginError): PluginError {
+    const stderr = this.stderr.text();
+    if (!stderr) return error;
+    const data =
+      error.data !== null && typeof error.data === "object" && !Array.isArray(error.data)
+        ? { ...(error.data as Record<string, unknown>), stderr }
+        : error.data === undefined
+          ? { stderr }
+          : { detail: error.data, stderr };
+    return { ...error, data };
   }
 
   async capabilities(): Promise<string[]> {
@@ -110,7 +214,7 @@ export class SubprocessPlugin implements Plugin {
         clearTimeout(timer);
         clearTimeout(grace);
         signal.removeEventListener("abort", onAbort);
-        done(response);
+        done(response.ok ? response : { ok: false, error: this.withStderr(response.error) });
       };
       const onAbort = () => rpc.notify("$/cancel", { id });
       signal.addEventListener("abort", onAbort);
@@ -118,7 +222,7 @@ export class SubprocessPlugin implements Plugin {
         timedOut = true;
         rpc.notify("$/cancel", { id });
         grace = setTimeout(() => {
-          child.kill("SIGKILL");
+          this.kill();
           finish({
             ok: false,
             error: pluginError(
@@ -145,6 +249,17 @@ export class SubprocessPlugin implements Plugin {
   }
 
   async shutdown(): Promise<void> {
+    try {
+      await this.stop();
+    } finally {
+      if (this.name) killContainer(this.name);
+      this.name = undefined;
+      if (this.ownedWorkDir) rmSync(this.ownedWorkDir, { recursive: true, force: true });
+      this.ownedWorkDir = undefined;
+    }
+  }
+
+  private async stop(): Promise<void> {
     const child = this.child;
     const rpc = this.rpc;
     if (!child || !rpc) return;
@@ -164,6 +279,7 @@ export class SubprocessPlugin implements Plugin {
     }
     rpc.notify("exit");
     if (await wait(STOP_STEP_MS)) return;
+    if (this.name) killContainer(this.name);
     child.kill("SIGTERM");
     if (await wait(STOP_STEP_MS)) return;
     child.kill("SIGKILL");
@@ -171,8 +287,12 @@ export class SubprocessPlugin implements Plugin {
   }
 }
 
-export function createSubprocessPlugin(manifest: PluginManifest, dir: string): SubprocessPlugin {
-  return new SubprocessPlugin(manifest, dir);
+export function createSubprocessPlugin(
+  manifest: PluginManifest,
+  dir: string,
+  options: SubprocessOptions = {},
+): SubprocessPlugin {
+  return new SubprocessPlugin(manifest, dir, options);
 }
 
 setSubprocessFactory(createSubprocessPlugin);

@@ -39,6 +39,7 @@
         "composition",
         "reference",
         "consent",
+        "transcript",
         "other"
       ]
     },
@@ -47,14 +48,37 @@
       "$ref": "common.schema.json#/$defs/id",
       "x-ref": "line"
     },
+    "take": {
+      "description": "The take a transcript transcribes (transcripts only).",
+      "$ref": "common.schema.json#/$defs/id",
+      "x-ref": "asset"
+    },
+    "sequence": {
+      "description": "The sequence a music bed scores (music only).",
+      "$ref": "common.schema.json#/$defs/id",
+      "x-ref": "sequence"
+    },
+    "scene": {
+      "description": "The scene a sound effect plays in (SFX only).",
+      "$ref": "common.schema.json#/$defs/id",
+      "x-ref": "scene"
+    },
     "provenance": {
       "$ref": "#/$defs/provenance"
     },
     "license": {
       "$ref": "common.schema.json#/$defs/license"
     },
+    "audio": {
+      "$ref": "#/$defs/audio"
+    },
+    "aligned_by": {
+      "description": "The plugin and model that aligned the take's words, when they are not the TTS provider's own (takes only).",
+      "type": "string",
+      "minLength": 1
+    },
     "words": {
-      "description": "Word timestamps in samples (takes only).",
+      "description": "Word timestamps in samples at the asset's own audio.sample_rate (takes only), one per script word (lineWords).",
       "type": "array",
       "items": {
         "$ref": "#/$defs/word"
@@ -99,6 +123,32 @@
         },
         "end": {
           "$ref": "common.schema.json#/$defs/samples"
+        },
+        "interpolated": {
+          "description": "True when the aligner gave this word no time and it was interpolated from its neighbours (M4: digits, symbols).",
+          "type": "boolean"
+        }
+      }
+    },
+    "audio": {
+      "title": "AudioInfo",
+      "description": "Measured format of an audio asset. Word times are in samples at this sample_rate.",
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["sample_rate", "channels", "samples"],
+      "properties": {
+        "sample_rate": {
+          "type": "integer",
+          "minimum": 1
+        },
+        "channels": {
+          "type": "integer",
+          "minimum": 1
+        },
+        "samples": {
+          "description": "Length in samples per channel.",
+          "type": "integer",
+          "minimum": 0
         }
       }
     }

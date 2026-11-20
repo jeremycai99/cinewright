@@ -29,7 +29,13 @@ export interface PluginManifest {
   secrets: string[];
   runtime:
     | { kind: "in_process"; entry: string }
-    | { kind: "subprocess"; command: string[]; cwd?: string };
+    | {
+        kind: "subprocess";
+        command: string[];
+        cwd?: string;
+        /** Run inside a pinned image (M4); `image` is a logical name such as "audio". */
+        container?: { image: string };
+      };
   concurrency: { max_parallel: number };
   rate_limits: { requests: number; per_seconds: number }[];
 }

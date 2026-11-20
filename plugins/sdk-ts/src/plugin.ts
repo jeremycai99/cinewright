@@ -6,6 +6,14 @@ export interface PluginContext {
   secrets: Readonly<Record<string, string>>;
   /** Default timeout for one call, in milliseconds. */
   callTimeoutMs: number;
+  /**
+   * The folder requests and results name files in (relative paths). The host creates one per
+   * plugin instance when this is unset, and deletes the folder it created at shutdown.
+   * Containerized plugins see it as /work.
+   */
+  workDir?: string;
+  /** Each line the plugin writes to stderr, with declared secret values replaced. */
+  onLog?: (line: string) => void;
 }
 
 export interface PluginRequest {

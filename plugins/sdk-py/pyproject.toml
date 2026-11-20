@@ -3,7 +3,8 @@ name = "cinewright-plugin-sdk"
 version = "0.0.0"
 description = "SDK for Cinewright subprocess plugins."
 license = "Apache-2.0"
-requires-python = ">=3.13"
+requires-python = ">=3.12"
+# 3.12: the audio image runs plugins on Python 3.12 (M4).
 dependencies = []
 
 [build-system]

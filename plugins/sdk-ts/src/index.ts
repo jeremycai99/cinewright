@@ -1,17 +1,50 @@
 export {
+  CONTAINER_START_TIMEOUT_MS,
+  CONTAINER_WORK_DIR,
+  type ContainerOptions,
+  containerCommand,
+  DEFAULT_SDK_DIR,
+  resolveContainerImage,
+} from "./container.js";
+export {
+  bindMount,
+  dockerRunArgs,
+  IMAGE_PLATFORM,
+  type Mount,
+  oomKilled,
+  type RunResult,
+  removeContainer,
+  runDocker,
+} from "./docker.js";
+export {
   ERROR_CODES,
   isPluginError,
   type PluginError,
   type PluginErrorCode,
   pluginError,
 } from "./errors.js";
-export { createSubprocessPlugin, SubprocessPlugin } from "./host.js";
+export { createSubprocessPlugin, type SubprocessOptions, SubprocessPlugin } from "./host.js";
+export {
+  type KindMethod,
+  type KindSpec,
+  type SampleSpan,
+  validateKindValue,
+  type WorkFile,
+} from "./kinds/common.js";
+export {
+  type AlignRequest,
+  type AlignResult,
+  STT_KIND,
+  type TranscribeRequest,
+  type TranscribeResult,
+} from "./kinds/stt.js";
 export {
   type CheckResult,
   type ConformanceReport,
   type GoldenCase,
   runConformance,
 } from "./kit.js";
+export { DEFAULT_LIMITS, type RunLimits, timeoutMs } from "./limits.js";
 export {
   type LoadedPlugin,
   loadPlugin,
@@ -27,5 +60,6 @@ export {
 } from "./manifest.js";
 export type { Plugin, PluginContext, PluginRequest, PluginResponse } from "./plugin.js";
 export { RpcClient, RpcError } from "./rpc.js";
+export { STDERR_TAIL_BYTES, StderrTail } from "./stderr.js";
 
 export const VERSION = "0.0.0";

@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import threading
+from pathlib import Path
 from typing import Any
 
 ERROR_CODES = (
@@ -42,6 +43,9 @@ class Plugin:
     """Override `capabilities` and `call`; call `check_cancelled()` often in long work."""
 
     _local = threading.local()
+    #: The folder requests and results name files in, set by the host before `init` (M4).
+    #: Containerized plugins see /work. None when the host gives none.
+    work_dir: Path | None = None
 
     def init(self, secrets: dict[str, str]) -> None:
         """Called once before any call, with the secrets the manifest declares."""

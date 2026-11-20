@@ -1,5 +1,6 @@
 import { isDeepStrictEqual } from "node:util";
 import { isPluginError } from "./errors.js";
+import { type KindSpec, validateKindValue } from "./kinds/common.js";
 import type { LoadedPlugin } from "./loader.js";
 import { validateManifest } from "./manifest.js";
 import type { PluginRequest, PluginResponse } from "./plugin.js";
@@ -32,10 +33,14 @@ const CANCEL_LIMIT_MS = 1000;
  * plugin reports equal its manifest's, that golden requests return the expected results, that a
  * failing request returns a typed error, and that cancellation stops a call within a second.
  * Golden cases must include at least one error case and one cancellable case.
+ *
+ * With a `kind`, each successful golden request and its result must also match that kind's
+ * schemas (`schema/kinds/<kind>.schema.json`) and checks (M4).
  */
 export async function runConformance(
   loaded: LoadedPlugin,
   golden: readonly GoldenCase[],
+  kind?: KindSpec,
 ): Promise<ConformanceReport> {
   const checks: CheckResult[] = [];
   const add = (check: CheckResult) => checks.push(check);
@@ -99,6 +104,7 @@ export async function runConformance(
           ok: response.ok && isDeepStrictEqual(response.result, expected.result),
           detail: JSON.stringify(response),
         });
+        if (kind && response.ok) add(kindCheck(kind, golden_case, response.result));
       } else {
         sawError = true;
         const typed = !response.ok && isPluginError(response.error);
@@ -117,4 +123,21 @@ export async function runConformance(
     await plugin.shutdown();
   }
   return { passed: checks.every((c) => c.ok), checks };
+}
+
+function kindCheck(kind: KindSpec, golden_case: GoldenCase, result: unknown): CheckResult {
+  const name = `${kind.name}: ${golden_case.name}`;
+  const method = kind.methods[golden_case.request.method];
+  if (!method)
+    return {
+      name,
+      ok: false,
+      detail: `${golden_case.request.method} is not a ${kind.name} method`,
+    };
+  const request = validateKindValue(kind.name, method.request, golden_case.request.params);
+  if (!request.ok) return { name, ok: false, detail: `request: ${request.errors.join("; ")}` };
+  const checked = validateKindValue(kind.name, method.result, result);
+  if (!checked.ok) return { name, ok: false, detail: `result: ${checked.errors.join("; ")}` };
+  const problem = method.check?.(golden_case.request.params, result) ?? null;
+  return problem ? { name, ok: false, detail: problem } : { name, ok: true };
 }
