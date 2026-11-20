@@ -14,7 +14,9 @@ from pathlib import Path
 import numpy as np
 import torch
 
-TEXT = "In 2014 it cost £13.60, and the bridge opened two years later."
+TEXT = os.environ.get(
+    "SPIKE_TEXT", "In 2014 it cost £13.60, and the bridge opened two years later."
+)
 VOICE = "af_heart"
 SEED = 1234
 MODELS = Path(os.environ.get("CINEWRIGHT_MODELS", "/opt/models"))
@@ -69,6 +71,30 @@ words = [
     {"word": w["word"], "start": w.get("start"), "end": w.get("end")}
     for w in aligned["word_segments"]
 ]
+# The same alignment with the words the aligner cannot spell (digits, symbols) left out of
+# the text; they are interpolated afterwards (the plan's rule).
+vocab = set(meta["dictionary"])
+script = TEXT.split()
+keep = [i for i, w in enumerate(script) if all(c in vocab for c in w.lower() if c.isalnum())]
+filtered = " ".join(script[i] for i in keep)
+seg2 = [{"start": 0.0, "end": duration, "text": filtered}]
+aligned2 = whisperx.align(seg2, align_model, meta, wav, "cpu", return_char_alignments=False)
+words_dropped = [None] * len(script)
+for i, w in zip(keep, aligned2["word_segments"], strict=False):
+    words_dropped[i] = {"word": w["word"], "start": w.get("start"), "end": w.get("end")}
+# The same take aligned against a spoken form of the text (SPIKE_SPOKEN), when given.
+spoken = os.environ.get(
+    "SPIKE_SPOKEN",
+    "In twenty fourteen it cost thirteen pounds sixty, and the bridge opened two years later.",
+)
+words_spoken = None
+if spoken:
+    seg3 = [{"start": 0.0, "end": duration, "text": spoken}]
+    aligned3 = whisperx.align(seg3, align_model, meta, wav, "cpu", return_char_alignments=False)
+    words_spoken = [
+        {"word": w["word"], "start": w.get("start"), "end": w.get("end")}
+        for w in aligned3["word_segments"]
+    ]
 t0 = time.perf_counter()
 asr = whisperx.load_model(
     str(MODELS / "faster-whisper-small"), "cpu", compute_type="int8", language="en", threads=1
@@ -93,6 +119,8 @@ result = {
     "transcript_sha256": hashlib.sha256(text.encode()).hexdigest(),
     "transcript": text,
     "words": words,
+    "words_dropped": words_dropped,
+    "words_spoken": words_spoken,
     "native": tokens,
     "max_native_vs_align_s": max(deltas) if deltas else None,
     "compared_words": len(deltas),
@@ -110,4 +138,12 @@ result = {
     },
 }
 (out / "result.json").write_text(json.dumps(result, indent=2))
-print(json.dumps({k: v for k, v in result.items() if k not in ("words", "native")}))
+print(
+    json.dumps(
+        {
+            k: v
+            for k, v in result.items()
+            if k not in ("words", "native", "words_dropped", "words_spoken")
+        }
+    )
+)
