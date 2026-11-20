@@ -1,0 +1,17 @@
+# The WhisperX STT plugin (M4.5b). It runs in the audio image, which holds whisperx, torch and
+# the models (container/audio). Only the light dependencies are declared here, so host tests
+# run without them; heavy imports are lazy.
+[project]
+name = "cinewright-stt-whisperx"
+version = "0.1.0"
+description = "Forced alignment and transcription for Cinewright, with WhisperX."
+license = "Apache-2.0"
+requires-python = ">=3.12"
+dependencies = ["cinewright-plugin-sdk", "num2words==0.5.14"]
+
+[tool.uv.sources]
+cinewright-plugin-sdk = { workspace = true }
+
+[build-system]
+requires = ["uv_build==0.13.8"]
+build-backend = "uv_build"

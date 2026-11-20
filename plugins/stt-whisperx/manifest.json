@@ -1,0 +1,22 @@
+{
+  "schema_version": 1,
+  "id": "stt_whisperx",
+  "version": "0.1.0",
+  "kind": "stt",
+  "capabilities": ["stt.align", "stt.transcribe"],
+  "cost_model": { "unit": "free" },
+  "latency_class": "batch",
+  "output_license": {
+    "terms": "Word times and transcripts derived from the user's own audio; no rights are added or taken",
+    "commercial_use": true
+  },
+  "secrets": [],
+  "runtime": {
+    "kind": "subprocess",
+    "command": ["python", "-m", "cinewright_stt_whisperx.plugin"],
+    "cwd": "src",
+    "container": { "image": "audio" }
+  },
+  "concurrency": { "max_parallel": 1 },
+  "rate_limits": []
+}
