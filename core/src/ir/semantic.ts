@@ -93,7 +93,8 @@ function rateKey(rate: unknown): string | null {
 
 /**
  * Rules that span the whole IR (M1.1c): unique ids, references that resolve to the right
- * kind, retired ids, deliverable profiles present and hashed correctly, one frame rate (D27).
+ * kind, retired ids, deliverable profiles present and hashed correctly, one frame rate (D27)
+ * and one sample rate (M4).
  */
 export function crossDocumentErrors(
   schemas: SchemaSet,
@@ -155,6 +156,7 @@ function profileErrors(project: JsonObject): ValidationError[] {
   }
   const deliverables = isObject(project.deliverables) ? project.deliverables.value : undefined;
   const rates = new Set<string>();
+  const sampleRates = new Set<number>();
   for (const deliverable of Array.isArray(deliverables) ? deliverables : []) {
     if (!isObject(deliverable) || !isObject(deliverable.profile)) continue;
     const profileId = deliverable.profile.value;
@@ -170,12 +172,22 @@ function profileErrors(project: JsonObject): ValidationError[] {
     }
     const key = isObject(copy.body) ? rateKey(copy.body.frame_rate) : null;
     if (key) rates.add(key);
+    const sampleRate = isObject(copy.body) ? copy.body.sample_rate : undefined;
+    if (typeof sampleRate === "number") sampleRates.add(sampleRate);
   }
   if (rates.size > 1) {
     errors.push({
       entity: projectId,
       pointer: "/deliverables",
       rule: "semantic.frame_rate_mismatch",
+    });
+  }
+  // One sample rate per project (M4), so take and mix arithmetic is exact.
+  if (sampleRates.size > 1) {
+    errors.push({
+      entity: projectId,
+      pointer: "/deliverables",
+      rule: "project.mixed_sample_rates",
     });
   }
   return errors;

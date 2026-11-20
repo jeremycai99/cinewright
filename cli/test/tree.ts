@@ -1,5 +1,5 @@
 import { execFileSync } from "node:child_process";
-import { cpSync, mkdtempSync, readdirSync, readFileSync, rmSync } from "node:fs";
+import { cpSync, mkdtempSync, readdirSync, readFileSync, rmSync, writeFileSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
 import { fileURLToPath } from "node:url";
@@ -89,6 +89,13 @@ export function referenceCopy(): string {
   return out;
 }
 
-export function golden(name: string): string {
-  return readFileSync(join(REFERENCE, "golden", name), "utf8");
+/**
+ * A golden file's text. With CINEWRIGHT_UPDATE_GOLDEN=1 and an `actual`, the file is rewritten
+ * first: regenerate after a deliberate change, then review the diff.
+ */
+export function golden(name: string, actual?: string): string {
+  const path = join(REFERENCE, "golden", name);
+  if (actual !== undefined && process.env.CINEWRIGHT_UPDATE_GOLDEN === "1")
+    writeFileSync(path, actual);
+  return readFileSync(path, "utf8");
 }

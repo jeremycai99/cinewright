@@ -1,4 +1,17 @@
 export {
+  findLine,
+  lexiconUsed,
+  lineTakes,
+  projectSampleRate,
+  scriptLines,
+  selectedTake,
+  speakerOf,
+  TakeError,
+  takeId,
+  takeKey,
+  takeSeed,
+} from "./audio/select.js";
+export {
   type HashString,
   sha256Bytes,
   sha256Hash,

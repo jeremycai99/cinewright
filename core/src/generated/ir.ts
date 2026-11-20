@@ -115,13 +115,17 @@ export type Id12 = string;
  */
 export type Id13 = string;
 /**
+ * Project-unique entity id (convention 9). Immutable and never reused.
+ */
+export type Id14 = string;
+/**
  * A literal token value or a reference to another token.
  */
 export type TokenValue1 = string | number | boolean | TokenRef;
 /**
  * Project-unique entity id (convention 9). Immutable and never reused.
  */
-export type Id14 = string;
+export type Id15 = string;
 
 /**
  * Every IR document schema; exists only so each type is generated once.
@@ -978,6 +982,13 @@ export interface Line {
     state: State;
     value?: string;
   };
+  /**
+   * The selected take (M4): an asset with role take for this line. Written by the narration job; the user may choose another, and a gate may lock it. A take whose request key no longer matches the line is stale (timing.no_take).
+   */
+  take?: {
+    state: State;
+    value?: Id10;
+  };
 }
 /**
  * A scene spec with typed fields (the spec's "What a scene spec holds").
@@ -1000,14 +1011,14 @@ export interface Scene {
   };
   cast: {
     state: State;
-    value?: Id10[];
+    value?: Id11[];
   };
   /**
    * Script lines in this scene, in order (D26).
    */
   lines: {
     state: State;
-    value?: Id11[];
+    value?: Id12[];
   };
   transition_out: {
     state: State;
@@ -1034,7 +1045,7 @@ export interface SceneDuration {
 }
 export interface Transition {
   type: "cut" | "cross_dissolve" | "wipe" | "match_cut";
-  to?: Id12;
+  to?: Id13;
   duration?: Frames;
   on?: string;
 }
@@ -1067,7 +1078,7 @@ export interface Shot {
   };
   subject: {
     state: State;
-    value?: Id13;
+    value?: Id14;
   };
   camera: {
     state: State;
@@ -1083,7 +1094,7 @@ export interface Shot {
   };
   references: {
     state: State;
-    value?: Id14[];
+    value?: Id15[];
   };
   layout: ShotLayout;
   style: LevelStyle;

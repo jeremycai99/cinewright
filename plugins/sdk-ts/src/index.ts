@@ -38,6 +38,7 @@ export {
   type TranscribeRequest,
   type TranscribeResult,
 } from "./kinds/stt.js";
+export { type SynthesizeRequest, type SynthesizeResult, TTS_KIND } from "./kinds/tts.js";
 export {
   type CheckResult,
   type ConformanceReport,

@@ -193,6 +193,9 @@ importers:
       '@cinewright/core':
         specifier: workspace:*
         version: link:../core
+      '@cinewright/engine':
+        specifier: workspace:*
+        version: link:../engine
 
   components:
     dependencies:

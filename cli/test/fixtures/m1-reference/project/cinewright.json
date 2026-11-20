@@ -348,6 +348,9 @@
                   "state": "user",
                   "value": "narrator"
                 },
+                "take": {
+                  "state": "open"
+                },
                 "text": {
                   "state": "user",
                   "value": "Every team hits the same wall."
@@ -374,6 +377,9 @@
                 "speaker": {
                   "state": "user",
                   "value": "dr_lin"
+                },
+                "take": {
+                  "state": "open"
                 },
                 "text": {
                   "state": "user",

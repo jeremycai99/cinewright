@@ -1,0 +1,84 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://cinewright.invalid/plugin/0/kinds/tts.schema.json",
+  "title": "TtsKind",
+  "description": "Requests and results of TTS plugins (M4). Files are paths relative to the plugin's work folder. Word times are integer samples at the result's sample_rate.",
+  "$defs": {
+    "file": {
+      "type": "string",
+      "minLength": 1,
+      "pattern": "^(?!/)(?!.*(^|/)\\.\\.(/|$)).+$"
+    },
+    "time": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["start", "end"],
+      "properties": {
+        "start": { "type": "integer", "minimum": 0 },
+        "end": { "type": "integer", "minimum": 0 }
+      }
+    },
+    "synthesize_request": {
+      "description": "tts.synthesize: one take of one line. `words` are the line's words (lineWords). `binding` is the speaker's binding for this provider, passed through (D29). `lexicon` maps each term the text uses to its pronunciation: a respelling, or IPA in slashes. `sample_rate` is the project's; a provider may return its own native rate. Write the audio (WAV) to `output`.",
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "text",
+        "words",
+        "language",
+        "binding",
+        "lexicon",
+        "seed",
+        "sample_rate",
+        "output"
+      ],
+      "properties": {
+        "text": { "type": "string", "minLength": 1 },
+        "words": { "type": "array", "minItems": 1, "items": { "type": "string", "minLength": 1 } },
+        "language": { "type": "string", "pattern": "^[a-z]{2,3}(-[A-Za-z0-9]{2,8})*$" },
+        "direction": { "type": "string" },
+        "binding": { "type": "object" },
+        "lexicon": {
+          "type": "object",
+          "additionalProperties": { "type": "string", "minLength": 1 }
+        },
+        "seed": { "type": "integer", "minimum": 0, "maximum": 4294967295 },
+        "sample_rate": { "type": "integer", "minimum": 1 },
+        "output": { "$ref": "#/$defs/file" }
+      }
+    },
+    "synthesize_result": {
+      "description": "`words`: one time per request word (null for a word the provider could not time), or null when the provider gives no times. `request` is the provider request as sent, without secrets. `license` is authoritative over the manifest's output_license.",
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["file", "sample_rate", "channels", "words", "model", "request", "license"],
+      "properties": {
+        "file": { "$ref": "#/$defs/file" },
+        "sample_rate": { "type": "integer", "minimum": 1 },
+        "channels": { "const": 1 },
+        "words": {
+          "oneOf": [
+            { "type": "null" },
+            {
+              "type": "array",
+              "items": { "oneOf": [{ "$ref": "#/$defs/time" }, { "type": "null" }] }
+            }
+          ]
+        },
+        "model": { "type": "string", "minLength": 1 },
+        "plan_tier": { "type": "string", "minLength": 1 },
+        "request": { "type": "object" },
+        "license": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["terms", "commercial_use"],
+          "properties": {
+            "terms": { "type": "string", "minLength": 1 },
+            "commercial_use": { "type": "boolean" },
+            "attribution": { "type": "string" }
+          }
+        }
+      }
+    }
+  }
+}

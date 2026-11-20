@@ -15,6 +15,8 @@ export const EXIT = {
   lock: 7,
   /** A render failed: its timeout, its memory limit, or render-job itself (M3.2a). */
   render: 8,
+  /** A provider plugin failed or none was usable; the message names the line and provider (M4). */
+  provider: 9,
 } as const;
 
 export type ExitCode = (typeof EXIT)[keyof typeof EXIT];
