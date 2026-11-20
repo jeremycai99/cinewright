@@ -1,0 +1,7 @@
+# The audio image's build context is container/audio. Keep in step with AUDIO_EXCLUDED in
+# tools/src/cinewright_tools/container.py.
+README.md
+image.lock.json
+spike
+**/__pycache__
+.venv

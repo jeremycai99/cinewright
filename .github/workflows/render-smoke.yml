@@ -217,3 +217,11 @@ jobs:
             echo "$GH_TOKEN" | docker login ghcr.io --username "$GITHUB_ACTOR" --password-stdin
           fi
       - run: uv run --locked cinewright-check-image-lock
+      - name: Log in to GHCR when an audio image is locked
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          if [ "$(jq -r '.digest // empty' container/audio/image.lock.json)" != "" ]; then
+            echo "$GH_TOKEN" | docker login ghcr.io --username "$GITHUB_ACTOR" --password-stdin
+          fi
+      - run: uv run --locked cinewright-check-image-lock --kind audio

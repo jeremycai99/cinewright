@@ -1,0 +1,44 @@
+# Builds the audio image on PRs that change its inputs, then checks it matches its pins and
+# imports the TTS and STT stacks with the network off (M4.0a). Later audio tasks add their
+# container tests here.
+name: audio-smoke
+
+on:
+  pull_request:
+    paths:
+      - container/audio/**
+      - tools/src/cinewright_tools/**
+      - .github/workflows/audio-smoke.yml
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: audio-smoke-${{ github.ref }}
+  cancel-in-progress: ${{ github.event_name == 'pull_request' }}
+
+jobs:
+  audio-smoke:
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      - uses: astral-sh/setup-uv@68559e99cc807c1eb7e9238fd43a15bba460eec2 # v10.3.3
+        with:
+          version-file: pyproject.toml
+      - run: uv sync --locked
+      - name: Build the audio image
+        run: |
+          start=$(date +%s)
+          uv run --locked cinewright-build-image --kind audio --tag cinewright-audio:ci
+          echo "build: $(( $(date +%s) - start )) s"
+          docker image inspect cinewright-audio:ci --format 'size: {{.Size}} bytes'
+      - name: Audio image container tests, none skipped
+        run: |
+          uv run --locked pytest tools/tests/test_audio_image.py -v -m container -rs | tee pytest.txt
+          ! grep -q SKIPPED pytest.txt
+        env:
+          CINEWRIGHT_CONTAINER_TESTS: "1"
+          CINEWRIGHT_AUDIO_IMAGE: cinewright-audio:ci
