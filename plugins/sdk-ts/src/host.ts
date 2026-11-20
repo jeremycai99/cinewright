@@ -21,6 +21,8 @@ import { StderrTail } from "./stderr.js";
 const HEALTH_TIMEOUT_MS = 5000;
 const CANCEL_GRACE_MS = 1000;
 const STOP_STEP_MS = 2000;
+/** stdout and stderr are separate pipes: give a failed call's stderr a moment to arrive. */
+const STDERR_SETTLE_MS = 100;
 
 /** Every child this process started, so none outlives it (M1.8b). */
 const children = new Set<ChildProcessWithoutNullStreams>();
@@ -214,7 +216,12 @@ export class SubprocessPlugin implements Plugin {
         clearTimeout(timer);
         clearTimeout(grace);
         signal.removeEventListener("abort", onAbort);
-        done(response.ok ? response : { ok: false, error: this.withStderr(response.error) });
+        if (response.ok) done(response);
+        else
+          setTimeout(
+            () => done({ ok: false, error: this.withStderr(response.error) }),
+            STDERR_SETTLE_MS,
+          );
       };
       const onAbort = () => rpc.notify("$/cancel", { id });
       signal.addEventListener("abort", onAbort);
