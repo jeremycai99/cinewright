@@ -173,7 +173,8 @@ def test_audio_image_matches_its_pins(audio_image: str) -> None:
 @pytest.mark.container
 def test_audio_stacks_import_offline(audio_image: str) -> None:
     command = ["docker", "run", "--rm", "--network", "none", "--platform", "linux/amd64"]
-    command += ["--read-only", "--tmpfs", "/tmp:rw,size=512m", "--env", "HOME=/tmp"]
+    # exec: phonemizer copies the espeak-ng library into /tmp and loads it from there.
+    command += ["--read-only", "--tmpfs", "/tmp:rw,exec,size=512m", "--env", "HOME=/tmp"]
     command += [audio_image, "imports"]
     result = subprocess.run(command, capture_output=True, text=True, check=False)
     assert result.returncode == 0, result.stderr

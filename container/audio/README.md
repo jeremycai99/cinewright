@@ -17,7 +17,7 @@ What is in it:
 
 Plugin code is not in the image. The plugin host (M4.5a) mounts each plugin's folder at `/plugins/<id>` read-only, so a plugin change needs no rebuild.
 
-Every run has the network off. The image sets `HF_HUB_OFFLINE`, `TRANSFORMERS_OFFLINE`, `HF_HOME`, `TORCH_HOME` and `NLTK_DATA` so nothing tries to download.
+Every run has the network off. `/tmp` must be a tmpfs mounted with `exec`: phonemizer copies the espeak-ng library there and loads it (the run limits already mount it so). The image sets `HF_HUB_OFFLINE`, `TRANSFORMERS_OFFLINE`, `HF_HOME`, `TORCH_HOME` and `NLTK_DATA` so nothing tries to download.
 
 ## Commands
 
@@ -55,4 +55,6 @@ Recorded on 2026-11-20.
 
 | Where | Build time | Image size |
 | --- | --- | --- |
-| MacBook (arm64, colima, amd64 under emulation), cold cache | MEASURE | MEASURE |
+| MacBook (arm64, colima 6 CPUs, amd64 under emulation), cold cache | 490 s | 2.22 GB (2,223,217,538 bytes) |
+
+CI times come from the `audio-smoke` job log.
