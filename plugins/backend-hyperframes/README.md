@@ -63,7 +63,21 @@ When the deliverable's `burn_in_captions` is true, `planShot` adds a `caption_tr
 
 ## Plugin
 
-`manifest.json` declares a `backend` plugin with the capability `render.composition`. `createPlugin()` answers it with `{ project, shot, deliverable, timing, out_dir, pack_path? }` and returns `{ dir, inputs }`; compile and pack errors are `invalid_request`.
+`manifest.json` declares a `backend` plugin (M5.4a) with the five methods of the SDK's `BACKEND_KIND` and the family capability `backend.html` (shots with `backend: "html"` route here). Every method takes `{ project, deliverable, timing, image?, pack_path? }`, where `timing` is the solver's output (`{ table, sequences, scenes, shots }`):
+
+| Method | Extra params | Returns |
+| --- | --- | --- |
+| `render.plan` | `shot` | `{ key, frames, body, segments }`, writing nothing |
+| `render.composition` | `shot`, `out_dir` (no image needed) | `{ dir, inputs, frames }` |
+| `render.shot` | `shot` | `{ key, dir, frames, body_frames, framemd5, sha256, hit }` |
+| `render.segment` | `scene` | the segment into the next scene, rendering both shots if needed |
+| `render.keyframes` | `shot` | `{ key, keyframes }` |
+
+Compile, pack and timing errors are `invalid_request` with `data.issues`; render errors are `provider_error` with `data.rule`, retryable only for `render.failed`. Each call compiles into a scratch folder of its own under `.cinewright/compiled/`, so two renders of one shot can run at once.
+
+**Cache commits (G9):** renders, segments and keyframes are committed with core's `commitCacheDir`: a rename into place, and when the key already exists the new folder is discarded and the existing one kept. No code path removes a committed entry.
+
+The CLI and engine reach this package only through its manifest (`cinewright-check-boundaries` rule `plugin-import`).
 
 ## Developer command
 

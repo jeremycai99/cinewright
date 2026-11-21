@@ -25,6 +25,12 @@ export {
 } from "./errors.js";
 export { createSubprocessPlugin, type SubprocessOptions, SubprocessPlugin } from "./host.js";
 export {
+  BACKEND_KIND,
+  type BackendCommon,
+  type BackendPlan,
+  type BackendRendered,
+} from "./kinds/backend.js";
+export {
   type KindMethod,
   type KindSpec,
   type SampleSpan,

@@ -52,6 +52,18 @@ export async function runConformance(
     ok: valid.ok,
     ...(valid.ok ? {} : { detail: JSON.stringify(valid.errors) }),
   });
+  if (kind?.requires) {
+    const missing = Object.entries(kind.requires).flatMap(([cap, needs]) =>
+      manifest.capabilities.includes(cap)
+        ? needs.filter((n) => !manifest.capabilities.includes(n)).map((n) => `${cap} needs ${n}`)
+        : [],
+    );
+    add({
+      name: `${kind.name}: capabilities`,
+      ok: missing.length === 0,
+      detail: missing.join("; "),
+    });
+  }
 
   await plugin.init({ secrets: {}, callTimeoutMs: 60_000 });
   try {

@@ -3,12 +3,29 @@
   "id": "backend_hyperframes",
   "version": "0.1.0",
   "kind": "backend",
-  "capabilities": ["render.composition"],
-  "cost_model": { "unit": "free" },
+  "capabilities": [
+    "backend.html",
+    "render.plan",
+    "render.composition",
+    "render.shot",
+    "render.segment",
+    "render.keyframes"
+  ],
+  "cost_model": {
+    "unit": "free"
+  },
   "latency_class": "batch",
-  "output_license": { "terms": "Apache-2.0", "commercial_use": true },
+  "output_license": {
+    "terms": "Apache-2.0",
+    "commercial_use": true
+  },
   "secrets": [],
-  "runtime": { "kind": "in_process", "entry": "./dist/index.js" },
-  "concurrency": { "max_parallel": 1 },
+  "runtime": {
+    "kind": "in_process",
+    "entry": "./dist/index.js"
+  },
+  "concurrency": {
+    "max_parallel": 1
+  },
   "rate_limits": []
 }

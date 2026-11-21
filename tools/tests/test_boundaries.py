@@ -79,3 +79,33 @@ def test_main_exit_codes(tmp_path: Path, capsys: pytest.CaptureFixture[str]) -> 
     write(tmp_path, "core/a.py", "import bpy\n")
     assert main([str(tmp_path)]) == 1
     assert "core/a.py:1 bpy-outside-blender" in capsys.readouterr().out
+
+
+def _plugin_repo(tmp_path: Path) -> Path:
+    write(tmp_path, "plugins/backend-x/package.json", '{"name": "@cinewright/backend-x"}')
+    write(tmp_path, "plugins/sdk-ts/package.json", '{"name": "@cinewright/plugin-sdk"}')
+    return tmp_path
+
+
+def test_flags_plugin_imports_from_cli_and_core(tmp_path: Path) -> None:
+    root = _plugin_repo(tmp_path)
+    write(root, "cli/src/a.ts", 'import { renderShot } from "@cinewright/backend-x";\n')
+    write(root, "core/src/b.ts", 'const m = await import("@cinewright/backend-x");\n')
+    write(root, "cli/src/ok.ts", 'import { loadPlugin } from "@cinewright/plugin-sdk";\n')
+    assert [(v.path, v.rule) for v in find_violations(root)] == [
+        ("cli/src/a.ts", "plugin-import"),
+        ("core/src/b.ts", "plugin-import"),
+    ]
+
+
+def test_engine_may_import_plugins_only_in_tests(tmp_path: Path) -> None:
+    root = _plugin_repo(tmp_path)
+    write(root, "engine/src/a.ts", 'export { x } from "@cinewright/backend-x";\n')
+    write(root, "engine/test/a.test.ts", 'import { x } from "@cinewright/backend-x";\n')
+    write(root, "plugins/backend-y/src/a.ts", 'import { x } from "@cinewright/backend-x";\n')
+    assert [v.path for v in find_violations(root)] == ["engine/src/a.ts"]
+
+
+def test_the_repository_has_no_plugin_imports() -> None:
+    repo = Path(__file__).resolve().parents[2]
+    assert [v for v in find_violations(repo) if v.rule == "plugin-import"] == []

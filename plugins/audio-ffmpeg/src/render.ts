@@ -1,7 +1,7 @@
 import { createHash, randomUUID } from "node:crypto";
-import { existsSync, mkdirSync, readFileSync, renameSync, rmSync, writeFileSync } from "node:fs";
+import { existsSync, mkdirSync, readFileSync, rmSync, writeFileSync } from "node:fs";
 import { join } from "node:path";
-import { type Cas, sha256Hash } from "@cinewright/core";
+import { type Cas, commitCacheDir, sha256Hash } from "@cinewright/core";
 import { DEFAULT_LIMITS, dockerRunArgs, type RunLimits, runDocker } from "@cinewright/plugin-sdk";
 import { envelope } from "./envelope.js";
 import { clipFile, masterChain, premixGraph } from "./graph.js";
@@ -211,9 +211,7 @@ export async function renderMix(input: {
     writeFileSync(join(outDir, "plan.json"), `${JSON.stringify(plan, null, 2)}\n`);
     rmSync(join(outDir, "master.s24le"));
     rmSync(join(outDir, "premix.wav"));
-    rmSync(dir, { recursive: true, force: true });
-    mkdirSync(cacheDir, { recursive: true });
-    renameSync(outDir, dir);
+    commitCacheDir(outDir, dir);
     return { key, dir, hit: false, pcm_sha256: pcmSha, measure: result };
   } finally {
     rmSync(work, { recursive: true, force: true });

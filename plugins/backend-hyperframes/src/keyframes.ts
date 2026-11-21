@@ -1,16 +1,8 @@
 import { randomUUID } from "node:crypto";
-import {
-  copyFileSync,
-  existsSync,
-  mkdirSync,
-  readFileSync,
-  renameSync,
-  rmSync,
-  writeFileSync,
-} from "node:fs";
+import { copyFileSync, existsSync, mkdirSync, readFileSync, rmSync, writeFileSync } from "node:fs";
 import { join } from "node:path";
 import type { MountSpec } from "@cinewright/components";
-import type { RendererInfo } from "@cinewright/core";
+import { commitCacheDir, type RendererInfo } from "@cinewright/core";
 import {
   DEFAULT_LIMITS,
   dockerRunArgs,
@@ -153,8 +145,9 @@ export async function captureKeyframes(options: {
     });
     writeFileSync(join(out, "keyframes.json"), `${JSON.stringify(keyframes, null, 2)}\n`);
     rmSync(join(out, "boxes.json"));
-    rmSync(dir, { recursive: true, force: true });
-    renameSync(out, dir);
+    if (commitCacheDir(out, dir) === "existing") {
+      return JSON.parse(readFileSync(index, "utf8")) as Keyframe[];
+    }
     return keyframes;
   } finally {
     rmSync(work, { recursive: true, force: true });

@@ -1,6 +1,6 @@
 """Import-boundary check (AGENTS.md §2.3 item 5 and §3 invariant 10).
 
-Two rules:
+Three rules:
 
 - ``bpy-outside-blender``: Python code imports ``bpy`` (``import``, ``from ... import``,
   ``importlib.import_module`` or ``__import__`` with a constant name) outside
@@ -8,6 +8,10 @@ Two rules:
 - ``personal-fixture-reference``: a string literal in Python, TypeScript or JavaScript
   names the personal fixtures directory. Comments are never scanned.
 
+- ``plugin-import``: TypeScript or JavaScript under ``cli/`` or ``core/`` imports a plugin
+  package (any ``@cinewright/*`` package whose folder is under ``plugins/``, except the plugin
+  SDK), or code under ``engine/`` outside its tests imports one statically (invariant 5,
+  M5.4a). Plugins are reached through the engine's registry, by manifest.
 A Python file that cannot be read or parsed is reported as ``unparseable``.
 
 Known limitation: the TS/JS scanner does not recognise regular-expression literals, so a
@@ -52,20 +56,22 @@ class Violation:
 def find_violations(repo_root: Path) -> list[Violation]:
     """Scan every source file under ``repo_root``; results are sorted by (path, line)."""
     found: list[Violation] = []
+    plugins = plugin_packages(repo_root)
     for path in _source_files(repo_root):
         rel = path.relative_to(repo_root).as_posix()
         if path.suffix in PY_SUFFIXES:
             found.extend(_check_python(path, rel))
         else:
             found.extend(_check_js(path, rel))
+            found.extend(_plugin_imports(path, rel, plugins))
     return sorted(found, key=lambda v: (v.path, v.line, v.rule))
 
 
 def main(argv: list[str] | None = None) -> int:
     parser = argparse.ArgumentParser(
         prog="cinewright-check-boundaries",
-        description="Fail if code imports bpy outside the Blender backend "
-        "or references the personal fixtures.",
+        description="Fail if code imports bpy outside the Blender backend, "
+        "references the personal fixtures, or imports a plugin package from cli, core or engine.",
     )
     parser.add_argument("repo_root", nargs="?", default=".", type=Path)
     args = parser.parse_args(argv)
@@ -138,6 +144,48 @@ def _is_dynamic_import(func: ast.expr) -> bool:
     if isinstance(func, ast.Attribute):
         return func.attr == "import_module"
     return False
+
+
+PLUGIN_SDK = "@cinewright/plugin-sdk"
+JS_IMPORT_RE = re.compile(
+    r"""(?:\bfrom\s*|\bimport\s*\(\s*|\bimport\s+|\brequire\s*\(\s*)["'](@cinewright/[a-z0-9-]+)["']"""
+)
+
+
+def plugin_packages(repo_root: Path) -> set[str]:
+    """Names of the packages under ``plugins/`` (from each package.json), minus the SDK."""
+    import json
+
+    names: set[str] = set()
+    for manifest in sorted((repo_root / "plugins").glob("*/package.json")):
+        try:
+            name = json.loads(manifest.read_text(encoding="utf-8")).get("name")
+        except (ValueError, OSError):
+            continue
+        if isinstance(name, str) and name != PLUGIN_SDK:
+            names.add(name)
+    return names
+
+
+def _plugin_imports(path: Path, rel: str, plugins: set[str]) -> list[Violation]:
+    restricted = rel.startswith(("cli/", "core/")) or (
+        rel.startswith("engine/") and not rel.startswith("engine/test/")
+    )
+    if not restricted or not plugins:
+        return []
+    try:
+        lines = path.read_text(encoding="utf-8").splitlines()
+    except (UnicodeDecodeError, ValueError):
+        return []
+    found: list[Violation] = []
+    for number, text in enumerate(lines, start=1):
+        if text.lstrip().startswith(("//", "*")):
+            continue
+        for match in JS_IMPORT_RE.finditer(text):
+            if match.group(1) in plugins:
+                detail = f"imports {match.group(1)}; reach plugins through the engine registry"
+                found.append(Violation(rel, number, "plugin-import", detail))
+    return found
 
 
 def _check_js(path: Path, rel: str) -> list[Violation]:
