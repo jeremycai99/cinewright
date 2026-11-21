@@ -1,6 +1,6 @@
 """Import-boundary check (AGENTS.md §2.3 item 5 and §3 invariant 10).
 
-Three rules:
+Four rules:
 
 - ``bpy-outside-blender``: Python code imports ``bpy`` (``import``, ``from ... import``,
   ``importlib.import_module`` or ``__import__`` with a constant name) outside
@@ -8,6 +8,9 @@ Three rules:
 - ``personal-fixture-reference``: a string literal in Python, TypeScript or JavaScript
   names the personal fixtures directory. Comments are never scanned.
 
+- ``gpl-import``: Python code imports ``kokoro``, ``misaki`` or ``phonemizer`` outside
+  ``plugins/tts-kokoro/`` (GPL-3.0-or-later, audit decision 8) and the audio image's own
+  tooling under ``container/audio/``.
 - ``plugin-import``: TypeScript or JavaScript under ``cli/`` or ``core/`` imports a plugin
   package (any ``@cinewright/*`` package whose folder is under ``plugins/``, except the plugin
   SDK), or code under ``engine/`` outside its tests imports one statically (invariant 5,
@@ -37,6 +40,8 @@ JS_SUFFIXES = {".ts", ".tsx", ".js", ".mjs", ".cjs"}
 SKIP_DIR_NAMES = {"node_modules", ".venv", "dist", ".git"}
 SKIP_PREFIXES = ("fixtures/", "tools/tests/fixtures/")
 BLENDER_PREFIX = "plugins/backend-blender/"
+GPL_MODULES = ("kokoro", "misaki", "phonemizer")
+GPL_ALLOWED = ("plugins/tts-kokoro/", "container/audio/")
 PERSONAL_RE = re.compile(r"fixtures[/\\]personal")
 STRING_TOKEN_TYPES = {
     getattr(tokenize, name)
@@ -112,6 +117,8 @@ def _check_python(path: Path, rel: str) -> list[Violation]:
     found: list[Violation] = []
     if not rel.startswith(BLENDER_PREFIX):
         found.extend(_bpy_imports(tree, rel))
+    if not rel.startswith(GPL_ALLOWED):
+        found.extend(_gpl_imports(tree, rel))
     try:
         tokens = list(tokenize.generate_tokens(io.StringIO(source).readline))
     except (tokenize.TokenError, SyntaxError) as exc:
@@ -136,6 +143,24 @@ def _bpy_imports(tree: ast.AST, rel: str) -> Iterator[Violation]:
             if isinstance(first, ast.Constant) and isinstance(first.value, str):
                 if _is_bpy(first.value):
                     yield Violation(rel, node.lineno, "bpy-outside-blender", detail)
+
+
+def _is_gpl(module: str) -> bool:
+    return any(module == m or module.startswith(f"{m}.") for m in GPL_MODULES)
+
+
+def _gpl_imports(tree: ast.AST, rel: str) -> Iterator[Violation]:
+    detail = "imports a GPL module (allowed only in plugins/tts-kokoro and container/audio)"
+    for node in ast.walk(tree):
+        if isinstance(node, ast.Import) and any(_is_gpl(a.name) for a in node.names):
+            yield Violation(rel, node.lineno, "gpl-import", detail)
+        elif (
+            isinstance(node, ast.ImportFrom)
+            and node.level == 0
+            and node.module
+            and _is_gpl(node.module)
+        ):
+            yield Violation(rel, node.lineno, "gpl-import", detail)
 
 
 def _is_dynamic_import(func: ast.expr) -> bool:
