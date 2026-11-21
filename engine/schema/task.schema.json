@@ -1,0 +1,21 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://cinewright.invalid/engine/0/task.schema.json",
+  "title": "Task",
+  "description": "One unit of workflow work (M7.1a), derived from the IR: an agent role's task, a pipeline job, a gate, or a human-filled role. `key` is its idempotency key: the same key is the same work.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["id", "key", "kind", "phase", "entities", "needs", "paid"],
+  "properties": {
+    "id": { "type": "string", "minLength": 1 },
+    "key": { "type": "string", "minLength": 1 },
+    "kind": { "enum": ["agent", "job", "gate", "human"] },
+    "phase": { "type": "string", "minLength": 1 },
+    "role": { "type": "string", "minLength": 1 },
+    "step": { "type": "string", "minLength": 1 },
+    "entities": { "type": "array", "items": { "type": "string", "minLength": 1 } },
+    "deliverable": { "type": "string", "minLength": 1 },
+    "needs": { "type": "array", "items": { "type": "string", "minLength": 1 } },
+    "paid": { "type": "boolean" }
+  }
+}

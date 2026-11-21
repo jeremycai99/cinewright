@@ -1,0 +1,38 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://cinewright.invalid/engine/0/event.schema.json",
+  "title": "RunEvent",
+  "description": "One line of `.cinewright/runs/<run>/events.jsonl` (M7.1a): ids, hashes and measurements, never prompt text or secrets.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["seq", "at", "run", "type"],
+  "properties": {
+    "seq": { "type": "integer", "minimum": 1 },
+    "at": { "type": "string", "format": "date-time" },
+    "run": { "type": "string", "minLength": 1 },
+    "type": {
+      "enum": [
+        "run.started",
+        "run.done",
+        "run.paused",
+        "run.failed",
+        "task.started",
+        "task.done",
+        "task.noop",
+        "task.failed",
+        "task.blocked"
+      ]
+    },
+    "task": { "type": "string" },
+    "role": { "type": "string" },
+    "plugin": { "type": "string" },
+    "model": { "type": "string" },
+    "input_hash": { "type": "string" },
+    "context_hash": { "type": "string" },
+    "tokens": { "type": "integer", "minimum": 0 },
+    "cost_usd": { "type": "number", "minimum": 0 },
+    "ms": { "type": "integer", "minimum": 0 },
+    "outcome": { "type": "string" },
+    "patch": { "type": "integer", "minimum": 0 }
+  }
+}

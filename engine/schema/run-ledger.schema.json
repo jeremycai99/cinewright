@@ -1,0 +1,19 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://cinewright.invalid/engine/0/run-ledger.schema.json",
+  "title": "RunLedgerLine",
+  "description": "One line of `.cinewright/runs/<run>/ledger.jsonl` (M7.1a): a task started, finished or failed. Disposable: production state is in the IR and the logs.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["seq", "task", "key", "kind", "status", "at"],
+  "properties": {
+    "seq": { "type": "integer", "minimum": 1 },
+    "task": { "type": "string", "minLength": 1 },
+    "key": { "type": "string", "minLength": 1 },
+    "kind": { "enum": ["agent", "job", "gate", "human"] },
+    "status": { "enum": ["started", "done", "failed"] },
+    "at": { "type": "string", "format": "date-time" },
+    "revision": { "type": "integer", "minimum": 0 },
+    "cost_usd": { "type": "number", "minimum": 0 }
+  }
+}

@@ -20,7 +20,8 @@ cinewright pack pin <pack_id> [--project <dir>] [--json]
 cinewright compile <shot_id> --deliverable <id> [--timing <timing.json>] --out <dir> [--project <dir>] [--json]
 cinewright render-shot <shot_id> --deliverable <id> [--timing <timing.json>] [--image <ref>] [--project <dir>] [--json]
 cinewright timing [--out <file>] [--project <dir>] [--json]
-cinewright render [--deliverable <id>]... [--until <stage>] [--no-critics] [--retake <line>]... [--provider <id>] [--out <dir>] [--image <ref>] [--plugins <dir>]... [--project <dir>] [--json]
+cinewright plan [--deliverable <id>]... [--run <id>] [--image <ref>] [--plugins <dir>]... [--project <dir>] [--json]
+cinewright render [--deliverable <id>]... [--until <stage>] [--no-critics] [--jobs-only] [--retake <line>]... [--provider <id>] [--out <dir>] [--image <ref>] [--plugins <dir>]... [--project <dir>] [--json]
 cinewright mix --deliverable <id> [--image <ref>] [--project <dir>] [--json]
 cinewright compose [--sequence <id>] [--provider <id>] [--plugins <dir>]... [--project <dir>] [--json]
 cinewright narrate [--line <id>]... [--retake <line>]... [--provider <id>] [--plugins <dir>]... [--project <dir>] [--json]
@@ -39,6 +40,8 @@ cinewright narrate [--line <id>]... [--retake <line>]... [--provider <id>] [--pl
 `mix` (M4.4) mixes the solved timeline for one deliverable in the render image (`--image` or `CINEWRIGHT_IMAGE`) with the network off: takes at their lines, the sequence's music bed ducked under speech by the pack's `sound.duck` tokens, sound effects at their scenes, then gain to the profile's integrated loudness and, when needed, a 4× oversampled limiter at its true-peak target. The result is cached by mix key in `.cinewright/cache/mixes/`; it prints the PCM hash (D33). Unmet targets (`mix.loudness_unmet`) exit 3 and cache nothing; a failed mixer exits 8.
 
 `timing` solves the timing (M4.2): scenes from the selected takes and the pack's pacing tokens (`sound.voice`), shots tiled across their scene, sequences end to end. It prints the timeline or, with `--json`, the table, spans and findings; `--out` writes the table. Error findings exit 3. `compile` and `render-shot` use the solved timing when `--timing` is not given.
+
+`plan` (M7.1a) starts or resumes a workflow run and stops before paid production, at the storyboard gate (G2): it runs the jobs up to the shots (stills need the render, which costs CPU time, not money), then pauses and exits 11, printing the pause and the run id (`--json`: `{ status, run, pause: { kind, id } }`). Without `--run` it resumes the latest run that did not finish, else starts one. Until gates can be approved (M7.6) a run always pauses there. `render` runs as a workflow run too, whose one task is the pipeline (preset `manual` until presets land; `--jobs-only` asks for that explicitly). A run's state is `.cinewright/runs/<run>/`: `ledger.jsonl` (each task started, done or failed, by its key), `events.jsonl` (ids, hashes and timings, with secrets redacted) and `outcome.json`. It is disposable: deleting it re-runs work, never re-decides it, and production state stays in the IR and `log/`.
 
 Assets live in the project's content-addressed store, `.cinewright/cas/`. When an asset is missing there, every command fetches it from the read-only remotes in `CINEWRIGHT_CAS_REMOTE` (comma-separated URL templates with a `{hex}` placeholder, `https:` or `file:`; e.g. `https://example.org/cas/{hex}`), tried in order. No credential is sent. A fetched object is stored only if it hashes to the requested hash and is no larger than the asset's recorded size; otherwise the command fails with `cas.remote_corrupt` or `cas.remote_oversized`. A missing asset names the remotes it tried. `uv run cinewright-eval cas-export <project> --to <dir>` writes a project's referenced assets as flat files named by hex, ready to upload to such a remote.
 
@@ -159,6 +162,7 @@ A status line follows: `applied revision N (sha256:…)`, `pending pN (reason)`,
 | 8 | A render failed: it hit its timeout or memory limit, or `render-job` failed (`render-shot`, `mix`) |
 | 9 | A provider plugin failed, or none was usable (`narrate`, `compose`) |
 | 10 | `render` finished and a critic reported an error finding (M6.1a) |
+| 11 | A workflow run paused: at a gate, for a human task, or at the budget cap (`plan`, M7.1a) |
 
 ## Test switches
 
