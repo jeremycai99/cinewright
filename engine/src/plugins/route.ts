@@ -79,3 +79,31 @@ function speakerBindings(ir: InlinedIr, speaker: string): Set<string> {
       .map(([id]) => id),
   );
 }
+
+/**
+ * The plugins that offer `capability`, best first (M7.2), by the same rule as `route`: a `pinned`
+ * plugin is the only choice; else `settings.providers.<kind>` in its order; else free plugins,
+ * then paid ones whose secrets are present, then by id. `exclude` drops plugins already tried.
+ */
+export function routeCapability(
+  capability: string,
+  ir: InlinedIr,
+  options: {
+    plugins: readonly FoundPlugin[];
+    pinned?: string;
+    exclude?: readonly string[];
+    env?: Readonly<Record<string, string | undefined>>;
+  },
+): FoundPlugin[] {
+  const offering = options.plugins.filter(
+    (p) =>
+      p.manifest.capabilities.includes(capability) && !options.exclude?.includes(p.manifest.id),
+  );
+  if (offering.length === 0) throw new RouteError(`no installed plugin offers ${capability}`);
+  const kind = offering[0]?.manifest.kind as PluginKind;
+  return route(kind, ir, undefined, {
+    plugins: offering,
+    ...(options.pinned === undefined ? {} : { provider: options.pinned }),
+    ...(options.env === undefined ? {} : { env: options.env }),
+  });
+}

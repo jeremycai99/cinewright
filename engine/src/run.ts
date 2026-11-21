@@ -18,6 +18,7 @@ import { EventLog, type RunEvent, secretValues } from "./runtime/events.js";
 import { RunLedger } from "./runtime/ledger.js";
 import { LoopRuntime } from "./runtime/loop.js";
 import type { RunContext, RunOutcome, Task, TaskResult, WorkflowRuntime } from "./runtime/types.js";
+import { Semaphore } from "./scheduler/pool.js";
 
 /** Runs one task of a kind; the agent runner (M7.4) and tests plug in here. */
 export type TaskExecutor = (task: Task, store: Store, run: string) => Promise<TaskResult>;
@@ -95,16 +96,26 @@ const pipelineFailure = (error: PipelineError): TaskResult => ({
 /**
  * Job tasks run the pipeline to their step's stage. Each stage runs once per IR state in an
  * invocation, so the many step tasks of one stage cost one pipeline call, and every unchanged
- * step inside it is a cache hit.
+ * step inside it is a cache hit. Pipeline calls never overlap: two would both narrate the same
+ * lines. (Rendering shots in parallel needs per-step dispatch; until then the scheduler's render
+ * pool bounds tasks, and the pipeline renders inside one call.)
  */
 function jobExecutor(options: WorkflowOptions): TaskExecutor {
   const done = new Map<string, Promise<RenderReport>>();
+  const one = new Semaphore(1);
   return async (task, store) => {
     const stage = STAGE_OF[task.step as StepKind] ?? "critique";
     const key = `${stage}@${stateHash(store.ir())}`;
     let report = done.get(key);
     if (!report) {
-      report = runRender(store, { ...options.render, until: stage });
+      report = (async () => {
+        const release = await one.acquire(new AbortController().signal);
+        try {
+          return await runRender(store, { ...options.render, until: stage });
+        } finally {
+          release();
+        }
+      })();
       done.set(key, report);
     }
     try {

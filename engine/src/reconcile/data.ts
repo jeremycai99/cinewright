@@ -47,6 +47,8 @@ export interface Preset {
 export interface EngineSettings {
   default_budget_usd: number;
   v0_1: { shot_types: Record<string, string>; transitions: string[] };
+  /** Retries (`attempts` in all, backoff doubling from `backoff_ms`) and the render pool's cap (M7.2). */
+  scheduler: { attempts: number; backoff_ms: number; backoff_factor: number; render_pool: number };
 }
 
 const read = (path: string) => JSON.parse(readFileSync(new URL(path, import.meta.url), "utf8"));
