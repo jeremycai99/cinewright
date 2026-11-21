@@ -1,0 +1,48 @@
+{
+  "rules": [
+    {
+      "id": "hierarchy.one_focus",
+      "rule": "Give each frame one clear focal point, so the viewer's hierarchy of attention is never in doubt."
+    },
+    {
+      "id": "hierarchy.supports_line",
+      "rule": "What is on screen supports the spoken line in hierarchy: it shows the claim being made, not a second one."
+    },
+    {
+      "id": "legibility.read_time",
+      "rule": "Keep on-screen text short enough for its legibility at the time it is held: a viewer reads it once, while listening."
+    },
+    {
+      "id": "legibility.size_floor",
+      "rule": "Never trade legibility for fit: cut words before text falls below the pack's minimum size."
+    },
+    {
+      "id": "contrast.meaning",
+      "rule": "Use contrast to mean something: a change of colour, size or weight marks a change the viewer should notice."
+    },
+    {
+      "id": "rhythm.cut_on_sense",
+      "rule": "Set the rhythm of cuts by the narration's sense units, not by a fixed interval."
+    },
+    {
+      "id": "rhythm.hold_to_read",
+      "rule": "Keep the rhythm slow enough that each shot holds until its text can be read."
+    },
+    {
+      "id": "continuity.same_thing_same_look",
+      "rule": "Keep continuity: the same idea keeps the same position, colour and form across shots."
+    },
+    {
+      "id": "continuity.transitions_mean",
+      "rule": "Use a transition other than a cut only when it carries continuity of meaning, such as time passing or a related idea."
+    },
+    {
+      "id": "intelligibility.one_idea",
+      "rule": "For intelligibility, each scene argues one idea, and its shots serve that idea in order."
+    },
+    {
+      "id": "intelligibility.plain_words",
+      "rule": "Prefer plain words for intelligibility: a term the brief does not define is explained or avoided."
+    }
+  ]
+}
