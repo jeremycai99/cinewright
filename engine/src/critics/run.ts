@@ -32,6 +32,8 @@ export interface CritiqueReport {
   revision: number;
   critics: { id: string; version: string; baseline?: Record<string, string> }[];
   findings: CriticFinding[];
+  /** Every rule in the rule table: what a clean report vouches for (tier A pass rates, M8.3a). */
+  rules: string[];
   /** Each critic's measurements, as `<critic id>.<name>`. */
   measured: Record<string, number>;
 }
@@ -217,6 +219,7 @@ export async function critique(
     revision: store.revision(),
     critics: critics.sort((a, b) => a.id.localeCompare(b.id)),
     findings: dedupeFindings(sortCriticFindings(findings)),
+    rules: Object.keys(RULES).sort(),
     measured,
   };
   mkdirSync(dirname(file), { recursive: true });

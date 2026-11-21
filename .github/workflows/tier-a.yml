@@ -1,0 +1,97 @@
+name: tier-a
+
+# Tier A (M8.3a, AGENTS.md §4.2): every PR renders the alpha fixtures with no paid API and no
+# secrets, and fails on any error finding, any hash that differs from the baseline, or a fixture
+# that is missing or skipped. Pass rates are per rule and per fixture (the job summary).
+# Until the fixtures land (A.2) the job says so and passes. It becomes a required check only
+# after decision 9 (alpha-gate.md): GitHub Free applies no ruleset to a private repository.
+
+on:
+  pull_request:
+  push:
+    branches: [main]
+
+permissions:
+  contents: read
+  packages: read
+
+concurrency:
+  group: tier-a-${{ github.ref }}
+  cancel-in-progress: ${{ github.event_name == 'pull_request' }}
+
+jobs:
+  tier-a:
+    # On main the render cache starts empty, so every render runs cold at least once a merge.
+    name: tier-a${{ github.event_name == 'push' && ' (cold)' || '' }}
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      - name: Fixtures present?
+        id: fixtures
+        run: |
+          if [ -f fixtures/benchmark/tier-a/index.json ]; then
+            echo "present=true" >> "$GITHUB_OUTPUT"
+          else
+            echo "present=false" >> "$GITHUB_OUTPUT"
+            echo "Tier A has no fixtures yet (alpha-gate.md Task 2, A.2)." >> "$GITHUB_STEP_SUMMARY"
+          fi
+      - uses: astral-sh/setup-uv@68559e99cc807c1eb7e9238fd43a15bba460eec2 # v10.3.3
+        if: steps.fixtures.outputs.present == 'true'
+        with:
+          version-file: pyproject.toml
+      - if: steps.fixtures.outputs.present == 'true'
+        run: uv sync --locked
+      - name: Use the locked images, or build them
+        if: steps.fixtures.outputs.present == 'true'
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          locked_hash="$(jq -r '.inputs_hash // empty' container/image.lock.json)"
+          tree_hash="$(uv run --locked python -c 'from pathlib import Path; from cinewright_tools.container import inputs_hash; print(inputs_hash(Path(".")))')"
+          echo "$GH_TOKEN" | docker login ghcr.io --username "$GITHUB_ACTOR" --password-stdin
+          if [ -n "$locked_hash" ] && [ "$locked_hash" = "$tree_hash" ]; then
+            image="$(jq -r '.image + "@" + .digest' container/image.lock.json)"
+            docker pull --platform linux/amd64 "$image"
+          else
+            image="cinewright-render:ci"
+            uv run --locked cinewright-build-image --tag "$image"
+          fi
+          echo "IMAGE=$image" >> "$GITHUB_ENV"
+      - uses: pnpm/action-setup@73e46992e05b19abd31f2f3c20e0e7370d762115 # v6.1.1
+        if: steps.fixtures.outputs.present == 'true'
+      - uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7.1.0
+        if: steps.fixtures.outputs.present == 'true'
+        with:
+          node-version-file: .node-version
+      - if: steps.fixtures.outputs.present == 'true'
+        run: pnpm install --frozen-lockfile && pnpm typecheck
+      - name: Restore the render cache
+        if: steps.fixtures.outputs.present == 'true' && github.event_name == 'pull_request'
+        uses: actions/cache/restore@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
+        with:
+          path: .tier-a-cache
+          key: tier-a-${{ env.IMAGE }}-${{ hashFiles('fixtures/benchmark/tier-a/**') }}
+          restore-keys: tier-a-${{ env.IMAGE }}-
+      - name: Tier A
+        if: steps.fixtures.outputs.present == 'true'
+        env:
+          CINEWRIGHT_IMAGE: ${{ env.IMAGE }}
+          CINEWRIGHT_CAS_REMOTE: ${{ vars.CINEWRIGHT_CAS_REMOTE }}
+        run: |
+          uv run --locked cinewright-eval tier-a --out "$RUNNER_TEMP/tier-a" \
+            && status=0 || status=$?
+          cat "$RUNNER_TEMP/tier-a/tier-a.md" >> "$GITHUB_STEP_SUMMARY"
+          exit "$status"
+      - name: Save the render cache
+        if: always() && steps.fixtures.outputs.present == 'true' && github.event_name == 'push'
+        uses: actions/cache/save@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
+        with:
+          path: .tier-a-cache
+          key: tier-a-${{ env.IMAGE }}-${{ hashFiles('fixtures/benchmark/tier-a/**') }}
+      - uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
+        if: always() && steps.fixtures.outputs.present == 'true'
+        with:
+          name: tier-a-report
+          path: ${{ runner.temp }}/tier-a
