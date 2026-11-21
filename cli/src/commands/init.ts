@@ -9,12 +9,13 @@ import {
   profileRefPath,
   UnknownProfileError,
 } from "@cinewright/core";
+import { loadEngineSettings, loadTemplate, WorkflowDataError } from "@cinewright/engine";
 import { parse, UsageError } from "../args.js";
 import { EXIT } from "../exit-codes.js";
 import { type Io, now, printJson, sessionId } from "../io.js";
 
 export const INIT_USAGE =
-  "usage: cinewright init <dir> --id <project_id> --deliverable <id>=<profile name or path> [--deliverable …] [--pack <id>] [--title <text>] [--json]";
+  "usage: cinewright init <dir> --id <project_id> --deliverable <id>=<profile name or path> [--deliverable …] [--pack <id>] [--title <text>] [--workflow <id>] [--budget <usd>] [--json]";
 
 export async function init(argv: string[], io: Io): Promise<number> {
   const { values, positionals } = parse(argv, {
@@ -22,6 +23,8 @@ export async function init(argv: string[], io: Io): Promise<number> {
     deliverable: { type: "string", multiple: true },
     title: { type: "string" },
     pack: { type: "string" },
+    workflow: { type: "string" },
+    budget: { type: "string" },
     json: { type: "boolean" },
   });
   const [target, ...extra] = positionals;
@@ -49,6 +52,19 @@ export async function init(argv: string[], io: Io): Promise<number> {
     if (error instanceof PackError) throw new UsageError(error.message);
     throw error;
   }
+  // D17: every project starts with a budget cap; the default is the engine's (engine/settings.json).
+  const budget =
+    values.budget === undefined ? loadEngineSettings().default_budget_usd : Number(values.budget);
+  if (!(budget > 0))
+    throw new UsageError(`--budget must be a positive number of USD, got ${values.budget}`);
+  if (values.workflow !== undefined) {
+    try {
+      loadTemplate(values.workflow);
+    } catch (error) {
+      if (error instanceof WorkflowDataError) throw new UsageError(error.message);
+      throw error;
+    }
+  }
   const dir = resolve(io.cwd, target);
   try {
     const result = await initProject(
@@ -57,6 +73,8 @@ export async function init(argv: string[], io: Io): Promise<number> {
         id: values.id,
         deliverables,
         pack,
+        budget,
+        ...(values.workflow === undefined ? {} : { workflow: values.workflow }),
         ...(values.title === undefined ? {} : { title: values.title }),
       },
       { sessionId: sessionId(io), now: now(io) },

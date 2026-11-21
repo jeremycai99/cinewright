@@ -1,0 +1,133 @@
+{
+  "id": "explainer",
+  "version": "1",
+  "description": "A narrated explainer: plan, script, narration, shot plan, shots, edit, storyboard, render, QA, assembly (V0_1_PLAN \u00a7Workflow).",
+  "phases": [
+    {
+      "id": "P1",
+      "kind": "agent",
+      "role": "producer",
+      "per": "project",
+      "requires": ["project.plan"],
+      "reads": ["project.brief", "project.deliverables", "project.budget", "project.style"],
+      "paid": true,
+      "needs": []
+    },
+    {
+      "id": "P2",
+      "kind": "agent",
+      "role": "writer",
+      "per": "project",
+      "requires": ["script.beats"],
+      "reads": ["project.brief", "project.plan", "project.cast", "project.deliverables"],
+      "paid": true,
+      "needs": ["P1"]
+    },
+    {
+      "id": "G1",
+      "kind": "gate",
+      "gate": "script",
+      "locks": ["script.beats"],
+      "needs": ["P2"]
+    },
+    {
+      "id": "P3",
+      "kind": "jobs",
+      "steps": ["narrate"],
+      "needs": ["G1"]
+    },
+    {
+      "id": "P4",
+      "kind": "agent",
+      "role": "director",
+      "per": "project",
+      "requires": ["project.sequences"],
+      "reads": ["script.beats", "project.deliverables", "project.style"],
+      "paid": true,
+      "needs": ["P3"]
+    },
+    {
+      "id": "P5",
+      "kind": "agent",
+      "role": "shot_builder",
+      "per": "shot",
+      "requires": ["shot.layers"],
+      "reads": [
+        "shot.type",
+        "shot.framing",
+        "shot.layout",
+        "scene.intent",
+        "scene.lines",
+        "project.style"
+      ],
+      "paid": true,
+      "needs": ["P4"]
+    },
+    {
+      "id": "P6m",
+      "kind": "jobs",
+      "steps": ["compose"],
+      "needs": ["P4"]
+    },
+    {
+      "id": "P6",
+      "kind": "agent",
+      "role": "editor",
+      "per": "project",
+      "requires": ["scene.duration"],
+      "reads": ["scene.intent", "scene.lines", "scene.shots"],
+      "paid": true,
+      "needs": ["P5", "P6m"]
+    },
+    {
+      "id": "P6t",
+      "kind": "jobs",
+      "steps": ["timing"],
+      "needs": ["P6"]
+    },
+    {
+      "id": "P7",
+      "kind": "jobs",
+      "steps": ["render"],
+      "needs": ["P6t"]
+    },
+    {
+      "id": "G2",
+      "kind": "gate",
+      "gate": "storyboard",
+      "locks": ["project.sequences", "scene.shots", "scene.transition_out"],
+      "needs": ["P7"]
+    },
+    {
+      "id": "P8",
+      "kind": "jobs",
+      "steps": ["segment"],
+      "needs": ["G2"]
+    },
+    {
+      "id": "P9",
+      "kind": "jobs",
+      "steps": ["mix", "captions"],
+      "needs": ["P8"]
+    },
+    {
+      "id": "P12",
+      "kind": "jobs",
+      "steps": ["assemble"],
+      "needs": ["P9"]
+    },
+    {
+      "id": "P10",
+      "kind": "jobs",
+      "steps": ["critique"],
+      "needs": ["P12"]
+    },
+    {
+      "id": "G3",
+      "kind": "gate",
+      "gate": "final",
+      "locks": ["project.sequences", "script.beats"],
+      "needs": ["P10"]
+    }
+  ]
+}

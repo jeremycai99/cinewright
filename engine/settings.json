@@ -1,0 +1,7 @@
+{
+  "default_budget_usd": 5,
+  "v0_1": {
+    "shot_types": { "motion_graphics": "html" },
+    "transitions": ["cut", "cross_dissolve", "wipe"]
+  }
+}

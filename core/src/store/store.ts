@@ -566,7 +566,13 @@ export class Store {
   }
 
   private async commitApplied(
-    patch: { base_revision: number; reason: string; ops: Op[]; decisions?: Patch["decisions"] },
+    patch: {
+      base_revision: number;
+      reason: string;
+      ops: Op[];
+      decisions?: Patch["decisions"];
+      task?: Patch["task"];
+    },
     author: Author,
     next: InlinedIr,
     before: Snapshot[],
@@ -616,6 +622,7 @@ export class Store {
       before,
       retired,
       state_hash: hash,
+      ...(patch.task ? { task: patch.task } : {}),
       ...extra,
     };
     const oldFiles = projectFileContents(this.state.ir);

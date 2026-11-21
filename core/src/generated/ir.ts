@@ -610,6 +610,7 @@ export interface AppliedEntry {
    * Entity ids a revert brought back; they are no longer retired.
    */
   restored?: Id[];
+  task?: TaskRecord;
 }
 /**
  * Set an authorable field or map entry.
@@ -705,6 +706,15 @@ export interface SuggestOp {
   path: string;
   value: JsonValue2;
   note?: string;
+}
+/**
+ * The workflow task an agent patch fulfilled (M7.1b): its id, its key when it ran, the hash of the context it read and the run. The reconciler re-derives the task when its key changes while its outputs are still agent-filled.
+ */
+export interface TaskRecord {
+  id: string;
+  key: string;
+  context_hash?: string;
+  run?: string;
 }
 /**
  * A patch stored for approval instead of applied (D25, convention 13).
@@ -823,6 +833,7 @@ export interface Patch {
    */
   ops: [Op, ...Op[]];
   decisions?: Decision[];
+  task?: TaskRecord;
 }
 /**
  * The project file, cinewright.json (D40). Sequence bodies live in sequences/<id>.json.
@@ -882,6 +893,13 @@ export interface Project {
     state: State;
     value?: Asset[];
   };
+  /**
+   * The Producer's plan (M7.1b; filled in P1): a summary, the cost estimate and the fix reserve, in USD.
+   */
+  plan?: {
+    state: State;
+    value?: ProjectPlan;
+  };
 }
 /**
  * Copies of the delivery profiles the deliverables use, keyed by profile id, with the hash of each body (convention 16). Written only by init.
@@ -925,12 +943,29 @@ export interface ProjectSettings {
     state: State;
     value?: ProviderRouting;
   };
+  /**
+   * The workflow template the engine runs (M7.1b), by id (`explainer`, `ad`). Unset means `explainer`.
+   */
+  workflow?: {
+    state: State;
+    value?: string;
+  };
+  /**
+   * Who fills each role (M7.1b, invariant 9): `agent` or `human`. A role not listed takes the preset's default. A human role's task waits in the queue.
+   */
+  roles?: {
+    state: State;
+    value?: RoleAssignments;
+  };
 }
 export interface ProviderRouting {
   /**
    * @minItems 1
    */
   [k: string]: [string, ...string[]];
+}
+export interface RoleAssignments {
+  [k: string]: "agent" | "human";
 }
 /**
  * The style pack and project-level token overrides (M1.3, M2.1).
@@ -1037,6 +1072,11 @@ export interface Line {
     state: State;
     value?: Id10;
   };
+}
+export interface ProjectPlan {
+  summary: string;
+  estimate_usd: number;
+  fix_reserve_usd?: number;
 }
 /**
  * A scene spec with typed fields (the spec's "What a scene spec holds").

@@ -28,6 +28,10 @@ export interface InitInput {
   deliverables: { id: string; profilePath: string }[];
   /** The style pack to pin and select (M3.1a); without one, `style.pack` stays open. */
   pack?: Pack;
+  /** The budget cap in USD (D17); the CLI passes the engine's default. Without one it stays open. */
+  budget?: number;
+  /** The workflow template id (M7.1b); without one `settings.workflow` is absent (`explainer`). */
+  workflow?: string;
 }
 
 export interface InitOptions {
@@ -109,9 +113,17 @@ export async function initProject(
     title: input.title === undefined ? { state: "open" } : { value: input.title, state: "user" },
     brief: { state: "open" },
     autonomy: { state: "open" },
-    budget: { state: "open" },
+    budget:
+      input.budget === undefined
+        ? { state: "open" }
+        : { state: "user", value: { currency: "USD", cap: input.budget } },
     policies: { state: "open" },
-    settings: { propose_conversational_edits: { value: true, state: "user" } },
+    settings: {
+      propose_conversational_edits: { value: true, state: "user" },
+      ...(input.workflow === undefined
+        ? {}
+        : { workflow: { value: input.workflow, state: "user" } }),
+    },
     style: {
       pack: input.pack ? { state: "user", value: input.pack.id } : { state: "open" },
       overrides: {},

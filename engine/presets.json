@@ -1,0 +1,10 @@
+{
+  "auto": { "gates": ["final"], "agents": true, "open_only": [] },
+  "guided": { "gates": ["script", "storyboard", "final"], "agents": true, "open_only": [] },
+  "directed": {
+    "gates": ["storyboard", "final"],
+    "agents": true,
+    "open_only": ["writer", "director"]
+  },
+  "manual": { "gates": ["final"], "agents": false, "open_only": [] }
+}

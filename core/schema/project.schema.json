@@ -193,6 +193,45 @@
               }
             }
           }
+        },
+        "workflow": {
+          "description": "The workflow template the engine runs (M7.1b), by id (`explainer`, `ad`). Unset means `explainer`.",
+          "x-authorable": "field",
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["state"],
+          "properties": {
+            "state": {
+              "$ref": "common.schema.json#/$defs/state"
+            },
+            "value": {
+              "type": "string",
+              "pattern": "^[a-z][a-z0-9_]*$",
+              "maxLength": 64
+            }
+          }
+        },
+        "roles": {
+          "description": "Who fills each role (M7.1b, invariant 9): `agent` or `human`. A role not listed takes the preset's default. A human role's task waits in the queue.",
+          "x-authorable": "field",
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["state"],
+          "properties": {
+            "state": {
+              "$ref": "common.schema.json#/$defs/state"
+            },
+            "value": {
+              "title": "RoleAssignments",
+              "type": "object",
+              "propertyNames": {
+                "enum": ["producer", "writer", "director", "shot_builder", "editor"]
+              },
+              "additionalProperties": {
+                "enum": ["agent", "human"]
+              }
+            }
+          }
         }
       }
     },
@@ -280,7 +319,7 @@
       }
     },
     "assets": {
-      "description": "The asset registry: every asset the IR references, by content hash (AGENTS.md \u00a76).",
+      "description": "The asset registry: every asset the IR references, by content hash (AGENTS.md §6).",
       "x-authorable": "list",
       "type": "object",
       "additionalProperties": false,
@@ -293,6 +332,39 @@
           "type": "array",
           "items": {
             "$ref": "asset.schema.json"
+          }
+        }
+      }
+    },
+    "plan": {
+      "description": "The Producer's plan (M7.1b; filled in P1): a summary, the cost estimate and the fix reserve, in USD.",
+      "x-authorable": "field",
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["state"],
+      "properties": {
+        "state": {
+          "$ref": "common.schema.json#/$defs/state"
+        },
+        "value": {
+          "title": "ProjectPlan",
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["summary", "estimate_usd"],
+          "properties": {
+            "summary": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 4000
+            },
+            "estimate_usd": {
+              "type": "number",
+              "minimum": 0
+            },
+            "fix_reserve_usd": {
+              "type": "number",
+              "minimum": 0
+            }
           }
         }
       }

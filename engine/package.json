@@ -11,7 +11,10 @@
   },
   "files": [
     "dist",
-    "schema"
+    "schema",
+    "templates",
+    "presets.json",
+    "settings.json"
   ],
   "scripts": {
     "test": "vitest run"
