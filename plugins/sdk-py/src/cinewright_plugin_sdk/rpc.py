@@ -9,6 +9,7 @@ from __future__ import annotations
 import json
 import sys
 import threading
+from pathlib import Path
 from typing import Any, TextIO, cast
 
 from cinewright_plugin_sdk.plugin import Cancelled, Plugin, PluginError
@@ -60,6 +61,9 @@ class _Server:
             return True
         if method == "initialize":
             secrets = params.get("secrets", {}) if isinstance(params, dict) else {}  # type: ignore[union-attr]
+            work_dir = params.get("workDir") if isinstance(params, dict) else None  # type: ignore[union-attr]
+            if isinstance(work_dir, str):
+                self.plugin.work_dir = Path(work_dir)
             self.plugin.init(secrets)  # type: ignore[arg-type]
             self.reply(rid, {})
         elif method == "health":

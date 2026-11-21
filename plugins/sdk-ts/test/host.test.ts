@@ -105,3 +105,36 @@ describe.skipIf(!run)("subprocess host with the Python stub", () => {
     expect(loaded.manifest.runtime.kind).toBe("subprocess");
   });
 });
+
+describe.skipIf(!run)("subprocess host stderr and work folder (F18, M4)", () => {
+  it("returns the stderr tail of a failed call with declared secrets replaced", async () => {
+    const m = manifest();
+    m.secrets = ["STUB_TOKEN"];
+    const lines: string[] = [];
+    const plugin = createSubprocessPlugin(m, STUB_DIR);
+    await plugin.init({
+      secrets: { STUB_TOKEN: "tok-0123456789" },
+      callTimeoutMs: 5000,
+      onLog: (line) => lines.push(line),
+    });
+    const r = await plugin.call({ id: "f", method: "fail_loud" }, new AbortController().signal);
+    await plugin.shutdown();
+    expect(r.ok).toBe(false);
+    const error = (r as { ok: false; error: { code: string; data?: { stderr?: string } } }).error;
+    expect(error.code).toBe("provider_error");
+    expect(error.data?.stderr).toContain("provider rejected token [secret:STUB_TOKEN]");
+    expect(JSON.stringify(r)).not.toContain("tok-0123456789");
+    expect(lines).toContain("provider rejected token [secret:STUB_TOKEN]");
+  });
+
+  it("creates a work folder when none is given and removes it at shutdown", async () => {
+    const plugin = createSubprocessPlugin(manifest(), STUB_DIR);
+    await plugin.init({ secrets: {}, callTimeoutMs: 5000 });
+    const dir = plugin.workDir as string;
+    expect(existsSync(dir)).toBe(true);
+    const r = await plugin.call({ id: "w", method: "work_dir" }, new AbortController().signal);
+    expect(r).toEqual({ ok: true, result: dir });
+    await plugin.shutdown();
+    expect(existsSync(dir)).toBe(false);
+  });
+});

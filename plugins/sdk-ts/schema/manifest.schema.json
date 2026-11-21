@@ -142,6 +142,20 @@
             },
             "cwd": {
               "type": "string"
+            },
+            "container": {
+              "description": "Run the command inside a pinned image instead of on the host (M4). The host mounts the plugin folder at /plugins/<id>, the work folder at /work and the Python SDK, with the network off.",
+              "title": "ContainerRuntime",
+              "type": "object",
+              "additionalProperties": false,
+              "required": ["image"],
+              "properties": {
+                "image": {
+                  "description": "A logical image name, resolved from container/<image>/image.lock.json or CINEWRIGHT_<IMAGE>_IMAGE.",
+                  "type": "string",
+                  "pattern": "^[a-z][a-z0-9-]*$"
+                }
+              }
             }
           }
         }

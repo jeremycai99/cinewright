@@ -36,6 +36,7 @@ export {
   loadCatalog,
   loadExamples,
 } from "./catalog/catalog.js";
+export { type Finding, finding, sortFindings } from "./findings.js";
 export type * from "./generated/ir.js";
 export { dependencyGraph, dirtyNodes, type Graph } from "./graph/deps.js";
 export {
@@ -168,5 +169,6 @@ export {
   shotsInOrder,
 } from "./timing/span.js";
 export { type TimingTable, validateTimingTable } from "./timing/table.js";
+export { interpolateWords, lineWords, type TimedWord, type WordTime } from "./timing/words.js";
 
 export const VERSION = "0.0.0";

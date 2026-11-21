@@ -25,6 +25,10 @@ line-length = 100
 cache-dir = ".cache/ruff"
 extend-exclude = ["**/*.md", "core/py/src/cinewright_ir/models.py"]
 
+[tool.ruff.per-file-target-version]
+# Plugins and their SDK run on the audio image's Python 3.12 (M4).
+"plugins/sdk-py/**" = "py312"
+
 [tool.ruff.lint]
 select = ["E", "F", "W", "I", "UP", "B"]
 
