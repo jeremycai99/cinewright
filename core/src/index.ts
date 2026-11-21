@@ -185,11 +185,13 @@ export {
 export { type PatchError, validatePatch } from "./store/patch.js";
 export { inScope, type WriteScopes } from "./store/scopes.js";
 export {
+  type ApplyOptions,
   type ApplyResult,
   ProjectLoadError,
   replayLog,
   Store,
   type StoreOptions,
+  type TaskScope,
 } from "./store/store.js";
 export { parseTime, TimeError } from "./time.js";
 export { resolveAnchor, TimingError } from "./timing/anchor.js";

@@ -12,6 +12,7 @@ packages:
   - plugins/critic-media
   - plugins/critic-script
   - plugins/llm-anthropic
+  - agents
   - container/render-runner
   - packs
   - components

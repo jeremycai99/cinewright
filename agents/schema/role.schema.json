@@ -1,0 +1,58 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://cinewright.invalid/agents/0/role.schema.json",
+  "title": "Role",
+  "description": "An agent role (M7.4): what it reads (selectors), what it may write (kinds and paths, enforced by the store), its tier and its budgets. `prompt.md` (craft principles and the contract only) and `output.schema.json` (its typed output) sit beside it.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "id",
+    "version",
+    "tier",
+    "reads",
+    "writes",
+    "per",
+    "token_budget",
+    "max_output_tokens",
+    "repairs"
+  ],
+  "properties": {
+    "id": { "type": "string", "pattern": "^[a-z][a-z0-9_]*$" },
+    "version": { "type": "string", "minLength": 1 },
+    "tier": { "enum": ["frontier", "mid"] },
+    "reads": {
+      "description": "`<entity kind>.<field>` (a slice of the IR, values with their states), or `pack.rules`, `catalog` or `findings`.",
+      "type": "array",
+      "items": {
+        "type": "string",
+        "pattern": "^((project|script|beat|line|cast|sequence|scene|shot|layer)\\.[a-z_]+|pack\\.rules|catalog|findings)$"
+      }
+    },
+    "writes": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["kinds", "paths"],
+      "properties": {
+        "kinds": { "type": "array", "minItems": 1, "items": { "type": "string" } },
+        "paths": {
+          "type": "array",
+          "minItems": 1,
+          "items": { "type": "string", "pattern": "^(/[^/]+)+$" }
+        }
+      }
+    },
+    "per": { "enum": ["project", "sequence", "shot"] },
+    "token_budget": {
+      "description": "The most input the context pack may hold, in estimated tokens.",
+      "type": "integer",
+      "minimum": 1
+    },
+    "max_output_tokens": { "type": "integer", "minimum": 1 },
+    "repairs": {
+      "description": "Rounds of invalid output returned to the model before the task fails.",
+      "type": "integer",
+      "minimum": 0
+    },
+    "effort": { "enum": ["low", "medium", "high"] }
+  }
+}

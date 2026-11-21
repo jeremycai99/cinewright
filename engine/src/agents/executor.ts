@@ -1,0 +1,56 @@
+import type { RoleDefinition } from "@cinewright/agents";
+import type { PluginResponse } from "@cinewright/plugin-sdk";
+import { PluginCallError, type PluginPool } from "../plugins/pool.js";
+import type { FoundPlugin } from "../plugins/registry.js";
+import type { TaskExecutor } from "../run.js";
+import type { ContextExtras } from "./context.js";
+import { type LlmCall, runAgentTask, type ToPatch } from "./runner.js";
+import type { SemanticCheck } from "./validate.js";
+
+/** `llm.generate` on a plugin through a pool, as an `LlmCall`; typed errors stay responses. */
+export function llmCall(pool: PluginPool, plugin: FoundPlugin): LlmCall {
+  return async (request): Promise<PluginResponse> => {
+    try {
+      return { ok: true, result: await pool.call(plugin, "llm.generate", request) };
+    } catch (error) {
+      if (error instanceof PluginCallError) return { ok: false, error: error.error };
+      throw error;
+    }
+  };
+}
+
+/**
+ * The agent executor for `runWorkflow` (M7.4): each agent task runs its role (`task.role`) with
+ * that role's `toPatch` and semantic check. A role with no definition or no `toPatch` fails the
+ * task; the v0.1 roles arrive with M7.5a–c.
+ */
+export function agentExecutor(options: {
+  roles: ReadonlyMap<string, RoleDefinition>;
+  toPatch: Readonly<Record<string, ToPatch>>;
+  checks?: Readonly<Record<string, SemanticCheck>>;
+  llm: LlmCall;
+  extras: ContextExtras;
+}): TaskExecutor {
+  return async (task, store, run) => {
+    const role = task.role ? options.roles.get(task.role) : undefined;
+    const toPatch = task.role ? options.toPatch[task.role] : undefined;
+    if (!role || !toPatch)
+      return {
+        status: "failed",
+        error: {
+          code: "agent.no_role",
+          message: `no definition for role ${task.role ?? "(none)"}`,
+        },
+      };
+    const check = task.role ? options.checks?.[task.role] : undefined;
+    return runAgentTask(task, {
+      store,
+      llm: options.llm,
+      role,
+      toPatch,
+      run,
+      extras: options.extras,
+      ...(check ? { check } : {}),
+    });
+  };
+}
