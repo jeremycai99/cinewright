@@ -36,6 +36,9 @@
     },
     {
       "path": "plugins/critic-layout"
+    },
+    {
+      "path": "plugins/critic-media"
     }
   ]
 }

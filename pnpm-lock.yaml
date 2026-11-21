@@ -290,6 +290,15 @@ importers:
         specifier: workspace:*
         version: link:../sdk-ts
 
+  plugins/critic-media:
+    dependencies:
+      '@cinewright/core':
+        specifier: workspace:*
+        version: link:../../core
+      '@cinewright/plugin-sdk':
+        specifier: workspace:*
+        version: link:../sdk-ts
+
   plugins/export-captions:
     dependencies:
       '@cinewright/components':

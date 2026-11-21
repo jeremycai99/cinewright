@@ -1,0 +1,11 @@
+{
+  "silence": { "floor_dbfs": -60, "max_ms": 1500 },
+  "clipping": { "min_run": 4 },
+  "spec": {
+    "container": "mov,mp4,m4a,3gp,3g2,mj2",
+    "codecs": { "libx264": "h264", "aac": "aac" },
+    "channels": 2,
+    "sync_encoder_frames": 2,
+    "aac_frame_samples": 1024
+  }
+}

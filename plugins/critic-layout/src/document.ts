@@ -17,6 +17,7 @@ export interface CheckDocument {
     box: Rect;
     enter: number;
     end: number;
+    entrance?: boolean;
     min_text_size?: number;
   }[];
   samples: {

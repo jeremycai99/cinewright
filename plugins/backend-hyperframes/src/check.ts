@@ -25,8 +25,8 @@ export interface CheckFailure {
 
 /**
  * What the layout critic reads (M6.1a), from `check/check.json` in the render's cache entry: the
- * HyperFrames version, the composition's size and body, each layer's box, on-screen frames and
- * resolved `density.min_text_size` (px), the keyframe samples with their text boxes, and the
+ * HyperFrames version, the composition's size and body, each layer's box, on-screen frames,
+ * whether it animates in, and resolved `density.min_text_size` (px), the keyframe samples with their text boxes, and the
  * failures of HyperFrames `check` at the same times.
  */
 export interface CheckDocument {
@@ -43,6 +43,8 @@ export interface CheckDocument {
     box: { x: number; y: number; width: number; height: number };
     enter: number;
     end: number;
+    /** The layer animates in (M6.1b's frozen check): all do, unless an enter entry lasts 0 frames. */
+    entrance: boolean;
     min_text_size?: number;
   }[];
   samples: Keyframe[];
@@ -134,6 +136,11 @@ export async function checkShot(options: {
           box: l.box,
           enter: l.timing.enter,
           end: l.timing.end,
+          // Every component animates in with the pack's motion.entrance unless an enter entry
+          // has zero duration (components/src/motion/presets.ts presetFor).
+          entrance: !l.motion.some(
+            (m) => (m.params?.phase ?? "enter") === "enter" && m.params?.duration === 0,
+          ),
           ...(typeof min === "number" ? { min_text_size: min } : {}),
         };
       }),
