@@ -9,6 +9,7 @@ import { readProjectFiles, writeProjectFiles } from "../src/project/files.js";
 import { InitError, initProject } from "../src/project/init.js";
 import { validateProject } from "../src/schema/validate.js";
 import { readLog } from "../src/store/log.js";
+import { Store } from "../src/store/store.js";
 
 const FIXTURES = fileURLToPath(new URL("./fixtures/", import.meta.url));
 const LANDSCAPE = join(FIXTURES, "profiles", "landscape_1080p30.json");
@@ -71,6 +72,24 @@ describe("initProject", () => {
       state_hash: result.stateHash,
     });
     expect(result.stateHash).toBe(stateHash(ir));
+  });
+
+  it("writes a budget cap and a workflow when given them (M7.1b)", async () => {
+    const dir = tempDir();
+    await initProject(
+      dir,
+      {
+        id: "demo",
+        deliverables: [{ id: "web", profilePath: LANDSCAPE }],
+        budget: 5,
+        workflow: "ad",
+      },
+      OPTIONS,
+    );
+    const ir = (await Store.open(dir, OPTIONS)).ir();
+    expect(ir.budget).toEqual({ state: "user", value: { currency: "USD", cap: 5 } });
+    expect(ir.settings.workflow).toEqual({ state: "user", value: "ad" });
+    expect(validateProject(ir)).toEqual([]);
   });
 
   it("refuses a directory that already holds a project", async () => {

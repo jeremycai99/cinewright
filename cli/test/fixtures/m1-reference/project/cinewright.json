@@ -58,7 +58,11 @@
     "value": "A 30-second explainer on why build pipelines break as teams grow."
   },
   "budget": {
-    "state": "open"
+    "state": "user",
+    "value": {
+      "cap": 5,
+      "currency": "USD"
+    }
   },
   "cast": {
     "state": "user",

@@ -447,6 +447,35 @@
           }
         }
       }
+    },
+    "task_record": {
+      "title": "TaskRecord",
+      "description": "The workflow task an agent patch fulfilled (M7.1b): its id, its key when it ran, the hash of the context it read and the run. The reconciler re-derives the task when its key changes while its outputs are still agent-filled.",
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["id", "key"],
+      "properties": {
+        "id": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 200
+        },
+        "key": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 200
+        },
+        "context_hash": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 200
+        },
+        "run": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 200
+        }
+      }
     }
   }
 }

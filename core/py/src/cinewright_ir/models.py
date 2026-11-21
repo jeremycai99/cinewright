@@ -364,6 +364,16 @@ class Decision(BaseModel):
     citations: list[Citation]
 
 
+class TaskRecord(BaseModel):
+    model_config = ConfigDict(
+        extra="forbid",
+    )
+    id: Annotated[str, Field(max_length=200, min_length=1)]
+    key: Annotated[str, Field(max_length=200, min_length=1)]
+    context_hash: Annotated[str | None, Field(max_length=200, min_length=1)] = None
+    run: Annotated[str | None, Field(max_length=200, min_length=1)] = None
+
+
 class Provenance(BaseModel):
     model_config = ConfigDict(
         extra="forbid",
@@ -823,6 +833,7 @@ class AppliedEntry(BaseModel):
             description="Entity ids a revert brought back; they are no longer retired."
         ),
     ] = None
+    task: TaskRecord | None = None
 
 
 class Mode(Enum):
@@ -964,6 +975,7 @@ class Patch(BaseModel):
     reason: Annotated[str, Field(max_length=2000, min_length=1)]
     ops: Annotated[list[Op], Field(min_length=1)]
     decisions: list[Decision] | None = None
+    task: TaskRecord | None = None
 
 
 class Title(BaseModel):
@@ -1066,6 +1078,46 @@ class Providers(BaseModel):
     value: Annotated[ProviderRouting | None, Field(title="ProviderRouting")] = None
 
 
+class Workflow(BaseModel):
+    model_config = ConfigDict(
+        extra="forbid",
+    )
+    state: State
+    value: Annotated[str | None, Field(max_length=64, pattern="^[a-z][a-z0-9_]*$")] = (
+        None
+    )
+
+
+class RoleAssignments(Enum):
+    agent = "agent"
+    human = "human"
+
+
+class RoleAssignments1(
+    RootModel[
+        dict[
+            Literal["producer", "writer", "director", "shot_builder", "editor"],
+            RoleAssignments,
+        ]
+    ]
+):
+    root: Annotated[
+        dict[
+            Literal["producer", "writer", "director", "shot_builder", "editor"],
+            RoleAssignments,
+        ],
+        Field(title="RoleAssignments"),
+    ]
+
+
+class Roles(BaseModel):
+    model_config = ConfigDict(
+        extra="forbid",
+    )
+    state: State
+    value: Annotated[RoleAssignments1 | None, Field(title="RoleAssignments")] = None
+
+
 class ProjectSettings(BaseModel):
     model_config = ConfigDict(
         extra="forbid",
@@ -1080,6 +1132,18 @@ class ProjectSettings(BaseModel):
         Providers | None,
         Field(
             description="Provider routing (D29): for each plugin kind, the plugin ids to use, in order. Unset means the free-first rule (free plugins, then paid plugins whose secrets are present, then by id)."
+        ),
+    ] = None
+    workflow: Annotated[
+        Workflow | None,
+        Field(
+            description="The workflow template the engine runs (M7.1b), by id (`explainer`, `ad`). Unset means `explainer`."
+        ),
+    ] = None
+    roles: Annotated[
+        Roles | None,
+        Field(
+            description="Who fills each role (M7.1b, invariant 9): `agent` or `human`. A role not listed takes the preset's default. A human role's task waits in the queue."
         ),
     ] = None
 
@@ -1106,6 +1170,23 @@ class Sequences(BaseModel):
     )
     state: State
     value: list[Id] | None = None
+
+
+class ProjectPlan(BaseModel):
+    model_config = ConfigDict(
+        extra="forbid",
+    )
+    summary: Annotated[str, Field(max_length=4000, min_length=1)]
+    estimate_usd: Annotated[float, Field(ge=0.0)]
+    fix_reserve_usd: Annotated[float | None, Field(ge=0.0)] = None
+
+
+class Plan(BaseModel):
+    model_config = ConfigDict(
+        extra="forbid",
+    )
+    state: State
+    value: Annotated[ProjectPlan | None, Field(title="ProjectPlan")] = None
 
 
 class Summary(BaseModel):
@@ -2029,6 +2110,12 @@ class Project(BaseModel):
             description="The asset registry: every asset the IR references, by content hash (AGENTS.md §6)."
         ),
     ]
+    plan: Annotated[
+        Plan | None,
+        Field(
+            description="The Producer's plan (M7.1b; filled in P1): a summary, the cost estimate and the fix reserve, in USD."
+        ),
+    ] = None
 
 
 class Shots(BaseModel):

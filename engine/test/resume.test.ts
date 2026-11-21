@@ -2,23 +2,28 @@ import { mkdtempSync, readdirSync, readFileSync, realpathSync, rmSync } from "no
 import { tmpdir } from "node:os";
 import { join } from "node:path";
 import { fileURLToPath } from "node:url";
-import { initProject, loadCatalog, loadPack, RUNS_DIR, Store } from "@cinewright/core";
+import { initProject, loadCatalog, loadPack, RUNS_DIR, Store, stateHash } from "@cinewright/core";
 import { afterEach, describe, expect, it } from "vitest";
 import type { RenderOptions } from "../src/pipeline/run.js";
-import { runWorkflow } from "../src/run.js";
+import { runWorkflow, type TaskExecutor } from "../src/run.js";
+import { explainerAgents } from "./stubs/agents.js";
 
 const ROOT = fileURLToPath(new URL("../../", import.meta.url));
 const PACK = loadPack("neutral", [join(ROOT, "packs")]);
 const CATALOG = loadCatalog(join(ROOT, "components", "src"));
 const OPTIONS = { sessionId: "t", now: () => "2026-11-21T00:00:00Z" };
 const NOW = () => "2026-11-21T00:00:00.000Z";
+const LLM = {
+  dir: "/plugins/llm_stub",
+  manifest: { id: "llm_stub", kind: "llm", version: "0.1.0", capabilities: ["llm.generate"] },
+} as never;
 const dirs: string[] = [];
 afterEach(() => {
   for (const d of dirs.splice(0)) rmSync(d, { recursive: true, force: true });
 });
 
-/** A project with one deliverable and nothing to narrate or render yet. */
-async function project(): Promise<Store> {
+/** A project with one deliverable, a narrator and a budget, and nothing written yet. */
+async function project(ops: object[] = []): Promise<Store> {
   const dir = realpathSync(mkdtempSync(join(tmpdir(), "cw-workflow-")));
   dirs.push(dir);
   await initProject(
@@ -29,10 +34,35 @@ async function project(): Promise<Store> {
         { id: "web", profilePath: join(ROOT, "registry/profiles/landscape_web.json") },
       ],
       pack: PACK,
+      budget: 5,
     },
     OPTIONS,
   );
-  return Store.open(join(dir, "p"), OPTIONS);
+  const store = await Store.open(join(dir, "p"), OPTIONS);
+  const r = await store.apply({
+    base_revision: 0,
+    author: { kind: "user" },
+    mode: "apply",
+    reason: "setup",
+    ops: [
+      {
+        op: "insert",
+        entity: "demo",
+        path: "/cast",
+        value: {
+          id: "narrator",
+          role: "narrator",
+          display_name: "N",
+          voice: { description: { language: "en" } },
+          performance: { baseline: "steady" },
+          on_screen: false,
+        },
+      },
+      ...ops,
+    ],
+  } as never);
+  if (r.status !== "applied") throw new Error(JSON.stringify(r));
+  return store;
 }
 
 const render = (extra: Partial<RenderOptions> = {}): RenderOptions => ({
@@ -50,29 +80,58 @@ const events = (store: Store, run: string) =>
     .filter(Boolean)
     .map((l) => JSON.parse(l) as { type: string; task?: string });
 
-describe("runWorkflow (M7.1a)", () => {
-  it("plans to the storyboard gate and pauses there; a second call resumes the same run", async () => {
-    const store = await project();
-    const first = await runWorkflow(store, {
-      render: render({ until: "shots" }),
-      until: "storyboard",
-      now: NOW,
-    });
-    expect(first.outcome).toEqual({
-      status: "paused",
-      pause: { kind: "gate", id: "gate:storyboard" },
-    });
-    const again = await runWorkflow(store, {
-      render: render({ until: "shots" }),
-      until: "storyboard",
-      now: NOW,
-    });
+const HUMANS = {
+  op: "set",
+  entity: "demo",
+  path: "/settings/roles",
+  value: {
+    producer: "human",
+    writer: "human",
+    director: "human",
+    shot_builder: "human",
+    editor: "human",
+  },
+};
+const fake = (id: string, kind: string, capabilities: string[]) =>
+  ({ dir: `/plugins/${id}`, manifest: { id, kind, version: "0.1.0", capabilities } }) as never;
+/** Installed plugins as intake sees them; the jobs themselves are stubbed. */
+const INSTALLED = {
+  tts: [fake("tts_stub", "tts", ["tts.synthesize"])],
+  stt: [],
+  music: [],
+  sfx: [],
+  backend: [
+    fake("html", "backend", ["backend.html", "render.shot"]),
+    fake("mixer", "backend", ["mix.render"]),
+  ],
+  exporter: [
+    fake("mp4", "exporter", ["export.mp4"]),
+    fake("captions", "exporter", ["export.captions"]),
+  ],
+};
+/** Every job succeeds without running the pipeline: the reconciler and loop are under test. */
+const noJobs: TaskExecutor = async () => ({ status: "done" });
+
+describe("runWorkflow (M7.1)", () => {
+  it("plans to the first human task and pauses there; a second call resumes the same run", async () => {
+    const store = await project([HUMANS]);
+    const first = await runWorkflow(store, { render: render(), until: "storyboard", now: NOW });
+    expect(first.outcome).toEqual({ status: "paused", pause: { kind: "human", id: "producer" } });
+    const again = await runWorkflow(store, { render: render(), until: "storyboard", now: NOW });
     expect(again.run).toBe(first.run);
-    expect(again.outcome.status).toBe("paused");
     const started = events(store, first.run)
       .filter((e) => e.type === "task.started")
       .map((e) => e.task);
-    expect(started).toEqual(["jobs:storyboard", "gate:storyboard", "gate:storyboard"]);
+    expect(started).toEqual(["producer", "producer"]);
+  });
+
+  it("fails at intake when an agent role has no model", async () => {
+    const store = await project();
+    const { outcome } = await runWorkflow(store, { render: render(), now: NOW });
+    expect(outcome).toMatchObject({ status: "failed", task: "intake", error: { code: "intake" } });
+    const findings = (outcome as { error: { data: { findings: { rule: string }[] } } }).error.data
+      .findings;
+    expect(findings.map((f) => f.rule)).toContain("intake.no_provider");
   });
 
   it("with jobs only, runs the pipeline as one job and returns its report", async () => {
@@ -110,21 +169,66 @@ describe("runWorkflow (M7.1a)", () => {
     expect((outcome as { error: { data: { step: string } } }).error.data.step).toBe("mix@web");
   });
 
-  it("pauses at the final gate unless it is auto-approved", async () => {
-    const store = await project();
-    const held = await runWorkflow(store, {
-      render: render({ until: "timing" }),
-      until: "final",
+  it("pauses at the final gate unless it is auto-approved, which locks what the gate names", async () => {
+    const store = await project([{ op: "set", entity: "demo", path: "/autonomy", value: "auto" }]);
+    const agents = explainerAgents();
+    const base = {
+      render: render({ plugins: INSTALLED }),
+      llm: [LLM],
+      executors: { agent: agents.execute, job: noJobs },
       now: NOW,
-    });
+    };
+    const held = await runWorkflow(store, base);
     expect(held.outcome).toEqual({ status: "paused", pause: { kind: "gate", id: "gate:final" } });
-    const approved = await runWorkflow(store, {
-      render: render({ until: "timing" }),
-      until: "final",
-      approveFinal: true,
-      now: NOW,
-    });
+    const approved = await runWorkflow(store, { ...base, approveFinal: true });
     expect(approved.run).toBe(held.run);
     expect(approved.outcome.status).toBe("done");
+    expect(store.ir().sequences.state).toBe("locked");
+    expect(store.ir().script.beats.state).toBe("locked");
+  });
+
+  it("killed once inside each agent task and restarted, ends where an uninterrupted run ends, filling each output once (Review Focus 1)", async () => {
+    const run = async (killAt?: number, wipe = false) => {
+      const store = await project([
+        { op: "set", entity: "demo", path: "/autonomy", value: "auto" },
+      ]);
+      const agents = explainerAgents(killAt === undefined ? {} : { killAt });
+      const opts = {
+        render: render({ plugins: INSTALLED }),
+        llm: [LLM],
+        executors: { agent: agents.execute, job: noJobs },
+        approveFinal: true,
+        now: NOW,
+      };
+      let outcome = (await runWorkflow(store, opts)).outcome;
+      if (killAt !== undefined) {
+        expect(outcome.status).toBe("failed");
+        if (wipe) rmSync(join(store.dir, RUNS_DIR), { recursive: true, force: true });
+        outcome = (await runWorkflow(await Store.open(store.dir, OPTIONS), opts)).outcome;
+      }
+      expect(outcome.status).toBe("done");
+      return {
+        hash: stateHash((await Store.open(store.dir, OPTIONS)).ir()),
+        applied: agents.applied,
+      };
+    };
+    const clean = await run();
+    expect([...clean.applied.keys()].sort()).toEqual(
+      [
+        "director",
+        "editor",
+        "producer",
+        "shot_builder:s01.sh01",
+        "shot_builder:s02.sh01",
+        "writer",
+      ].sort(),
+    );
+    for (let k = 1; k <= clean.applied.size; k += 1) {
+      for (const wipe of [false, true]) {
+        const killed = await run(k, wipe);
+        expect(killed.hash, `kill at ${k}${wipe ? ", runs/ wiped" : ""}`).toBe(clean.hash);
+        expect([...killed.applied.values()].every((n) => n === 1)).toBe(true);
+      }
+    }
   });
 });

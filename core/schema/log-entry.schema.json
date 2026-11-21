@@ -198,6 +198,9 @@
             "$ref": "common.schema.json#/$defs/id"
           },
           "description": "Entity ids a revert brought back; they are no longer retired."
+        },
+        "task": {
+          "$ref": "common.schema.json#/$defs/task_record"
         }
       }
     },

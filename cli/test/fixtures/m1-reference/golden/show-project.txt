@@ -5,7 +5,7 @@ packs: { neutral: { version: "1.1.0", hash: "sha256:07871a49dc8c48c05dafbda1fb82
 title: "Why pipelines break"  # user
 brief: "A 30-second explainer on why build pipelines break as teams grow."  # user
 autonomy: guided  # user
-budget: ~  # open
+budget: { currency: USD, cap: 5 }  # user
 policies: ~  # open
 settings:
   propose_conversational_edits: true  # user

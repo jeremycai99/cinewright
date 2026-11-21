@@ -9,6 +9,7 @@ export {
   SOLVER_CRITIC,
   TRANSCRIBE_CRITIC,
 } from "./critics/run.js";
+export { type Installed, intake } from "./intake.js";
 export {
   type AudioRef,
   ComposeError,
@@ -45,7 +46,20 @@ export { callOnce, PluginChoiceError, pluginWith } from "./plugins/call.js";
 export { PluginCallError, PluginPool } from "./plugins/pool.js";
 export { type FoundPlugin, findPlugins, PluginRegistryError } from "./plugins/registry.js";
 export { RouteError, type RouteOptions, route } from "./plugins/route.js";
-export { runWorkflow, type WorkflowOptions } from "./run.js";
+export {
+  type EngineSettings,
+  loadEngineSettings,
+  loadPreset,
+  loadTemplate,
+  type Preset,
+  type TemplatePhase,
+  validateTemplate,
+  WorkflowDataError,
+  type WorkflowTemplate,
+} from "./reconcile/data.js";
+export { recordedKeys } from "./reconcile/inputs.js";
+export { type ReconcileInputs, reconcile } from "./reconcile/reconcile.js";
+export { runWorkflow, type TaskExecutor, type WorkflowOptions } from "./run.js";
 export { EventLog, type RunEvent, secretValues } from "./runtime/events.js";
 export { type LedgerLine, RunLedger } from "./runtime/ledger.js";
 export { LoopRuntime } from "./runtime/loop.js";

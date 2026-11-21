@@ -34,6 +34,9 @@
       "items": {
         "$ref": "common.schema.json#/$defs/decision"
       }
+    },
+    "task": {
+      "$ref": "common.schema.json#/$defs/task_record"
     }
   }
 }
