@@ -592,6 +592,51 @@ class Insets(BaseModel):
     left: Annotated[float, Field(ge=0.0, le=0.5)]
 
 
+class Severity(Enum):
+    error = "error"
+    warning = "warning"
+
+
+class Critic(BaseModel):
+    model_config = ConfigDict(
+        extra="forbid",
+    )
+    id: Annotated[str, Field(min_length=1)]
+    version: Annotated[str, Field(min_length=1)]
+
+
+class FindingFrames(BaseModel):
+    model_config = ConfigDict(
+        extra="forbid",
+    )
+    start: Annotated[int, Field(ge=0)]
+    end: Annotated[int, Field(ge=0)]
+
+
+class EvidenceRect(BaseModel):
+    model_config = ConfigDict(
+        extra="forbid",
+    )
+    x: float
+    y: float
+    width: float
+    height: float
+
+
+class Evidence(BaseModel):
+    model_config = ConfigDict(
+        extra="forbid",
+    )
+    measured: float | None = None
+    limit: float | None = None
+    selector: str | None = None
+    box: EvidenceRect | None = None
+    region: EvidenceRect | None = None
+    still: str | None = None
+    text: str | None = None
+    code: str | None = None
+
+
 class Component(BaseModel):
     model_config = ConfigDict(
         extra="forbid",
@@ -1570,6 +1615,24 @@ class DeliveryProfile(BaseModel):
     ] = None
 
 
+class CriticFinding(BaseModel):
+    model_config = ConfigDict(
+        extra="forbid",
+    )
+    id: Annotated[str, Field(pattern="^f_[0-9a-f]{12}$")]
+    signature: Annotated[str, Field(pattern="^sha256:[0-9a-f]{64}$")]
+    rule: Annotated[str, Field(pattern="^[a-z][a-z0-9_]*\\.[a-z][a-z0-9_]*$")]
+    severity: Severity
+    entity: Annotated[str, Field(min_length=1)]
+    pointer: str | None = None
+    message: str
+    data: dict[str, Any]
+    critic: Critic
+    deliverable: Id | None = None
+    frames: FindingFrames | None = None
+    evidence: Evidence
+
+
 class Motion(BaseModel):
     model_config = ConfigDict(
         extra="forbid",
@@ -2032,6 +2095,7 @@ class IrDocuments(BaseModel):
     asset: Asset | None = None
     cast: CastMember | None = None
     delivery_profile: DeliveryProfile | None = None
+    finding: CriticFinding | None = None
     layer: Layer | None = None
     snapshot: Snapshot | None = None
     touched: Touched | None = None

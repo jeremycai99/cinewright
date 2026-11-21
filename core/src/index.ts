@@ -53,7 +53,22 @@ export {
   loadCatalog,
   loadExamples,
 } from "./catalog/catalog.js";
-export { type Finding, finding, sortFindings } from "./findings.js";
+export { CLEARANCE_CRITIC, clearanceFindings } from "./clearance.js";
+export {
+  type CriticFinding,
+  dedupeFindings,
+  type Evidence,
+  type Finding,
+  type FindingFrames,
+  finding,
+  findingId,
+  type OwnerClass,
+  RULES,
+  sign,
+  sortCriticFindings,
+  sortFindings,
+  validateCriticFinding,
+} from "./findings.js";
 export type * from "./generated/ir.js";
 export { dependencyGraph, dirtyNodes, type Graph } from "./graph/deps.js";
 export {

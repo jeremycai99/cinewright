@@ -27,7 +27,8 @@ export type DocumentKind =
   | "script"
   | "cast_member"
   | "asset"
-  | "timing_table";
+  | "timing_table"
+  | "critic_finding";
 
 export const ROOT_FILES: Readonly<Record<DocumentKind, string>> = {
   project: "project.schema.json",
@@ -37,6 +38,7 @@ export const ROOT_FILES: Readonly<Record<DocumentKind, string>> = {
   cast_member: "cast.schema.json",
   asset: "asset.schema.json",
   timing_table: "timing.schema.json",
+  critic_finding: "finding.schema.json",
 };
 
 const SCHEMA_BASE = "https://cinewright.invalid/ir/0/";

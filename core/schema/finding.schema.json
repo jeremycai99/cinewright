@@ -1,0 +1,71 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://cinewright.invalid/ir/0/finding.schema.json",
+  "title": "CriticFinding",
+  "description": "One finding of a critic (M6.1): derived data, not an IR entity. `entity` and `pointer` are the entity path; `frames` is on the project timeline; `evidence` holds numbers and references, never prose. `signature` is the SHA-256 of the JCS of { rule, entity, pointer, deliverable, key }, where `key` stays the same while the defect persists; `id` is \"f_\" and its first 12 hex digits.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["id", "signature", "rule", "severity", "entity", "message", "data", "critic", "evidence"],
+  "properties": {
+    "id": { "type": "string", "pattern": "^f_[0-9a-f]{12}$" },
+    "signature": { "type": "string", "pattern": "^sha256:[0-9a-f]{64}$" },
+    "rule": { "type": "string", "pattern": "^[a-z][a-z0-9_]*\\.[a-z][a-z0-9_]*$" },
+    "severity": { "enum": ["error", "warning"] },
+    "entity": { "type": "string", "minLength": 1 },
+    "pointer": { "type": "string" },
+    "message": { "type": "string" },
+    "data": { "type": "object" },
+    "critic": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["id", "version"],
+      "properties": {
+        "id": { "type": "string", "minLength": 1 },
+        "version": { "type": "string", "minLength": 1 }
+      }
+    },
+    "deliverable": { "$ref": "common.schema.json#/$defs/id" },
+    "frames": { "$ref": "#/$defs/frame_span" },
+    "evidence": { "$ref": "#/$defs/evidence" }
+  },
+  "$defs": {
+    "frame_span": {
+      "title": "FindingFrames",
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["start", "end"],
+      "properties": {
+        "start": { "type": "integer", "minimum": 0 },
+        "end": { "type": "integer", "minimum": 0 }
+      }
+    },
+    "rect": {
+      "title": "EvidenceRect",
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["x", "y", "width", "height"],
+      "properties": {
+        "x": { "type": "number" },
+        "y": { "type": "number" },
+        "width": { "type": "number" },
+        "height": { "type": "number" }
+      }
+    },
+    "evidence": {
+      "title": "Evidence",
+      "description": "What was measured against what limit, and where: a selector, the element's box, the limit's rectangle (`region`), a still, the text, and the upstream check's code.",
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "measured": { "type": "number" },
+        "limit": { "type": "number" },
+        "selector": { "type": "string" },
+        "box": { "$ref": "#/$defs/rect" },
+        "region": { "$ref": "#/$defs/rect" },
+        "still": { "type": "string" },
+        "text": { "type": "string" },
+        "code": { "type": "string" }
+      }
+    }
+  }
+}
