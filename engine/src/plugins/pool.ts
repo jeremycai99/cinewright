@@ -15,7 +15,9 @@ export class PluginCallError extends Error {
 
 /**
  * Plugins a job uses, loaded and initialized on first use and shut down together (M4). Each
- * gets the secrets its manifest declares from `env`, and the job's work folder.
+ * gets the secrets its manifest declares from `env`, and the job's work folder. With
+ * `CINEWRIGHT_FREE_ONLY=1` in `env` (tier A, M8.3a), a plugin whose cost model is not free is
+ * refused before it starts.
  */
 export class PluginPool {
   private readonly loaded = new Map<string, Promise<LoadedPlugin>>();
@@ -34,6 +36,18 @@ export class PluginPool {
   }
 
   private get(found: FoundPlugin): Promise<LoadedPlugin> {
+    if (
+      this.options.env.CINEWRIGHT_FREE_ONLY === "1" &&
+      found.manifest.cost_model.unit !== "free"
+    ) {
+      return Promise.reject(
+        new PluginCallError(found.manifest.id, {
+          code: "unsupported",
+          message: `a paid plugin may not run with CINEWRIGHT_FREE_ONLY=1 (cost model: ${found.manifest.cost_model.unit})`,
+          retryable: false,
+        }),
+      );
+    }
     let entry = this.loaded.get(found.manifest.id);
     if (!entry) {
       entry = (async () => {

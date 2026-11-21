@@ -4,6 +4,7 @@ import { join } from "node:path";
 import { fileURLToPath } from "node:url";
 import type { InlinedIr } from "@cinewright/core";
 import { describe, expect, it } from "vitest";
+import { PluginCallError, PluginPool } from "../src/plugins/pool.js";
 import { findPlugins, PluginRegistryError } from "../src/plugins/registry.js";
 import { RouteError, route } from "../src/plugins/route.js";
 
@@ -122,5 +123,23 @@ describe("route (D29)", () => {
     expect(() => route("tts", ir(), "nobody", { plugins, env: {} })).toThrow(
       /no cast member nobody/,
     );
+  });
+});
+
+describe("the free-only switch (M8.3a)", () => {
+  it("refuses to start a paid plugin under CINEWRIGHT_FREE_ONLY, before running anything", async () => {
+    const [paid] = (await findPlugins("tts", [repo()])).filter(
+      (p) => p.manifest.id === "elevenlabs",
+    );
+    if (!paid) throw new Error("no paid plugin");
+    const pool = new PluginPool({
+      env: { CINEWRIGHT_FREE_ONLY: "1", ELEVENLABS_API_KEY: "k" },
+      workDir: mkdtempSync(join(tmpdir(), "cw-pool-")),
+      callTimeoutMs: 1000,
+    });
+    const call = pool.call(paid, "tts.x", {});
+    await expect(call).rejects.toBeInstanceOf(PluginCallError);
+    await expect(call).rejects.toThrow(/elevenlabs: unsupported: .*paid.*CINEWRIGHT_FREE_ONLY/);
+    await pool.shutdown();
   });
 });

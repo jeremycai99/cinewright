@@ -144,6 +144,7 @@ describe("critique (M6.1a)", () => {
     expect(saved.deliverable).toBe("web");
     expect(saved.revision).toBe(store.revision());
     expect(saved.findings).toEqual(findings);
+    expect((saved as unknown as { rules: string[] }).rules).toContain("captions.sync");
     expect(saved.critics.map((c) => c.id)).toEqual(["clearance", "critic_layout", "solver"]);
     expect(saved.critics.find((c) => c.id === "critic_layout")?.baseline?.hyperframes).toBe(
       "0.9.58",
