@@ -1,0 +1,14 @@
+[project]
+name = "cinewright-eval"
+version = "0.0.0"
+description = "Benchmark tooling for Cinewright: CAS export for tier A fixtures (alpha gate)."
+license = "Apache-2.0"
+requires-python = ">=3.13"
+dependencies = []
+
+[project.scripts]
+cinewright-eval = "cinewright_eval.cli:main"
+
+[build-system]
+requires = ["uv_build==0.13.8"]
+build-backend = "uv_build"
