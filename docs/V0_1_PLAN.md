@@ -152,6 +152,8 @@ The implementation audit of 2026-11-16 (`docs/plans/roadmap-audit-2026-11-16.md`
 
 ### M3 — HyperFrames backend
 
+Detailed task plan (approved 2026-11-16): `docs/plans/m3-hyperframes-backend.md`. **Done 2026-11-16** (PRs #40–#49).
+
 - **M3.1 Shot compiler**: resolved shot IR (typed layers) + pack → HyperFrames composition (HTML, the component host bundle and a mount spec; components animate with WAAPI, which HyperFrames seeks, per Open issue 6), once per deliverable. The compiler is the only producer of HTML (D31).
 - **M3.2 Renderer adapter**: render per shot × deliverable inside the container with the network disabled; collect logs, timings, `framemd5` and output hash; cache by render key.
 - **M3.3 Transition segments** (D34): render cross-dissolve and mask/wipe segments from the tail of the outgoing and the head of the incoming composition; hard cuts need no segment.
@@ -160,6 +162,8 @@ The implementation audit of 2026-11-16 (`docs/plans/roadmap-audit-2026-11-16.md`
   - AC: the spec's scene example (motion-graphics shot) compiles and renders in both aspect ratios; the determinism test passes; a revised shot re-renders only itself and its adjacent transition segments; the HyperFrames API in use is checked against current upstream docs and pinned (§External facts lists what was checked on 2026-11-13); encoding follows the M0.2 spike.
 
 ### M4 — Audio
+
+Detailed task plan (approved 2026-11-17): `docs/plans/m4-audio.md`, revised after the audit `docs/plans/audit-m3-m4-plan-2026-11-16.md`. It starts with **M3.6**, the audit's M3 fixes (body ranges, render key, caption overlap, container tests in CI), and moves M4.3b (generative music) after the alpha gate.
 
 - **M4.1 TTS provider interface** + ElevenLabs plugin (with character/word timestamps) + Kokoro local plugin (a Python subprocess plugin, M1.8b; word timestamps come from M4.5 alignment where the provider returns none). The voice comes from the narrator's provider binding (D29); plugins translate the pronunciation lexicon. Takes are frozen in the CAS with provenance (D33).
   - AC: the same narration renders through either plugin and yields timing anchors in the IR; re-running the pipeline reuses frozen takes.
