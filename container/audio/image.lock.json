@@ -1,5 +1,5 @@
 {
   "image": "ghcr.io/jeremycai99/cinewright-audio",
-  "digest": null,
-  "inputs_hash": null
+  "digest": "sha256:6156fe26c6e473bd93e8605ee4101ec3a571af2bf9d47fdd20f42178b1b82ad3",
+  "inputs_hash": "445d4d1b976aec4f5194e8e537ef177c0fa7f679a7a74b151c77efce48af4861"
 }
