@@ -1,0 +1,17 @@
+# The Kokoro TTS plugin (M4.1c). GPL-3.0-or-later: in its process misaki loads phonemizer-fork
+# and the espeak-ng library (audit decision 8). It runs in the audio image, which holds kokoro,
+# misaki, torch and the model; only the SDK is declared here, so host tests run without them.
+[project]
+name = "cinewright-tts-kokoro"
+version = "0.1.0"
+description = "Local text to speech for Cinewright, with Kokoro-82M."
+license = "GPL-3.0-or-later"
+requires-python = ">=3.12"
+dependencies = ["cinewright-plugin-sdk"]
+
+[tool.uv.sources]
+cinewright-plugin-sdk = { workspace = true }
+
+[build-system]
+requires = ["uv_build==0.13.8"]
+build-backend = "uv_build"
