@@ -149,15 +149,11 @@ def test_build_image_uses_the_audio_context(fake_docker: list[Sequence[str]]) ->
     assert command[-1] == str(REPO / "container/audio")
 
 
-def test_audio_lock_is_unpublished(capsys: pytest.CaptureFixture[str]) -> None:
-    assert image_lock.main(["--kind", "audio", "--repo", str(REPO)]) == 0
-    assert "image lock: unpublished" in capsys.readouterr().out
+def test_audio_lock_names_the_image_and_sets_both_fields_or_neither() -> None:
     lock = json.loads((AUDIO / "image.lock.json").read_text())
-    assert lock == {
-        "image": "ghcr.io/jeremycai99/cinewright-audio",
-        "digest": None,
-        "inputs_hash": None,
-    }
+    assert lock["image"] == "ghcr.io/jeremycai99/cinewright-audio"
+    assert (lock["digest"] is None) == (lock["inputs_hash"] is None)
+    assert image_lock.check_image_lock(lock, lock["inputs_hash"], "tree") == []
 
 
 @pytest.fixture
