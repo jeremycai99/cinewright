@@ -51,11 +51,11 @@ export class LoopRuntime implements WorkflowRuntime {
       const results = await this.scheduler.run(
         ready,
         async (task, plugin, s) => {
-          const t0 = Date.now();
+          const t0 = events.clockMs();
           try {
             return await ctx.execute(task, s, plugin);
           } finally {
-            ms.set(task.id, Date.now() - t0);
+            ms.set(task.id, Math.max(0, events.clockMs() - t0));
           }
         },
         signal,
