@@ -105,6 +105,19 @@ jobs:
       - run: pnpm typecheck
       - name: The reference shot twice, then a cache hit
         run: sh .github/scripts/reference-shot.sh "$IMAGE" "$RUNNER_TEMP/reference" smoke
+      # The backend's container tests (run limits, video plate, segments, keyframes) must run in
+      # CI, not only locally, and none may skip (audit G2). One runner is enough: the
+      # cross-runner comparison is the reference shot's job.
+      - name: Backend container tests, none skipped
+        if: matrix.side == 'a'
+        env:
+          CINEWRIGHT_CONTAINER_TESTS: "1"
+          CINEWRIGHT_IMAGE: ${{ env.IMAGE }}
+        run: |
+          pnpm --filter @cinewright/backend-hyperframes exec vitest run \
+            --reporter=default --reporter=json --outputFile="$RUNNER_TEMP/backend-tests.json"
+          jq -e '.numPendingTests == 0 and .numTodoTests == 0' "$RUNNER_TEMP/backend-tests.json" \
+            || { echo "backend container tests: some tests were skipped"; exit 1; }
       - name: Record hashes and CPU
         run: |
           uv run --locked cinewright-render-in-container --image "$IMAGE" \

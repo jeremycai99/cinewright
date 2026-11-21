@@ -19,7 +19,7 @@ async function plan(shotId: string, type: "cross_dissolve" | "wipe" | "cut", fra
 describe("segments in the compiler (M3.3)", () => {
   it("extends the outgoing shot by d - h frames and suppresses exits that end at the cut", async () => {
     const p = await plan("s03.sh02", "cross_dissolve");
-    expect(p.timeline).toEqual({ start: 90, before: 0, after: 6 });
+    expect(p.timeline).toEqual({ start: 90, before: 0, after: 6, body: { start: 0, end: 66 } });
     expect(p.frames).toBe(72 + 6);
     expect(p.segments.outgoing).toMatchObject({
       scene: "s03_the_problem",
@@ -33,25 +33,65 @@ describe("segments in the compiler (M3.3)", () => {
 
   it("starts the incoming shot h frames early, with layers that start with it on from the overlap", async () => {
     const p = await plan("s04.sh01", "cross_dissolve");
-    expect(p.timeline).toEqual({ start: 156, before: 6, after: 0 });
+    expect(p.timeline).toEqual({ start: 156, before: 6, after: 0, body: { start: 12, end: 66 } });
     expect(p.frames).toBe(66);
     // It starts with its shot, so it enters at the overlap's start: the transition is its entrance.
     expect(p.spec.layers[0]?.timing).toEqual({ enter: 0, end: 66 });
   });
 
   it("encodes only the body: the outgoing body stops at the segment, the incoming one starts after it", async () => {
+    // The segment covers [156, 168): sh02 is compiled over [90, 168), sh01 of s04 over [156, 222).
     expect(renderJobCommand(await plan("s03.sh02", "cross_dissolve"))).toEqual(
-      expect.arrayContaining(["--format", "mp4+frames", "--body", "0,72"]),
+      expect.arrayContaining(["--format", "mp4+frames", "--body", "0,66"]),
     );
     expect(renderJobCommand(await plan("s04.sh01", "cross_dissolve"))).toEqual(
-      expect.arrayContaining(["--body", "6,66"]),
+      expect.arrayContaining(["--body", "12,66"]),
     );
     expect(renderJobCommand(await plan("s03.sh02", "cut"))).not.toContain("--body");
   });
 
+  for (const d of [12, 13]) {
+    it(`bodies and the segment add up to the timeline exactly (d = ${d}, audit G1)`, async () => {
+      const a = await plan("s03.sh02", "cross_dissolve", d);
+      const b = await plan("s04.sh01", "cross_dissolve", d);
+      const seg = a.segments.outgoing as { start: number; end: number };
+      const length = (p: typeof a) => p.timeline.body.end - p.timeline.body.start;
+      // Own spans: s03.sh02 [90, 162) and s04.sh01 [162, 222).
+      expect(length(a) + (seg.end - seg.start) + length(b)).toBe(222 - 90);
+      expect(a.timeline.start + a.timeline.body.end).toBe(seg.start);
+      expect(b.timeline.start + b.timeline.body.start).toBe(seg.end);
+    });
+  }
+
+  it("puts the body range in the render key (audit G1)", async () => {
+    const renderer = { image: "sha256:1", hyperframes: "0.9.58", settings: {} };
+    const key = async (d: number) => {
+      const store = await reference(segmentOps("cross_dissolve", d));
+      return shotRenderKey(
+        {
+          ir: store.ir(),
+          shotId: "s04.sh01",
+          deliverableId: "web_landscape",
+          pack: pack("neutral"),
+          catalog: catalog(),
+          timing: timing(),
+        },
+        renderer,
+      );
+    };
+    // h = 6 for both, so the compiled span is the same; only the body differs (12 versus 13).
+    const [p12, p13] = [
+      await plan("s04.sh01", "cross_dissolve", 12),
+      await plan("s04.sh01", "cross_dissolve", 13),
+    ];
+    expect(p12.timeline.before).toBe(p13.timeline.before);
+    expect(p12.frames).toBe(p13.frames);
+    expect(await key(12)).not.toBe(await key(13));
+  });
+
   it("compiles a cut with no overlap", async () => {
     const p = await plan("s03.sh02", "cut");
-    expect(p.timeline).toEqual({ start: 90, before: 0, after: 0 });
+    expect(p.timeline).toEqual({ start: 90, before: 0, after: 0, body: { start: 0, end: 72 } });
     expect(p.segments).toEqual({});
   });
 

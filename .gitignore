@@ -35,6 +35,6 @@ out/
 .idea/
 .vscode/
 *.swp
-# Duplicates that iCloud or Finder create on sync conflicts ("name 2", "name 2.ext")
-* 2
-* 2.*
+# Duplicates that iCloud or Finder create on sync conflicts ("name 2", "name 3.ext", …)
+* [0-9]
+* [0-9].*

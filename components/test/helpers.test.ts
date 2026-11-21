@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { breakCaption, cueTimes } from "../src/caption_track/lines.js";
+import { breakCaption, displayCues } from "../src/caption_track/lines.js";
 import { staggerStarts } from "../src/motion/stagger.js";
 
 describe("staggerStarts", () => {
@@ -30,9 +30,28 @@ describe("breakCaption", () => {
   });
 });
 
-describe("cueTimes", () => {
+describe("displayCues", () => {
   it("extends a cue shorter than the minimum display time", () => {
-    expect(cueTimes({ text: "Hi", start: 10, end: 12 }, 30)).toEqual({ start: 10, end: 40 });
-    expect(cueTimes({ text: "Hi", start: 10, end: 90 }, 30)).toEqual({ start: 10, end: 90 });
+    expect(displayCues([{ text: "Hi", start: 10, end: 12 }], 30)).toEqual([
+      { text: "Hi", start: 10, end: 40 },
+    ]);
+    expect(displayCues([{ text: "Hi", start: 10, end: 90 }], 30)).toEqual([
+      { text: "Hi", start: 10, end: 90 },
+    ]);
+  });
+
+  it("never holds a cue past the next one's start (audit G3)", () => {
+    expect(
+      displayCues(
+        [
+          { text: "B", start: 20, end: 60 },
+          { text: "A", start: 0, end: 5 },
+        ],
+        30,
+      ),
+    ).toEqual([
+      { text: "A", start: 0, end: 20 },
+      { text: "B", start: 20, end: 60 },
+    ]);
   });
 });
