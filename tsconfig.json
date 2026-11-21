@@ -27,6 +27,9 @@
     },
     {
       "path": "plugins/audio-ffmpeg"
+    },
+    {
+      "path": "plugins/export-captions"
     }
   ]
 }
