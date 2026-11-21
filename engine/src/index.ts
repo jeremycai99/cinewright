@@ -1,4 +1,11 @@
 export type { PluginResponse } from "@cinewright/plugin-sdk";
+export {
+  type Cassette,
+  type CassetteMode,
+  cassetteOptions,
+  requestHash,
+  withCassettes,
+} from "./agents/cassette.js";
 export { WavError, type WavInfo, wavInfo } from "./audio/wav.js";
 export {
   CritiqueError,

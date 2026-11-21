@@ -1,0 +1,11 @@
+{
+  "tiers": { "frontier": "claude-opus-5-5", "mid": "claude-sonnet-5-5" },
+  "pins": { "critic-2026-11": "claude-opus-5-5" },
+  "default_effort": "medium",
+  "fallbacks": { "beta": "server-side-fallback-2026-07-01", "mode": "default" },
+  "prices_usd_per_mtok": {
+    "claude-opus-5-5": { "input": 4, "output": 20, "cache_read": 0.2 },
+    "claude-sonnet-5-5": { "input": 2, "output": 10, "cache_read": 0.1 }
+  },
+  "estimate": { "chars_per_token": 3, "tokens_per_image": 1600 }
+}

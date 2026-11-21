@@ -9,7 +9,7 @@
   "scripts": {
     "lint": "biome ci .",
     "format": "biome format --write .",
-    "typecheck": "tsc -b && tsc -p core/test/tsconfig.json && tsc -p packs/tsconfig.json && tsc -p components/test/tsconfig.json && tsc -p plugins/backend-hyperframes/test/tsconfig.json && tsc -p engine/test/tsconfig.json && tsc -p plugins/library-audio/test/tsconfig.json && tsc -p plugins/audio-ffmpeg/test/tsconfig.json && tsc -p plugins/export-mp4/test/tsconfig.json && tsc -p plugins/export-captions/test/tsconfig.json && tsc -p plugins/critic-layout/test/tsconfig.json && tsc -p plugins/critic-media/test/tsconfig.json && tsc -p plugins/critic-script/test/tsconfig.json",
+    "typecheck": "tsc -b && tsc -p core/test/tsconfig.json && tsc -p packs/tsconfig.json && tsc -p components/test/tsconfig.json && tsc -p plugins/backend-hyperframes/test/tsconfig.json && tsc -p engine/test/tsconfig.json && tsc -p plugins/library-audio/test/tsconfig.json && tsc -p plugins/audio-ffmpeg/test/tsconfig.json && tsc -p plugins/export-mp4/test/tsconfig.json && tsc -p plugins/export-captions/test/tsconfig.json && tsc -p plugins/critic-layout/test/tsconfig.json && tsc -p plugins/critic-media/test/tsconfig.json && tsc -p plugins/critic-script/test/tsconfig.json && tsc -p plugins/llm-anthropic/test/tsconfig.json",
     "test": "pnpm -r --if-present test",
     "gen:types": "pnpm --filter @cinewright/core gen:types",
     "gen:check": "pnpm --filter @cinewright/core gen:check"

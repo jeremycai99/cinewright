@@ -1,0 +1,14 @@
+{
+  "schema_version": 1,
+  "id": "stub_llm",
+  "version": "0.1.0",
+  "kind": "llm",
+  "capabilities": ["llm.generate", "llm.estimate"],
+  "cost_model": { "unit": "free" },
+  "latency_class": "interactive",
+  "output_license": { "terms": "Apache-2.0", "commercial_use": true },
+  "secrets": [],
+  "runtime": { "kind": "in_process", "entry": "index.ts" },
+  "concurrency": { "max_parallel": 4 },
+  "rate_limits": []
+}

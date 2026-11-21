@@ -155,6 +155,31 @@ describe("intake (M7.1b, P0)", () => {
     expect(run(store, { ...INSTALLED, llm: [] }, "manual")).toEqual([]);
   });
 
+  it("counts a paid model only when its secrets are set (D29)", async () => {
+    const store = await project([NARRATOR, LINES]);
+    const paid = {
+      dir: "/plugins/llm_paid",
+      manifest: {
+        id: "llm_paid",
+        kind: "llm",
+        version: "0.1.0",
+        capabilities: ["llm.generate"],
+        cost_model: { unit: "token" },
+        secrets: ["LLM_KEY"],
+      },
+    } as unknown as FoundPlugin;
+    const rules = (env: Record<string, string>) =>
+      intake(
+        store.ir(),
+        loadTemplate("explainer"),
+        loadPreset("guided"),
+        { ...INSTALLED, llm: [paid] },
+        env,
+      ).map((f) => f.rule);
+    expect(rules({})).toContain("intake.no_provider");
+    expect(rules({ LLM_KEY: "k" })).toEqual([]);
+  });
+
   it("needs a deliverable", async () => {
     const store = await project([]);
     const ir = store.ir();

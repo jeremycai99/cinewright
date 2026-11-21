@@ -111,6 +111,53 @@ def test_the_repository_has_no_plugin_imports() -> None:
     assert [v for v in find_violations(repo) if v.rule == "plugin-import"] == []
 
 
+MODEL = "claude-" + "opus-5-5"  # split, so this test file is not itself a violation
+VENDOR = "@anthropic" + "-ai/sdk"
+
+
+def test_flags_model_ids_and_vendor_sdk_outside_the_llm_plugin(tmp_path: Path) -> None:
+    write(tmp_path, "engine/src/agent.ts", f'export const M = "{MODEL}";\n')
+    write(tmp_path, "engine/src/client.ts", f'import Anthropic from "{VENDOR}";\n')
+    write(tmp_path, "core/src/lazy.ts", f'const m = await import("{VENDOR}/resources");\n')
+    write(tmp_path, "agents/roles/writer/role.json", f'{{"model": "{MODEL}"}}\n')
+    write(tmp_path, "tools/src/x.py", f'MODEL = "{MODEL}"\nimport anthropic\n')
+    found = sorted((v.path, v.rule) for v in find_violations(tmp_path))
+    assert found == [
+        ("agents/roles/writer/role.json", "model-id"),
+        ("core/src/lazy.ts", "vendor-sdk"),
+        ("engine/src/agent.ts", "model-id"),
+        ("engine/src/client.ts", "vendor-sdk"),
+        ("tools/src/x.py", "model-id"),
+        ("tools/src/x.py", "vendor-sdk"),
+    ]
+
+
+def test_allows_them_in_the_llm_plugin_docs_comments_and_locks(tmp_path: Path) -> None:
+    write(
+        tmp_path,
+        "plugins/llm-anthropic/src/plugin.ts",
+        f'import A from "{VENDOR}";\nconst m = "{MODEL}";\n',
+    )
+    write(
+        tmp_path, "plugins/llm-anthropic/settings.json", f'{{"tiers": {{"frontier": "{MODEL}"}}}}\n'
+    )
+    write(tmp_path, "docs/plans/m7.md", f"The frontier tier is {MODEL}.\n")
+    write(tmp_path, "engine/src/note.ts", f"// the plugin maps tiers to {MODEL}\nexport {{}};\n")
+    write(tmp_path, "pnpm-lock.yaml", f"  {VENDOR}:\n")
+    write(
+        tmp_path,
+        "plugins/llm-anthropic/package.json",
+        f'{{"dependencies": {{"{VENDOR}": "1.0.0"}}}}\n',
+    )
+    assert find_violations(tmp_path) == []
+
+
+def test_the_repository_names_no_model_outside_the_llm_plugin() -> None:
+    root = Path(__file__).resolve().parents[2]
+    bad = [v for v in find_violations(root) if v.rule in ("model-id", "vendor-sdk")]
+    assert bad == []
+
+
 def test_gpl_modules_stay_in_the_kokoro_plugin(tmp_path: Path) -> None:
     write(tmp_path, "plugins/stt-whisperx/src/a.py", "from misaki import en\nimport kokoro\n")
     write(tmp_path, "plugins/tts-kokoro/src/b.py", "from kokoro import KPipeline\n")

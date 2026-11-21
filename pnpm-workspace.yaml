@@ -11,6 +11,7 @@ packages:
   - plugins/critic-layout
   - plugins/critic-media
   - plugins/critic-script
+  - plugins/llm-anthropic
   - container/render-runner
   - packs
   - components

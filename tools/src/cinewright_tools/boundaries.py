@@ -15,6 +15,13 @@ Four rules:
   package (any ``@cinewright/*`` package whose folder is under ``plugins/``, except the plugin
   SDK), or code under ``engine/`` outside its tests imports one statically (invariant 5,
   M5.4a). Plugins are reached through the engine's registry, by manifest.
+- ``model-id``: a string literal in Python, TypeScript or JavaScript, or a JSON file, names a
+  model (``claude-<family>-<version>``, ``gpt-<n>``, ``gemini-<n>``) outside
+  ``plugins/llm-anthropic/`` (invariants 5 and 11, audit F16). Core and engine name tiers only.
+- ``vendor-sdk``: code or a JSON manifest outside ``plugins/llm-anthropic/`` imports or depends
+  on a vendor LLM SDK (``@anthropic-ai/*``, Python ``anthropic``).
+
+Docs, plans and comments are never scanned; lock files are not source.
 A Python file that cannot be read or parsed is reported as ``unparseable``.
 
 Known limitation: the TS/JS scanner does not recognise regular-expression literals, so a
@@ -37,6 +44,13 @@ from pathlib import Path
 
 PY_SUFFIXES = {".py"}
 JS_SUFFIXES = {".ts", ".tsx", ".js", ".mjs", ".cjs"}
+JSON_SUFFIXES = {".json"}
+LLM_PLUGIN_PREFIX = "plugins/llm-anthropic/"
+MODEL_RE = re.compile(
+    r"\b(claude-(?:opus|sonnet|haiku|fable|mythos)(?:-[0-9]+)+|gpt-[0-9][\w.-]*|gemini-[0-9][\w.-]*)\b"
+)
+VENDOR_JS = "@anthropic-ai/"
+VENDOR_PY = "anthropic"
 SKIP_DIR_NAMES = {"node_modules", ".venv", "dist", ".git"}
 SKIP_PREFIXES = ("fixtures/", "tools/tests/fixtures/")
 BLENDER_PREFIX = "plugins/backend-blender/"
@@ -54,7 +68,9 @@ STRING_TOKEN_TYPES = {
 class Violation:
     path: str  # repo-relative, POSIX separators
     line: int
-    rule: str  # "bpy-outside-blender" | "personal-fixture-reference" | "unparseable"
+    # "bpy-outside-blender" | "personal-fixture-reference" | "plugin-import" | "model-id"
+    # | "vendor-sdk" | "unparseable"
+    rule: str
     detail: str
 
 
@@ -64,7 +80,9 @@ def find_violations(repo_root: Path) -> list[Violation]:
     plugins = plugin_packages(repo_root)
     for path in _source_files(repo_root):
         rel = path.relative_to(repo_root).as_posix()
-        if path.suffix in PY_SUFFIXES:
+        if path.suffix in JSON_SUFFIXES:
+            found.extend(_check_json(path, rel))
+        elif path.suffix in PY_SUFFIXES:
             found.extend(_check_python(path, rel))
         else:
             found.extend(_check_js(path, rel))
@@ -98,7 +116,7 @@ def _source_files(repo_root: Path) -> Iterator[Path]:
         )
         for name in sorted(filenames):
             path = here / name
-            if path.suffix in PY_SUFFIXES or path.suffix in JS_SUFFIXES:
+            if path.suffix in PY_SUFFIXES | JS_SUFFIXES | JSON_SUFFIXES:
                 yield path
 
 
@@ -123,10 +141,32 @@ def _check_python(path: Path, rel: str) -> list[Violation]:
         tokens = list(tokenize.generate_tokens(io.StringIO(source).readline))
     except (tokenize.TokenError, SyntaxError) as exc:
         return [Violation(rel, 1, "unparseable", f"{type(exc).__name__}: {exc}")]
+    in_plugin = rel.startswith(LLM_PLUGIN_PREFIX)
     for tok in tokens:
-        if tok.type in STRING_TOKEN_TYPES and PERSONAL_RE.search(tok.string):
+        if tok.type not in STRING_TOKEN_TYPES:
+            continue
+        if PERSONAL_RE.search(tok.string):
             found.append(_personal(rel, tok.start[0], tok.string))
+        model = None if in_plugin else MODEL_RE.search(tok.string)
+        if model:
+            found.append(_model(rel, tok.start[0], model.group(1)))
+    if not in_plugin:
+        found.extend(_vendor_imports(tree, rel))
     return found
+
+
+def _vendor_imports(tree: ast.AST, rel: str) -> Iterator[Violation]:
+    for node in ast.walk(tree):
+        if isinstance(node, ast.Import):
+            names = [alias.name for alias in node.names]
+        elif isinstance(node, ast.ImportFrom) and node.module and node.level == 0:
+            names = [node.module]
+        else:
+            continue
+        for name in names:
+            if name == VENDOR_PY or name.startswith(f"{VENDOR_PY}."):
+                detail = f"imports {name}; only {LLM_PLUGIN_PREFIX} may"
+                yield Violation(rel, node.lineno, "vendor-sdk", detail)
 
 
 def _bpy_imports(tree: ast.AST, rel: str) -> Iterator[Violation]:
@@ -218,11 +258,54 @@ def _check_js(path: Path, rel: str) -> list[Violation]:
         source = path.read_text(encoding="utf-8")
     except (UnicodeDecodeError, ValueError) as exc:
         return [Violation(rel, 1, "unparseable", f"{type(exc).__name__}: {exc}")]
-    return [
-        _personal(rel, line, text)
-        for line, text in _js_string_literals(source)
-        if PERSONAL_RE.search(text)
-    ]
+    found: list[Violation] = []
+    in_plugin = rel.startswith(LLM_PLUGIN_PREFIX)
+    for line, text in _js_string_literals(source):
+        if PERSONAL_RE.search(text):
+            found.append(_personal(rel, line, text))
+        if in_plugin:
+            continue
+        if text.startswith(VENDOR_JS):
+            found.append(
+                Violation(rel, line, "vendor-sdk", f"imports {text}; only {LLM_PLUGIN_PREFIX} may")
+            )
+        model = MODEL_RE.search(text)
+        if model:
+            found.append(_model(rel, line, model.group(1)))
+    return found
+
+
+def _check_json(path: Path, rel: str) -> list[Violation]:
+    if rel.startswith(LLM_PLUGIN_PREFIX):
+        return []
+    try:
+        lines = path.read_text(encoding="utf-8").splitlines()
+    except (UnicodeDecodeError, ValueError) as exc:
+        return [Violation(rel, 1, "unparseable", f"{type(exc).__name__}: {exc}")]
+    found: list[Violation] = []
+    for number, text in enumerate(lines, start=1):
+        if f'"{VENDOR_JS}' in text:
+            found.append(
+                Violation(
+                    rel,
+                    number,
+                    "vendor-sdk",
+                    f"depends on a vendor SDK; only {LLM_PLUGIN_PREFIX} may",
+                )
+            )
+        model = MODEL_RE.search(text)
+        if model:
+            found.append(_model(rel, number, model.group(1)))
+    return found
+
+
+def _model(rel: str, line: int, name: str) -> Violation:
+    return Violation(
+        rel,
+        line,
+        "model-id",
+        f"names model {name}; name a tier, and map it in {LLM_PLUGIN_PREFIX}settings.json",
+    )
 
 
 def _js_string_literals(source: str) -> Iterator[tuple[int, str]]:
