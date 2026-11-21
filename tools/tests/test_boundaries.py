@@ -156,3 +156,13 @@ def test_the_repository_names_no_model_outside_the_llm_plugin() -> None:
     root = Path(__file__).resolve().parents[2]
     bad = [v for v in find_violations(root) if v.rule in ("model-id", "vendor-sdk")]
     assert bad == []
+
+
+def test_gpl_modules_stay_in_the_kokoro_plugin(tmp_path: Path) -> None:
+    write(tmp_path, "plugins/stt-whisperx/src/a.py", "from misaki import en\nimport kokoro\n")
+    write(tmp_path, "plugins/tts-kokoro/src/b.py", "from kokoro import KPipeline\n")
+    write(tmp_path, "container/audio/audio_job/c.py", "import phonemizer\n")
+    assert [(v.path, v.line, v.rule) for v in find_violations(tmp_path)] == [
+        ("plugins/stt-whisperx/src/a.py", 1, "gpl-import"),
+        ("plugins/stt-whisperx/src/a.py", 2, "gpl-import"),
+    ]
