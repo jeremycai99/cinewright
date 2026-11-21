@@ -176,6 +176,8 @@ Detailed task plan (approved 2026-11-17): `docs/plans/m4-audio.md`, revised afte
 
 ### M5 — Assembly and delivery
 
+Detailed task plan (approved 2026-11-20): `docs/plans/m5-assembly-delivery.md`.
+
 - **M5.1 Assembly**: concatenate shot bodies and transition segments (same encoder settings, closed GOPs, concat demuxer, no re-encode, bitexact muxing), mux audio.
 - **M5.2 Captions**: SRT/VTT sidecars from line timestamps, always; burn-in comes from M3.4.
 - **M5.3 Delivery profiles v0**: two data-file profiles, e.g. "landscape web" and "vertical social" (frame rate, sample rate, safe zones, max duration, codec/bitrate, loudness and true-peak targets, caption rules).
@@ -183,6 +185,10 @@ Detailed task plan (approved 2026-11-17): `docs/plans/m4-audio.md`, revised afte
   - AC: a one-shot revision re-renders only that shot and its adjacent transition segments, and re-assembles without re-encoding the others.
 
 ### M6 — Critics and fix loop
+
+Detailed task plan for M6.1 (approved 2026-11-20): `docs/plans/m6-1-deterministic-critics.md`.
+
+Detailed task plan for M6.2–M6.3 (approved 2026-11-20): `docs/plans/m6-2-3-vision-fix-loop.md`.
 
 M6.1 belongs to the alpha gate. M6.2 and M6.3 need the LLM provider, agent runner and agents (M7.3–M7.5) and land after them.
 
@@ -194,9 +200,13 @@ M6.1 belongs to the alpha gate. M6.2 and M6.3 need the LLM provider, agent runne
 
 ### v0.1-alpha gate — walking skeleton, no agents
 
+Detailed task plan (approved 2026-11-20): `docs/plans/alpha-gate.md`.
+
 Needs M0–M5 and M6.1. An IR fixture written through `cinewright patch` (one explainer, both aspect ratios, both packs) goes through `cinewright render` to a narrated, mixed, captioned MP4 that passes every deterministic check, and a one-shot edit re-renders only that shot. These fixtures become the first tier A benchmark entries. Agent work (M7) starts after this gate.
 
 ### M7 — Engine and agents
+
+Detailed task plan (approved 2026-11-20): `docs/plans/m7-engine-agents.md`.
 
 Implements §Multi-agent orchestration (D5, D9, D37).
 
@@ -211,6 +221,8 @@ Implements §Multi-agent orchestration (D5, D9, D37).
 
 ### M8 — CLI and benchmark v0
 
+Detailed task plan (approved 2026-11-20): `docs/plans/m8-cli-benchmark.md`.
+
 - **M8.1 CLI**: `cinewright init | patch | show | plan | render | review | export | status | tasks | log` (`init`, `patch` and `show` from M1; a first `render` from M5.4), non-interactive flags and JSON output for CI.
 - **M8.2 Benchmark v0** in `fixtures/benchmark/` (D36). Tier A: frozen IR and assets, starting from the alpha-gate fixtures and growing with snapshots of good tier B runs. Tier B: at least 8 neutral briefs covering explainer and ad × 15/30/60 s × 16:9/9:16, with at least 2 briefs requesting both aspect ratios, spanning different subjects and tones and split across both packs. No personal briefs. This is the v0.1 subset; the suite grows to the full coverage in AGENTS.md §4.1 by v1.0.
 - **M8.3 Eval harness**: tier A on every PR (no paid APIs, safe for forks); tier B nightly and on maintainer trigger, 3 runs per brief, budget-capped. Reports per-brief deterministic pass rate, rubric mean and variance, cost and latency, stored per commit with the critic model and rubric version.
@@ -218,6 +230,8 @@ Implements §Multi-agent orchestration (D5, D9, D37).
   - AC: the exit gate above passes.
 
 ## Revised task breakdown and order (audit, 2026-11-16)
+
+Overview from 2026-11-20 to the v0.1 exit and on to v1.0 (approved 2026-11-20): `docs/plans/completion-roadmap.md`.
 
 The 2026-11-16 audit (`docs/plans/roadmap-audit-2026-11-16.md`, §4) refined the milestones above into PR-sized tasks, added tasks for gaps it found, and moved some work earlier. Where it differs from a milestone's text above, this section wins; each milestone still gets its own detailed plan and approval before its first PR. New tasks are marked *new*.
 
