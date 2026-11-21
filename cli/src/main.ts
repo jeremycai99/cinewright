@@ -13,6 +13,7 @@ import { MIX_USAGE, mix } from "./commands/mix.js";
 import { NARRATE_USAGE, narrate } from "./commands/narrate.js";
 import { PACK_USAGE, pack } from "./commands/pack.js";
 import { PATCH_USAGE, patch } from "./commands/patch.js";
+import { RENDER_USAGE, render } from "./commands/render.js";
 import { SCHEMA_USAGE, schema } from "./commands/schema.js";
 import { SHOW_USAGE, show } from "./commands/show.js";
 import { STATUS_USAGE, status } from "./commands/status.js";
@@ -35,6 +36,7 @@ const COMMANDS: Record<string, (argv: string[], io: Io) => Promise<number>> = {
   timing,
   compose,
   mix,
+  render,
 };
 const USAGE = [
   `cinewright ${VERSION}`,
@@ -52,6 +54,7 @@ const USAGE = [
   TIMING_USAGE,
   COMPOSE_USAGE,
   MIX_USAGE,
+  RENDER_USAGE,
 ].join("\n");
 
 /** Run one CLI invocation and return its exit code (cli/README.md). */

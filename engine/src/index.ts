@@ -15,6 +15,22 @@ export {
   type TakeRef,
 } from "./jobs/narration.js";
 export { TranscribeError, type TranscribeOptions, transcribeTake } from "./jobs/transcribe.js";
+export { manifestFor } from "./pipeline/manifest.js";
+export {
+  type PlannedStep,
+  planRender,
+  STAGES,
+  type Stage,
+  type StepKind,
+} from "./pipeline/plan.js";
+export {
+  type DeliverableReport,
+  PipelineError,
+  type RenderOptions,
+  type RenderReport,
+  runRender,
+  type StepRecord,
+} from "./pipeline/run.js";
 export { backendFor } from "./plugins/backend.js";
 export { callOnce, PluginChoiceError, pluginWith } from "./plugins/call.js";
 export { PluginCallError, PluginPool } from "./plugins/pool.js";
