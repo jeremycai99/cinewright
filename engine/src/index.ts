@@ -45,5 +45,20 @@ export { callOnce, PluginChoiceError, pluginWith } from "./plugins/call.js";
 export { PluginCallError, PluginPool } from "./plugins/pool.js";
 export { type FoundPlugin, findPlugins, PluginRegistryError } from "./plugins/registry.js";
 export { RouteError, type RouteOptions, route } from "./plugins/route.js";
+export { runWorkflow, type WorkflowOptions } from "./run.js";
+export { EventLog, type RunEvent, secretValues } from "./runtime/events.js";
+export { type LedgerLine, RunLedger } from "./runtime/ledger.js";
+export { LoopRuntime } from "./runtime/loop.js";
+export { validateEvent, validateLedgerLine, validateTask } from "./runtime/schemas.js";
+export type {
+  PauseKind,
+  RunContext,
+  RunOutcome,
+  Task,
+  TaskError,
+  TaskKind,
+  TaskResult,
+  WorkflowRuntime,
+} from "./runtime/types.js";
 
 export const VERSION = "0.0.0";

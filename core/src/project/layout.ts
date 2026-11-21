@@ -8,6 +8,11 @@ export const DECISION_LOG = "log/decisions.jsonl";
 export const CACHE_DIR = ".cinewright";
 export const CAS_DIR = ".cinewright/cas";
 export const RUNS_DIR = ".cinewright/runs";
+
+/** A workflow run's disposable state: its ledger, event log and gate packets (M7.1a). */
+export function runDir(projectDir: string, runId: string): string {
+  return `${projectDir}/${RUNS_DIR}/${runId}`;
+}
 export const TXN_DIR = ".cinewright/txn";
 /** Disposable shot renders, one folder per render key (M3.2a); deleting it only costs time. */
 export const RENDER_CACHE_DIR = ".cinewright/cache/renders";

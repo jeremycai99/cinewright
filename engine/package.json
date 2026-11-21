@@ -10,13 +10,15 @@
     }
   },
   "files": [
-    "dist"
+    "dist",
+    "schema"
   ],
   "scripts": {
     "test": "vitest run"
   },
   "dependencies": {
     "@cinewright/core": "workspace:*",
-    "@cinewright/plugin-sdk": "workspace:*"
+    "@cinewright/plugin-sdk": "workspace:*",
+    "ajv": "8.20.0"
   }
 }
