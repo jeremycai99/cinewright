@@ -1,0 +1,17 @@
+{
+  "schema_version": 1,
+  "id": "audio_ffmpeg",
+  "version": "0.1.0",
+  "kind": "backend",
+  "capabilities": ["mix.render"],
+  "cost_model": { "unit": "free" },
+  "latency_class": "batch",
+  "output_license": {
+    "terms": "The mix carries the licences of the takes, music and effects it uses",
+    "commercial_use": true
+  },
+  "secrets": [],
+  "runtime": { "kind": "in_process", "entry": "./dist/index.js" },
+  "concurrency": { "max_parallel": 1 },
+  "rate_limits": []
+}

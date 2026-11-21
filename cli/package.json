@@ -19,6 +19,7 @@
     "test": "vitest run"
   },
   "dependencies": {
+    "@cinewright/audio-ffmpeg": "workspace:*",
     "@cinewright/backend-hyperframes": "workspace:*",
     "@cinewright/components": "workspace:*",
     "@cinewright/core": "workspace:*",

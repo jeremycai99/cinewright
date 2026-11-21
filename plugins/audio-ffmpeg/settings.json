@@ -1,5 +1,5 @@
 {
-  "$comment": "Mixer FFmpeg settings from the M4.0b spike (container/audio/README.md §Determinism). Task 11 (M4.4) builds plugins/audio-ffmpeg around them. These produced one PCM hash and one MP4 hash on an Intel and an AMD CI runner and an emulated Apple Silicon host, so no -cpuflags restriction is set.",
+  "$comment": "Mixer FFmpeg settings from the M4.0b spike (container/audio/README.md §Determinism). plugins/audio-ffmpeg (M4.4) implements them in src/graph.ts and src/render.ts. These produced one PCM hash and one MP4 hash on an Intel and an AMD CI runner and an emulated Apple Silicon host, so no -cpuflags restriction is set.",
   "image": "render",
   "internal_format": "float64 for gain envelopes (aeval), float32 between stages",
   "resampler": "aresample with FFmpeg's default swr resampler",
