@@ -7,9 +7,17 @@
   "additionalProperties": false,
   "required": ["id", "version", "phases"],
   "properties": {
-    "id": { "type": "string", "pattern": "^[a-z][a-z0-9_]*$" },
-    "version": { "type": "string", "minLength": 1 },
-    "description": { "type": "string" },
+    "id": {
+      "type": "string",
+      "pattern": "^[a-z][a-z0-9_]*$"
+    },
+    "version": {
+      "type": "string",
+      "minLength": 1
+    },
+    "description": {
+      "type": "string"
+    },
     "phases": {
       "type": "array",
       "minItems": 1,
@@ -18,10 +26,19 @@
         "additionalProperties": false,
         "required": ["id", "kind", "needs"],
         "properties": {
-          "id": { "type": "string", "pattern": "^[A-Za-z0-9_]+$" },
-          "kind": { "enum": ["agent", "jobs", "gate"] },
-          "role": { "enum": ["producer", "writer", "director", "shot_builder", "editor"] },
-          "gate": { "enum": ["script", "storyboard", "final"] },
+          "id": {
+            "type": "string",
+            "pattern": "^[A-Za-z0-9_]+$"
+          },
+          "kind": {
+            "enum": ["agent", "jobs", "gate"]
+          },
+          "role": {
+            "enum": ["producer", "writer", "director", "shot_builder", "editor"]
+          },
+          "gate": {
+            "enum": ["script", "storyboard", "final"]
+          },
           "steps": {
             "type": "array",
             "items": {
@@ -38,12 +55,48 @@
               ]
             }
           },
-          "per": { "enum": ["project", "sequence", "scene", "shot", "line"] },
-          "requires": { "type": "array", "items": { "$ref": "#/$defs/pattern" } },
-          "reads": { "type": "array", "items": { "$ref": "#/$defs/pattern" } },
-          "locks": { "type": "array", "items": { "$ref": "#/$defs/pattern" } },
-          "paid": { "type": "boolean" },
-          "needs": { "type": "array", "items": { "type": "string" } }
+          "per": {
+            "enum": ["project", "sequence", "scene", "shot", "line"]
+          },
+          "requires": {
+            "type": "array",
+            "items": {
+              "$ref": "#/$defs/pattern"
+            }
+          },
+          "reads": {
+            "type": "array",
+            "items": {
+              "$ref": "#/$defs/pattern"
+            }
+          },
+          "locks": {
+            "description": "Field patterns a gate locks on approval; `*` is every filled field (G3).",
+            "type": "array",
+            "items": {
+              "anyOf": [
+                {
+                  "$ref": "#/$defs/pattern"
+                },
+                {
+                  "const": "*"
+                }
+              ]
+            }
+          },
+          "paid": {
+            "type": "boolean"
+          },
+          "needs": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "owner": {
+            "description": "The role a gate's rejection note goes to.",
+            "enum": ["producer", "writer", "director", "shot_builder", "editor"]
+          }
         }
       }
     }

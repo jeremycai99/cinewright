@@ -27,8 +27,9 @@
       "id": "G1",
       "kind": "gate",
       "gate": "script",
-      "locks": ["script.beats"],
-      "needs": ["P2"]
+      "locks": ["script.beats", "beat.lines", "line.text"],
+      "needs": ["P2"],
+      "owner": "writer"
     },
     {
       "id": "P3",
@@ -85,8 +86,17 @@
       "id": "G2",
       "kind": "gate",
       "gate": "storyboard",
-      "locks": ["project.sequences", "scene.shots", "scene.transition_out"],
-      "needs": ["P7"]
+      "locks": [
+        "project.sequences",
+        "sequence.scenes",
+        "scene.shots",
+        "scene.transition_out",
+        "shot.type",
+        "shot.layout",
+        "layer.component"
+      ],
+      "needs": ["P7"],
+      "owner": "director"
     },
     {
       "id": "P8",
@@ -116,8 +126,9 @@
       "id": "G3",
       "kind": "gate",
       "gate": "final",
-      "locks": ["project.sequences", "script.beats"],
-      "needs": ["P10"]
+      "locks": ["*"],
+      "needs": ["P10"],
+      "owner": "director"
     }
   ]
 }

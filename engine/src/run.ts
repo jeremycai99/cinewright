@@ -1,6 +1,7 @@
 import { existsSync, readdirSync, readFileSync, writeFileSync } from "node:fs";
 import { join } from "node:path";
 import { RUNS_DIR, runDir, type Store, sha256Hash, stateHash } from "@cinewright/core";
+import { approveGate, type GateName, gatePassed } from "./gates/decide.js";
 import { intake } from "./intake.js";
 import { planRender, type Stage, type StepKind } from "./pipeline/plan.js";
 import { PipelineError, type RenderOptions, type RenderReport, runRender } from "./pipeline/run.js";
@@ -13,7 +14,6 @@ import {
 } from "./reconcile/data.js";
 import { recordedKeys } from "./reconcile/inputs.js";
 import { reconcile } from "./reconcile/reconcile.js";
-import { entities, splitPattern, wrapper } from "./reconcile/requirements.js";
 import { EventLog, type RunEvent, secretValues } from "./runtime/events.js";
 import { RunLedger } from "./runtime/ledger.js";
 import { LoopRuntime } from "./runtime/loop.js";
@@ -128,21 +128,10 @@ function jobExecutor(options: WorkflowOptions): TaskExecutor {
   };
 }
 
-/** Every field a gate names, as `[entity, field]`, with its state. */
-function gateFields(store: Store, phase: TemplatePhase) {
-  const all = entities(store.ir());
-  return (phase.locks ?? []).flatMap((p) => {
-    const [kind, field] = splitPattern(p);
-    return all
-      .filter((e) => e.kind === kind && wrapper(e, field) !== undefined)
-      .map((e) => ({ entity: e.id, field, state: wrapper(e, field)?.state }));
-  });
-}
-
 /**
- * A gate is passed when every field it names is locked (gates are IR state). Approving the final
- * gate with `approveFinal` (tier B) locks them as `gate.final`; the approval command for the other
- * gates arrives in M7.6.
+ * A gate task is done when every field the gate names is locked (gates are IR state). With
+ * `approveFinal` (tier B) the final gate approves itself as `gate.final` with the reason `auto`;
+ * other gates wait for `cinewright review approve` (M7.6).
  */
 async function executeGate(
   store: Store,
@@ -151,18 +140,10 @@ async function executeGate(
   options: WorkflowOptions,
 ): Promise<TaskResult> {
   const phase = template.phases.find((p) => p.id === task.phase) as TemplatePhase;
-  const fields = gateFields(store, phase);
-  if (fields.every((f) => f.state === "locked")) return { status: "noop" };
-  if (phase.gate !== "final" || !options.approveFinal) return { status: "blocked" };
-  const r = await store.apply({
-    base_revision: store.revision(),
-    author: { kind: "job", name: "gate.final" },
-    mode: "apply",
-    reason: "auto: --approve-final",
-    ops: fields
-      .filter((f) => f.state !== "locked")
-      .map((f) => ({ op: "lock", entity: f.entity, path: `/${f.field}` })),
-  } as never);
+  const gate = phase.gate as GateName;
+  if (gatePassed(store, template, gate)) return { status: "noop" };
+  if (gate !== "final" || !options.approveFinal) return { status: "blocked" };
+  const r = await approveGate(store, template, gate, { auto: true });
   if (r.status !== "applied")
     return { status: "failed", error: { code: "gate.approve_failed", message: JSON.stringify(r) } };
   return { status: "done", revision: r.revision };

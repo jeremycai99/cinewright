@@ -36,6 +36,22 @@ export {
   SOLVER_CRITIC,
   TRANSCRIBE_CRITIC,
 } from "./critics/run.js";
+export {
+  approveGate,
+  GateError,
+  type GateName,
+  gatePassed,
+  instructionsFor,
+  rejectGate,
+} from "./gates/decide.js";
+export { type GateField, gateFields } from "./gates/locks.js";
+export { buildPacket, type GatePacket, SPEND_LOG, validatePacket } from "./gates/packet.js";
+export {
+  chooseVariant,
+  requestVariants,
+  type Variant,
+  type VariantMaker,
+} from "./gates/variants.js";
 export { type Installed, intake } from "./intake.js";
 export {
   type AudioRef,
@@ -109,5 +125,7 @@ export {
   type SchedulerOptions,
   SYSTEM_CLOCK,
 } from "./scheduler/scheduler.js";
+
+export { pendingTasks, submitHumanTask } from "./tasks/queue.js";
 
 export const VERSION = "0.0.0";
