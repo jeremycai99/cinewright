@@ -261,7 +261,7 @@
       "description": "render.check (M6.1a): HyperFrames check and text boxes at the shot's keyframes, cached in the render's cache entry as `check/check.json` (file).",
       "type": "object",
       "additionalProperties": false,
-      "required": ["file", "failures", "boxes"],
+      "required": ["file", "failures", "boxes", "hit"],
       "properties": {
         "file": {
           "type": "string",
@@ -310,6 +310,9 @@
               }
             }
           }
+        },
+        "hit": {
+          "type": "boolean"
         }
       }
     }

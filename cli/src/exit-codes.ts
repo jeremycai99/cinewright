@@ -17,6 +17,8 @@ export const EXIT = {
   render: 8,
   /** A provider plugin failed or none was usable; the message names the line or sequence and the provider (M4). */
   provider: 9,
+  /** `cinewright render` finished, and a critic reported an error finding (M6.1a). */
+  findings: 10,
 } as const;
 
 export type ExitCode = (typeof EXIT)[keyof typeof EXIT];

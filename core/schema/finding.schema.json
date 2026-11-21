@@ -5,7 +5,17 @@
   "description": "One finding of a critic (M6.1): derived data, not an IR entity. `entity` and `pointer` are the entity path; `frames` is on the project timeline; `evidence` holds numbers and references, never prose. `signature` is the SHA-256 of the JCS of { rule, entity, pointer, deliverable, key }, where `key` stays the same while the defect persists; `id` is \"f_\" and its first 12 hex digits.",
   "type": "object",
   "additionalProperties": false,
-  "required": ["id", "signature", "rule", "severity", "entity", "message", "data", "critic", "evidence"],
+  "required": [
+    "id",
+    "signature",
+    "rule",
+    "severity",
+    "entity",
+    "message",
+    "data",
+    "critic",
+    "evidence"
+  ],
   "properties": {
     "id": { "type": "string", "pattern": "^f_[0-9a-f]{12}$" },
     "signature": { "type": "string", "pattern": "^sha256:[0-9a-f]{64}$" },

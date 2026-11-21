@@ -13,10 +13,18 @@
       "additionalProperties": false,
       "required": ["x", "y", "width", "height"],
       "properties": {
-        "x": { "type": "number" },
-        "y": { "type": "number" },
-        "width": { "type": "number" },
-        "height": { "type": "number" }
+        "x": {
+          "type": "number"
+        },
+        "y": {
+          "type": "number"
+        },
+        "width": {
+          "type": "number"
+        },
+        "height": {
+          "type": "number"
+        }
       }
     },
     "run_request": {
@@ -24,38 +32,75 @@
       "additionalProperties": false,
       "required": ["project", "deliverable", "timing", "artifacts"],
       "properties": {
-        "project": { "type": "string", "minLength": 1 },
-        "deliverable": { "type": "string", "minLength": 1 },
+        "project": {
+          "type": "string",
+          "minLength": 1
+        },
+        "deliverable": {
+          "type": "string",
+          "minLength": 1
+        },
         "timing": {
           "type": "object",
           "required": ["table", "sequences", "scenes", "shots"],
           "properties": {
-            "table": { "type": "object" },
-            "sequences": { "type": "object" },
-            "scenes": { "type": "object" },
-            "shots": { "type": "object" },
-            "frames": { "type": "integer", "minimum": 0 }
+            "table": {
+              "type": "object"
+            },
+            "sequences": {
+              "type": "object"
+            },
+            "scenes": {
+              "type": "object"
+            },
+            "shots": {
+              "type": "object"
+            },
+            "frames": {
+              "type": "integer",
+              "minimum": 0
+            }
           }
         },
-        "image": { "type": "string", "minLength": 1 },
-        "pack_path": { "type": "array", "items": { "type": "string" } },
+        "image": {
+          "type": "string",
+          "minLength": 1
+        },
+        "pack_path": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
         "artifacts": {
           "type": "object",
           "additionalProperties": false,
           "required": ["renders"],
           "properties": {
-            "assembly": { "type": "string", "minLength": 1 },
+            "assembly": {
+              "type": "string",
+              "minLength": 1
+            },
             "renders": {
               "type": "object",
-              "additionalProperties": { "type": "string", "minLength": 1 }
+              "additionalProperties": {
+                "type": "string",
+                "minLength": 1
+              }
             },
             "captions": {
               "type": "object",
               "additionalProperties": false,
               "required": ["srt", "vtt"],
               "properties": {
-                "srt": { "type": "string", "minLength": 1 },
-                "vtt": { "type": "string", "minLength": 1 }
+                "srt": {
+                  "type": "string",
+                  "minLength": 1
+                },
+                "vtt": {
+                  "type": "string",
+                  "minLength": 1
+                }
               }
             }
           }
@@ -64,7 +109,12 @@
           "type": "object",
           "additionalProperties": false,
           "properties": {
-            "shots": { "type": "array", "items": { "$ref": "#/$defs/id" } }
+            "shots": {
+              "type": "array",
+              "items": {
+                "$ref": "#/$defs/id"
+              }
+            }
           }
         }
       }
@@ -84,45 +134,95 @@
         "evidence"
       ],
       "properties": {
-        "id": { "type": "string", "pattern": "^f_[0-9a-f]{12}$" },
-        "signature": { "type": "string", "pattern": "^sha256:[0-9a-f]{64}$" },
-        "rule": { "type": "string", "pattern": "^[a-z][a-z0-9_]*\\.[a-z][a-z0-9_]*$" },
-        "severity": { "enum": ["error", "warning"] },
-        "entity": { "type": "string", "minLength": 1 },
-        "pointer": { "type": "string" },
-        "message": { "type": "string" },
-        "data": { "type": "object" },
+        "id": {
+          "type": "string",
+          "pattern": "^f_[0-9a-f]{12}$"
+        },
+        "signature": {
+          "type": "string",
+          "pattern": "^sha256:[0-9a-f]{64}$"
+        },
+        "rule": {
+          "type": "string",
+          "pattern": "^[a-z][a-z0-9_]*\\.[a-z][a-z0-9_]*$"
+        },
+        "severity": {
+          "enum": ["error", "warning"]
+        },
+        "entity": {
+          "type": "string",
+          "minLength": 1
+        },
+        "pointer": {
+          "type": "string"
+        },
+        "message": {
+          "type": "string"
+        },
+        "data": {
+          "type": "object"
+        },
         "critic": {
           "type": "object",
           "additionalProperties": false,
           "required": ["id", "version"],
           "properties": {
-            "id": { "type": "string", "minLength": 1 },
-            "version": { "type": "string", "minLength": 1 }
+            "id": {
+              "type": "string",
+              "minLength": 1
+            },
+            "version": {
+              "type": "string",
+              "minLength": 1
+            }
           }
         },
-        "deliverable": { "$ref": "#/$defs/id" },
+        "deliverable": {
+          "$ref": "#/$defs/id"
+        },
         "frames": {
           "type": "object",
           "additionalProperties": false,
           "required": ["start", "end"],
           "properties": {
-            "start": { "type": "integer", "minimum": 0 },
-            "end": { "type": "integer", "minimum": 0 }
+            "start": {
+              "type": "integer",
+              "minimum": 0
+            },
+            "end": {
+              "type": "integer",
+              "minimum": 0
+            }
           }
         },
         "evidence": {
           "type": "object",
           "additionalProperties": false,
           "properties": {
-            "measured": { "type": "number" },
-            "limit": { "type": "number" },
-            "selector": { "type": "string" },
-            "box": { "$ref": "#/$defs/rect" },
-            "region": { "$ref": "#/$defs/rect" },
-            "still": { "type": "string" },
-            "text": { "type": "string" },
-            "code": { "type": "string" }
+            "measured": {
+              "type": "number"
+            },
+            "limit": {
+              "type": "number"
+            },
+            "selector": {
+              "type": "string"
+            },
+            "box": {
+              "$ref": "#/$defs/rect"
+            },
+            "region": {
+              "$ref": "#/$defs/rect"
+            },
+            "still": {
+              "type": "string"
+            },
+            "text": {
+              "type": "string"
+            },
+            "code": {
+              "type": "string"
+            }
           }
         }
       }
@@ -132,8 +232,25 @@
       "additionalProperties": false,
       "required": ["findings", "measured"],
       "properties": {
-        "findings": { "type": "array", "items": { "$ref": "#/$defs/finding" } },
-        "measured": { "type": "object", "additionalProperties": { "type": "number" } }
+        "findings": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/finding"
+          }
+        },
+        "measured": {
+          "type": "object",
+          "additionalProperties": {
+            "type": "number"
+          }
+        },
+        "baseline": {
+          "description": "What the findings depend on besides the plugin version (D36): its settings hash, the HyperFrames version, ...",
+          "type": "object",
+          "additionalProperties": {
+            "type": "string"
+          }
+        }
       }
     }
   }

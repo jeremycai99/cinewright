@@ -6,14 +6,14 @@ import {
   loadPack,
   RULES,
   resolvePackTokens,
-  safeRect,
   Store,
+  safeRect,
   validateCriticFinding,
 } from "@cinewright/core";
 import { criticKind, type GoldenCase, loadPlugin, runConformance } from "@cinewright/plugin-sdk";
 import { describe, expect, it } from "vitest";
 import { packPairFindings } from "../src/contrast.js";
-import { createPlugin } from "../src/index.js";
+import { createPlugin, loadSettings } from "../src/index.js";
 import { box, doc, project, renderDir, request, tempDir } from "./helpers.js";
 
 const PACKS = fileURLToPath(new URL("../../../packs/", import.meta.url));
@@ -246,7 +246,11 @@ describe("the layout critic (M6.1a)", () => {
         request: { id: "g1", method: "critic.run", params },
         expect: {
           ok: true,
-          result: { findings: [], measured: { "layout.samples": 1, "layout.shots": 1 } },
+          result: {
+            findings: [],
+            measured: { "layout.samples": 1, "layout.shots": 1 },
+            baseline: { settings: loadSettings().hash, hyperframes: "0.9.58" },
+          },
         },
       },
       {

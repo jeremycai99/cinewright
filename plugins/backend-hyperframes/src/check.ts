@@ -63,13 +63,17 @@ export async function checkShot(options: {
   rendered: Rendered;
   renderer: RendererInfo;
   limits?: RunLimits;
-}): Promise<{ file: string; doc: CheckDocument }> {
+}): Promise<{ file: string; doc: CheckDocument; hit: boolean }> {
   const { compiled, rendered, renderer } = options;
   const limits = options.limits ?? DEFAULT_LIMITS;
   const dir = join(rendered.dir, "check");
   const file = join(dir, "check.json");
-  const read = () => ({ file, doc: JSON.parse(readFileSync(file, "utf8")) as CheckDocument });
-  if (existsSync(file)) return read();
+  const read = (hit: boolean) => ({
+    file,
+    doc: JSON.parse(readFileSync(file, "utf8")) as CheckDocument,
+    hit,
+  });
+  if (existsSync(file)) return read(true);
 
   const samples = await captureKeyframes({ compiled, rendered, renderer, limits });
   const work = join(rendered.dir, `.tmp-${randomUUID()}`);
@@ -139,7 +143,7 @@ export async function checkShot(options: {
     for (const f of ["failures.json", "check-log.txt"]) rmSync(join(out, f), { force: true });
     writeFileSync(join(out, "check.json"), `${JSON.stringify(doc, null, 2)}\n`);
     commitCacheDir(out, dir);
-    return read();
+    return read(false);
   } finally {
     rmSync(work, { recursive: true, force: true });
   }

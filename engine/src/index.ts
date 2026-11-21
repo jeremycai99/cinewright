@@ -1,6 +1,14 @@
 export type { PluginResponse } from "@cinewright/plugin-sdk";
 export { WavError, type WavInfo, wavInfo } from "./audio/wav.js";
 export {
+  CritiqueError,
+  type CritiqueOptions,
+  type CritiqueReport,
+  critique,
+  REPORTS_DIR,
+  SOLVER_CRITIC,
+} from "./critics/run.js";
+export {
   type AudioRef,
   ComposeError,
   type ComposeOptions,

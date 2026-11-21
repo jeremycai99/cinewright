@@ -31,18 +31,18 @@ export {
   type BackendRendered,
 } from "./kinds/backend.js";
 export {
-  type CriticRunFinding,
-  type CriticRunRequest,
-  type CriticRunResult,
-  criticKind,
-} from "./kinds/critic.js";
-export {
   type KindMethod,
   type KindSpec,
   type SampleSpan,
   validateKindValue,
   type WorkFile,
 } from "./kinds/common.js";
+export {
+  type CriticRunFinding,
+  type CriticRunRequest,
+  type CriticRunResult,
+  criticKind,
+} from "./kinds/critic.js";
 export {
   type AudioResult,
   MUSIC_KIND,

@@ -108,6 +108,7 @@ describe("render.check (M6.1a)", () => {
         { section: "runtime", code: "cinewright.overflow", severity: "warning", message: "m" },
       ],
       boxes: [{ frame: 12, boxes: [] }],
+      hit: false,
     };
     expect(validateKindValue("backend", "check_result", result).ok).toBe(true);
     expect(

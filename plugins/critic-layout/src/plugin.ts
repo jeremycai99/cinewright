@@ -69,7 +69,8 @@ export async function runLayout(
     throw new Invalid((error as Error).message);
   }
   const safe = safeRect(pack, profile);
-  const { settings } = loadSettings();
+  const { settings, hash } = loadSettings();
+  const hyperframes = new Set<string>();
   const timing = p.timing as {
     sequences: Record<string, { start: number }>;
     shots: Record<string, { start: number; end: number }>;
@@ -106,10 +107,12 @@ export async function runLayout(
     };
     findings.push(...failureFindings(doc, ctx), ...geometryFindings(doc, safe, settings, ctx));
     samples += doc.samples.length;
+    hyperframes.add(doc.hyperframes);
   }
   return {
     findings: dedupeFindings(sortCriticFindings(findings)),
     measured: { "layout.samples": samples, "layout.shots": wanted.length },
+    baseline: { settings: hash, hyperframes: [...hyperframes].sort().join(",") },
   };
 }
 

@@ -286,9 +286,10 @@ export function createPlugin(): Plugin {
       const ctx = await context(params);
       const info = await renderer(ctx.p.image);
       return shot(ctx, (params as { shot: string }).shot, async (compiled, rendered) => {
-        const { file, doc } = await checkShot({ compiled, rendered, renderer: info });
+        const { file, doc, hit } = await checkShot({ compiled, rendered, renderer: info });
         return {
           file,
+          hit,
           failures: doc.failures,
           boxes: doc.samples.map((s) => ({ frame: s.frame, boxes: s.boxes })),
         };

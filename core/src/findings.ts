@@ -58,37 +58,36 @@ export type OwnerClass =
  * Every rule a critic may emit (M6.1), with its severity and the owner class that fixes it. A
  * critic that emits a rule not listed here, or with another severity, fails conformance.
  */
-export const RULES: Readonly<
-  Record<string, { severity: "error" | "warning"; owner: OwnerClass }>
-> = {
-  "layout.overflow": { severity: "error", owner: "shot_builder" },
-  "layout.density": { severity: "error", owner: "writer" },
-  "layout.collision": { severity: "error", owner: "shot_builder" },
-  "layout.safe_area": { severity: "error", owner: "shot_builder" },
-  "layout.min_text_size": { severity: "error", owner: "shot_builder" },
-  "layout.check": { severity: "error", owner: "render" },
-  "contrast.text": { severity: "error", owner: "shot_builder" },
-  "contrast.pack_pair": { severity: "error", owner: "human" },
-  "timing.short_hold": { severity: "warning", owner: "editor" },
-  "audio.loudness": { severity: "error", owner: "mixer" },
-  "audio.true_peak": { severity: "error", owner: "mixer" },
-  "audio.silence": { severity: "warning", owner: "editor" },
-  "audio.clipping": { severity: "error", owner: "mixer" },
-  "video.blank": { severity: "error", owner: "render" },
-  "video.frozen": { severity: "error", owner: "render" },
-  "spec.ffprobe": { severity: "error", owner: "assembly" },
-  "clearance.license_missing": { severity: "error", owner: "human" },
-  "clearance.noncommercial": { severity: "error", owner: "human" },
-  "clearance.consent_missing": { severity: "error", owner: "human" },
-  "stt.mismatch": { severity: "error", owner: "narration" },
-  "stt.no_transcript": { severity: "warning", owner: "narration" },
-  "captions.overlap": { severity: "error", owner: "editor" },
-  "captions.out_of_range": { severity: "error", owner: "editor" },
-  "captions.short_display": { severity: "error", owner: "editor" },
-  "captions.line_too_long": { severity: "error", owner: "writer" },
-  "captions.missing_line": { severity: "error", owner: "editor" },
-  "captions.sync": { severity: "error", owner: "editor" },
-};
+export const RULES: Readonly<Record<string, { severity: "error" | "warning"; owner: OwnerClass }>> =
+  {
+    "layout.overflow": { severity: "error", owner: "shot_builder" },
+    "layout.density": { severity: "error", owner: "writer" },
+    "layout.collision": { severity: "error", owner: "shot_builder" },
+    "layout.safe_area": { severity: "error", owner: "shot_builder" },
+    "layout.min_text_size": { severity: "error", owner: "shot_builder" },
+    "layout.check": { severity: "error", owner: "render" },
+    "contrast.text": { severity: "error", owner: "shot_builder" },
+    "contrast.pack_pair": { severity: "error", owner: "human" },
+    "timing.short_hold": { severity: "warning", owner: "editor" },
+    "audio.loudness": { severity: "error", owner: "mixer" },
+    "audio.true_peak": { severity: "error", owner: "mixer" },
+    "audio.silence": { severity: "warning", owner: "editor" },
+    "audio.clipping": { severity: "error", owner: "mixer" },
+    "video.blank": { severity: "error", owner: "render" },
+    "video.frozen": { severity: "error", owner: "render" },
+    "spec.ffprobe": { severity: "error", owner: "assembly" },
+    "clearance.license_missing": { severity: "error", owner: "human" },
+    "clearance.noncommercial": { severity: "error", owner: "human" },
+    "clearance.consent_missing": { severity: "error", owner: "human" },
+    "stt.mismatch": { severity: "error", owner: "narration" },
+    "stt.no_transcript": { severity: "warning", owner: "narration" },
+    "captions.overlap": { severity: "error", owner: "editor" },
+    "captions.out_of_range": { severity: "error", owner: "editor" },
+    "captions.short_display": { severity: "error", owner: "editor" },
+    "captions.line_too_long": { severity: "error", owner: "writer" },
+    "captions.missing_line": { severity: "error", owner: "editor" },
+    "captions.sync": { severity: "error", owner: "editor" },
+  };
 
 /** `f_` and the first 12 hex digits of a signature. */
 export function findingId(signature: string): string {

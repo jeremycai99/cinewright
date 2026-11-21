@@ -39,6 +39,8 @@ export interface CriticRunResult {
   findings: CriticRunFinding[];
   /** Named measurements for the report (`audio.integrated_lufs`, `layout.samples`, …). */
   measured: Record<string, number>;
+  /** What the findings depend on besides the plugin version (D36): settings hash, HyperFrames version. */
+  baseline?: Record<string, string>;
 }
 
 /**
