@@ -60,6 +60,21 @@ export interface StoreOptions {
 
 export const DEFAULT_GATES = ["gate.script", "gate.storyboard", "gate.final"] as const;
 
+/**
+ * Where one agent task may write (M7.4, F19): the entities it was given and their subtrees, and,
+ * when `writes` is set, the role's kinds and paths instead of the store's `writeScopes`. Every
+ * field an inserted entity carries is checked against those paths too.
+ */
+export interface TaskScope {
+  role: string;
+  entities: readonly string[];
+  writes?: { kinds: string[]; paths: string[] };
+}
+
+export interface ApplyOptions {
+  scope?: TaskScope;
+}
+
 type ResolvedOptions = Required<Omit<StoreOptions, "writeScopes" | "catalog">> & {
   writeScopes: WriteScopes | null;
   catalog: Catalog | undefined;
@@ -371,8 +386,22 @@ export class Store {
   }
 
   /** Apply, propose or suggest a patch (convention 10). */
-  async apply(input: unknown): Promise<ApplyResult> {
+  async apply(input: unknown, options: ApplyOptions = {}): Promise<ApplyResult> {
     return withLock(this.dir, this.options.lockTimeoutMs, async () => {
+      this.taskScope = options.scope ?? null;
+      try {
+        return await this.applyLocked(input);
+      } finally {
+        this.taskScope = null;
+      }
+    });
+  }
+
+  /** The scope of the `apply` in progress (M7.4); null outside one or for an unscoped patch. */
+  private taskScope: TaskScope | null = null;
+
+  private async applyLocked(input: unknown): Promise<ApplyResult> {
+    {
       this.state = await Store.load(this.dir);
       const checked = validatePatch(input);
       if (!checked.ok) return { status: "rejected", errors: checked.errors };
@@ -416,7 +445,7 @@ export class Store {
               : null;
       if (reason === null) return this.applyNow(patch, patch.author);
       return this.checkedPending(patch, reason);
-    });
+    }
   }
 
   /**
@@ -755,7 +784,11 @@ export class Store {
     });
   }
 
-  /** Ops of an agent patch that touch nodes outside its role's write scope (M1.4b). */
+  /**
+   * Ops of an agent patch outside its scope (M1.4b, M7.4): a node of an entity outside the task's
+   * entities and their subtrees (`scope.entity`), a path outside the role's write scope, or a
+   * field an inserted entity carries outside it (`scope.denied`). One error per op and field.
+   */
   private scopeErrors(
     author: Author,
     before: readonly Snapshot[],
@@ -763,24 +796,72 @@ export class Store {
     current: ReadonlyMap<string, IrEntity>,
     next: ReadonlyMap<string, IrEntity>,
   ): PatchError[] {
-    const scopes = this.options.writeScopes;
-    if (!scopes || author.kind !== "agent") return [];
+    if (author.kind !== "agent") return [];
+    const task = this.taskScope;
+    const scopes: WriteScopes | null = task?.writes
+      ? { [author.role]: task.writes }
+      : this.options.writeScopes;
+    if (!scopes && !task) return [];
     const errors: PatchError[] = [];
-    const reported = new Set<number>();
+    const reported = new Set<string>();
+    const entityOf = (id: string) => next.get(id) ?? current.get(id);
+    const within = (id: string): boolean => {
+      for (let e = entityOf(id); e; e = e.parent ? entityOf(e.parent) : undefined)
+        if (task?.entities.includes(e.id)) return true;
+      return false;
+    };
+    const report = (key: string, error: PatchError) => {
+      if (reported.has(key)) return;
+      reported.add(key);
+      errors.push(error);
+    };
     before.forEach((snap, k) => {
       const op = opOf[k] ?? 0;
-      if (reported.has(op)) return;
-      const kind = (current.get(snap.entity) ?? next.get(snap.entity))?.kind ?? "unknown";
-      if (inScope(scopes, author.role, kind, snap.path)) return;
-      reported.add(op);
-      errors.push({
-        op,
-        entity: snap.entity,
-        pointer: snap.path,
-        rule: "scope.denied",
-        message: `role ${author.role} may not write ${kind} ${snap.path}`,
-      });
+      const kind = entityOf(snap.entity)?.kind ?? "unknown";
+      if (task && !within(snap.entity)) {
+        report(`op:${op}`, {
+          op,
+          entity: snap.entity,
+          pointer: snap.path,
+          rule: "scope.entity",
+          message: `the ${author.role} task may write only ${task.entities.join(", ")} and what they hold, not ${snap.entity}`,
+        });
+        return;
+      }
+      if (scopes && !inScope(scopes, author.role, kind, snap.path))
+        report(`op:${op}`, {
+          op,
+          entity: snap.entity,
+          pointer: snap.path,
+          rule: "scope.denied",
+          message: `role ${author.role} may not write ${kind} ${snap.path}`,
+        });
     });
+    if (!scopes) return errors;
+    // Inserted entities: every field they carry (not left open) must be in the role's scope.
+    const opOfNew = (id: string): number | null => {
+      let e = next.get(id);
+      while (e?.parent && !current.has(e.parent)) e = next.get(e.parent);
+      const k = before.findIndex((b) => b.entity === e?.list?.owner && b.path === e?.list?.path);
+      return k >= 0 ? (opOf[k] ?? null) : null;
+    };
+    for (const [id, e] of next) {
+      if (current.has(id)) continue;
+      for (const [field, wrapper] of Object.entries(e.node)) {
+        if (field === "id" || field === "origin" || field === "locked") continue;
+        const state = (wrapper as { state?: string } | null)?.state;
+        if (state === undefined || state === "open") continue;
+        if (inScope(scopes, author.role, e.kind, `/${field}`)) continue;
+        const op = opOfNew(id);
+        report(`new:${id}/${field}`, {
+          op,
+          entity: id,
+          pointer: `/${field}`,
+          rule: "scope.denied",
+          message: `role ${author.role} may not write ${e.kind} /${field} (in an inserted ${e.kind})`,
+        });
+      }
+    }
     return errors;
   }
 
