@@ -68,6 +68,14 @@ export class EventLog {
     return new EventLog(join(runDir, "events.jsonl"), run, now, secrets, listener);
   }
 
+  /**
+   * Milliseconds on the run's clock, for durations: a fixed time (`CINEWRIGHT_FIXED_TIME`)
+   * measures every task as 0 ms, so events stay byte-stable.
+   */
+  clockMs(): number {
+    return Date.parse(this.now());
+  }
+
   private redact(text: string): string {
     let out = text;
     for (const s of this.secrets) out = out.split(s).join("[redacted]");
