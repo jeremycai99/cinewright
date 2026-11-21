@@ -1393,6 +1393,14 @@ class MusicBed(BaseModel):
     value: Annotated[str | None, Field(min_length=1)] = None
 
 
+class Music(BaseModel):
+    model_config = ConfigDict(
+        extra="forbid",
+    )
+    state: State
+    value: Id | None = None
+
+
 class Style(RootModel[Any]):
     root: Annotated[
         Any,
@@ -2007,6 +2015,12 @@ class Sequence(BaseModel):
     title: Title
     mood: Mood1
     music_bed: MusicBed
+    music: Annotated[
+        Music | None,
+        Field(
+            description="The selected music bed (M4.3a): an asset with role music for this sequence. Written by the Composer job; the user may choose another, and a gate may lock it."
+        ),
+    ] = None
     style: LevelStyle
     scenes: Scenes
 

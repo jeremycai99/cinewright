@@ -126,6 +126,10 @@ export type TokenValue1 = string | number | boolean | TokenRef;
  * Project-unique entity id (convention 9). Immutable and never reused.
  */
 export type Id15 = string;
+/**
+ * Project-unique entity id (convention 9). Immutable and never reused.
+ */
+export type Id16 = string;
 
 /**
  * Every IR document schema; exists only so each type is generated once.
@@ -1142,6 +1146,13 @@ export interface Sequence {
   music_bed: {
     state: State;
     value?: string;
+  };
+  /**
+   * The selected music bed (M4.3a): an asset with role music for this sequence. Written by the Composer job; the user may choose another, and a gate may lock it.
+   */
+  music?: {
+    state: State;
+    value?: Id16;
   };
   style: LevelStyle;
   scenes: {

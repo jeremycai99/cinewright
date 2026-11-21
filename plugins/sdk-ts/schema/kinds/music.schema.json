@@ -1,0 +1,65 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://cinewright.invalid/plugin/0/kinds/music.schema.json",
+  "title": "MusicKind",
+  "description": "Requests and results of music and SFX plugins (M4). Files are paths relative to the plugin's work folder; audio is WAV.",
+  "$defs": {
+    "file": {
+      "type": "string",
+      "minLength": 1,
+      "pattern": "^(?!/)(?!.*(^|/)\\.\\.(/|$)).+$"
+    },
+    "license": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["terms", "commercial_use"],
+      "properties": {
+        "terms": { "type": "string", "minLength": 1 },
+        "commercial_use": { "type": "boolean" },
+        "attribution": { "type": "string" }
+      }
+    },
+    "music_request": {
+      "description": "music.request: a bed for one sequence. `genre` and `mood` come from the pack's sound.music tokens (cascade-resolved) and the sequence's mood; `brief` is the sequence's music_bed text; `duration_ms` is the sequence's length. Beds are instrumental (`vocals: false`).",
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["genre", "mood", "bpm_min", "bpm_max", "duration_ms", "vocals", "output"],
+      "properties": {
+        "genre": { "type": "string", "minLength": 1 },
+        "mood": { "type": "string", "minLength": 1 },
+        "brief": { "type": "string" },
+        "bpm_min": { "type": "integer", "minimum": 1 },
+        "bpm_max": { "type": "integer", "minimum": 1 },
+        "duration_ms": { "type": "integer", "minimum": 1 },
+        "vocals": { "const": false },
+        "seed": { "type": "integer", "minimum": 0, "maximum": 4294967295 },
+        "output": { "$ref": "#/$defs/file" }
+      }
+    },
+    "sfx_request": {
+      "description": "sfx.request: one sound effect, by name (scene.sound.sfx).",
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["name", "output"],
+      "properties": {
+        "name": { "type": "string", "minLength": 1 },
+        "output": { "$ref": "#/$defs/file" }
+      }
+    },
+    "audio_result": {
+      "description": "The audio written to `file`. `request` is what the provider was asked, without secrets; `license` is authoritative over the manifest's output_license.",
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["file", "sample_rate", "channels", "request", "license"],
+      "properties": {
+        "file": { "$ref": "#/$defs/file" },
+        "sample_rate": { "type": "integer", "minimum": 1 },
+        "channels": { "type": "integer", "minimum": 1, "maximum": 2 },
+        "model": { "type": "string", "minLength": 1 },
+        "loop": { "description": "The bed may be looped to fill the sequence.", "type": "boolean" },
+        "request": { "type": "object" },
+        "license": { "$ref": "#/$defs/license" }
+      }
+    }
+  }
+}

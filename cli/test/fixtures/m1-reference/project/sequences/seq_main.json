@@ -3,6 +3,9 @@
   "mood": {
     "state": "open"
   },
+  "music": {
+    "state": "open"
+  },
   "music_bed": {
     "state": "open"
   },

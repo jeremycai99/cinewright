@@ -20,6 +20,7 @@ cinewright pack pin <pack_id> [--project <dir>] [--json]
 cinewright compile <shot_id> --deliverable <id> [--timing <timing.json>] --out <dir> [--project <dir>] [--json]
 cinewright render-shot <shot_id> --deliverable <id> [--timing <timing.json>] [--image <ref>] [--project <dir>] [--json]
 cinewright timing [--out <file>] [--project <dir>] [--json]
+cinewright compose [--sequence <id>] [--provider <id>] [--plugins <dir>]... [--project <dir>] [--json]
 cinewright narrate [--line <id>]... [--retake <line>]... [--provider <id>] [--plugins <dir>]... [--project <dir>] [--json]
 ```
 
@@ -28,6 +29,8 @@ cinewright narrate [--line <id>]... [--retake <line>]... [--provider <id>] [--pl
 `compile` is a developer tool until `cinewright render` (M5.4): it compiles one shot for one deliverable into a HyperFrames composition (`plugins/backend-hyperframes`), and exits 3 listing every compile error with its entity, field and rule. `render-shot` compiles the shot into `.cinewright/compiled/` and renders it in the render image (`--image` or `CINEWRIGHT_IMAGE`) with the network off and run limits, into the disposable cache `.cinewright/cache/renders/<key>/`; a cached render runs no container. A failed render exits 8 naming the shot and the limit or error.
 
 `narrate` is a developer tool until `cinewright render` (M4): for each line (or each `--line`), it keeps a valid user-selected take, reuses a take of the routed TTS provider whose request key still matches, or makes one, and selects it on the line as the `narration` job. `--retake` always makes a new take. Providers are routed by `--provider`, then `settings.providers.tts`, then free plugins the speaker has a binding for, then paid ones whose secrets are set (D29). Plugins are found on `--plugins` folders, `CINEWRIGHT_PLUGIN_PATH`, then the first-party `plugins/`. A provider failure exits 9 naming the line and provider; takes already made are kept, so a re-run makes only the rest. A refused line (a cloned voice with no consent record) exits 3 with its finding.
+
+`compose` (M4.3a) chooses a music bed for each sequence from a music provider (`--provider`, then `settings.providers.music`, then free plugins first) and selects it in `sequence.music`, keeping a bed the user chose and reusing one whose request still matches. The request comes from the pack's `sound.music` tokens, the sequence's mood and `music_bed`, and its solved length; beds are instrumental. Where `sound.sfx.enabled` is true, each name in a scene's `sound.sfx` becomes a sound effect. The first-party `library_audio` plugin reads `library.json` files on `CINEWRIGHT_AUDIO_LIBRARY_PATH`. No matching bed is a `compose.no_match` finding (exit 3); a provider failure exits 9.
 
 `timing` solves the timing (M4.2): scenes from the selected takes and the pack's pacing tokens (`sound.voice`), shots tiled across their scene, sequences end to end. It prints the timeline or, with `--json`, the table, spans and findings; `--out` writes the table. Error findings exit 3. `compile` and `render-shot` use the solved timing when `--timing` is not given.
 
@@ -146,7 +149,7 @@ A status line follows: `applied revision N (sha256:…)`, `pending pN (reason)`,
 | 6 | The project failed to load: edited outside the store, a corrupt or missing file |
 | 7 | The store lock stayed held by another process (`CINEWRIGHT_LOCK_TIMEOUT_MS`, default 10 s) |
 | 8 | A render failed: it hit its timeout or memory limit, or `render-job` failed (`render-shot`) |
-| 9 | A provider plugin failed, or none was usable (`narrate`) |
+| 9 | A provider plugin failed, or none was usable (`narrate`, `compose`) |
 
 ## Test switches
 

@@ -21,6 +21,9 @@
     },
     {
       "path": "container/render-runner"
+    },
+    {
+      "path": "plugins/library-audio"
     }
   ]
 }
