@@ -1,3 +1,4 @@
+import { readFileSync } from "node:fs";
 import {
   type Asset,
   type InlinedIr,
@@ -6,7 +7,12 @@ import {
   type TokenTree,
 } from "@cinewright/core";
 
-export const MIXER_VERSION = "0.1.0";
+export const MIXER_VERSION = "0.2.0";
+
+/** The mixer's settings (`settings.json`, from the M4.0b and M5.1 spikes). */
+const SETTINGS = JSON.parse(readFileSync(new URL("../settings.json", import.meta.url), "utf8")) as {
+  encode_headroom_db: number;
+};
 
 export type Bus = "voice" | "music" | "sfx";
 
@@ -48,6 +54,11 @@ export interface MixPlan {
   /** A fade at the end of each music bed, in samples, so no bed stops with a click. */
   bed_fade: number;
   targets: { integrated_lufs: number; tolerance_lu: number; true_peak_dbtp: number };
+  /**
+   * The limiter's ceiling: the true-peak target minus `encode_headroom_db`, because the lossy
+   * encode of the delivered file raises the peak (M5.1).
+   */
+  limit_dbtp: number;
 }
 
 export class MixPlanError extends Error {
@@ -183,5 +194,6 @@ export function planMix(input: {
       tolerance_lu: profile.loudness.tolerance_lu,
       true_peak_dbtp: profile.loudness.true_peak_dbtp,
     },
+    limit_dbtp: profile.loudness.true_peak_dbtp - SETTINGS.encode_headroom_db,
   };
 }

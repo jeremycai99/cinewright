@@ -1,5 +1,5 @@
 {
-  "$comment": "Mixer FFmpeg settings from the M4.0b spike (container/audio/README.md §Determinism). plugins/audio-ffmpeg (M4.4) implements them in src/graph.ts and src/render.ts. These produced one PCM hash and one MP4 hash on an Intel and an AMD CI runner and an emulated Apple Silicon host, so no -cpuflags restriction is set.",
+  "$comment": "Mixer FFmpeg settings from the M4.0b spike (container/audio/README.md \u00a7Determinism). plugins/audio-ffmpeg (M4.4) implements them in src/graph.ts and src/render.ts. These produced one PCM hash and one MP4 hash on an Intel and an AMD CI runner and an emulated Apple Silicon host, so no -cpuflags restriction is set.",
   "image": "render",
   "internal_format": "float64 for gain envelopes (aeval), float32 between stages",
   "resampler": "aresample with FFmpeg's default swr resampler",
@@ -27,5 +27,7 @@
     "-1"
   ],
   "aac": ["-c:a", "aac", "-fflags", "+bitexact", "-flags", "+bitexact", "-map_metadata", "-1"],
-  "aac_bitrate": "from the delivery profile (encoding.audio_bitrate_kbps)"
+  "aac_bitrate": "from the delivery profile (encoding.audio_bitrate_kbps)",
+  "encode_headroom_db": 0.5,
+  "$comment_headroom": "M5.1: the AAC encode raised the true peak of a master limited at -1.0 dBTP to -0.9 dBTP. The mixer limits at the profile's true-peak target minus this headroom, so the delivered file meets the target; it is part of the mix key."
 }

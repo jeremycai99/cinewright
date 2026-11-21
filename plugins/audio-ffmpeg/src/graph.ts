@@ -73,7 +73,7 @@ export function masterChain(plan: MixPlan, gainDb: number, limit: boolean): stri
   const R = plan.sample_rate;
   const steps = [`volume=${gainDb.toFixed(4)}dB:precision=double`];
   if (limit) {
-    const ceiling = (10 ** (plan.targets.true_peak_dbtp / 20)).toFixed(6);
+    const ceiling = (10 ** (plan.limit_dbtp / 20)).toFixed(6);
     steps.push(
       `aresample=${4 * R}`,
       `alimiter=limit=${ceiling}:level=0:attack=1:release=50:asc=0`,
