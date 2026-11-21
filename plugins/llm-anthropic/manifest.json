@@ -1,0 +1,17 @@
+{
+  "schema_version": 1,
+  "id": "llm_anthropic",
+  "version": "0.1.0",
+  "kind": "llm",
+  "capabilities": ["llm.generate", "llm.estimate"],
+  "cost_model": { "unit": "token" },
+  "latency_class": "interactive",
+  "output_license": {
+    "terms": "Output is the customer's under Anthropic's commercial terms; see the provider's terms for restrictions",
+    "commercial_use": true
+  },
+  "secrets": ["ANTHROPIC_API_KEY"],
+  "runtime": { "kind": "in_process", "entry": "./dist/index.js" },
+  "concurrency": { "max_parallel": 4 },
+  "rate_limits": []
+}

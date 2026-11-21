@@ -234,9 +234,13 @@ export async function runWorkflow(
   const template = loadTemplate(ir.settings.workflow?.value ?? "explainer");
   const preset = loadPreset(options.preset ?? ir.autonomy.value ?? "guided");
   const plugins = options.render.plugins;
-  const problems = intake(ir, template, preset, { ...plugins, llm: options.llm ?? [] }).filter(
-    (f) => f.severity === "error",
-  );
+  const problems = intake(
+    ir,
+    template,
+    preset,
+    { ...plugins, llm: options.llm ?? [] },
+    options.render.env ?? process.env,
+  ).filter((f) => f.severity === "error");
   if (problems.length > 0)
     return finish({
       status: "failed",

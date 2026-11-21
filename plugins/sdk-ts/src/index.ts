@@ -44,6 +44,13 @@ export {
   criticKind,
 } from "./kinds/critic.js";
 export {
+  type EstimateResult,
+  type GenerateRequest,
+  type GenerateResult,
+  LLM_KIND,
+  type LlmContent,
+} from "./kinds/llm.js";
+export {
   type AudioResult,
   MUSIC_KIND,
   type MusicRequest,

@@ -9,20 +9,32 @@ export type Installed = Partial<Record<string, readonly FoundPlugin[]>>;
 const offers = (plugins: readonly FoundPlugin[] | undefined, capability: string) =>
   (plugins ?? []).some((p) => p.manifest.capabilities.includes(capability));
 
+/** Usable by the routing rule (D29): free, or paid with every secret present. */
+const usable = (
+  plugins: readonly FoundPlugin[] | undefined,
+  env: Readonly<Record<string, string | undefined>>,
+) =>
+  (plugins ?? []).filter(
+    (p) =>
+      p.manifest.cost_model?.unit === "free" ||
+      (p.manifest.secrets ?? []).every((s) => Boolean(env[s])),
+  );
+
 /**
  * P0 intake (M7.1b): what must hold before a run starts. Error findings, each naming its entity:
  * - `intake.no_budget`: the project has no budget cap (D17);
  * - `intake.no_deliverable`: it has no deliverable;
  * - `intake.unsupported`: a shot type or a transition v0.1 cannot route (`engine/settings.json`);
- * - `intake.no_provider`: an agent role the preset runs with no installed `llm` plugin, a line
- *   with no `tts` plugin to narrate it, or a shot, mix, caption or assembly step with no plugin
- *   offering its capability.
+ * - `intake.no_provider`: an agent role the preset runs with no usable `llm` plugin, a line with
+ *   no usable `tts` plugin to narrate it (usable: free, or paid with its secrets set in `env`), or a
+ *   shot, mix, caption or assembly step with no plugin offering its capability.
  */
 export function intake(
   ir: InlinedIr,
   template: WorkflowTemplate,
   preset: Preset,
   installed: Installed,
+  env: Readonly<Record<string, string | undefined>> = process.env,
 ): Finding[] {
   const out: Finding[] = [];
   const settings = loadEngineSettings();
@@ -83,7 +95,7 @@ export function intake(
   }
 
   const roles = (ir.settings.roles?.value ?? {}) as Record<string, string>;
-  if (preset.agents && (installed.llm ?? []).length === 0) {
+  if (preset.agents && usable(installed.llm, env).length === 0) {
     const needed = new Set(
       template.phases
         .filter((p) => p.kind === "agent" && p.role && roles[p.role] !== "human")
@@ -95,13 +107,13 @@ export function intake(
           "intake.no_provider",
           "error",
           ir.id,
-          `role ${role} runs as an agent, and no llm plugin is installed (or set it to human)`,
+          `role ${role} runs as an agent, and no llm plugin is usable: install one, set its key, or set the role to human`,
           { role, kind: "llm" },
           `/settings/roles/${role}`,
         ),
       );
   }
-  if ((installed.tts ?? []).length === 0)
+  if (usable(installed.tts, env).length === 0)
     for (const line of all.filter((e) => e.kind === "line"))
       out.push(
         finding(

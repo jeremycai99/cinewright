@@ -1,0 +1,30 @@
+{
+  "name": "@cinewright/llm-anthropic",
+  "version": "0.1.0",
+  "private": true,
+  "license": "Apache-2.0",
+  "type": "module",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "default": "./dist/index.js"
+    }
+  },
+  "files": [
+    "dist",
+    "manifest.json",
+    "settings.json"
+  ],
+  "scripts": {
+    "test": "vitest run"
+  },
+  "dependencies": {
+    "@anthropic-ai/sdk": "1.12.0",
+    "@cinewright/plugin-sdk": "workspace:*"
+  },
+  "devDependencies": {
+    "@cinewright/core": "workspace:*",
+    "@cinewright/engine": "workspace:*",
+    "ajv": "8.20.0"
+  }
+}

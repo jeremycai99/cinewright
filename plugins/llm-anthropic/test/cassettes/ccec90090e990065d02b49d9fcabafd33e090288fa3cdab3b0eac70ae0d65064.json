@@ -1,0 +1,15 @@
+{
+  "request_hash": "sha256:ccec90090e990065d02b49d9fcabafd33e090288fa3cdab3b0eac70ae0d65064",
+  "response": {
+    "output": {
+      "answer": "hello"
+    },
+    "model": "served-model",
+    "usage": {
+      "input_tokens": 1000,
+      "output_tokens": 100
+    },
+    "cost_usd": 0.006,
+    "stop": "end"
+  }
+}
