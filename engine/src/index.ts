@@ -45,7 +45,7 @@ export { backendFor } from "./plugins/backend.js";
 export { callOnce, PluginChoiceError, pluginWith } from "./plugins/call.js";
 export { PluginCallError, PluginPool } from "./plugins/pool.js";
 export { type FoundPlugin, findPlugins, PluginRegistryError } from "./plugins/registry.js";
-export { RouteError, type RouteOptions, route } from "./plugins/route.js";
+export { RouteError, type RouteOptions, route, routeCapability } from "./plugins/route.js";
 export {
   type EngineSettings,
   loadEngineSettings,
@@ -74,5 +74,13 @@ export type {
   TaskResult,
   WorkflowRuntime,
 } from "./runtime/types.js";
+export { CancelledError, Semaphore } from "./scheduler/pool.js";
+export {
+  type Clock,
+  type Execute,
+  Scheduler,
+  type SchedulerOptions,
+  SYSTEM_CLOCK,
+} from "./scheduler/scheduler.js";
 
 export const VERSION = "0.0.0";

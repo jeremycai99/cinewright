@@ -1,3 +1,4 @@
+import type { FoundPlugin } from "../plugins/registry.js";
 import type { EventLog } from "./events.js";
 import type { RunLedger } from "./ledger.js";
 
@@ -17,6 +18,10 @@ export interface Task {
   /** Task ids that must be done first. */
   needs: string[];
   paid: boolean;
+  /** The plugin capability it calls, routed by the scheduler (M7.2). */
+  capability?: string;
+  /** A plugin the user pinned: no fallback to another. */
+  pinned?: string;
 }
 
 /** A typed failure, shaped like a plugin error. */
@@ -27,7 +32,8 @@ export interface TaskError {
   data?: unknown;
 }
 
-export type PauseKind = "gate" | "human" | "budget";
+/** `provider`: a pinned plugin kept failing after its retries (M7.2). */
+export type PauseKind = "gate" | "human" | "budget" | "provider";
 
 export interface TaskResult {
   /** `blocked`: the task cannot finish yet (a gate not approved, a human task waiting, the budget). */
@@ -53,7 +59,10 @@ export interface RunContext {
   template: string;
   preset: string;
   derive(): Promise<Task[]>;
-  execute(task: Task, signal: AbortSignal): Promise<TaskResult>;
+  /** Run one task; `plugin` is the one the scheduler routed a task with a `capability` to. */
+  execute(task: Task, signal: AbortSignal, plugin?: FoundPlugin): Promise<TaskResult>;
+  /** The plugins for a task's capability, best first (`routeCapability`). */
+  route?: (task: Task) => FoundPlugin[];
   ledger: RunLedger;
   events: EventLog;
 }

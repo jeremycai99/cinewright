@@ -1,4 +1,6 @@
+import { Scheduler } from "../scheduler/scheduler.js";
 import type {
+  PauseKind,
   RunContext,
   RunOutcome,
   Task,
@@ -8,17 +10,20 @@ import type {
 } from "./types.js";
 
 /**
- * The plain loop runtime (M7.1a). Derive the tasks, drop the ones the ledger has done, run the
- * first whose needs are all done, record it, and derive again: an agent's patch can change what
- * is left. Stops when nothing is ready. Then a failure (the first by derive order) wins, then a
- * pause; otherwise the run is done. A task that fails never stops the tasks that do not need it.
+ * The plain loop runtime (M7.1a, M7.2). Derive the tasks, drop the ones the ledger has done, hand
+ * every task whose needs are all done to the scheduler (limits, retries, fallback), record each
+ * result in derive order, and derive again: a patch can change what is left. Stops when nothing is
+ * ready. Then a failure (the first by derive order) wins, then a pause; otherwise the run is done.
+ * A task that fails never stops the tasks that do not need it.
  */
 export class LoopRuntime implements WorkflowRuntime {
+  constructor(private readonly scheduler: Scheduler = new Scheduler()) {}
+
   async run(ctx: RunContext, signal: AbortSignal): Promise<RunOutcome> {
     const { ledger, events } = ctx;
     events.emit("run.started", { outcome: ctx.template });
     const failed = new Map<string, TaskError>();
-    const paused = new Map<string, { kind: "gate" | "human" | "budget"; id: string }>();
+    const paused = new Map<string, { kind: PauseKind; id: string }>();
     const outputs: Record<string, unknown> = {};
     let order: string[] = [];
     for (;;) {
@@ -27,7 +32,7 @@ export class LoopRuntime implements WorkflowRuntime {
       order = tasks.map((t) => t.id);
       const byId = new Map(tasks.map((t) => [t.id, t]));
       const complete = (t: Task) => ledger.isDone(t);
-      const next = tasks.find(
+      const ready = tasks.filter(
         (t) =>
           !complete(t) &&
           !failed.has(t.id) &&
@@ -37,45 +42,28 @@ export class LoopRuntime implements WorkflowRuntime {
             return need === undefined || complete(need);
           }),
       );
-      if (!next) break;
-      ledger.started(next);
-      events.emit("task.started", { task: next.id, ...(next.role ? { role: next.role } : {}) });
-      const t0 = events.clockMs();
-      let result: TaskResult;
-      try {
-        result = await ctx.execute(next, signal);
-      } catch (error) {
-        result = {
-          status: "failed",
-          error: { code: "internal", message: String((error as Error).message ?? error) },
-        };
+      if (ready.length === 0) break;
+      for (const t of ready) {
+        ledger.started(t);
+        events.emit("task.started", { task: t.id, ...(t.role ? { role: t.role } : {}) });
       }
-      const ms = Math.max(0, events.clockMs() - t0);
-      if (result.status === "done" || result.status === "noop") {
-        ledger.done(next, result);
-        if (result.output !== undefined) outputs[next.id] = result.output;
-        events.emit(result.status === "done" ? "task.done" : "task.noop", {
-          task: next.id,
-          ms,
-          ...(result.cost_usd === undefined ? {} : { cost_usd: result.cost_usd }),
-          ...(result.revision === undefined ? {} : { patch: result.revision }),
-        });
-      } else if (result.status === "failed") {
-        const error = result.error ?? { code: "internal", message: "the task failed" };
-        ledger.failed(next, result);
-        failed.set(next.id, error);
-        events.emit("task.failed", {
-          task: next.id,
-          ms,
-          outcome: `${error.code}: ${error.message}`,
-        });
-      } else {
-        const pause = result.pause ?? {
-          kind: next.kind === "human" ? "human" : "gate",
-          id: next.id,
-        };
-        paused.set(next.id, pause);
-        events.emit("task.blocked", { task: next.id, ms, outcome: `${pause.kind}:${pause.id}` });
+      const ms = new Map<string, number>();
+      const results = await this.scheduler.run(
+        ready,
+        async (task, plugin, s) => {
+          const t0 = events.clockMs();
+          try {
+            return await ctx.execute(task, s, plugin);
+          } finally {
+            ms.set(task.id, Math.max(0, events.clockMs() - t0));
+          }
+        },
+        signal,
+        ctx.route,
+      );
+      for (const next of ready) {
+        const result = results.get(next.id) as TaskResult;
+        this.record(ctx, next, result, ms.get(next.id) ?? 0, { failed, paused, outputs });
       }
     }
     const firstFailed = order.find((id) => failed.has(id)) ?? [...failed.keys()][0];
@@ -86,11 +74,44 @@ export class LoopRuntime implements WorkflowRuntime {
     }
     const firstPaused = order.find((id) => paused.has(id)) ?? [...paused.keys()][0];
     if (firstPaused !== undefined) {
-      const pause = paused.get(firstPaused) as { kind: "gate" | "human" | "budget"; id: string };
+      const pause = paused.get(firstPaused) as { kind: PauseKind; id: string };
       events.emit("run.paused", { task: firstPaused, outcome: `${pause.kind}:${pause.id}` });
       return { status: "paused", pause };
     }
     events.emit("run.done");
     return { status: "done", outputs };
+  }
+
+  private record(
+    ctx: RunContext,
+    next: Task,
+    result: TaskResult,
+    ms: number,
+    state: {
+      failed: Map<string, TaskError>;
+      paused: Map<string, { kind: PauseKind; id: string }>;
+      outputs: Record<string, unknown>;
+    },
+  ): void {
+    const { ledger, events } = ctx;
+    if (result.status === "done" || result.status === "noop") {
+      ledger.done(next, result);
+      if (result.output !== undefined) state.outputs[next.id] = result.output;
+      events.emit(result.status === "done" ? "task.done" : "task.noop", {
+        task: next.id,
+        ms,
+        ...(result.cost_usd === undefined ? {} : { cost_usd: result.cost_usd }),
+        ...(result.revision === undefined ? {} : { patch: result.revision }),
+      });
+    } else if (result.status === "failed") {
+      const error = result.error ?? { code: "internal", message: "the task failed" };
+      ledger.failed(next, result);
+      state.failed.set(next.id, error);
+      events.emit("task.failed", { task: next.id, ms, outcome: `${error.code}: ${error.message}` });
+    } else {
+      const pause = result.pause ?? { kind: next.kind === "human" ? "human" : "gate", id: next.id };
+      state.paused.set(next.id, pause);
+      events.emit("task.blocked", { task: next.id, ms, outcome: `${pause.kind}:${pause.id}` });
+    }
   }
 }

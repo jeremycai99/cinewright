@@ -54,6 +54,29 @@ describe("the loop runtime (M7.1a)", () => {
     expect(exec.calls).toEqual(["a", "b", "c"]);
   });
 
+  it("runs independent ready tasks concurrently, and records them in derive order (M7.2)", async () => {
+    const started: string[] = [];
+    let release: () => void = () => {};
+    const gate = new Promise<void>((r) => {
+      release = r;
+    });
+    const ctx = context([task("a"), task("b"), task("c", ["a", "b"])], stubExecutor());
+    ctx.execute = async (t) => {
+      started.push(t.id);
+      if (t.id !== "c") {
+        if (started.length === 2) release();
+        await gate;
+      }
+      return { status: "done" };
+    };
+    expect((await new LoopRuntime().run(ctx, new AbortController().signal)).status).toBe("done");
+    expect(started).toEqual(["a", "b", "c"]);
+    const done = lines(join(ctx.dir, "ledger.jsonl"))
+      .filter((l) => l.status === "done")
+      .map((l) => l.task);
+    expect(done).toEqual(["a", "b", "c"]);
+  });
+
   it("pauses at a gate, and continues after the gate is approved", async () => {
     let approved = false;
     const exec = stubExecutor({ g: () => (approved ? { status: "done" } : { status: "blocked" }) });

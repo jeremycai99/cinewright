@@ -7,15 +7,57 @@
   "additionalProperties": false,
   "required": ["id", "key", "kind", "phase", "entities", "needs", "paid"],
   "properties": {
-    "id": { "type": "string", "minLength": 1 },
-    "key": { "type": "string", "minLength": 1 },
-    "kind": { "enum": ["agent", "job", "gate", "human"] },
-    "phase": { "type": "string", "minLength": 1 },
-    "role": { "type": "string", "minLength": 1 },
-    "step": { "type": "string", "minLength": 1 },
-    "entities": { "type": "array", "items": { "type": "string", "minLength": 1 } },
-    "deliverable": { "type": "string", "minLength": 1 },
-    "needs": { "type": "array", "items": { "type": "string", "minLength": 1 } },
-    "paid": { "type": "boolean" }
+    "id": {
+      "type": "string",
+      "minLength": 1
+    },
+    "key": {
+      "type": "string",
+      "minLength": 1
+    },
+    "kind": {
+      "enum": ["agent", "job", "gate", "human"]
+    },
+    "phase": {
+      "type": "string",
+      "minLength": 1
+    },
+    "role": {
+      "type": "string",
+      "minLength": 1
+    },
+    "step": {
+      "type": "string",
+      "minLength": 1
+    },
+    "entities": {
+      "type": "array",
+      "items": {
+        "type": "string",
+        "minLength": 1
+      }
+    },
+    "deliverable": {
+      "type": "string",
+      "minLength": 1
+    },
+    "needs": {
+      "type": "array",
+      "items": {
+        "type": "string",
+        "minLength": 1
+      }
+    },
+    "paid": {
+      "type": "boolean"
+    },
+    "capability": {
+      "type": "string",
+      "minLength": 1
+    },
+    "pinned": {
+      "type": "string",
+      "minLength": 1
+    }
   }
 }
