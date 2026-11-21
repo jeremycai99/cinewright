@@ -73,7 +73,7 @@ let entryValidator: ValidateFunction | undefined;
 
 function newAjv(): Ajv2020 {
   const ajv = new Ajv2020({ strict: true, allErrors: true, verbose: true });
-  ajv.addVocabulary(["x-token-type"]);
+  ajv.addVocabulary(["x-token-type", "x-readable"]);
   return ajv;
 }
 

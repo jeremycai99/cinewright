@@ -6,12 +6,14 @@
   "required": ["text"],
   "properties": {
     "text": {
+      "x-readable": true,
       "description": "The headline. Words are separated by spaces.",
       "type": "string",
       "minLength": 1,
       "maxLength": 200
     },
     "subtitle": {
+      "x-readable": true,
       "description": "A supporting line under the headline.",
       "type": "string",
       "minLength": 1,

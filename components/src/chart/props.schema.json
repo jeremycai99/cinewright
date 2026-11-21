@@ -7,6 +7,7 @@
   "properties": {
     "kind": { "description": "Bars compare; a line shows a trend.", "enum": ["bar", "line"] },
     "categories": {
+      "x-readable": true,
       "description": "Category or time-step labels, in order.",
       "type": "array",
       "minItems": 1,

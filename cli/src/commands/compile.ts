@@ -18,6 +18,7 @@ import {
   packSearchPath,
   RENDER_CACHE_DIR,
   resolveProjectPack,
+  solveTiming,
   type TimingTable,
   validateTimingTable,
 } from "@cinewright/core";
@@ -27,9 +28,9 @@ import { type Io, printJson } from "../io.js";
 import { findProject, openStore } from "../project.js";
 
 export const COMPILE_USAGE =
-  "usage: cinewright compile <shot_id> --deliverable <id> --timing <timing.json> --out <dir> [--project <dir>] [--json]";
+  "usage: cinewright compile <shot_id> --deliverable <id> [--timing <timing.json>] --out <dir> [--project <dir>] [--json]";
 export const RENDER_SHOT_USAGE =
-  "usage: cinewright render-shot <shot_id> --deliverable <id> --timing <timing.json> [--image <ref>] [--project <dir>] [--json]";
+  "usage: cinewright render-shot <shot_id> --deliverable <id> [--timing <timing.json>] [--image <ref>] [--project <dir>] [--json]";
 
 const OPTIONS = {
   deliverable: { type: "string" },
@@ -54,7 +55,8 @@ function readTiming(path: string): TimingTable {
 interface Target {
   shotId: string;
   deliverable: string;
-  timing: TimingTable;
+  /** A hand-written table (`--timing`); without one, the solver's (M4.2). */
+  timing: TimingTable | undefined;
   project: string;
   json: boolean;
 }
@@ -68,12 +70,10 @@ function target(
   const [shotId, ...extra] = positionals;
   if (!shotId || extra.length > 0) throw new UsageError(`${command} takes one shot id`);
   if (!values.deliverable) throw new UsageError("--deliverable is required");
-  if (!values.timing)
-    throw new UsageError("--timing is required (until narration writes timing, M4.2)");
   return {
     shotId,
     deliverable: values.deliverable,
-    timing: readTiming(resolve(io.cwd, values.timing)),
+    timing: values.timing ? readTiming(resolve(io.cwd, values.timing)) : undefined,
     project: findProject(io, values.project),
     json: values.json === true,
   };
@@ -89,13 +89,15 @@ async function compileOrReport(
   const store = await openStore(io, t.project);
   const ir = store.ir();
   try {
+    const pack = resolveProjectPack(ir, packSearchPath(io.env));
+    const catalog = loadCatalog(catalogDir);
     return await compileShot({
       ir,
       shotId: t.shotId,
       deliverableId: t.deliverable,
-      pack: resolveProjectPack(ir, packSearchPath(io.env)),
-      catalog: loadCatalog(catalogDir),
-      timing: t.timing,
+      pack,
+      catalog,
+      timing: t.timing ?? solveTiming(ir, pack, catalog).table,
       assets: projectAssets(ir, t.project),
       outDir,
     });

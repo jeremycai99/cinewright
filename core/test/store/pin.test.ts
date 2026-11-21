@@ -81,7 +81,7 @@ describe("pack pins (M3.1a)", () => {
     writeFileSync(manifestFile, JSON.stringify(manifest));
     const issue = packIssue(() => resolveProjectPack(store.ir(), [packs]));
     expect(issue?.rule).toBe("pack.pin_mismatch");
-    expect(issue?.message).toContain("pinned 1.0.0");
+    expect(issue?.message).toContain("pinned 1.1.0");
     expect(issue?.message).toContain("found 1.0.1");
     expect(issue?.message).toContain("cinewright pack pin neutral");
   });

@@ -172,6 +172,7 @@ export {
 } from "./store/store.js";
 export { parseTime, TimeError } from "./time.js";
 export { resolveAnchor, TimingError } from "./timing/anchor.js";
+export { readableWords, type SolvedTiming, solveTiming } from "./timing/solve.js";
 export {
   compileSpan,
   layerTiming,

@@ -229,8 +229,8 @@
   "origin": "user",
   "packs": {
     "neutral": {
-      "hash": "sha256:fa77f23dd171c44d3936f50486780ab0a4214e84c8d5d827f2c0327316ef4ac3",
-      "version": "1.0.0"
+      "hash": "sha256:07871a49dc8c48c05dafbda1fb8219579d2066dc429fc7d93cd1502a08fcae4b",
+      "version": "1.1.0"
     }
   },
   "policies": {

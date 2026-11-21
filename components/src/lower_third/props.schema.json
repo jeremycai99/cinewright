@@ -6,12 +6,14 @@
   "required": ["name"],
   "properties": {
     "name": {
+      "x-readable": true,
       "description": "The name shown first.",
       "type": "string",
       "minLength": 1,
       "maxLength": 60
     },
     "role": {
+      "x-readable": true,
       "description": "A role, title or place under the name.",
       "type": "string",
       "minLength": 1,

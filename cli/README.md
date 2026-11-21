@@ -17,8 +17,9 @@ cinewright status [--project <dir>] [--json]
 cinewright schema [<kind> | tokens [--json]]
 cinewright components [<id>] [--json]
 cinewright pack pin <pack_id> [--project <dir>] [--json]
-cinewright compile <shot_id> --deliverable <id> --timing <timing.json> --out <dir> [--project <dir>] [--json]
-cinewright render-shot <shot_id> --deliverable <id> --timing <timing.json> [--image <ref>] [--project <dir>] [--json]
+cinewright compile <shot_id> --deliverable <id> [--timing <timing.json>] --out <dir> [--project <dir>] [--json]
+cinewright render-shot <shot_id> --deliverable <id> [--timing <timing.json>] [--image <ref>] [--project <dir>] [--json]
+cinewright timing [--out <file>] [--project <dir>] [--json]
 cinewright narrate [--line <id>]... [--retake <line>]... [--provider <id>] [--plugins <dir>]... [--project <dir>] [--json]
 ```
 
@@ -27,6 +28,8 @@ cinewright narrate [--line <id>]... [--retake <line>]... [--provider <id>] [--pl
 `compile` is a developer tool until `cinewright render` (M5.4): it compiles one shot for one deliverable into a HyperFrames composition (`plugins/backend-hyperframes`), and exits 3 listing every compile error with its entity, field and rule. `render-shot` compiles the shot into `.cinewright/compiled/` and renders it in the render image (`--image` or `CINEWRIGHT_IMAGE`) with the network off and run limits, into the disposable cache `.cinewright/cache/renders/<key>/`; a cached render runs no container. A failed render exits 8 naming the shot and the limit or error.
 
 `narrate` is a developer tool until `cinewright render` (M4): for each line (or each `--line`), it keeps a valid user-selected take, reuses a take of the routed TTS provider whose request key still matches, or makes one, and selects it on the line as the `narration` job. `--retake` always makes a new take. Providers are routed by `--provider`, then `settings.providers.tts`, then free plugins the speaker has a binding for, then paid ones whose secrets are set (D29). Plugins are found on `--plugins` folders, `CINEWRIGHT_PLUGIN_PATH`, then the first-party `plugins/`. A provider failure exits 9 naming the line and provider; takes already made are kept, so a re-run makes only the rest. A refused line (a cloned voice with no consent record) exits 3 with its finding.
+
+`timing` solves the timing (M4.2): scenes from the selected takes and the pack's pacing tokens (`sound.voice`), shots tiled across their scene, sequences end to end. It prints the timeline or, with `--json`, the table, spans and findings; `--out` writes the table. Error findings exit 3. `compile` and `render-shot` use the solved timing when `--timing` is not given.
 
 Without `--project`, a command uses the nearest directory upward that holds `cinewright.json`. `--file -` reads the patch from stdin.
 

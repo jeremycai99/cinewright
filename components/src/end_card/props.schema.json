@@ -6,18 +6,21 @@
   "required": ["headline"],
   "properties": {
     "headline": {
+      "x-readable": true,
       "description": "The closing message.",
       "type": "string",
       "minLength": 1,
       "maxLength": 120
     },
     "subline": {
+      "x-readable": true,
       "description": "A supporting line.",
       "type": "string",
       "minLength": 1,
       "maxLength": 160
     },
     "cta": {
+      "x-readable": true,
       "description": "A call to action, drawn as a button.",
       "type": "string",
       "minLength": 1,

@@ -2,7 +2,7 @@
   "schema_version": 1,
   "id": "neutral",
   "name": "Neutral",
-  "version": "1.0.0",
+  "version": "1.1.0",
   "description": "The neutral default pack: restrained, legible and broadly professional, meant to suit any brief until a project chooses another pack.",
   "license": "Apache-2.0",
   "aspect_classes": ["landscape", "portrait"],

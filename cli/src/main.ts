@@ -14,6 +14,7 @@ import { PATCH_USAGE, patch } from "./commands/patch.js";
 import { SCHEMA_USAGE, schema } from "./commands/schema.js";
 import { SHOW_USAGE, show } from "./commands/show.js";
 import { STATUS_USAGE, status } from "./commands/status.js";
+import { TIMING_USAGE, timing } from "./commands/timing.js";
 import { EXIT } from "./exit-codes.js";
 import { VERSION } from "./index.js";
 import type { Io } from "./io.js";
@@ -29,6 +30,7 @@ const COMMANDS: Record<string, (argv: string[], io: Io) => Promise<number>> = {
   compile,
   "render-shot": renderShotCommand,
   narrate,
+  timing,
 };
 const USAGE = [
   `cinewright ${VERSION}`,
@@ -43,6 +45,7 @@ const USAGE = [
   COMPILE_USAGE,
   RENDER_SHOT_USAGE,
   NARRATE_USAGE,
+  TIMING_USAGE,
 ].join("\n");
 
 /** Run one CLI invocation and return its exit code (cli/README.md). */

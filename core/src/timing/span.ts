@@ -23,12 +23,25 @@ export function shotsInOrder(ir: InlinedIr): { sequence: string; scene: string; 
 }
 
 /**
- * A shot's frames on its sequence's timeline (M3.1a). It starts at `anchors.start`, and ends at
+ * A shot's frames on its sequence's timeline (M3.1a). With a solved table (M4.2), the span the
+ * solver tiled. Otherwise it starts at `anchors.start`, and ends at
  * `anchors.end` if set, otherwise after `duration`, otherwise at the next shot's start in the same
  * sequence. Throws `timing.unknown_span` when none of these applies, `timing.empty_span` when the
  * end is not after the start.
  */
 export function shotSpan(ir: InlinedIr, shotId: string, table: TimingTable): Span {
+  // A solved table carries the tiled spans (M4.2); they win over the M3 rule.
+  const solved = table.shots?.[shotId];
+  if (solved) {
+    if (solved.end <= solved.start) {
+      throw new TimingError(
+        "timing.empty_span",
+        `the shot has no frames (${solved.start})`,
+        shotId,
+      );
+    }
+    return { start: solved.start, end: solved.end };
+  }
   const shots = shotsInOrder(ir);
   const at = shots.findIndex((s) => s.shot.id === shotId);
   const entry = shots[at];

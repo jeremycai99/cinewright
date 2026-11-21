@@ -2,7 +2,7 @@
   "schema_version": 1,
   "id": "playful",
   "name": "Playful",
-  "version": "1.0.0",
+  "version": "1.1.0",
   "description": "A deliberately contrasting pack (D39): warm, rounded and energetic, for children's lessons, playful explainers and light-hearted ads.",
   "license": "Apache-2.0",
   "aspect_classes": ["landscape", "portrait"],
