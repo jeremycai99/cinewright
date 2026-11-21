@@ -9,4 +9,5 @@ export {
   layerSeed,
   writeComposition,
 } from "./node/composition.js";
+export { type CaptionRules, sequenceCues, type TimedCue } from "./node/cues.js";
 export { buildSpecimen, type SpecimenItem, type SpecimenResult } from "./node/specimen.js";

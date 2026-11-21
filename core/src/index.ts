@@ -30,6 +30,7 @@ export {
   CasMissingError,
   resolveAsset,
 } from "./cas/cas.js";
+export { type CasRemote, CasRemoteError, httpRemote, remotesFromEnv } from "./cas/remote.js";
 export {
   CascadeError,
   isByAspect,

@@ -20,6 +20,7 @@ cinewright pack pin <pack_id> [--project <dir>] [--json]
 cinewright compile <shot_id> --deliverable <id> [--timing <timing.json>] --out <dir> [--project <dir>] [--json]
 cinewright render-shot <shot_id> --deliverable <id> [--timing <timing.json>] [--image <ref>] [--project <dir>] [--json]
 cinewright timing [--out <file>] [--project <dir>] [--json]
+cinewright render [--deliverable <id>]... [--until <stage>] [--retake <line>]... [--provider <id>] [--out <dir>] [--image <ref>] [--plugins <dir>]... [--project <dir>] [--json]
 cinewright mix --deliverable <id> [--image <ref>] [--project <dir>] [--json]
 cinewright compose [--sequence <id>] [--provider <id>] [--plugins <dir>]... [--project <dir>] [--json]
 cinewright narrate [--line <id>]... [--retake <line>]... [--provider <id>] [--plugins <dir>]... [--project <dir>] [--json]
@@ -33,9 +34,13 @@ cinewright narrate [--line <id>]... [--retake <line>]... [--provider <id>] [--pl
 
 `compose` (M4.3a) chooses a music bed for each sequence from a music provider (`--provider`, then `settings.providers.music`, then free plugins first) and selects it in `sequence.music`, keeping a bed the user chose and reusing one whose request still matches. The request comes from the pack's `sound.music` tokens, the sequence's mood and `music_bed`, and its solved length; beds are instrumental. Where `sound.sfx.enabled` is true, each name in a scene's `sound.sfx` becomes a sound effect. The first-party `library_audio` plugin reads `library.json` files on `CINEWRIGHT_AUDIO_LIBRARY_PATH`. No matching bed is a `compose.no_match` finding (exit 3); a provider failure exits 9.
 
+`render` (M5.4b) runs every non-agent job in order: narrate each line, solve the timing, compose music, render each shot and transition segment per deliverable, mix, write caption sidecars, and assemble. Each step reports its key and whether its cache hit, so an edit re-does only what it changed. `--until narrate|timing|compose|shots|mix|captions|assemble` stops after a stage; `--out <dir>` copies each deliverable's MP4, `.srt`, `.vtt` and a provenance `manifest.json` there. Error findings (a line with no valid take, a shot that starts outside its scene, a compile error) stop the run after the step that reports them and exit 3; a render failure exits 8; a provider failure exits 9. The `--json` report: `{ revision, state_hash, steps: [{ id, kind, key, hit, ms }], deliverables: { <id>: { file, sha256, framemd5, pcm_sha256, frames, captions, manifest? } }, findings, until }`.
+
 `mix` (M4.4) mixes the solved timeline for one deliverable in the render image (`--image` or `CINEWRIGHT_IMAGE`) with the network off: takes at their lines, the sequence's music bed ducked under speech by the pack's `sound.duck` tokens, sound effects at their scenes, then gain to the profile's integrated loudness and, when needed, a 4× oversampled limiter at its true-peak target. The result is cached by mix key in `.cinewright/cache/mixes/`; it prints the PCM hash (D33). Unmet targets (`mix.loudness_unmet`) exit 3 and cache nothing; a failed mixer exits 8.
 
 `timing` solves the timing (M4.2): scenes from the selected takes and the pack's pacing tokens (`sound.voice`), shots tiled across their scene, sequences end to end. It prints the timeline or, with `--json`, the table, spans and findings; `--out` writes the table. Error findings exit 3. `compile` and `render-shot` use the solved timing when `--timing` is not given.
+
+Assets live in the project's content-addressed store, `.cinewright/cas/`. When an asset is missing there, every command fetches it from the read-only remotes in `CINEWRIGHT_CAS_REMOTE` (comma-separated URL templates with a `{hex}` placeholder, `https:` or `file:`; e.g. `https://example.org/cas/{hex}`), tried in order. No credential is sent. A fetched object is stored only if it hashes to the requested hash and is no larger than the asset's recorded size; otherwise the command fails with `cas.remote_corrupt` or `cas.remote_oversized`. A missing asset names the remotes it tried. `uv run cinewright-eval cas-export <project> --to <dir>` writes a project's referenced assets as flat files named by hex, ready to upload to such a remote.
 
 Without `--project`, a command uses the nearest directory upward that holds `cinewright.json`. `--file -` reads the patch from stdin.
 

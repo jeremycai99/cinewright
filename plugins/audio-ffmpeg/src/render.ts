@@ -142,59 +142,66 @@ export async function renderMix(input: {
     ]);
     const premix = await measure("/mix/out/premix.wav");
     const silent = !(premix.integrated_lufs > SILENCE_LUFS);
-    const gainDb = silent ? 0 : plan.targets.integrated_lufs - premix.integrated_lufs;
-    const limited = !silent && premix.true_peak_dbtp + gainDb > plan.targets.true_peak_dbtp;
-    await ffmpeg([
-      "-y",
-      "-i",
-      "/mix/out/premix.wav",
-      "-af",
-      masterChain(plan, gainDb, limited),
-      ...["-c:a", "pcm_s24le", "-f", "s24le", "/mix/out/master.s24le"],
-    ]);
-    await ffmpeg([
-      "-y",
-      ...[
-        "-f",
-        "s24le",
-        "-ar",
-        String(plan.sample_rate),
-        "-ac",
-        "2",
-        "-i",
-        "/mix/out/master.s24le",
-      ],
-      ...[
-        "-c:a",
-        "pcm_s24le",
-        "-fflags",
-        "+bitexact",
-        "-flags",
-        "+bitexact",
-        "-map_metadata",
-        "-1",
-      ],
-      "/mix/out/master.wav",
-    ]);
-    const master = await measure("/mix/out/master.wav");
+    let gainDb = silent ? 0 : plan.targets.integrated_lufs - premix.integrated_lufs;
+    const limited = !silent && premix.true_peak_dbtp + gainDb > plan.limit_dbtp;
+    const master = async (gain: number) => {
+      await ffmpeg([
+        "-y",
+        ...["-i", "/mix/out/premix.wav", "-af", masterChain(plan, gain, limited)],
+        ...["-c:a", "pcm_s24le", "-f", "s24le", "/mix/out/master.s24le"],
+      ]);
+      await ffmpeg([
+        "-y",
+        ...[
+          "-f",
+          "s24le",
+          "-ar",
+          String(plan.sample_rate),
+          "-ac",
+          "2",
+          "-i",
+          "/mix/out/master.s24le",
+        ],
+        ...[
+          "-c:a",
+          "pcm_s24le",
+          "-fflags",
+          "+bitexact",
+          "-flags",
+          "+bitexact",
+          "-map_metadata",
+          "-1",
+        ],
+        "/mix/out/master.wav",
+      ]);
+      return measure("/mix/out/master.wav");
+    };
+    let measured = await master(gainDb);
+    // Heavy limiting lowers the loudness the gain aimed at. One corrective pass adds the
+    // shortfall and limits again (M5.1); the result is still checked against the targets.
+    const shortfall = plan.targets.integrated_lufs - measured.integrated_lufs;
+    if (limited && Math.abs(shortfall) > plan.targets.tolerance_lu / 2) {
+      gainDb += shortfall;
+      measured = await master(gainDb);
+    }
     const result: MixMeasure = {
       premix,
       gain_db: Number(gainDb.toFixed(4)),
       limited,
-      master,
+      master: measured,
       silent,
     };
     const t = plan.targets;
     if (
       !silent &&
-      (Math.abs(master.integrated_lufs - t.integrated_lufs) > t.tolerance_lu + 1e-9 ||
-        master.true_peak_dbtp > t.true_peak_dbtp + 1e-9)
+      (Math.abs(measured.integrated_lufs - t.integrated_lufs) > t.tolerance_lu + 1e-9 ||
+        measured.true_peak_dbtp > t.true_peak_dbtp + 1e-9)
     ) {
       throw new MixError(
         "mix.loudness_unmet",
-        `the ${plan.deliverable} mix measures ${master.integrated_lufs} LUFS and ${master.true_peak_dbtp} dBTP; ` +
+        `the ${plan.deliverable} mix measures ${measured.integrated_lufs} LUFS and ${measured.true_peak_dbtp} dBTP; ` +
           `the targets are ${t.integrated_lufs} ± ${t.tolerance_lu} LUFS and at most ${t.true_peak_dbtp} dBTP`,
-        { measured: master, targets: t },
+        { measured, targets: t },
       );
     }
     const pcm = readFileSync(join(outDir, "master.s24le"));

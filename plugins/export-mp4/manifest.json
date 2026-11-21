@@ -1,0 +1,17 @@
+{
+  "schema_version": 1,
+  "id": "export_mp4",
+  "version": "0.1.0",
+  "kind": "exporter",
+  "capabilities": ["export.mp4"],
+  "cost_model": { "unit": "free" },
+  "latency_class": "batch",
+  "output_license": {
+    "terms": "The film carries the licences of the assets it uses",
+    "commercial_use": true
+  },
+  "secrets": [],
+  "runtime": { "kind": "in_process", "entry": "./dist/index.js" },
+  "concurrency": { "max_parallel": 1 },
+  "rate_limits": []
+}

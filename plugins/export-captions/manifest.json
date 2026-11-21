@@ -1,0 +1,14 @@
+{
+  "schema_version": 1,
+  "id": "export_captions",
+  "version": "0.1.0",
+  "kind": "exporter",
+  "capabilities": ["export.captions"],
+  "cost_model": { "unit": "free" },
+  "latency_class": "interactive",
+  "output_license": { "terms": "Derived from the project's own script", "commercial_use": true },
+  "secrets": [],
+  "runtime": { "kind": "in_process", "entry": "./dist/index.js" },
+  "concurrency": { "max_parallel": 4 },
+  "rate_limits": []
+}

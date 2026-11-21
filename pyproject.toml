@@ -4,7 +4,7 @@
 required-version = "==0.13.8"
 
 [tool.uv.workspace]
-members = ["core/py", "plugins/sdk-py", "plugins/stt-whisperx", "plugins/tts-kokoro", "tools"]
+members = ["core/py", "eval", "plugins/sdk-py", "plugins/stt-whisperx", "plugins/tts-kokoro", "tools"]
 # The audio image has its own Python (3.12) and lock.
 exclude = ["container/audio"]
 
@@ -12,7 +12,7 @@ exclude = ["container/audio"]
 dev = ["datamodel-code-generator==0.96.0", "pytest==9.2.0", "ruff==0.17.5"]
 
 [tool.pytest.ini_options]
-testpaths = ["core/py/tests", "plugins/sdk-py/tests", "plugins/stt-whisperx/tests", "plugins/tts-kokoro/tests", "tools/tests"]
+testpaths = ["core/py/tests", "eval/tests", "plugins/sdk-py/tests", "plugins/stt-whisperx/tests", "plugins/tts-kokoro/tests", "tools/tests"]
 addopts = ["--import-mode=importlib"]
 cache_dir = ".cache/pytest"
 markers = [
@@ -35,12 +35,12 @@ extend-exclude = ["**/*.md", "core/py/src/cinewright_ir/models.py"]
 select = ["E", "F", "W", "I", "UP", "B"]
 
 [tool.ruff.lint.isort]
-known-first-party = ["cinewright_ir", "cinewright_plugin_sdk", "cinewright_stt_whisperx", "cinewright_tools", "cinewright_tts_kokoro"]
+known-first-party = ["cinewright_eval", "cinewright_ir", "cinewright_plugin_sdk", "cinewright_stt_whisperx", "cinewright_tools", "cinewright_tts_kokoro"]
 
 [tool.pyright]
 pythonVersion = "3.13"
 venvPath = "."
 venv = ".venv"
-include = ["core/py", "plugins/sdk-py", "plugins/stt-whisperx", "plugins/tts-kokoro", "tools"]
+include = ["core/py", "eval", "plugins/sdk-py", "plugins/stt-whisperx", "plugins/tts-kokoro", "tools"]
 exclude = ["**/node_modules", "**/.venv", "tools/tests/fixtures"]
-strict = ["core/py/src", "plugins/sdk-py/src", "tools/src"]
+strict = ["core/py/src", "eval/src", "plugins/sdk-py/src", "tools/src"]
