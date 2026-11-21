@@ -14,42 +14,31 @@ const RENDER_ENV = {
   CINEWRIGHT_IMAGE: process.env.CINEWRIGHT_IMAGE ?? "cinewright-render:dev",
 };
 
-/** Ops that give the demo shot a template and one title layer. */
-const titled = (text: string) => [
-  {
-    op: "set",
-    entity: "s01.sh01",
-    path: "/layout",
-    value: { landscape: { template: "title" }, portrait: { template: "title" } },
-  },
+/** Ops that give the demo shot a template and one bullet list. */
+const listed = (items: string[]) => [
+  { op: "set", entity: "s01.sh01", path: "/layout/landscape", value: { template: "title" } },
+  { op: "set", entity: "s01.sh01", path: "/layout/portrait", value: { template: "title" } },
   {
     op: "insert",
     entity: "s01.sh01",
     path: "/layers",
     value: {
-      id: "s01.sh01.title",
-      component: "kinetic_title",
-      props: { text },
+      id: "s01.sh01.list",
+      component: "bullet_reveal",
+      props: { items },
       layout: { landscape: { region: "title" }, portrait: { region: "title" } },
     },
   },
 ];
 
-async function project(): Promise<string> {
+const WEB_PROFILE = new URL("../../registry/profiles/landscape_web.json", import.meta.url).pathname;
+
+async function project(profile = `${PROFILES}landscape_1080p30.json`): Promise<string> {
   const dir = join(tempDir(), "demo");
   expect(
     (
       await run(
-        [
-          "init",
-          dir,
-          "--id",
-          "demo",
-          "--pack",
-          "neutral",
-          "--deliverable",
-          `web=${PROFILES}landscape_1080p30.json`,
-        ],
+        ["init", dir, "--id", "demo", "--pack", "neutral", "--deliverable", `web=${profile}`],
         ENV,
       )
     ).code,
@@ -144,26 +133,27 @@ describe("cinewright render", () => {
 });
 
 describe.skipIf(!CONTAINERS)("cinewright render with critics (M6.1a)", () => {
-  it("exits 10 on an overflowing title, names the finding and the report, and 0 with --no-critics", async () => {
-    const dir = await project();
+  it("exits 10 on a list past the density limit, names the finding and the report, and 0 with --no-critics", async () => {
+    const dir = await project(WEB_PROFILE);
     const file = join(tempDir(), "title.json");
-    const text = Array.from({ length: 60 }, (_, i) => `Overflowing${i}`).join(" ");
+    const items = Array.from({ length: 8 }, (_, i) => `Point ${i + 1}`);
     writeFileSync(
       file,
       JSON.stringify({
         base_revision: 1,
         author: { kind: "user" },
         mode: "apply",
-        reason: "an overflowing title",
-        ops: titled(text),
+        reason: "too many bullets",
+        ops: listed(items),
       }),
     );
-    expect((await run(["patch", "apply", "--file", file, "--project", dir], ENV)).code).toBe(0);
+    const applied = await run(["patch", "apply", "--file", file, "--project", dir], ENV);
+    expect(applied.code, applied.stdout + applied.stderr).toBe(0);
     const base = ["render", "--project", dir, "--plugins", PLUGINS];
     const r = await run(base, RENDER_ENV);
     expect(r.code, r.stderr).toBe(EXIT.findings);
     expect(r.stderr).toMatch(
-      /error layout\.overflow s01\.sh01\.title\/props @web frame \d+ \[f_[0-9a-f]{12}\]/,
+      /error layout\.density s01\.sh01\.list\/props @web frame \d+ \[f_[0-9a-f]{12}\]/,
     );
     const json = JSON.parse((await run([...base, "--json"], RENDER_ENV)).stdout);
     expect(json.status).toBe("findings");
