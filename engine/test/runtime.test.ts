@@ -126,4 +126,15 @@ describe("the loop runtime (M7.1a)", () => {
     };
     expect(await run()).toEqual(await run());
   });
+
+  it("measures task time on the run's clock, so a fixed time records 0 ms however long a task takes", async () => {
+    const ctx = context([task("a")], stubExecutor());
+    ctx.execute = async () => {
+      await new Promise((r) => setTimeout(r, 5));
+      return { status: "done" };
+    };
+    await new LoopRuntime().run(ctx, new AbortController().signal);
+    const done = lines(join(ctx.dir, "events.jsonl")).find((e) => e.type === "task.done");
+    expect(done?.ms).toBe(0);
+  });
 });

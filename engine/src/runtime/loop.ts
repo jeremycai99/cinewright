@@ -40,7 +40,7 @@ export class LoopRuntime implements WorkflowRuntime {
       if (!next) break;
       ledger.started(next);
       events.emit("task.started", { task: next.id, ...(next.role ? { role: next.role } : {}) });
-      const t0 = Date.now();
+      const t0 = events.clockMs();
       let result: TaskResult;
       try {
         result = await ctx.execute(next, signal);
@@ -50,7 +50,7 @@ export class LoopRuntime implements WorkflowRuntime {
           error: { code: "internal", message: String((error as Error).message ?? error) },
         };
       }
-      const ms = Date.now() - t0;
+      const ms = Math.max(0, events.clockMs() - t0);
       if (result.status === "done" || result.status === "noop") {
         ledger.done(next, result);
         if (result.output !== undefined) outputs[next.id] = result.output;
