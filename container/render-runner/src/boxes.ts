@@ -26,7 +26,7 @@ export const BOXES_EXIT = { ok: 0, input: 2, error: 4 } as const;
 
 const WORK_DIR = "/tmp/cinewright-boxes";
 
-/** One text element's box at a time: its layer, a selector, its text and its rect in px. */
+/** One text element's box at a time: its layer, a selector, its text, its rect and computed font size in px. */
 export interface TextBox {
   layer: string;
   selector: string;
@@ -35,11 +35,12 @@ export interface TextBox {
   y: number;
   width: number;
   height: number;
+  font_size: number;
 }
 
 /**
  * Runs in the page: every element under a `.cw-layer` that holds text of its own, with its
- * transformed bounding box rounded to 0.01 px, in document order.
+ * transformed bounding box and computed font size rounded to 0.01 px, in document order.
  */
 export const READ_BOXES = `(() => {
   const out = [];
@@ -61,7 +62,7 @@ export const READ_BOXES = `(() => {
       if (style.visibility === "hidden" || style.display === "none") continue;
       const rect = el.getBoundingClientRect();
       if (rect.width === 0 || rect.height === 0) continue;
-      out.push({ layer: layerEl.id.replace(/^cw-/, ""), selector: path(el, layerEl), text: own, x: r(rect.x), y: r(rect.y), width: r(rect.width), height: r(rect.height) });
+      out.push({ layer: layerEl.id.replace(/^cw-/, ""), selector: path(el, layerEl), text: own, x: r(rect.x), y: r(rect.y), width: r(rect.width), height: r(rect.height), font_size: r(parseFloat(style.fontSize)) });
     }
   }
   return out;

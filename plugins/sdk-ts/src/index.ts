@@ -31,6 +31,12 @@ export {
   type BackendRendered,
 } from "./kinds/backend.js";
 export {
+  type CriticRunFinding,
+  type CriticRunRequest,
+  type CriticRunResult,
+  criticKind,
+} from "./kinds/critic.js";
+export {
   type KindMethod,
   type KindSpec,
   type SampleSpan,
