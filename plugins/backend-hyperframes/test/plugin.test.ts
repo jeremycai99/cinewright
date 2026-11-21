@@ -51,6 +51,7 @@ describe("the backend plugin (M5.4a)", () => {
         "backend.html",
         "render.composition",
         "render.keyframes",
+        "render.check",
         "render.plan",
         "render.segment",
         "render.shot",

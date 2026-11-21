@@ -8,6 +8,7 @@ packages:
   - plugins/audio-ffmpeg
   - plugins/export-mp4
   - plugins/export-captions
+  - plugins/critic-layout
   - container/render-runner
   - packs
   - components

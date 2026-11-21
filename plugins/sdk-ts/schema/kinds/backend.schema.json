@@ -238,6 +238,83 @@
           "type": "array"
         }
       }
+    },
+    "check_request": {
+      "allOf": [
+        {
+          "$ref": "#/$defs/common"
+        }
+      ],
+      "type": "object",
+      "required": ["shot", "image"],
+      "properties": {
+        "shot": {
+          "$ref": "#/$defs/id"
+        },
+        "image": {
+          "type": "string",
+          "minLength": 1
+        }
+      }
+    },
+    "check_result": {
+      "description": "render.check (M6.1a): HyperFrames check and text boxes at the shot's keyframes, cached in the render's cache entry as `check/check.json` (file).",
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["file", "failures", "boxes", "hit"],
+      "properties": {
+        "file": {
+          "type": "string",
+          "minLength": 1
+        },
+        "failures": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "required": ["section", "code", "severity", "message"],
+            "properties": {
+              "section": {
+                "type": "string"
+              },
+              "code": {
+                "type": "string"
+              },
+              "severity": {
+                "type": "string"
+              },
+              "message": {
+                "type": "string"
+              },
+              "selector": {
+                "type": "string"
+              },
+              "time": {
+                "type": "number"
+              }
+            }
+          }
+        },
+        "boxes": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": ["frame", "boxes"],
+            "properties": {
+              "frame": {
+                "type": "integer",
+                "minimum": 0
+              },
+              "boxes": {
+                "type": "array"
+              }
+            }
+          }
+        },
+        "hit": {
+          "type": "boolean"
+        }
+      }
     }
   }
 }

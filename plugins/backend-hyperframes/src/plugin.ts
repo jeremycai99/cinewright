@@ -21,6 +21,7 @@ import {
 } from "@cinewright/core";
 import type { Plugin, PluginError, PluginRequest, PluginResponse } from "@cinewright/plugin-sdk";
 import { projectAssets } from "./assets.js";
+import { checkShot } from "./check.js";
 import { type Compiled, compileShot, planShot } from "./compile.js";
 import { CompileError } from "./errors.js";
 import { captureKeyframes } from "./keyframes.js";
@@ -39,6 +40,7 @@ const METHODS = [
   "render.shot",
   "render.segment",
   "render.keyframes",
+  "render.check",
 ] as const;
 type Method = (typeof METHODS)[number];
 
@@ -99,7 +101,7 @@ export function toPluginError(error: unknown): PluginResponse {
 }
 
 /**
- * The HyperFrames backend (invariant 5, M5.4a). Five methods over the M3 functions; every one
+ * The HyperFrames backend (invariant 5, M5.4a). Six methods over the M3 functions; every one
  * takes the project folder, ids and the solved timing (D32). Compile and timing errors are
  * `invalid_request` with `data.issues`; render failures are `provider_error` with `data.rule`,
  * retryable only for `render.failed`.
@@ -279,6 +281,19 @@ export function createPlugin(): Plugin {
         key: renderCacheKey(compiled, info),
         keyframes: await captureKeyframes({ compiled, rendered, renderer: info }),
       }));
+    },
+    async "render.check"(params) {
+      const ctx = await context(params);
+      const info = await renderer(ctx.p.image);
+      return shot(ctx, (params as { shot: string }).shot, async (compiled, rendered) => {
+        const { file, doc, hit } = await checkShot({ compiled, rendered, renderer: info });
+        return {
+          file,
+          hit,
+          failures: doc.failures,
+          boxes: doc.samples.map((s) => ({ frame: s.frame, boxes: s.boxes })),
+        };
+      });
     },
   };
 

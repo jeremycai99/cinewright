@@ -118,6 +118,7 @@ async function options(extra: Partial<RenderOptions> = {}): Promise<RenderOption
       sfx: [],
       backend: await findPlugins("backend", search),
       exporter: await findPlugins("exporter", search),
+      critic: await findPlugins("critic", search),
     },
     pack: PACK,
     catalog: CATALOG,
@@ -140,6 +141,7 @@ describe("the render pipeline (M5.4b)", () => {
       "mix@web",
       "captions@web",
       "assemble@web",
+      "critique@web",
     ]);
   });
 
@@ -187,6 +189,9 @@ describe.skipIf(!CONTAINERS)("the render pipeline in the render image (M5.4b)", 
           synthetic_voice: true,
         });
         expect(first.deliverables[d]?.frames).toBeGreaterThan(0);
+        const critiqued = first.deliverables[d]?.critique;
+        expect(existsSync(critiqued?.file ?? "")).toBe(true);
+        expect(critiqued?.findings.filter((f) => f.severity === "error")).toEqual([]);
       }
 
       const second = await runRender(store, await options());
@@ -210,6 +215,10 @@ describe.skipIf(!CONTAINERS)("the render pipeline in the render image (M5.4b)", 
           "segment:s01@social",
           "assemble@web",
           "assemble@social",
+          "check:s02.sh01@web",
+          "check:s02.sh01@social",
+          "critique:critic_layout@web",
+          "critique:critic_layout@social",
         ].sort(),
       );
     },

@@ -9,13 +9,14 @@ import { findProject, openStore } from "../project.js";
 import { pluginPath } from "./narrate.js";
 
 export const RENDER_USAGE =
-  "usage: cinewright render [--deliverable <id>]... [--until narrate|timing|compose|shots|mix|captions|assemble] [--retake <line>]... [--provider <id>] [--out <dir>] [--image <ref>] [--plugins <dir>]... [--project <dir>] [--json]";
+  "usage: cinewright render [--deliverable <id>]... [--until narrate|timing|compose|shots|mix|captions|assemble|critique] [--no-critics] [--retake <line>]... [--provider <id>] [--out <dir>] [--image <ref>] [--plugins <dir>]... [--project <dir>] [--json]";
 
 /**
  * `cinewright render` (M5.4b): every non-agent job in order (narrate, timing, compose, shots,
- * mix, captions, assemble), re-doing only what an edit changed. Prints a report of every step
- * with its key and whether its cache hit. Exit 3 for IR and compile findings, 8 for a render
- * failure, 9 for a provider.
+ * mix, captions, assemble), re-doing only what an edit changed, then the critique step (M6.1a)
+ * unless `--no-critics`. Prints a report of every step with its key and whether its cache hit.
+ * Exit 3 for IR and compile findings, 8 for a render failure, 9 for a provider, 10 when a critic
+ * reports an error finding.
  */
 export async function render(argv: string[], io: Io): Promise<number> {
   const { values } = parse(argv, {
@@ -28,6 +29,7 @@ export async function render(argv: string[], io: Io): Promise<number> {
     plugins: { type: "string", multiple: true },
     project: { type: "string" },
     json: { type: "boolean" },
+    "no-critics": { type: "boolean" },
   });
   const image = values.image ?? io.env.CINEWRIGHT_IMAGE;
   if (!image) throw new UsageError("--image <ref> (or CINEWRIGHT_IMAGE) is required");
@@ -52,6 +54,7 @@ export async function render(argv: string[], io: Io): Promise<number> {
       ...(values.retake ? { retake: values.retake } : {}),
       ...(values.provider ? { provider: values.provider } : {}),
       ...(values.out ? { out: resolve(io.cwd, values.out) } : {}),
+      ...(values["no-critics"] ? { critics: false } : {}),
       image,
       plugins: {
         tts: await findPlugins("tts", search),
@@ -60,23 +63,34 @@ export async function render(argv: string[], io: Io): Promise<number> {
         sfx: await findPlugins("sfx", search),
         backend: await findPlugins("backend", search),
         exporter: await findPlugins("exporter", search),
+        critic: await findPlugins("critic", search),
       },
       pack,
       catalog: loadCatalog(catalogDir),
       env: io.env,
       ...(values.json ? {} : { onEvent: (s) => io.stderr(`${s.hit ? "hit " : "made"} ${s.id}\n`) }),
     });
-    if (values.json) printJson(io, { status: "ok", ...report });
+    const critiques = Object.values(report.deliverables).flatMap((d) =>
+      d.critique ? [d.critique] : [],
+    );
+    const failed = critiques.some((c) => c.findings.some((f) => f.severity === "error"));
+    if (values.json) printJson(io, { status: failed ? "findings" : "ok", ...report });
     else {
       for (const [id, d] of Object.entries(report.deliverables)) {
         io.stdout(
-          `${id}: ${d.file || "(not assembled)"}${d.manifest ? ` (manifest ${d.manifest})` : ""}\n`,
+          `${id}: ${d.file || "(not assembled)"}${d.manifest ? ` (manifest ${d.manifest})` : ""}${d.critique ? ` (report ${d.critique.file})` : ""}\n`,
         );
       }
-      for (const f of report.findings)
-        io.stderr(`${f.severity} ${f.rule} ${f.entity}: ${f.message}\n`);
+      if (critiques.length === 0)
+        for (const f of report.findings)
+          io.stderr(`${f.severity} ${f.rule} ${f.entity}: ${f.message}\n`);
+      for (const [id, d] of Object.entries(report.deliverables))
+        for (const f of d.critique?.findings ?? [])
+          io.stderr(
+            `${f.severity} ${f.rule} ${f.entity}${f.pointer ?? ""} @${id}${f.frames ? ` frame ${f.frames.start}` : ""} [${f.id}]: ${f.message}\n`,
+          );
     }
-    return EXIT.ok;
+    return failed ? EXIT.findings : EXIT.ok;
   } catch (error) {
     if (!(error instanceof PipelineError)) throw error;
     const code =

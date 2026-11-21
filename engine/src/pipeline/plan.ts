@@ -9,6 +9,7 @@ export const STAGES = [
   "mix",
   "captions",
   "assemble",
+  "critique",
 ] as const;
 export type Stage = (typeof STAGES)[number];
 
@@ -20,7 +21,9 @@ export type StepKind =
   | "segment"
   | "mix"
   | "captions"
-  | "assemble";
+  | "assemble"
+  | "check"
+  | "critique";
 
 /** A step of the render pipeline, before it runs (M5.4b). */
 export interface PlannedStep {
@@ -77,6 +80,7 @@ export function planRender(ir: InlinedIr, deliverables?: readonly string[]): Pla
     steps.push({ id: `mix@${deliverable}`, kind: "mix", stage: "mix", deliverable });
     steps.push({ id: `captions@${deliverable}`, kind: "captions", stage: "captions", deliverable });
     steps.push({ id: `assemble@${deliverable}`, kind: "assemble", stage: "assemble", deliverable });
+    steps.push({ id: `critique@${deliverable}`, kind: "critique", stage: "critique", deliverable });
   }
   return steps;
 }

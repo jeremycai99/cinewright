@@ -38,6 +38,12 @@ export {
   type WorkFile,
 } from "./kinds/common.js";
 export {
+  type CriticRunFinding,
+  type CriticRunRequest,
+  type CriticRunResult,
+  criticKind,
+} from "./kinds/critic.js";
+export {
   type AudioResult,
   MUSIC_KIND,
   type MusicRequest,

@@ -30,7 +30,7 @@ export interface BackendRendered {
   hit: boolean;
 }
 
-/** The five methods of a render backend, and the capability a backend that renders must pair. */
+/** The six methods of a render backend, and the capability a backend that renders must pair. */
 export const BACKEND_KIND: KindSpec = {
   name: "backend",
   methods: {
@@ -39,10 +39,12 @@ export const BACKEND_KIND: KindSpec = {
     "render.shot": { request: "shot_request", result: "rendered" },
     "render.segment": { request: "segment_request", result: "rendered" },
     "render.keyframes": { request: "keyframes_request", result: "keyframes_result" },
+    "render.check": { request: "check_request", result: "check_result" },
   },
   requires: {
     "render.shot": ["render.plan"],
     "render.segment": ["render.shot"],
     "render.keyframes": ["render.shot"],
+    "render.check": ["render.shot"],
   },
 };

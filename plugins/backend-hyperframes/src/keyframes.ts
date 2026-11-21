@@ -61,6 +61,8 @@ export interface Keyframe {
     y: number;
     width: number;
     height: number;
+    /** Computed font size in px (render images from M6.1a on). */
+    font_size?: number;
   }[];
 }
 

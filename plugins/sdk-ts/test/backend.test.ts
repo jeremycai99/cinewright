@@ -97,3 +97,23 @@ describe("the backend kit (M5.4a)", () => {
     });
   });
 });
+
+describe("render.check (M6.1a)", () => {
+  it("needs render.shot and returns failures and boxes per frame", async () => {
+    const { validateKindValue } = await import("../src/kinds/common.js");
+    expect(BACKEND_KIND.requires?.["render.check"]).toEqual(["render.shot"]);
+    const result = {
+      file: "/cache/k1/check/check.json",
+      failures: [
+        { section: "runtime", code: "cinewright.overflow", severity: "warning", message: "m" },
+      ],
+      boxes: [{ frame: 12, boxes: [] }],
+      hit: false,
+    };
+    expect(validateKindValue("backend", "check_result", result).ok).toBe(true);
+    expect(
+      validateKindValue("backend", "check_result", { ...result, boxes: [{ frame: -1, boxes: [] }] })
+        .ok,
+    ).toBe(false);
+  });
+});

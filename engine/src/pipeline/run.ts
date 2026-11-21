@@ -3,6 +3,7 @@ import { tmpdir } from "node:os";
 import { join } from "node:path";
 import {
   type Catalog,
+  type CriticFinding,
   type Finding,
   finding,
   type InlinedIr,
@@ -14,6 +15,7 @@ import {
   type TokenTree,
 } from "@cinewright/core";
 import type { PluginResponse } from "@cinewright/plugin-sdk";
+import { CritiqueError, critique } from "../critics/run.js";
 import { ComposeError, compose } from "../jobs/composer.js";
 import { NarrationError, narrate } from "../jobs/narration.js";
 import { backendFor } from "../plugins/backend.js";
@@ -42,6 +44,8 @@ export interface DeliverableReport {
   assembly_key: string;
   shots: { id: string; backend: string; version: string; key: string }[];
   manifest?: string;
+  /** The critique step's report (M6.1a): its file and its sorted findings. */
+  critique?: { file: string; findings: CriticFinding[] };
 }
 
 export interface RenderReport {
@@ -63,6 +67,8 @@ export interface RenderOptions {
   image: string;
   /** Copy each deliverable's files and manifest here. */
   out?: string;
+  /** Run the critique step after assembly (default true; `--no-critics`). */
+  critics?: boolean;
   plugins: {
     tts: readonly FoundPlugin[];
     stt: readonly FoundPlugin[];
@@ -70,6 +76,7 @@ export interface RenderOptions {
     sfx: readonly FoundPlugin[];
     backend: readonly FoundPlugin[];
     exporter: readonly FoundPlugin[];
+    critic?: readonly FoundPlugin[];
   };
   pack: { tokens: TokenTree };
   catalog: Catalog;
@@ -97,11 +104,13 @@ const reached = (until: Stage, stage: Stage) => STAGES.indexOf(stage) <= STAGES.
  * `cinewright render` (M5.4b): every non-agent job in order, serially, re-doing only what an
  * edit changed. Narration and the Composer are the M4 jobs; timing is `solveTiming`; shots,
  * segments, the mix, captions and assembly go through plugins, whose caches decide hits.
- * Error findings stop the run after the step that reports them.
+ * Error findings stop the run after the step that reports them. Last, unless `critics` is false,
+ * the critique step grades each deliverable and writes its report (M6.1a); its error findings do
+ * not stop the run, the caller decides (`cinewright render` exits 10).
  */
 export async function runRender(store: Store, options: RenderOptions): Promise<RenderReport> {
   const env = options.env ?? process.env;
-  const until = options.until ?? "assemble";
+  const until = options.until ?? (options.critics === false ? "assemble" : "critique");
   const steps: StepRecord[] = [];
   const findings: Finding[] = [];
   const record = (step: StepRecord) => {
@@ -230,6 +239,27 @@ export async function runRender(store: Store, options: RenderOptions): Promise<R
           `${JSON.stringify(manifestFor(store, deliverable, entry, options.image), null, 2)}\n`,
         );
         entry.manifest = manifest;
+      }
+      if (options.critics !== false && reached(until, "critique")) {
+        const entry = deliverables[deliverable] as DeliverableReport;
+        try {
+          const done = await critique(store, {
+            deliverable,
+            report: entry,
+            timing,
+            image: options.image,
+            backends: options.plugins.backend,
+            critics: options.plugins.critic ?? [],
+            pool,
+            findings,
+            record,
+          });
+          entry.critique = { file: done.file, findings: done.findings };
+        } catch (error) {
+          if (error instanceof CritiqueError)
+            throw new PipelineError("render", error.step, error.message, [], error.data);
+          throw error;
+        }
       }
     }
   } finally {

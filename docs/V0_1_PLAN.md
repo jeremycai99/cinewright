@@ -8,7 +8,7 @@ Scope comes from the decision log in `DESIGN_SPEC.md`, including D25–D41 from 
 
 **In:** explainer and short ad, 15–60 s, 16:9 and 9:16 (one or both per project, D28), a single narrator (D7) · Guided autonomy with gates at script, storyboard (shot list plus keyframe stills of the real compositions) and final (D8, D38) · HyperFrames backend and compositor (D10) · neutral default pack plus one contrasting pack (D39) · transitions: cut, cross-dissolve and one mask/wipe, rendered as segments (D34) · narration, one music provider plus a local library, mixer, sidecar and burned-in captions (D35, D38) · deterministic critics, Claude vision critique and the fix loop · the orchestration engine and v0.1 agent subset (§Multi-agent orchestration) · CLI · neutral benchmark v0, tiers A and B (D36).
 
-**Out (later milestones):** Blender backend (v0.3) · multi-voice dialogue, cast bible beyond one narrator (v0.2) · music generation beyond one provider + library (v0.2) · generative video, lip sync, render-guided generation (v0.4) · Studio UI (v0.3) · OTIO/FCPXML, SDK, MCP server (v0.5) · Remotion plugin (optional, any time after v0.1) · proxy workflow (never, D23) · Composer agent (v0.2; a rules-based job fills the role in v0.1) · Style Designer agent and pack derivation (v0.3) · image-based storyboard frames and the animatic gate (v0.3) · untrusted third-party plugins and sandboxing (v0.5).
+**Out (later milestones):** Blender backend (v0.3) · multi-voice dialogue, cast bible beyond one narrator (v0.2) · music generation beyond one provider + library (v0.2) · generative video, lip sync, render-guided generation (v0.4) · Studio UI (v0.3) · OTIO/FCPXML, SDK, MCP server (v0.5) · Remotion plugin (optional, any time after v0.1) · proxy workflow (never, D23) · Composer agent (v0.2; a rules-based job fills the role in v0.1) · Style Designer agent and pack derivation (v0.3) · image-based storyboard frames and the animatic gate (v0.3) · untrusted third-party plugins and sandboxing (v0.5) · the flashing check, WCAG 2.3.1 (with the accessibility critic; the v0.1 components have no strobing preset).
 
 ## Exit gate
 
@@ -406,7 +406,7 @@ sequenceDiagram
 
 ### Critique and fix loop
 
-Each finding carries type, severity (`blocking` or `warning`), entity path, frame range, evidence and a signature (type + path + normalized evidence). The critic orchestrator dedupes findings, assigns the first owner below, and runs a deterministic fixer first where one exists.
+Each finding carries type, severity (`error` or `warning`; "blocking" in this plan means `error`), entity path, frame range, evidence and a signature (type + path + the part of the evidence that persists with the defect; `core/src/findings.ts`, M6.1a). The critic orchestrator dedupes findings, assigns the first owner below, and runs a deterministic fixer first where one exists.
 
 | Finding | First owner | Then |
 | --- | --- | --- |

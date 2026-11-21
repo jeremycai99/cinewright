@@ -9,7 +9,8 @@
     "render.composition",
     "render.shot",
     "render.segment",
-    "render.keyframes"
+    "render.keyframes",
+    "render.check"
   ],
   "cost_model": {
     "unit": "free"

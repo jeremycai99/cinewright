@@ -1,0 +1,14 @@
+{
+  "schema_version": 1,
+  "id": "stub_check",
+  "version": "0.1.0",
+  "kind": "backend",
+  "capabilities": ["backend.html", "render.plan", "render.shot", "render.check"],
+  "cost_model": { "unit": "free" },
+  "latency_class": "batch",
+  "output_license": { "terms": "Apache-2.0", "commercial_use": true },
+  "secrets": [],
+  "runtime": { "kind": "in_process", "entry": "index.ts" },
+  "concurrency": { "max_parallel": 1 },
+  "rate_limits": []
+}
