@@ -1,0 +1,22 @@
+{
+  "schema_version": 1,
+  "id": "tts_kokoro",
+  "version": "0.1.0",
+  "kind": "tts",
+  "capabilities": ["tts.synthesize"],
+  "cost_model": { "unit": "free" },
+  "latency_class": "batch",
+  "output_license": {
+    "terms": "Speech generated locally with Kokoro-82M (Apache-2.0 weights); no restriction on the output",
+    "commercial_use": true
+  },
+  "secrets": [],
+  "runtime": {
+    "kind": "subprocess",
+    "command": ["python", "-m", "cinewright_tts_kokoro.plugin"],
+    "cwd": "src",
+    "container": { "image": "audio" }
+  },
+  "concurrency": { "max_parallel": 1 },
+  "rate_limits": []
+}
