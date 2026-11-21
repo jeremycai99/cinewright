@@ -4,6 +4,7 @@ packages:
   - engine
   - plugins/sdk-ts
   - plugins/backend-hyperframes
+  - plugins/library-audio
   - container/render-runner
   - packs
   - components

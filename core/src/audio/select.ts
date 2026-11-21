@@ -1,5 +1,6 @@
 import { createHash } from "node:crypto";
 import { sha256Hash } from "../canonical/hash.js";
+import { resolveEntity, type TokenTree } from "../cascade/resolve.js";
 import type { Asset, CastMember, Line } from "../generated/ir.js";
 import type { InlinedIr } from "../ir/inlined.js";
 
@@ -128,4 +129,58 @@ export function selectedTake(ir: InlinedIr, lineId: string): { take?: Asset; sta
     current = undefined;
   }
   return { take, stale: current === undefined || take.provenance.request_hash !== current };
+}
+
+/** The provider-neutral part of a music request for one sequence (M4.3a). */
+export interface MusicAsk {
+  genre: string;
+  mood: string;
+  brief?: string;
+  bpm_min: number;
+  bpm_max: number;
+  duration_ms: number;
+  vocals: false;
+}
+
+/**
+ * The music request for a sequence: genre and BPM range from the cascade-resolved
+ * `sound.music.*` tokens, mood from the token plus the sequence's own mood, the brief from its
+ * `music_bed` text, its length (`frames` at the project rate), and `vocals: false`.
+ */
+export function musicAsk(
+  ir: InlinedIr,
+  sequenceId: string,
+  pack: { tokens: TokenTree },
+  frames: number,
+): MusicAsk {
+  const sequence = (ir.sequences.value ?? []).find((s) => s.id === sequenceId);
+  if (!sequence) throw new TakeError(`no sequence ${sequenceId}`);
+  const deliverable = (ir.deliverables.value ?? [])[0];
+  if (!deliverable) throw new TakeError("the project has no deliverable");
+  const tokens = resolveEntity(ir, sequenceId, deliverable.id, pack.tokens).tokens;
+  const token = (path: string) => tokens[path]?.value;
+  const profile = deliverable.profile.value;
+  const fps = profile === undefined ? undefined : ir.profiles[profile]?.body.frame_rate;
+  if (!fps) throw new TakeError("the project has no frame rate");
+  const mood = [String(token("sound.music.mood")), ...(sequence.mood?.value ?? [])].join(", ");
+  const brief = sequence.music_bed?.value;
+  return {
+    genre: String(token("sound.music.genre")),
+    mood,
+    ...(brief === undefined ? {} : { brief }),
+    bpm_min: Number(token("sound.music.bpm_min")),
+    bpm_max: Number(token("sound.music.bpm_max")),
+    duration_ms: Math.ceil((frames * 1000 * fps.den) / fps.num),
+    vocals: false,
+  };
+}
+
+/** The request key of a music bed or sound effect: the JCS hash of the ask and the provider. */
+export function audioKey(kind: "music" | "sfx", ask: object, providerId: string): string {
+  return sha256Hash({ kind, ask, provider: providerId });
+}
+
+/** The asset id of bed `n` for a sequence, or of effect `n` for a scene (decision 16). */
+export function audioId(kind: "music" | "sfx", owner: string, key: string, n: number): string {
+  return `${kind}_${owner}_${digestHex(`${key}:${n}`).slice(0, 8)}`;
 }

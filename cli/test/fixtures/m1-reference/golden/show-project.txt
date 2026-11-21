@@ -26,6 +26,7 @@ sequences:  # user
     title: "The problem"  # user
     mood: ~  # open
     music_bed: ~  # open
+    music: ~  # open
     style:
       overrides: {}
     scenes:  # user

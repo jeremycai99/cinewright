@@ -1,0 +1,17 @@
+{
+  "schema_version": 1,
+  "id": "library_audio",
+  "version": "0.1.0",
+  "kind": "music",
+  "capabilities": ["music.request", "sfx.request"],
+  "cost_model": { "unit": "free" },
+  "latency_class": "interactive",
+  "output_license": {
+    "terms": "Each item carries its own licence from library.json; a library item without one is rejected",
+    "commercial_use": false
+  },
+  "secrets": ["CINEWRIGHT_AUDIO_LIBRARY_PATH"],
+  "runtime": { "kind": "in_process", "entry": "./dist/index.js" },
+  "concurrency": { "max_parallel": 4 },
+  "rate_limits": []
+}

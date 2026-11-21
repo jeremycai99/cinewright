@@ -1,7 +1,11 @@
 export {
+  audioId,
+  audioKey,
   findLine,
   lexiconUsed,
   lineTakes,
+  type MusicAsk,
+  musicAsk,
   projectSampleRate,
   scriptLines,
   selectedTake,

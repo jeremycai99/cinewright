@@ -1,3 +1,3 @@
 ~ demo /brief: ~ → "A 30-second explainer on why build pipelines break as teams grow."  [user]
 ~ demo /autonomy: ~ → guided  [user]
-applied revision 7 (sha256:ff5aeeaf44a9eec26741ab937d968706a6bd5110a19d30d1e9de651a8682f2a4)
+applied revision 7 (sha256:77e756470714c8aa0949a6486a6a2e96082e82498e9af84ec258fbe322104400)

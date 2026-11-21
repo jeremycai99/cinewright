@@ -1,5 +1,12 @@
 export { WavError, type WavInfo, wavInfo } from "./audio/wav.js";
 export {
+  type AudioRef,
+  ComposeError,
+  type ComposeOptions,
+  type ComposeResult,
+  compose,
+} from "./jobs/composer.js";
+export {
   type NarrateOptions,
   type NarrateResult,
   NarrationError,

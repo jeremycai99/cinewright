@@ -66,6 +66,17 @@
         }
       }
     },
+    "music": {
+      "description": "The selected music bed (M4.3a): an asset with role music for this sequence. Written by the Composer job; the user may choose another, and a gate may lock it.",
+      "x-authorable": "field",
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["state"],
+      "properties": {
+        "state": { "$ref": "common.schema.json#/$defs/state" },
+        "value": { "$ref": "common.schema.json#/$defs/id", "x-ref": "asset" }
+      }
+    },
     "style": {
       "$ref": "style.schema.json#/$defs/level_style"
     },

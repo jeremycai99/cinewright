@@ -32,6 +32,12 @@ export {
   type WorkFile,
 } from "./kinds/common.js";
 export {
+  type AudioResult,
+  MUSIC_KIND,
+  type MusicRequest,
+  type SfxRequest,
+} from "./kinds/music.js";
+export {
   type AlignRequest,
   type AlignResult,
   STT_KIND,
