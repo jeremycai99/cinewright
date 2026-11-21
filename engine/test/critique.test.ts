@@ -13,10 +13,11 @@ import {
 } from "@cinewright/core";
 import { afterEach, describe, expect, it } from "vitest";
 import { critique } from "../src/critics/run.js";
+import { narrate } from "../src/jobs/narration.js";
 import type { DeliverableReport, StepRecord } from "../src/pipeline/run.js";
 import { PluginPool } from "../src/plugins/pool.js";
 import { findPlugins } from "../src/plugins/registry.js";
-import { apply, PLUGINS } from "./helpers.js";
+import { apply, narrationProject, PLUGINS, plugins } from "./helpers.js";
 
 const ROOT = fileURLToPath(new URL("../../", import.meta.url));
 const STUBS = fileURLToPath(new URL("./fixtures/critique-plugins/", import.meta.url));
@@ -206,5 +207,114 @@ describe("critique (M6.1a)", () => {
     ]);
     const { findings } = await run(store, { backends: [] });
     expect(findings.map((f) => f.rule)).toEqual(["clearance.consent_missing"]);
+  });
+});
+
+describe("critique and transcripts (M6.1c)", () => {
+  it("freezes a transcript for each selected take once, and the script critic reads it", async () => {
+    const { store } = await narrationProject();
+    const env = { STUB_TTS_TOKEN: "tok-SECRET-0123456789" };
+    await narrate(store, { ...(await plugins()), env });
+    const timing = {
+      table: { fps: { num: 30, den: 1 }, lines: {} },
+      sequences: {},
+      scenes: {},
+      shots: {},
+      frames: 0,
+    };
+    const go = async () => {
+      const pool = new PluginPool({
+        env,
+        workDir: mkdtempSync(join(tmpdir(), "cw-pool-")),
+        callTimeoutMs: 60_000,
+      });
+      const steps: StepRecord[] = [];
+      try {
+        const out = await critique(store, {
+          deliverable: "web_landscape",
+          report: { ...report(), shots: [] },
+          timing: timing as never,
+          image: "unused",
+          backends: [],
+          critics: (await findPlugins("critic", [join(ROOT, "plugins")])).filter(
+            (c) => c.manifest.id === "critic_script",
+          ),
+          stt: (await plugins()).stt,
+          env,
+          pool,
+          record: (s) => steps.push(s),
+        });
+        return { ...out, steps };
+      } finally {
+        await pool.shutdown();
+      }
+    };
+    const first = await go();
+    const transcribed = first.steps.filter((s) => s.kind === "transcribe");
+    expect(transcribed.map((s) => [s.id, s.hit])).toEqual(
+      ["b01.l01", "b01.l02", "b01.l03", "b01.l04", "b01.l05"].map((l) => [
+        `transcribe:${l}`,
+        false,
+      ]),
+    );
+    expect((store.ir().assets.value ?? []).filter((a) => a.role === "transcript")).toHaveLength(5);
+    // The stub recognizer hears "hello" whatever was said.
+    expect(first.findings.map((f) => [f.rule, f.entity])).toEqual(
+      ["b01.l01", "b01.l02", "b01.l03", "b01.l04", "b01.l05"].map((l) => ["stt.mismatch", l]),
+    );
+    const again = await go();
+    expect(again.steps.map((s) => [s.id, s.hit])).toEqual([
+      ...["b01.l01", "b01.l02", "b01.l03", "b01.l04", "b01.l05"].map((l) => [
+        `transcribe:${l}`,
+        true,
+      ]),
+      ["critique@web_landscape", true],
+    ]);
+  });
+});
+
+describe("critique when transcription fails (M6.1c)", () => {
+  it("keeps going, and says why each line has no transcript", async () => {
+    const { store } = await narrationProject();
+    const env = { STUB_TTS_TOKEN: "tok-SECRET-0123456789" };
+    await narrate(store, { ...(await plugins()), env });
+    const pool = new PluginPool({
+      env,
+      workDir: mkdtempSync(join(tmpdir(), "cw-pool-")),
+      callTimeoutMs: 60_000,
+    });
+    try {
+      const { findings } = await critique(store, {
+        deliverable: "web_landscape",
+        report: { ...report(), shots: [] },
+        timing: {
+          table: { fps: { num: 30, den: 1 }, lines: {} },
+          sequences: {},
+          scenes: {},
+          shots: {},
+          frames: 0,
+        } as never,
+        image: "unused",
+        backends: [],
+        critics: (await findPlugins("critic", [join(ROOT, "plugins")])).filter(
+          (c) => c.manifest.id === "critic_script",
+        ),
+        stt: await findPlugins("stt", [
+          fileURLToPath(new URL("./fixtures/broken-stt/", import.meta.url)),
+        ]),
+        env,
+        pool,
+      });
+      expect(findings.map((f) => [f.rule, f.severity, f.entity])).toEqual(
+        ["b01.l01", "b01.l02", "b01.l03", "b01.l04", "b01.l05"].map((l) => [
+          "stt.no_transcript",
+          "warning",
+          l,
+        ]),
+      );
+      expect(findings[0]?.message).toMatch(/stub_stt_broken/);
+    } finally {
+      await pool.shutdown();
+    }
   });
 });

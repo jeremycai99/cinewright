@@ -147,6 +147,9 @@ export class SubprocessPlugin implements Plugin {
     }
     child.stderr.setEncoding("utf8");
     child.stderr.on("data", (chunk: string) => this.stderr.push(chunk));
+    // A command that cannot start (ENOENT) emits `error`, not `exit`; unhandled, it would crash
+    // the host. It surfaces in the start failure's message instead.
+    child.on("error", (error) => this.stderr.push(`${error.message}\n`));
     hookExit();
     children.add(child);
     child.on("exit", () => {
