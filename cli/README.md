@@ -40,6 +40,8 @@ cinewright narrate [--line <id>]... [--retake <line>]... [--provider <id>] [--pl
 
 `timing` solves the timing (M4.2): scenes from the selected takes and the pack's pacing tokens (`sound.voice`), shots tiled across their scene, sequences end to end. It prints the timeline or, with `--json`, the table, spans and findings; `--out` writes the table. Error findings exit 3. `compile` and `render-shot` use the solved timing when `--timing` is not given.
 
+Assets live in the project's content-addressed store, `.cinewright/cas/`. When an asset is missing there, every command fetches it from the read-only remotes in `CINEWRIGHT_CAS_REMOTE` (comma-separated URL templates with a `{hex}` placeholder, `https:` or `file:`; e.g. `https://example.org/cas/{hex}`), tried in order. No credential is sent. A fetched object is stored only if it hashes to the requested hash and is no larger than the asset's recorded size; otherwise the command fails with `cas.remote_corrupt` or `cas.remote_oversized`. A missing asset names the remotes it tried. `uv run cinewright-eval cas-export <project> --to <dir>` writes a project's referenced assets as flat files named by hex, ready to upload to such a remote.
+
 Without `--project`, a command uses the nearest directory upward that holds `cinewright.json`. `--file -` reads the patch from stdin.
 
 ## Patches

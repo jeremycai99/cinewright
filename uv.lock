@@ -12,10 +12,12 @@ resolution-markers = [
 
 [manifest]
 members = [
+    "cinewright-eval",
     "cinewright-ir",
     "cinewright-plugin-sdk",
     "cinewright-stt-whisperx",
     "cinewright-tools",
+    "cinewright-tts-kokoro",
 ]
 
 [manifest.dependency-groups]
@@ -71,6 +73,11 @@ wheels = [
 ]
 
 [[package]]
+name = "cinewright-eval"
+version = "0.0.0"
+source = { editable = "eval" }
+
+[[package]]
 name = "cinewright-ir"
 version = "0.0.0"
 source = { editable = "core/py" }
@@ -111,6 +118,17 @@ dependencies = [
 
 [package.metadata]
 requires-dist = [{ name = "pyyaml", specifier = "==6.0.3" }]
+
+[[package]]
+name = "cinewright-tts-kokoro"
+version = "0.1.0"
+source = { editable = "plugins/tts-kokoro" }
+dependencies = [
+    { name = "cinewright-plugin-sdk" },
+]
+
+[package.metadata]
+requires-dist = [{ name = "cinewright-plugin-sdk", editable = "plugins/sdk-py" }]
 
 [[package]]
 name = "click"
