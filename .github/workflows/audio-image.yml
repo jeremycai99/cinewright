@@ -1,0 +1,58 @@
+# Builds the audio image (M4.0a) from its pinned inputs and publishes it to GHCR.
+# A follow-up PR records the digest and inputs hash in container/audio/image.lock.json.
+name: audio-image
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - container/audio/**
+      # Neither is in the build context (container/audio/.dockerignore).
+      - "!container/audio/image.lock.json"
+      - "!container/audio/README.md"
+      - "!container/audio/spike/**"
+      - .github/workflows/audio-image.yml
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: audio-image
+  cancel-in-progress: false
+
+jobs:
+  publish:
+    runs-on: ubuntu-24.04
+    permissions:
+      contents: read
+      packages: write
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      - uses: astral-sh/setup-uv@68559e99cc807c1eb7e9238fd43a15bba460eec2 # v10.3.3
+        with:
+          version-file: pyproject.toml
+      - run: uv sync --locked
+      - name: Log in to GHCR
+        run: echo "$GH_TOKEN" | docker login ghcr.io --username "$GITHUB_ACTOR" --password-stdin
+        env:
+          GH_TOKEN: ${{ github.token }}
+      - name: Build and push
+        run: |
+          image="$(jq -r .image container/audio/image.lock.json)"
+          uv run --locked cinewright-build-image --kind audio --tag "$image:$GITHUB_SHA" --push
+          digest="$(docker buildx imagetools inspect "$image:$GITHUB_SHA" --format '{{json .Manifest}}' | jq -r .digest)"
+          hash="$(uv run --locked python -c 'from pathlib import Path; from cinewright_tools.container import inputs_hash; print(inputs_hash(Path("."), "audio"))')"
+          lock="$(printf '{\n  "image": "%s",\n  "digest": "%s",\n  "inputs_hash": "%s"\n}' "$image" "$digest" "$hash")"
+          echo "$lock"
+          {
+            echo "## Audio image published"
+            echo
+            echo "Record this in \`container/audio/image.lock.json\`:"
+            echo
+            echo '```json'
+            echo "$lock"
+            echo '```'
+          } >> "$GITHUB_STEP_SUMMARY"

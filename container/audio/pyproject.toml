@@ -1,0 +1,47 @@
+# The audio image's Python environment (M4.0a): TTS and STT only. It has its own lock,
+# resolved for linux/amd64 and CPython 3.12, and is not a member of the root uv workspace.
+[project]
+name = "cinewright-audio"
+version = "0.0.0"
+description = "Python environment and tools of the Cinewright audio image."
+license = "Apache-2.0"
+requires-python = "==3.12.*"
+dependencies = [
+    "torch==2.8.0",
+    "torchaudio==2.8.0",
+    "torchvision==0.23.0",
+    "kokoro==0.9.4",
+    "misaki[en]==0.9.4",
+    "whisperx==3.8.6",
+    "en-core-web-sm==3.8.0",
+]
+
+[project.scripts]
+audio-job = "audio_job.cli:main"
+
+[build-system]
+requires = ["uv_build==0.13.8"]
+build-backend = "uv_build"
+
+[tool.uv]
+required-version = "==0.13.8"
+environments = ["sys_platform == 'linux' and platform_machine == 'x86_64'"]
+
+[tool.uv.build-backend]
+module-root = ""
+module-name = "audio_job"
+
+[tool.uv.sources]
+torch = { index = "pytorch-cpu" }
+torchaudio = { index = "pytorch-cpu" }
+torchvision = { index = "pytorch-cpu" }
+en-core-web-sm = { url = "https://github.com/explosion/spacy-models/releases/download/en_core_web_sm-3.8.0/en_core_web_sm-3.8.0-py3-none-any.whl" }
+
+[[tool.uv.index]]
+name = "pytorch-cpu"
+url = "https://download.pytorch.org/whl/cpu"
+explicit = true
+
+[tool.ruff]
+extend = "../../pyproject.toml"
+target-version = "py312"

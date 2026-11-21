@@ -1,7 +1,9 @@
 import platform
 import shutil
+import subprocess
 from collections.abc import Sequence
 from pathlib import Path
+from typing import Any
 
 import pytest
 
@@ -97,3 +99,23 @@ def test_every_run_has_the_limits() -> None:
     assert after("--security-opt") == "no-new-privileges"
     assert "--read-only" in command
     assert after("--tmpfs") == "/tmp:rw,exec,size=2048m"
+
+
+def test_run_is_killed_by_name_at_its_timeout(
+    fake_docker: list[Sequence[str]], monkeypatch: pytest.MonkeyPatch, tmp_path: Path
+) -> None:
+    def slow_run(command: Sequence[str], **kwargs: Any) -> subprocess.CompletedProcess[str]:
+        fake_docker.append(command)
+        if list(command[:2]) == ["/usr/bin/docker", "run"]:
+            assert kwargs["timeout"] == 5
+            raise subprocess.TimeoutExpired(command, 5)
+        return subprocess.CompletedProcess(command, 0, "", "")
+
+    monkeypatch.setattr(subprocess, "run", slow_run)
+    result = run_render("img", HELLO, tmp_path / "out", timeout=5)
+    run, kill = list(fake_docker[-2]), list(fake_docker[-1])
+    name = run[run.index("--name") + 1]
+    assert name.startswith("cinewright-render-")
+    assert kill == ["/usr/bin/docker", "kill", name]
+    assert result.exit_code == 124
+    assert "timed out after 5 s" in result.stderr

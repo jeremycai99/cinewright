@@ -1,4 +1,4 @@
-"""The render image's digest lock (container/image.lock.json).
+"""Image digest locks (container/image.lock.json and container/audio/image.lock.json).
 
 CI publishes the image on main; a follow-up PR records its digest and inputs hash here.
 The check ties the three together: the locked digest, the inputs-hash label baked into that
@@ -16,14 +16,18 @@ from collections.abc import Mapping
 from pathlib import Path
 from typing import cast
 
-from cinewright_tools.container import inputs_hash
+from cinewright_tools.container import AUDIO_DIR, ImageKind, inputs_hash
 
 LOCK_FILE = "container/image.lock.json"
+LOCK_FILES: dict[ImageKind, str] = {"render": LOCK_FILE, "audio": f"{AUDIO_DIR}/image.lock.json"}
 LABEL = "org.cinewright.inputs-hash"
 
 
 def check_image_lock(
-    lock: Mapping[str, str | None], label_inputs_hash: str | None, tree_inputs_hash: str
+    lock: Mapping[str, str | None],
+    label_inputs_hash: str | None,
+    tree_inputs_hash: str,
+    lock_file: str = LOCK_FILE,
 ) -> list[str]:
     """Problems with the lock, or an empty list. An unpublished lock (both null) passes.
 
@@ -35,7 +39,7 @@ def check_image_lock(
     if digest is None and locked is None:
         return []
     if digest is None or locked is None:
-        return [f"{LOCK_FILE} must set both digest and inputs_hash, or neither"]
+        return [f"{lock_file} must set both digest and inputs_hash, or neither"]
     problems: list[str] = []
     if label_inputs_hash != locked:
         built_from = label_inputs_hash or "unknown inputs (no label)"
@@ -43,7 +47,9 @@ def check_image_lock(
     return problems
 
 
-def stale_lock_notice(lock: Mapping[str, str | None], tree_inputs_hash: str) -> str | None:
+def stale_lock_notice(
+    lock: Mapping[str, str | None], tree_inputs_hash: str, lock_file: str = LOCK_FILE
+) -> str | None:
     """A notice when the tree's container inputs differ from the locked image's, else None.
 
     Not a failure: a PR that changes a container input (a lockfile, for example) cannot
@@ -55,21 +61,24 @@ def stale_lock_notice(lock: Mapping[str, str | None], tree_inputs_hash: str) -> 
         return None
     return (
         f"container inputs changed ({tree_inputs_hash}) since the locked image ({locked}): "
-        f"publish and update {LOCK_FILE}"
+        f"publish and update {lock_file}"
     )
 
 
 def main(argv: list[str] | None = None) -> int:
     parser = argparse.ArgumentParser(
         prog="cinewright-check-image-lock",
-        description="Pull the locked render image and check its inputs-hash label and the tree.",
+        description="Pull a locked image and check its inputs-hash label and the tree.",
     )
+    parser.add_argument("--kind", choices=tuple(LOCK_FILES), default="render")
     parser.add_argument("--repo", type=Path, default=Path("."))
     args = parser.parse_args(argv)
+    kind: ImageKind = args.kind
+    lock_file = LOCK_FILES[kind]
     lock = cast(
-        dict[str, str | None], json.loads((args.repo / LOCK_FILE).read_text(encoding="utf-8"))
+        dict[str, str | None], json.loads((args.repo / lock_file).read_text(encoding="utf-8"))
     )
-    tree = inputs_hash(args.repo)
+    tree = inputs_hash(args.repo, kind)
     label: str | None = None
     if lock.get("digest") is not None:
         docker = shutil.which("docker")
@@ -91,10 +100,10 @@ def main(argv: list[str] | None = None) -> int:
         ]
         out = subprocess.run(inspect, capture_output=True, text=True, check=False).stdout.strip()
         label = out or None
-    problems = check_image_lock(lock, label, tree)
+    problems = check_image_lock(lock, label, tree, lock_file)
     for problem in problems:
         print(problem)
-    notice = stale_lock_notice(lock, tree)
+    notice = stale_lock_notice(lock, tree, lock_file)
     if notice:
         # GitHub Actions shows ::warning:: lines as annotations; elsewhere they read as text.
         print(f"::warning::{notice}")

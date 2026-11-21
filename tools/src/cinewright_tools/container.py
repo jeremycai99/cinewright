@@ -14,8 +14,13 @@ import platform
 import shutil
 import subprocess
 import sys
+import uuid
+from collections.abc import Iterable
 from dataclasses import dataclass
 from pathlib import Path
+from typing import Literal
+
+ImageKind = Literal["render", "audio"]
 
 IMAGE_PLATFORM = "linux/amd64"
 BASELINE_MACHINES = frozenset({"x86_64", "amd64", "AMD64"})
@@ -36,8 +41,30 @@ RUNNER_EXCLUDED_DIRS = frozenset({"node_modules", "dist", "test"})
 RUNNER_EXCLUDED_SUFFIXES = (".tsbuildinfo",)  # local build artifacts, ignored by git
 
 
-def inputs_hash(repo_root: Path) -> str:
-    """SHA-256 over sorted (relative path, sha256 of bytes) pairs of the image inputs."""
+# The audio image's build context is its own folder (container/audio), minus what its
+# .dockerignore excludes. Keep the two in step.
+AUDIO_DIR = "container/audio"
+AUDIO_EXCLUDED = frozenset({"README.md", "image.lock.json", "spike", "__pycache__", ".venv"})
+
+
+def inputs_hash(repo_root: Path, image: ImageKind = "render") -> str:
+    """SHA-256 over sorted (relative path, sha256 of bytes) pairs of the image's inputs."""
+    files = _audio_inputs(repo_root) if image == "audio" else _render_inputs(repo_root)
+    return files_digest(
+        (path.relative_to(repo_root).as_posix(), hashlib.sha256(path.read_bytes()).hexdigest())
+        for path in files
+    )
+
+
+def files_digest(pairs: Iterable[tuple[str, str]]) -> str:
+    """SHA-256 over sorted ``path\0sha256\n`` lines: one digest for a set of files."""
+    digest = hashlib.sha256()
+    for rel, file_digest in sorted(pairs):
+        digest.update(f"{rel}\0{file_digest}\n".encode())
+    return digest.hexdigest()
+
+
+def _render_inputs(repo_root: Path) -> list[Path]:
     files = [repo_root / rel for rel in INPUT_FILES]
     runner = repo_root / RUNNER_DIR
     for path in runner.rglob("*"):
@@ -48,14 +75,16 @@ def inputs_hash(repo_root: Path) -> str:
             and not path.name.endswith(RUNNER_EXCLUDED_SUFFIXES)
         ):
             files.append(path)
-    pairs = sorted(
-        (path.relative_to(repo_root).as_posix(), hashlib.sha256(path.read_bytes()).hexdigest())
-        for path in files
-    )
-    digest = hashlib.sha256()
-    for rel, file_digest in pairs:
-        digest.update(f"{rel}\0{file_digest}\n".encode())
-    return digest.hexdigest()
+    return files
+
+
+def _audio_inputs(repo_root: Path) -> list[Path]:
+    audio = repo_root / AUDIO_DIR
+    return [
+        path
+        for path in audio.rglob("*")
+        if path.is_file() and not AUDIO_EXCLUDED.intersection(path.relative_to(audio).parts)
+    ]
 
 
 @dataclass(frozen=True)
@@ -71,7 +100,41 @@ class DockerUnavailableError(RuntimeError):
     pass
 
 
-def run_render(image: str, composition: Path, out_dir: Path, fmt: str = "mp4") -> RenderResult:
+# A run that outlives its timeout is stopped by container name (audit G7); killing the
+# docker CLI process alone would leave the container running.
+DEFAULT_TIMEOUT_S = 1800
+TIMEOUT_EXIT = 124
+
+
+@dataclass(frozen=True)
+class _Run:
+    returncode: int
+    stderr: str
+
+
+def _run_named(docker: str, command: list[str], timeout: float) -> _Run:
+    """Run ``command`` (a ``docker run``) under a unique name, killing it at ``timeout``."""
+    name = f"cinewright-render-{uuid.uuid4().hex[:12]}"
+    command = [*command[:2], "--name", name, *command[2:]]
+    try:
+        result = subprocess.run(
+            command, capture_output=True, text=True, check=False, timeout=timeout
+        )
+    except subprocess.TimeoutExpired:
+        subprocess.run([docker, "kill", name], capture_output=True, text=True, check=False)
+        return _Run(
+            TIMEOUT_EXIT, f"container {name} timed out after {timeout:g} s and was killed\n"
+        )
+    return _Run(result.returncode, result.stderr)
+
+
+def run_render(
+    image: str,
+    composition: Path,
+    out_dir: Path,
+    fmt: str = "mp4",
+    timeout: float = DEFAULT_TIMEOUT_S,
+) -> RenderResult:
     """Render ``composition`` in ``image`` with the network off; outputs land in ``out_dir``."""
     docker = shutil.which("docker")
     if docker is None:
@@ -81,7 +144,7 @@ def run_render(image: str, composition: Path, out_dir: Path, fmt: str = "mp4") -
     command += ["--mount", bind_mount(composition, "/job/in", readonly=True)]
     command += ["--mount", bind_mount(out_dir, "/job/out", readonly=False)]
     command += [image, "--in", "/job/in", "--out", "/job/out", "--format", fmt]
-    result = subprocess.run(command, capture_output=True, text=True, check=False)
+    result = _run_named(docker, command, timeout)
     return RenderResult(
         exit_code=result.returncode,
         out_dir=out_dir,
@@ -126,7 +189,13 @@ def docker_run_base(docker: str) -> list[str]:
     return command
 
 
-def run_check(image: str, composition: Path, out_dir: Path, at: list[float]) -> CheckResult:
+def run_check(
+    image: str,
+    composition: Path,
+    out_dir: Path,
+    at: list[float],
+    timeout: float = DEFAULT_TIMEOUT_S,
+) -> CheckResult:
     """Run ``render-job check`` (HyperFrames check, M2.4b) on ``composition`` at ``at`` seconds.
 
     Outputs land in ``out_dir``: ``check.json``, ``failures.json``, ``check-log.txt``.
@@ -140,7 +209,7 @@ def run_check(image: str, composition: Path, out_dir: Path, at: list[float]) -> 
     command += ["--mount", bind_mount(out_dir, "/job/out", readonly=False)]
     times = ",".join(f"{t:g}" for t in at)
     command += [image, "check", "--in", "/job/in", "--out", "/job/out", "--at", times]
-    result = subprocess.run(command, capture_output=True, text=True, check=False)
+    result = _run_named(docker, command, timeout)
     raw = _read(out_dir / "failures.json")
     failures: list[dict[str, object]] = json.loads(raw) if raw else []
     return CheckResult(
