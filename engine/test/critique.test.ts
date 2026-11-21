@@ -109,7 +109,10 @@ async function run(store: Store, extra: Partial<Parameters<typeof critique>[1]> 
       timing,
       image: "unused",
       backends: await findPlugins("backend", [STUBS]),
-      critics: await findPlugins("critic", [PLUGINS, join(ROOT, "plugins")]),
+      // The media critic needs a real delivered file; the pipeline's container test runs it.
+      critics: (await findPlugins("critic", [PLUGINS, join(ROOT, "plugins")])).filter(
+        (c) => c.manifest.id === "critic_layout",
+      ),
       pool,
       record: (s) => steps.push(s),
       ...extra,

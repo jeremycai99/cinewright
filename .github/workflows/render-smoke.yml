@@ -152,6 +152,18 @@ jobs:
             --reporter=default --reporter=json --outputFile="$RUNNER_TEMP/assembly-tests.json"
           jq -e '.numPendingTests == 0 and .numTodoTests == 0' "$RUNNER_TEMP/assembly-tests.json" \
             || { echo "assembly container tests: some tests were skipped"; exit 1; }
+      # The media critic's container tests (M6.1b): loudness, true peak after encoding and the
+      # format check on files synthesized in the image, none skipped.
+      - name: Media critic container tests, none skipped
+        if: matrix.side == 'a'
+        env:
+          CINEWRIGHT_CONTAINER_TESTS: "1"
+          CINEWRIGHT_IMAGE: ${{ env.IMAGE }}
+        run: |
+          pnpm --filter @cinewright/critic-media exec vitest run test/media.container.test.ts \
+            --reporter=default --reporter=json --outputFile="$RUNNER_TEMP/media-tests.json"
+          jq -e '.numPendingTests == 0 and .numTodoTests == 0' "$RUNNER_TEMP/media-tests.json" \
+            || { echo "media critic container tests: some tests were skipped"; exit 1; }
       - name: Record hashes and CPU
         run: |
           uv run --locked cinewright-render-in-container --image "$IMAGE" \

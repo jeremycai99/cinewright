@@ -39,6 +39,7 @@ describe.skipIf(!ENABLED)("render.check in the container (M6.1a)", () => {
       /layer=s03\.sh01\.title/,
     );
     expect(doc.layers.find((l) => l.id === "s03.sh01.title")?.min_text_size).toBeGreaterThan(0);
+    expect(doc.layers.find((l) => l.id === "s03.sh01.title")?.entrance).toBe(true);
     const title = doc.samples.flatMap((s) => s.boxes).filter((b) => b.layer === "s03.sh01.title");
     expect(title.length).toBeGreaterThan(0);
     for (const b of title) expect(b.font_size).toBeGreaterThan(0);

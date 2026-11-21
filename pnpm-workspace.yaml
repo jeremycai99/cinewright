@@ -9,6 +9,7 @@ packages:
   - plugins/export-mp4
   - plugins/export-captions
   - plugins/critic-layout
+  - plugins/critic-media
   - container/render-runner
   - packs
   - components

@@ -1,0 +1,14 @@
+{
+  "schema_version": 1,
+  "id": "critic_media",
+  "version": "0.1.0",
+  "kind": "critic",
+  "capabilities": ["critic.run"],
+  "cost_model": { "unit": "free" },
+  "latency_class": "batch",
+  "output_license": { "terms": "Apache-2.0", "commercial_use": true },
+  "secrets": [],
+  "runtime": { "kind": "in_process", "entry": "./dist/index.js" },
+  "concurrency": { "max_parallel": 2 },
+  "rate_limits": []
+}

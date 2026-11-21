@@ -219,6 +219,8 @@ describe.skipIf(!CONTAINERS)("the render pipeline in the render image (M5.4b)", 
           "check:s02.sh01@social",
           "critique:critic_layout@web",
           "critique:critic_layout@social",
+          "critique:critic_media@web",
+          "critique:critic_media@social",
         ].sort(),
       );
     },
