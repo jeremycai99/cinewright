@@ -11,6 +11,7 @@ on:
       - plugins/sdk-ts/**
       - plugins/sdk-py/**
       - plugins/stt-whisperx/**
+      - plugins/tts-kokoro/**
       - engine/**
       - .github/workflows/audio-smoke.yml
   workflow_dispatch:
@@ -59,7 +60,7 @@ jobs:
         run: |
           pnpm --filter @cinewright/plugin-sdk exec vitest run test/container.test.ts \
             --reporter=default --reporter=json --outputFile="$RUNNER_TEMP/sdk.json"
-          pnpm --filter @cinewright/engine exec vitest run test/stt-whisperx.container.test.ts \
+          pnpm --filter @cinewright/engine exec vitest run test/stt-whisperx.container.test.ts test/kokoro.container.test.ts \
             --reporter=default --reporter=json --outputFile="$RUNNER_TEMP/engine.json"
           for f in sdk engine; do
             jq -e '.numPendingTests == 0 and .numTodoTests == 0' "$RUNNER_TEMP/$f.json" > /dev/null \

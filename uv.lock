@@ -17,6 +17,7 @@ members = [
     "cinewright-plugin-sdk",
     "cinewright-stt-whisperx",
     "cinewright-tools",
+    "cinewright-tts-kokoro",
 ]
 
 [manifest.dependency-groups]
@@ -117,6 +118,17 @@ dependencies = [
 
 [package.metadata]
 requires-dist = [{ name = "pyyaml", specifier = "==6.0.3" }]
+
+[[package]]
+name = "cinewright-tts-kokoro"
+version = "0.1.0"
+source = { editable = "plugins/tts-kokoro" }
+dependencies = [
+    { name = "cinewright-plugin-sdk" },
+]
+
+[package.metadata]
+requires-dist = [{ name = "cinewright-plugin-sdk", editable = "plugins/sdk-py" }]
 
 [[package]]
 name = "click"
