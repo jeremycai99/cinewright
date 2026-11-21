@@ -1,6 +1,6 @@
-# Builds the audio image on PRs that change its inputs, then checks it matches its pins and
-# imports the TTS and STT stacks with the network off (M4.0a). Later audio tasks add their
-# container tests here.
+# Builds the audio image on PRs that change it or the code that runs in it, then checks it
+# matches its pins, imports the TTS and STT stacks with the network off (M4.0a), and runs the
+# containerized-plugin tests: the plugin host (M4.5a) and the WhisperX plugin (M4.5b).
 name: audio-smoke
 
 on:
@@ -8,6 +8,10 @@ on:
     paths:
       - container/audio/**
       - tools/src/cinewright_tools/**
+      - plugins/sdk-ts/**
+      - plugins/sdk-py/**
+      - plugins/stt-whisperx/**
+      - engine/**
       - .github/workflows/audio-smoke.yml
   workflow_dispatch:
 
@@ -42,3 +46,22 @@ jobs:
         env:
           CINEWRIGHT_CONTAINER_TESTS: "1"
           CINEWRIGHT_AUDIO_IMAGE: cinewright-audio:ci
+      - uses: pnpm/action-setup@73e46992e05b19abd31f2f3c20e0e7370d762115 # v6.1.1
+      - uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7.1.0
+        with:
+          node-version-file: .node-version
+      - run: pnpm install --frozen-lockfile
+      - run: pnpm typecheck
+      - name: Containerized plugin tests, none skipped
+        env:
+          CINEWRIGHT_CONTAINER_TESTS: "1"
+          CINEWRIGHT_AUDIO_IMAGE: cinewright-audio:ci
+        run: |
+          pnpm --filter @cinewright/plugin-sdk exec vitest run test/container.test.ts \
+            --reporter=default --reporter=json --outputFile="$RUNNER_TEMP/sdk.json"
+          pnpm --filter @cinewright/engine exec vitest run test/stt-whisperx.container.test.ts \
+            --reporter=default --reporter=json --outputFile="$RUNNER_TEMP/engine.json"
+          for f in sdk engine; do
+            jq -e '.numPendingTests == 0 and .numTodoTests == 0' "$RUNNER_TEMP/$f.json" > /dev/null \
+              || { echo "$f: container tests were skipped"; exit 1; }
+          done
