@@ -272,3 +272,49 @@ describe("critique and transcripts (M6.1c)", () => {
     ]);
   });
 });
+
+describe("critique when transcription fails (M6.1c)", () => {
+  it("keeps going, and says why each line has no transcript", async () => {
+    const { store } = await narrationProject();
+    const env = { STUB_TTS_TOKEN: "tok-SECRET-0123456789" };
+    await narrate(store, { ...(await plugins()), env });
+    const pool = new PluginPool({
+      env,
+      workDir: mkdtempSync(join(tmpdir(), "cw-pool-")),
+      callTimeoutMs: 60_000,
+    });
+    try {
+      const { findings } = await critique(store, {
+        deliverable: "web_landscape",
+        report: { ...report(), shots: [] },
+        timing: {
+          table: { fps: { num: 30, den: 1 }, lines: {} },
+          sequences: {},
+          scenes: {},
+          shots: {},
+          frames: 0,
+        } as never,
+        image: "unused",
+        backends: [],
+        critics: (await findPlugins("critic", [join(ROOT, "plugins")])).filter(
+          (c) => c.manifest.id === "critic_script",
+        ),
+        stt: await findPlugins("stt", [
+          fileURLToPath(new URL("./fixtures/broken-stt/", import.meta.url)),
+        ]),
+        env,
+        pool,
+      });
+      expect(findings.map((f) => [f.rule, f.severity, f.entity])).toEqual(
+        ["b01.l01", "b01.l02", "b01.l03", "b01.l04", "b01.l05"].map((l) => [
+          "stt.no_transcript",
+          "warning",
+          l,
+        ]),
+      );
+      expect(findings[0]?.message).toMatch(/stub_stt_broken/);
+    } finally {
+      await pool.shutdown();
+    }
+  });
+});

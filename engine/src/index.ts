@@ -7,6 +7,7 @@ export {
   critique,
   REPORTS_DIR,
   SOLVER_CRITIC,
+  TRANSCRIBE_CRITIC,
 } from "./critics/run.js";
 export {
   type AudioRef,

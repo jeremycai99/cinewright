@@ -1,0 +1,14 @@
+{
+  "schema_version": 1,
+  "id": "stub_stt_broken",
+  "version": "0.1.0",
+  "kind": "stt",
+  "capabilities": ["stt.transcribe"],
+  "cost_model": { "unit": "free" },
+  "latency_class": "batch",
+  "output_license": { "terms": "Apache-2.0", "commercial_use": true },
+  "secrets": [],
+  "runtime": { "kind": "subprocess", "command": ["/nonexistent/stt-binary"] },
+  "concurrency": { "max_parallel": 1 },
+  "rate_limits": []
+}

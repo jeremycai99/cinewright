@@ -138,3 +138,12 @@ describe.skipIf(!run)("subprocess host stderr and work folder (F18, M4)", () => 
     expect(existsSync(dir)).toBe(false);
   });
 });
+
+describe("a subprocess plugin whose command does not exist (M6.1c)", () => {
+  it("fails to start with the reason, and raises no unhandled error", async () => {
+    const m = manifest();
+    m.runtime = { kind: "subprocess", command: ["/nonexistent/cinewright-plugin"] };
+    const plugin = createSubprocessPlugin(m, STUB_DIR);
+    await expect(plugin.init({ secrets: {}, callTimeoutMs: 1000 })).rejects.toThrow(/ENOENT/);
+  }, 30_000);
+});
