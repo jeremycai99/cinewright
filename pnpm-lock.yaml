@@ -253,6 +253,9 @@ importers:
 
   engine:
     dependencies:
+      '@cinewright/agents':
+        specifier: workspace:*
+        version: link:../agents
       '@cinewright/core':
         specifier: workspace:*
         version: link:../core

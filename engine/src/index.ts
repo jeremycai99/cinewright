@@ -6,6 +6,26 @@ export {
   requestHash,
   withCassettes,
 } from "./agents/cassette.js";
+export { type CitationError, resolveCitations } from "./agents/citations.js";
+export {
+  buildContextPack,
+  CHARS_PER_TOKEN,
+  ContextBudgetError,
+  type ContextExtras,
+  type ContextPack,
+  envelopeSchema,
+  packText,
+} from "./agents/context.js";
+export { agentExecutor, llmCall } from "./agents/executor.js";
+export {
+  type AgentDeps,
+  decisionsFor,
+  type LlmCall,
+  type Op,
+  runAgentTask,
+  type ToPatch,
+} from "./agents/runner.js";
+export { type OutputError, type SemanticCheck, validateOutput } from "./agents/validate.js";
 export { WavError, type WavInfo, wavInfo } from "./audio/wav.js";
 export {
   CritiqueError,
