@@ -184,12 +184,6 @@ importers:
 
   cli:
     dependencies:
-      '@cinewright/audio-ffmpeg':
-        specifier: workspace:*
-        version: link:../plugins/audio-ffmpeg
-      '@cinewright/backend-hyperframes':
-        specifier: workspace:*
-        version: link:../plugins/backend-hyperframes
       '@cinewright/components':
         specifier: workspace:*
         version: link:../components

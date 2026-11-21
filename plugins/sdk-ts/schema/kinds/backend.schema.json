@@ -1,0 +1,243 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://cinewright.invalid/plugin/0/kinds/backend.schema.json",
+  "title": "BackendKind",
+  "description": "Requests and results of render backends (M5.4a). Every method takes the project folder, ids and the solved timing; none takes a function or an open store, so the same JSON can cross a process boundary (D32).",
+  "$defs": {
+    "id": {
+      "type": "string",
+      "pattern": "^[a-z][a-z0-9_]*(\\.[a-z0-9_]+)*$"
+    },
+    "common": {
+      "type": "object",
+      "required": ["project", "deliverable", "timing"],
+      "properties": {
+        "project": {
+          "type": "string",
+          "minLength": 1
+        },
+        "deliverable": {
+          "$ref": "#/$defs/id"
+        },
+        "timing": {
+          "description": "The solver's output: { table, sequences, scenes, shots, frames }.",
+          "type": "object",
+          "required": ["table", "sequences", "scenes", "shots"],
+          "properties": {
+            "table": {
+              "type": "object"
+            },
+            "sequences": {
+              "type": "object"
+            },
+            "scenes": {
+              "type": "object"
+            },
+            "shots": {
+              "type": "object"
+            },
+            "frames": {
+              "type": "integer",
+              "minimum": 0
+            }
+          }
+        },
+        "image": {
+          "type": "string",
+          "minLength": 1
+        },
+        "pack_path": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        }
+      }
+    },
+    "plan_request": {
+      "allOf": [
+        {
+          "$ref": "#/$defs/common"
+        }
+      ],
+      "type": "object",
+      "required": ["shot", "image"],
+      "properties": {
+        "shot": {
+          "$ref": "#/$defs/id"
+        },
+        "image": {
+          "type": "string",
+          "minLength": 1
+        }
+      }
+    },
+    "plan_result": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["key", "frames", "body", "segments"],
+      "properties": {
+        "key": {
+          "type": "string"
+        },
+        "frames": {
+          "type": "integer",
+          "minimum": 1
+        },
+        "body": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["start", "end"],
+          "properties": {
+            "start": {
+              "type": "integer"
+            },
+            "end": {
+              "type": "integer"
+            }
+          }
+        },
+        "segments": {
+          "type": "object",
+          "additionalProperties": false,
+          "properties": {
+            "incoming": {
+              "type": "string"
+            },
+            "outgoing": {
+              "type": "string"
+            }
+          }
+        }
+      }
+    },
+    "composition_request": {
+      "allOf": [
+        {
+          "$ref": "#/$defs/common"
+        }
+      ],
+      "type": "object",
+      "required": ["shot", "out_dir"],
+      "properties": {
+        "shot": {
+          "$ref": "#/$defs/id"
+        },
+        "out_dir": {
+          "type": "string",
+          "minLength": 1
+        }
+      }
+    },
+    "composition_result": {
+      "type": "object",
+      "required": ["dir", "inputs"],
+      "properties": {
+        "dir": {
+          "type": "string"
+        },
+        "inputs": {
+          "type": "object"
+        },
+        "frames": {
+          "type": "integer"
+        }
+      }
+    },
+    "shot_request": {
+      "allOf": [
+        {
+          "$ref": "#/$defs/common"
+        }
+      ],
+      "type": "object",
+      "required": ["shot", "image"],
+      "properties": {
+        "shot": {
+          "$ref": "#/$defs/id"
+        },
+        "image": {
+          "type": "string",
+          "minLength": 1
+        }
+      }
+    },
+    "rendered": {
+      "type": "object",
+      "required": ["key", "dir", "frames", "framemd5", "sha256", "hit"],
+      "properties": {
+        "key": {
+          "type": "string"
+        },
+        "dir": {
+          "type": "string"
+        },
+        "frames": {
+          "type": "integer",
+          "minimum": 1
+        },
+        "body_frames": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "framemd5": {
+          "type": "string"
+        },
+        "sha256": {
+          "type": "string"
+        },
+        "hit": {
+          "type": "boolean"
+        }
+      }
+    },
+    "segment_request": {
+      "allOf": [
+        {
+          "$ref": "#/$defs/common"
+        }
+      ],
+      "type": "object",
+      "required": ["scene", "image"],
+      "properties": {
+        "scene": {
+          "$ref": "#/$defs/id"
+        },
+        "image": {
+          "type": "string",
+          "minLength": 1
+        }
+      }
+    },
+    "keyframes_request": {
+      "allOf": [
+        {
+          "$ref": "#/$defs/common"
+        }
+      ],
+      "type": "object",
+      "required": ["shot", "image"],
+      "properties": {
+        "shot": {
+          "$ref": "#/$defs/id"
+        },
+        "image": {
+          "type": "string",
+          "minLength": 1
+        }
+      }
+    },
+    "keyframes_result": {
+      "type": "object",
+      "required": ["key", "keyframes"],
+      "properties": {
+        "key": {
+          "type": "string"
+        },
+        "keyframes": {
+          "type": "array"
+        }
+      }
+    }
+  }
+}

@@ -13,6 +13,14 @@ export const TXN_DIR = ".cinewright/txn";
 export const RENDER_CACHE_DIR = ".cinewright/cache/renders";
 /** Mixes by mix key (M4.4): disposable, like renders (D37). */
 export const MIX_CACHE_DIR = ".cinewright/cache/mixes";
+/** Transition segments by segment key (M3.3). */
+export const SEGMENT_CACHE_DIR = ".cinewright/cache/segments";
+/** Assembled deliverables by assembly key (M5.1). */
+export const ASSEMBLY_CACHE_DIR = ".cinewright/cache/assemblies";
+/** Caption sidecars by captions key (M5.2). */
+export const CAPTIONS_CACHE_DIR = ".cinewright/cache/captions";
+/** Compiled compositions, one folder per shot and deliverable, rewritten on each compile. */
+export const COMPILED_DIR = ".cinewright/compiled";
 export const GITIGNORE = ".cinewright/\n";
 
 const ID = /^[a-z][a-z0-9_]*(\.[a-z0-9_]+)*$/;

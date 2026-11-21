@@ -10,4 +10,5 @@ export {
   MixPlanError,
   planMix,
 } from "./plan.js";
+export { createPlugin } from "./plugin.js";
 export { MixError, type MixMeasure, type MixResult, mixKey, renderMix } from "./render.js";

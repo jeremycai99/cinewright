@@ -23,6 +23,8 @@ export interface KindMethod {
 export interface KindSpec {
   name: string;
   methods: Readonly<Record<string, KindMethod>>;
+  /** Capabilities that need others: a manifest listing a key must list every value too. */
+  requires?: Readonly<Record<string, readonly string[]>>;
 }
 
 const ajv = new Ajv2020({ strict: true, allErrors: true });

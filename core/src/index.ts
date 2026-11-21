@@ -122,6 +122,7 @@ export {
   type TokenType,
   vocabulary,
 } from "./pack/vocabulary.js";
+export { commitCacheDir } from "./project/cache.js";
 export {
   ProjectFilesError,
   projectFileContents,

@@ -9,13 +9,7 @@
       "path": "../components"
     },
     {
-      "path": "../plugins/backend-hyperframes"
-    },
-    {
       "path": "../engine"
-    },
-    {
-      "path": "../plugins/audio-ffmpeg"
     }
   ]
 }

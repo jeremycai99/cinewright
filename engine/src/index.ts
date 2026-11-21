@@ -1,3 +1,4 @@
+export type { PluginResponse } from "@cinewright/plugin-sdk";
 export { WavError, type WavInfo, wavInfo } from "./audio/wav.js";
 export {
   type AudioRef,
@@ -14,6 +15,8 @@ export {
   type TakeRef,
 } from "./jobs/narration.js";
 export { TranscribeError, type TranscribeOptions, transcribeTake } from "./jobs/transcribe.js";
+export { backendFor } from "./plugins/backend.js";
+export { callOnce, PluginChoiceError, pluginWith } from "./plugins/call.js";
 export { PluginCallError, PluginPool } from "./plugins/pool.js";
 export { type FoundPlugin, findPlugins, PluginRegistryError } from "./plugins/registry.js";
 export { RouteError, type RouteOptions, route } from "./plugins/route.js";

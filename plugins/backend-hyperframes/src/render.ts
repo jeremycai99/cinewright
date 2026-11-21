@@ -4,7 +4,13 @@ import { existsSync, mkdirSync, readFileSync, renameSync, rmSync, writeFileSync 
 import { join } from "node:path";
 import { fileURLToPath } from "node:url";
 import { promisify } from "node:util";
-import { type HashString, type RendererInfo, renderKeyV1, sha256Bytes } from "@cinewright/core";
+import {
+  commitCacheDir,
+  type HashString,
+  type RendererInfo,
+  renderKeyV1,
+  sha256Bytes,
+} from "@cinewright/core";
 import {
   DEFAULT_LIMITS,
   dockerRunArgs,
@@ -180,9 +186,8 @@ export async function renderShot(options: RenderOptions): Promise<Rendered> {
     );
     writeFileSync(join(out, "sha256.txt"), sums);
     writeFileSync(join(out, "inputs.json"), `${JSON.stringify(compiled.inputs, null, 2)}\n`);
-    mkdirSync(cacheDir, { recursive: true });
-    rmSync(dir, { recursive: true, force: true });
-    renameSync(out, dir);
+    // Another process may have committed this key first; its entry stands (G9).
+    commitCacheDir(out, dir);
   } finally {
     rmSync(work, { recursive: true, force: true });
   }

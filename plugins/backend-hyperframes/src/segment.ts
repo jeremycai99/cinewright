@@ -1,7 +1,13 @@
 import { randomUUID } from "node:crypto";
-import { existsSync, mkdirSync, readFileSync, renameSync, rmSync, writeFileSync } from "node:fs";
+import { existsSync, mkdirSync, readFileSync, rmSync, writeFileSync } from "node:fs";
 import { join } from "node:path";
-import { type RendererInfo, type Segment, sha256Bytes, sha256Hash } from "@cinewright/core";
+import {
+  commitCacheDir,
+  type RendererInfo,
+  type Segment,
+  sha256Bytes,
+  sha256Hash,
+} from "@cinewright/core";
 import {
   DEFAULT_LIMITS,
   dockerRunArgs,
@@ -224,8 +230,7 @@ export async function renderSegment(options: SegmentOptions): Promise<RenderedSe
       `${sha256Bytes(readFileSync(join(out, "segment.mp4"))).slice("sha256:".length)}  segment.mp4\n`,
     );
     writeFileSync(join(out, "inputs.json"), `${JSON.stringify(inputs, null, 2)}\n`);
-    rmSync(dir, { recursive: true, force: true });
-    renameSync(out, dir);
+    commitCacheDir(out, dir);
   } finally {
     rmSync(work, { recursive: true, force: true });
   }

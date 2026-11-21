@@ -1,31 +1,28 @@
-import { readFileSync, rmSync } from "node:fs";
-import { join, resolve } from "node:path";
-import {
-  type Compiled,
-  CompileError,
-  compileShot,
-  projectAssets,
-  RenderError,
-  renderShot,
-  resolveRenderer,
-} from "@cinewright/backend-hyperframes";
+import { readFileSync } from "node:fs";
+import { delimiter, resolve } from "node:path";
 import { catalogDir } from "@cinewright/components";
 import {
-  CACHE_DIR,
   isEntityId,
   loadCatalog,
   PackError,
   packSearchPath,
-  RENDER_CACHE_DIR,
   resolveProjectPack,
   solveTiming,
   type TimingTable,
   validateTimingTable,
 } from "@cinewright/core";
+import {
+  backendFor,
+  callOnce,
+  findPlugins,
+  PluginChoiceError,
+  type PluginResponse,
+} from "@cinewright/engine";
 import { parse, UsageError } from "../args.js";
 import { EXIT } from "../exit-codes.js";
 import { type Io, printJson } from "../io.js";
 import { findProject, openStore } from "../project.js";
+import { pluginPath } from "./narrate.js";
 
 export const COMPILE_USAGE =
   "usage: cinewright compile <shot_id> --deliverable <id> [--timing <timing.json>] --out <dir> [--project <dir>] [--json]";
@@ -79,63 +76,114 @@ function target(
   };
 }
 
-/** Compile, or print every compile error and return exit 3. */
-async function compileOrReport(
-  command: string,
-  t: Target,
-  outDir: string,
-  io: Io,
-): Promise<Compiled | number> {
-  const store = await openStore(io, t.project);
-  const ir = store.ir();
-  try {
-    const pack = resolveProjectPack(ir, packSearchPath(io.env));
-    const catalog = loadCatalog(catalogDir);
-    return await compileShot({
-      ir,
-      shotId: t.shotId,
-      deliverableId: t.deliverable,
-      pack,
-      catalog,
-      timing: t.timing ?? solveTiming(ir, pack, catalog).table,
-      assets: projectAssets(ir, t.project),
-      outDir,
-    });
-  } catch (error) {
-    const issues =
-      error instanceof CompileError
-        ? error.errors
-        : error instanceof PackError
-          ? error.errors.map((e) => ({
-              entity: e.pack,
-              pointer: e.pointer,
-              rule: e.rule,
-              message: e.message,
-            }))
-          : null;
-    if (!issues) throw error;
-    if (t.json) printJson(io, { status: "invalid", errors: issues });
-    else {
-      io.stderr(`cinewright ${command}: ${t.shotId} does not compile\n`);
-      for (const e of issues)
-        io.stderr(
-          `  ${e.entity ?? "-"} ${e.pointer || "/"}: ${e.rule}${e.message ? ` (${e.message})` : ""}\n`,
-        );
-    }
-    return EXIT.invalid;
+interface Issue {
+  entity?: string | null;
+  pack?: string;
+  pointer?: string;
+  rule: string;
+  message?: string;
+}
+
+function printIssues(command: string, t: Target, issues: Issue[], io: Io): number {
+  const list = issues.map((e) => ({
+    entity: e.entity ?? e.pack ?? null,
+    pointer: e.pointer ?? "",
+    rule: e.rule,
+    ...(e.message ? { message: e.message } : {}),
+  }));
+  if (t.json) printJson(io, { status: "invalid", errors: list });
+  else {
+    io.stderr(`cinewright ${command}: ${t.shotId} does not compile\n`);
+    for (const e of list)
+      io.stderr(
+        `  ${e.entity ?? "-"} ${e.pointer || "/"}: ${e.rule}${e.message ? ` (${e.message})` : ""}\n`,
+      );
   }
+  return EXIT.invalid;
 }
 
 /**
- * `cinewright compile`: compile one shot for one deliverable into a HyperFrames composition
- * (M3.1b). A developer tool until `cinewright render` (M5.4).
+ * Call the shot's backend through the engine (M5.4a, invariant 5): the CLI imports no plugin.
+ * Returns the response, or an exit code after printing the problem.
+ */
+async function callBackend(
+  command: string,
+  t: Target,
+  method: "render.composition" | "render.shot",
+  extra: Record<string, unknown>,
+  io: Io,
+): Promise<PluginResponse | number> {
+  const store = await openStore(io, t.project);
+  const ir = store.ir();
+  let timing: unknown;
+  try {
+    timing = t.timing
+      ? { table: t.timing, sequences: {}, scenes: {}, shots: {}, frames: 0 }
+      : (() => {
+          const { findings: _findings, ...solved } = solveTiming(
+            ir,
+            resolveProjectPack(ir, packSearchPath(io.env)),
+            loadCatalog(catalogDir),
+          );
+          return solved;
+        })();
+  } catch (error) {
+    if (error instanceof PackError) return printIssues(command, t, error.errors, io);
+    throw error;
+  }
+  let backend: Awaited<ReturnType<typeof findPlugins>>[number];
+  try {
+    backend = backendFor(ir, t.shotId, await findPlugins("backend", pluginPath(io, undefined)));
+  } catch (error) {
+    if (error instanceof PluginChoiceError) {
+      return printIssues(
+        command,
+        t,
+        [{ entity: t.shotId, rule: error.rule, message: error.message }],
+        io,
+      );
+    }
+    throw error;
+  }
+  const packPath = (io.env.CINEWRIGHT_PACK_PATH ?? "").split(delimiter).filter(Boolean);
+  const response = await callOnce(
+    backend,
+    method,
+    {
+      project: t.project,
+      deliverable: t.deliverable,
+      timing,
+      shot: t.shotId,
+      pack_path: packPath,
+      ...extra,
+    },
+    { env: io.env },
+  );
+  if (!response.ok && response.error.code === "invalid_request") {
+    const data = response.error.data as { issues?: Issue[] } | undefined;
+    return printIssues(
+      command,
+      t,
+      data?.issues ?? [{ rule: "backend.invalid", message: response.error.message }],
+      io,
+    );
+  }
+  return response;
+}
+
+/**
+ * `cinewright compile`: compile one shot for one deliverable into a composition (M3.1b) through
+ * the shot's backend. A developer tool until `cinewright render` (M5.4b).
  */
 export async function compile(argv: string[], io: Io): Promise<number> {
   const { values, positionals } = parse(argv, { ...OPTIONS, out: { type: "string" } });
   if (!values.out) throw new UsageError("--out is required");
   const t = target("compile", positionals, values, io);
-  const compiled = await compileOrReport("compile", t, resolve(io.cwd, values.out), io);
-  if (typeof compiled === "number") return compiled;
+  const out = resolve(io.cwd, values.out);
+  const response = await callBackend("compile", t, "render.composition", { out_dir: out }, io);
+  if (typeof response === "number") return response;
+  if (!response.ok) throw new Error(`${response.error.code}: ${response.error.message}`);
+  const compiled = response.result as { dir: string; frames: number; inputs: unknown };
   if (t.json)
     printJson(io, {
       status: "ok",
@@ -151,38 +199,42 @@ export async function compile(argv: string[], io: Io): Promise<number> {
 }
 
 /**
- * `cinewright render-shot`: compile one shot and render it in the render image (M3.2a), cached
- * in `.cinewright/cache/renders/<key>/`. A developer tool until `cinewright render` (M5.4).
+ * `cinewright render-shot`: compile one shot and render it in the render image (M3.2a) through
+ * its backend, cached in `.cinewright/cache/renders/<key>/`. A developer tool until
+ * `cinewright render` (M5.4b).
  */
 export async function renderShotCommand(argv: string[], io: Io): Promise<number> {
   const { values, positionals } = parse(argv, { ...OPTIONS, image: { type: "string" } });
   const image = values.image ?? io.env.CINEWRIGHT_IMAGE;
   if (!image) throw new UsageError("--image <ref> (or CINEWRIGHT_IMAGE) is required");
   const t = target("render-shot", positionals, values, io);
-  // Both ids become a folder name that is cleared below.
+  // Both ids become a folder name the backend clears.
   if (!isEntityId(t.shotId) || !isEntityId(t.deliverable))
     throw new UsageError("the shot and deliverable must be entity ids");
-  const work = join(t.project, CACHE_DIR, "compiled", `${t.shotId}.${t.deliverable}`);
-  rmSync(work, { recursive: true, force: true });
-  const compiled = await compileOrReport("render-shot", t, work, io);
-  if (typeof compiled === "number") return compiled;
-  try {
-    const rendered = await renderShot({
-      compiled,
-      shotId: t.shotId,
-      renderer: await resolveRenderer(image),
-      cacheDir: join(t.project, RENDER_CACHE_DIR),
-    });
-    if (t.json) printJson(io, { status: "ok", ...rendered });
-    else
-      io.stdout(
-        `${rendered.hit ? "cached" : "rendered"} ${t.shotId} for ${t.deliverable}: ${rendered.dir}\n`,
-      );
-    return EXIT.ok;
-  } catch (error) {
-    if (!(error instanceof RenderError)) throw error;
-    if (t.json) printJson(io, { status: "failed", rule: error.rule, message: error.message });
-    else io.stderr(`cinewright render-shot: ${error.message}\n`);
+  const response = await callBackend("render-shot", t, "render.shot", { image }, io);
+  if (typeof response === "number") return response;
+  if (!response.ok) {
+    const data = response.error.data as { rule?: string } | undefined;
+    if (t.json)
+      printJson(io, {
+        status: "failed",
+        rule: data?.rule ?? response.error.code,
+        message: response.error.message,
+      });
+    else io.stderr(`cinewright render-shot: ${response.error.message}\n`);
     return EXIT.render;
   }
+  const rendered = response.result as {
+    key: string;
+    dir: string;
+    framemd5: string;
+    sha256: string;
+    hit: boolean;
+  };
+  if (t.json) printJson(io, { status: "ok", ...rendered });
+  else
+    io.stdout(
+      `${rendered.hit ? "cached" : "rendered"} ${t.shotId} for ${t.deliverable}: ${rendered.dir}\n`,
+    );
+  return EXIT.ok;
 }
