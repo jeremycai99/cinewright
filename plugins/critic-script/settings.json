@@ -1,0 +1,4 @@
+{
+  "stt": { "max_wer": 0.1, "wildcard_max": 4 },
+  "captions": { "sync_frames": 3 }
+}

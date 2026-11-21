@@ -299,6 +299,18 @@ importers:
         specifier: workspace:*
         version: link:../sdk-ts
 
+  plugins/critic-script:
+    dependencies:
+      '@cinewright/components':
+        specifier: workspace:*
+        version: link:../../components
+      '@cinewright/core':
+        specifier: workspace:*
+        version: link:../../core
+      '@cinewright/plugin-sdk':
+        specifier: workspace:*
+        version: link:../sdk-ts
+
   plugins/export-captions:
     dependencies:
       '@cinewright/components':

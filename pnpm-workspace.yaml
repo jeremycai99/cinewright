@@ -10,6 +10,7 @@ packages:
   - plugins/export-captions
   - plugins/critic-layout
   - plugins/critic-media
+  - plugins/critic-script
   - container/render-runner
   - packs
   - components

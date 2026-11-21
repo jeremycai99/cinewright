@@ -23,6 +23,7 @@ export type StepKind =
   | "captions"
   | "assemble"
   | "check"
+  | "transcribe"
   | "critique";
 
 /** A step of the render pipeline, before it runs (M5.4b). */

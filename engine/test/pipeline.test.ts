@@ -123,6 +123,8 @@ async function options(extra: Partial<RenderOptions> = {}): Promise<RenderOption
     pack: PACK,
     catalog: CATALOG,
     env: { STUB_TTS_TOKEN: SECRET },
+    // The stub recognizer hears "hello" whatever was said; critique.test.ts covers transcripts.
+    transcribe: false,
     ...extra,
   };
 }
@@ -221,6 +223,8 @@ describe.skipIf(!CONTAINERS)("the render pipeline in the render image (M5.4b)", 
           "critique:critic_layout@social",
           "critique:critic_media@web",
           "critique:critic_media@social",
+          "critique:critic_script@web",
+          "critique:critic_script@social",
         ].sort(),
       );
     },

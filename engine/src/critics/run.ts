@@ -13,6 +13,7 @@ import {
   sortCriticFindings,
 } from "@cinewright/core";
 import { type CriticRunResult, criticKind, validateKindValue } from "@cinewright/plugin-sdk";
+import { TranscribeError, transcribeTake } from "../jobs/transcribe.js";
 import { backendFor } from "../plugins/backend.js";
 import { PluginCallError, type PluginPool } from "../plugins/pool.js";
 import type { FoundPlugin } from "../plugins/registry.js";
@@ -53,6 +54,9 @@ export interface CritiqueOptions {
   /** Only these shots: an edit's scope. */
   scope?: { shots?: string[] };
   pack_path?: string[];
+  /** STT plugins: a selected take with no frozen transcript gets one when one offers `stt.transcribe`. */
+  stt?: readonly FoundPlugin[];
+  env?: Readonly<Record<string, string | undefined>>;
   record?: (step: { id: string; kind: string; key: string; hit: boolean; ms: number }) => void;
 }
 
@@ -96,6 +100,7 @@ export async function critique(
   options: CritiqueOptions,
 ): Promise<{ findings: CriticFinding[]; file: string; report: CritiqueReport }> {
   const { deliverable, timing, pool } = options;
+  await freezeTranscripts(store, options);
   const ir = store.ir();
   const common = { project: store.dir, deliverable, timing, image: options.image };
   const inScope = (shot: string) => !options.scope?.shots || options.scope.shots.includes(shot);
@@ -213,4 +218,37 @@ export async function critique(
   writeFileSync(tmp, `${JSON.stringify(report, null, 2)}\n`);
   renameSync(tmp, file);
   return { findings: report.findings, file, report };
+}
+
+/**
+ * A frozen transcript for each selected take that has none (M6.1c), when an installed STT plugin
+ * offers `stt.transcribe`; one already frozen is reused and calls no plugin. Without such a plugin
+ * nothing runs, and the script critic reports `stt.no_transcript`.
+ */
+async function freezeTranscripts(store: Store, options: CritiqueOptions): Promise<void> {
+  const stt = (options.stt ?? []).filter((p) => p.manifest.capabilities.includes("stt.transcribe"));
+  if (stt.length === 0) return;
+  const lines = (store.ir().script.beats.value ?? []).flatMap((b) => b.lines.value ?? []);
+  for (const line of lines) {
+    const take = line.take?.value;
+    if (!take) continue;
+    const step = `transcribe:${line.id}`;
+    const t0 = Date.now();
+    try {
+      const { asset, made } = await transcribeTake(store, take, {
+        stt,
+        ...(options.env ? { env: options.env } : {}),
+      });
+      options.record?.({
+        id: step,
+        kind: "transcribe",
+        key: asset.hash,
+        hit: !made,
+        ms: Date.now() - t0,
+      });
+    } catch (error) {
+      if (error instanceof TranscribeError) throw new CritiqueError(step, error.message);
+      throw error;
+    }
+  }
 }

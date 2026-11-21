@@ -69,6 +69,8 @@ export interface RenderOptions {
   out?: string;
   /** Run the critique step after assembly (default true; `--no-critics`). */
   critics?: boolean;
+  /** Freeze a transcript of each selected take for the script critic (default true, M6.1c). */
+  transcribe?: boolean;
   plugins: {
     tts: readonly FoundPlugin[];
     stt: readonly FoundPlugin[];
@@ -253,6 +255,7 @@ export async function runRender(store: Store, options: RenderOptions): Promise<R
             pool,
             findings,
             record,
+            ...(options.transcribe === false ? {} : { stt: options.plugins.stt, env }),
           });
           entry.critique = { file: done.file, findings: done.findings };
         } catch (error) {
