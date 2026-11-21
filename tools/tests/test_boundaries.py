@@ -109,3 +109,13 @@ def test_engine_may_import_plugins_only_in_tests(tmp_path: Path) -> None:
 def test_the_repository_has_no_plugin_imports() -> None:
     repo = Path(__file__).resolve().parents[2]
     assert [v for v in find_violations(repo) if v.rule == "plugin-import"] == []
+
+
+def test_gpl_modules_stay_in_the_kokoro_plugin(tmp_path: Path) -> None:
+    write(tmp_path, "plugins/stt-whisperx/src/a.py", "from misaki import en\nimport kokoro\n")
+    write(tmp_path, "plugins/tts-kokoro/src/b.py", "from kokoro import KPipeline\n")
+    write(tmp_path, "container/audio/audio_job/c.py", "import phonemizer\n")
+    assert [(v.path, v.line, v.rule) for v in find_violations(tmp_path)] == [
+        ("plugins/stt-whisperx/src/a.py", 1, "gpl-import"),
+        ("plugins/stt-whisperx/src/a.py", 2, "gpl-import"),
+    ]
