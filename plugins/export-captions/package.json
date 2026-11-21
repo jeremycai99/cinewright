@@ -1,0 +1,25 @@
+{
+  "name": "@cinewright/export-captions",
+  "version": "0.1.0",
+  "private": true,
+  "license": "Apache-2.0",
+  "type": "module",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "default": "./dist/index.js"
+    }
+  },
+  "files": [
+    "dist",
+    "manifest.json"
+  ],
+  "scripts": {
+    "test": "vitest run"
+  },
+  "dependencies": {
+    "@cinewright/components": "workspace:*",
+    "@cinewright/core": "workspace:*",
+    "@cinewright/plugin-sdk": "workspace:*"
+  }
+}

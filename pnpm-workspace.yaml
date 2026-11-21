@@ -7,6 +7,7 @@ packages:
   - plugins/library-audio
   - plugins/audio-ffmpeg
   - plugins/export-mp4
+  - plugins/export-captions
   - container/render-runner
   - packs
   - components
