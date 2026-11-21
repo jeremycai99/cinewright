@@ -10,6 +10,10 @@ on:
     paths:
       - container/**
       - plugins/backend-hyperframes/**
+      - plugins/audio-ffmpeg/**
+      - plugins/library-audio/**
+      - plugins/sdk-ts/**
+      - engine/**
       - cli/**
       - core/src/**
       - core/schema/**
@@ -33,6 +37,10 @@ on:
     paths:
       - container/**
       - plugins/backend-hyperframes/**
+      - plugins/audio-ffmpeg/**
+      - plugins/library-audio/**
+      - plugins/sdk-ts/**
+      - engine/**
       - cli/**
       - core/src/**
       - core/schema/**
@@ -118,12 +126,25 @@ jobs:
             --reporter=default --reporter=json --outputFile="$RUNNER_TEMP/backend-tests.json"
           jq -e '.numPendingTests == 0 and .numTodoTests == 0' "$RUNNER_TEMP/backend-tests.json" \
             || { echo "backend container tests: some tests were skipped"; exit 1; }
+      # The mixer's container tests run on both runners, none skipped; each records the mix's PCM
+      # hash for smoke-compare (M4.4, D33).
+      - name: Mixer container tests, none skipped
+        env:
+          CINEWRIGHT_CONTAINER_TESTS: "1"
+          CINEWRIGHT_IMAGE: ${{ env.IMAGE }}
+          CINEWRIGHT_MIX_HASH_OUT: ${{ runner.temp }}/mix-pcm-sha256.txt
+        run: |
+          pnpm --filter @cinewright/audio-ffmpeg exec vitest run test/mix.container.test.ts \
+            --reporter=default --reporter=json --outputFile="$RUNNER_TEMP/mix-tests.json"
+          jq -e '.numPendingTests == 0 and .numTodoTests == 0' "$RUNNER_TEMP/mix-tests.json" \
+            || { echo "mixer container tests: some tests were skipped"; exit 1; }
       - name: Record hashes and CPU
         run: |
           uv run --locked cinewright-render-in-container --image "$IMAGE" \
             --in container/fixtures/hello-world --out "$RUNNER_TEMP/hello"
           mkdir -p smoke
           cp "$RUNNER_TEMP/hello/framemd5.txt" "$RUNNER_TEMP/hello/sha256.txt" smoke/
+          cp "$RUNNER_TEMP/mix-pcm-sha256.txt" smoke/
           { grep -m1 'model name' /proc/cpuinfo; grep -m1 '^flags' /proc/cpuinfo; nproc; } > smoke/cpu.txt
       - uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
         with:
@@ -192,6 +213,7 @@ jobs:
           cmp smoke-a/sha256.txt smoke-b/sha256.txt || { echo "::error::output bytes differ across runners"; status=1; }
           cmp smoke-a/reference-framemd5.txt smoke-b/reference-framemd5.txt || { echo "::error::reference shot frames differ across runners"; status=1; }
           cmp smoke-a/reference-sha256.txt smoke-b/reference-sha256.txt || { echo "::error::reference shot bytes differ across runners"; status=1; }
+          cmp smoke-a/mix-pcm-sha256.txt smoke-b/mix-pcm-sha256.txt || { echo "::error::the mix's PCM hash differs across runners"; status=1; }
           if [ "$status" -ne 0 ]; then
             echo "CPU flags, runner a:"; sed -n 2p smoke-a/cpu.txt
             echo "CPU flags, runner b:"; sed -n 2p smoke-b/cpu.txt

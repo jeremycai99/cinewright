@@ -11,6 +11,8 @@ export const RUNS_DIR = ".cinewright/runs";
 export const TXN_DIR = ".cinewright/txn";
 /** Disposable shot renders, one folder per render key (M3.2a); deleting it only costs time. */
 export const RENDER_CACHE_DIR = ".cinewright/cache/renders";
+/** Mixes by mix key (M4.4): disposable, like renders (D37). */
+export const MIX_CACHE_DIR = ".cinewright/cache/mixes";
 export const GITIGNORE = ".cinewright/\n";
 
 const ID = /^[a-z][a-z0-9_]*(\.[a-z0-9_]+)*$/;

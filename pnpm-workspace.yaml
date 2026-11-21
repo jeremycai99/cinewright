@@ -5,6 +5,7 @@ packages:
   - plugins/sdk-ts
   - plugins/backend-hyperframes
   - plugins/library-audio
+  - plugins/audio-ffmpeg
   - container/render-runner
   - packs
   - components
