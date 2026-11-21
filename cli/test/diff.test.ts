@@ -37,9 +37,11 @@ describe("the readable diff of each reference patch", () => {
         ["patch", command, "--project", dir, "--file", join(REFERENCE, "patches", name)],
         ENV,
       );
-      expect(result.stdout, name).toBe(golden(`diff-${String(i + 1).padStart(2, "0")}.txt`));
+      expect(result.stdout, name).toBe(
+        golden(`diff-${String(i + 1).padStart(2, "0")}.txt`, result.stdout),
+      );
     }
     const approved = await run(["patch", "approve", "p1", "--project", dir], ENV);
-    expect(approved.stdout).toBe(golden("diff-approve.txt"));
+    expect(approved.stdout).toBe(golden("diff-approve.txt", approved.stdout));
   }, 60_000);
 });

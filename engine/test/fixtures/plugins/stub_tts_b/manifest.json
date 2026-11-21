@@ -1,0 +1,17 @@
+{
+  "schema_version": 1,
+  "id": "stub_tts_b",
+  "version": "0.1.0",
+  "kind": "tts",
+  "capabilities": ["tts.synthesize"],
+  "cost_model": { "unit": "free" },
+  "latency_class": "batch",
+  "output_license": { "terms": "Test output; no rights granted", "commercial_use": true },
+  "secrets": ["STUB_TTS_TOKEN"],
+  "runtime": {
+    "kind": "in_process",
+    "entry": "../../../../../plugins/sdk-ts/test/fixtures/stub-tts/index.ts"
+  },
+  "concurrency": { "max_parallel": 1 },
+  "rate_limits": []
+}

@@ -204,6 +204,22 @@
               "maxLength": 500
             }
           }
+        },
+        "take": {
+          "description": "The selected take (M4): an asset with role take for this line. Written by the narration job; the user may choose another, and a gate may lock it. A take whose request key no longer matches the line is stale (timing.no_take).",
+          "x-authorable": "field",
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["state"],
+          "properties": {
+            "state": {
+              "$ref": "common.schema.json#/$defs/state"
+            },
+            "value": {
+              "$ref": "common.schema.json#/$defs/id",
+              "x-ref": "asset"
+            }
+          }
         }
       }
     }

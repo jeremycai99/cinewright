@@ -8,6 +8,7 @@ import {
 } from "./commands/compile.js";
 import { COMPONENTS_USAGE, components } from "./commands/components.js";
 import { INIT_USAGE, init } from "./commands/init.js";
+import { NARRATE_USAGE, narrate } from "./commands/narrate.js";
 import { PACK_USAGE, pack } from "./commands/pack.js";
 import { PATCH_USAGE, patch } from "./commands/patch.js";
 import { SCHEMA_USAGE, schema } from "./commands/schema.js";
@@ -27,6 +28,7 @@ const COMMANDS: Record<string, (argv: string[], io: Io) => Promise<number>> = {
   pack,
   compile,
   "render-shot": renderShotCommand,
+  narrate,
 };
 const USAGE = [
   `cinewright ${VERSION}`,
@@ -40,6 +42,7 @@ const USAGE = [
   PACK_USAGE,
   COMPILE_USAGE,
   RENDER_SHOT_USAGE,
+  NARRATE_USAGE,
 ].join("\n");
 
 /** Run one CLI invocation and return its exit code (cli/README.md). */

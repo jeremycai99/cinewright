@@ -17,7 +17,7 @@ describe("cinewright show", () => {
       const dir = referenceCopy();
       const result = await run(["show", ...args, "--project", dir]);
       expect(result.code, result.stderr).toBe(0);
-      expect(result.stdout).toBe(golden(file));
+      expect(result.stdout).toBe(golden(file, result.stdout));
     });
   }
 

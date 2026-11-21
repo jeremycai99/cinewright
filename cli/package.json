@@ -21,6 +21,7 @@
   "dependencies": {
     "@cinewright/backend-hyperframes": "workspace:*",
     "@cinewright/components": "workspace:*",
-    "@cinewright/core": "workspace:*"
+    "@cinewright/core": "workspace:*",
+    "@cinewright/engine": "workspace:*"
   }
 }

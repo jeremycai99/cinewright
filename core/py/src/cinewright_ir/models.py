@@ -1111,6 +1111,14 @@ class OnScreenText(BaseModel):
     value: Annotated[str | None, Field(max_length=500)] = None
 
 
+class Take(BaseModel):
+    model_config = ConfigDict(
+        extra="forbid",
+    )
+    state: State
+    value: Id | None = None
+
+
 class Line(BaseModel):
     model_config = ConfigDict(
         extra="forbid",
@@ -1130,6 +1138,12 @@ class Line(BaseModel):
     on_screen_text: Annotated[
         OnScreenText, Field(description="Text shown on screen with the line.")
     ]
+    take: Annotated[
+        Take | None,
+        Field(
+            description="The selected take (M4): an asset with role take for this line. Written by the narration job; the user may choose another, and a gate may lock it. A take whose request key no longer matches the line is stale (timing.no_take)."
+        ),
+    ] = None
 
 
 class Budget(BaseModel):

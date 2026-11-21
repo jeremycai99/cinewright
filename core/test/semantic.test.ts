@@ -61,6 +61,16 @@ describe("validateProject", () => {
     ]);
   });
 
+  it("reports deliverables with two sample rates (M4)", () => {
+    const ir = reference();
+    const copy = ir.profiles.portrait_1080p30;
+    copy.body.sample_rate = 44100;
+    copy.hash = sha256Hash(copy.body);
+    expect(validateProject(ir)).toEqual([
+      { entity: "demo", pointer: "/deliverables", rule: "project.mixed_sample_rates" },
+    ]);
+  });
+
   it("reports a deliverable whose profile is not in the project", () => {
     const ir = reference();
     ir.deliverables.value[1].profile.value = "square_1080p30";
