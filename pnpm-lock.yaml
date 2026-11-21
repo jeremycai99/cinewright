@@ -281,6 +281,15 @@ importers:
         specifier: workspace:*
         version: link:../sdk-ts
 
+  plugins/export-mp4:
+    dependencies:
+      '@cinewright/core':
+        specifier: workspace:*
+        version: link:../../core
+      '@cinewright/plugin-sdk':
+        specifier: workspace:*
+        version: link:../sdk-ts
+
   plugins/library-audio:
     dependencies:
       '@cinewright/plugin-sdk':

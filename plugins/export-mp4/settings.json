@@ -1,0 +1,7 @@
+{
+  "$comment": "Assembly settings (M5.1). Video is never re-encoded: the concat demuxer stream-copies the parts, and the mix is encoded once with the profile's audio codec and bitrate. Every run is single-threaded and bitexact in the render image.",
+  "video": ["-f", "concat", "-safe", "0", "-c", "copy"],
+  "flags": ["-fflags", "+bitexact", "-flags", "+bitexact", "-map_metadata", "-1"],
+  "mux": ["-movflags", "+faststart"],
+  "audio_flags": ["-flags:a", "+bitexact"]
+}
