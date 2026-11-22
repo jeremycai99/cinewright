@@ -1,0 +1,68 @@
+{
+  "request_hash": "sha256:c409d74185b82389ad945d98b7e9c918c8c94ccf2b85057492ed6b6cf1d8cf4b",
+  "response": {
+    "output": {
+      "output": {
+        "plan": {
+          "summary": "For homeowners thinking about replacing a gas furnace: a heat pump can warm a house using heat taken from cold outdoor air. A refrigerant absorbs heat outside, a compressor raises its temperature, and the heat is released indoors. Because it moves heat rather than burning fuel, it can deliver more heat energy than the electricity it uses. Calm and factual, with no prices, brands or savings claims.",
+          "target_seconds": 75,
+          "beats": [
+            "If you are thinking about replacing a gas furnace, a heat pump can warm your house using heat taken from cold outdoor air.",
+            "Outside, a refrigerant absorbs heat from the cold outdoor air.",
+            "A compressor then raises the refrigerant's temperature.",
+            "Indoors, that heat is released to warm the house.",
+            "A heat pump moves heat rather than burning fuel.",
+            "Because it moves heat, it can deliver more heat energy than the electricity it uses."
+          ]
+        },
+        "pack": "neutral"
+      },
+      "decisions": [
+        {
+          "about": [
+            "brief_01/plan"
+          ],
+          "choice": "The summary uses only the brief's claims for homeowners replacing a gas furnace: heat from cold outdoor air, the refrigerant, the compressor, release indoors, and moving heat rather than burning fuel. It has no prices, brands or savings.",
+          "citations": [
+            "brief"
+          ]
+        },
+        {
+          "about": [
+            "brief_01/plan"
+          ],
+          "choice": "The film runs 75 seconds. That suits a short explainer of six simple ideas within the single landscape_web deliverable.",
+          "citations": [
+            "brief"
+          ]
+        },
+        {
+          "about": [
+            "brief_01/plan"
+          ],
+          "choice": "The beats follow the brief's order with one idea each: the homeowner's situation, the three steps of the heat cycle, then moving versus burning and what follows from it.",
+          "citations": [
+            "brief",
+            "craft_rule:intelligibility.one_idea"
+          ]
+        },
+        {
+          "about": [
+            "brief_01/plan"
+          ],
+          "choice": "The plan names the neutral pack, which is restrained and professional, in place of the playful pack that no one chose. The brief asks for a calm, factual film for homeowners.",
+          "citations": [
+            "brief"
+          ]
+        }
+      ]
+    },
+    "model": "claude-opus-5-5",
+    "usage": {
+      "input_tokens": 3373,
+      "output_tokens": 1366
+    },
+    "cost_usd": 0.040812,
+    "stop": "end"
+  }
+}

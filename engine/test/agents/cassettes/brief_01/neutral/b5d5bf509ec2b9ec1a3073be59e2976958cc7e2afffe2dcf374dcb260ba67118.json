@@ -1,0 +1,59 @@
+{
+  "request_hash": "sha256:b5d5bf509ec2b9ec1a3073be59e2976958cc7e2afffe2dcf374dcb260ba67118",
+  "response": {
+    "output": {
+      "output": {
+        "plan": {
+          "summary": "For homeowners thinking about replacing a gas furnace: a heat pump can warm a house using heat taken from cold outdoor air. A refrigerant absorbs heat outside, a compressor raises its temperature, and the heat is released indoors. Because it moves heat rather than burning fuel, it can deliver more heat energy than the electricity it uses. Calm and factual, with no prices, brands or claims about savings.",
+          "target_seconds": 60,
+          "beats": [
+            "Homeowners thinking about replacing a gas furnace learn that a heat pump can warm a house using heat taken from cold outdoor air.",
+            "Outside, a refrigerant absorbs heat from the cold outdoor air.",
+            "A compressor then raises the refrigerant's temperature.",
+            "Indoors, that heat is released to warm the house.",
+            "A heat pump moves heat rather than burning fuel.",
+            "Because it moves heat, it can deliver more heat energy than the electricity it uses."
+          ]
+        }
+      },
+      "decisions": [
+        {
+          "about": [
+            "brief_01/plan"
+          ],
+          "choice": "The summary restates only the brief's audience, mechanism and heat-moving claim, and keeps its calm, factual tone with no prices, brands or savings claims.",
+          "citations": [
+            "brief"
+          ]
+        },
+        {
+          "about": [
+            "brief_01/plan"
+          ],
+          "choice": "A running time of 60 seconds suits a short explainer of six single-idea beats, and the landscape_web deliverable states no maximum duration.",
+          "citations": [
+            "brief",
+            "craft_rule:intelligibility.one_idea"
+          ]
+        },
+        {
+          "about": [
+            "brief_01/plan"
+          ],
+          "choice": "The beats open with the audience, give one beat to each of the three steps (absorb outside, compress, release indoors), and close with moving heat versus burning fuel and what that means for the heat energy delivered.",
+          "citations": [
+            "brief",
+            "craft_rule:intelligibility.one_idea"
+          ]
+        }
+      ]
+    },
+    "model": "claude-opus-5-5",
+    "usage": {
+      "input_tokens": 2403,
+      "output_tokens": 790
+    },
+    "cost_usd": 0.025412,
+    "stop": "end"
+  }
+}

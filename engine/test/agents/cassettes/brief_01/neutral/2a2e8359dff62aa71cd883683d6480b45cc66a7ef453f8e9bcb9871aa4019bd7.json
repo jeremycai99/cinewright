@@ -1,0 +1,198 @@
+{
+  "request_hash": "sha256:2a2e8359dff62aa71cd883683d6480b45cc66a7ef453f8e9bcb9871aa4019bd7",
+  "response": {
+    "output": {
+      "output": {
+        "beats": [
+          {
+            "id": "b01",
+            "summary": "Homeowners thinking about replacing a gas furnace learn that a heat pump can warm a house using heat taken from cold outdoor air.",
+            "lines": [
+              {
+                "id": "b01.l01",
+                "text": "Thinking about replacing a gas furnace?"
+              },
+              {
+                "id": "b01.l02",
+                "text": "A heat pump is one way to heat your home.",
+                "on_screen_text": "The heat pump"
+              },
+              {
+                "id": "b01.l03",
+                "text": "It can warm a house using heat taken from cold outdoor air.",
+                "direction": "[calm, slight emphasis on 'cold outdoor air']",
+                "on_screen_text": "Heat from cold outdoor air"
+              },
+              {
+                "id": "b01.l04",
+                "text": "Here is how it works.",
+                "direction": "[short pause after]"
+              }
+            ]
+          },
+          {
+            "id": "b02",
+            "summary": "Outside, a refrigerant absorbs heat from the cold outdoor air.",
+            "lines": [
+              {
+                "id": "b02.l01",
+                "text": "It starts outside the house."
+              },
+              {
+                "id": "b02.l02",
+                "text": "Even cold air still holds some heat."
+              },
+              {
+                "id": "b02.l03",
+                "text": "A refrigerant absorbs that heat from the outdoor air.",
+                "on_screen_text": "1. Refrigerant absorbs heat"
+              }
+            ]
+          },
+          {
+            "id": "b03",
+            "summary": "A compressor then raises the refrigerant's temperature.",
+            "lines": [
+              {
+                "id": "b03.l01",
+                "text": "Next comes the compressor."
+              },
+              {
+                "id": "b03.l02",
+                "text": "It raises the refrigerant's temperature.",
+                "direction": "[emphasis on 'raises']",
+                "on_screen_text": "2. Compressor raises temperature"
+              },
+              {
+                "id": "b03.l03",
+                "text": "Now the heat it carries is warm enough to use."
+              }
+            ]
+          },
+          {
+            "id": "b04",
+            "summary": "Indoors, that heat is released to warm the house.",
+            "lines": [
+              {
+                "id": "b04.l01",
+                "text": "The refrigerant then moves indoors."
+              },
+              {
+                "id": "b04.l02",
+                "text": "There, it releases its heat.",
+                "on_screen_text": "3. Heat released indoors"
+              },
+              {
+                "id": "b04.l03",
+                "text": "That heat warms the house.",
+                "direction": "[pause after]"
+              }
+            ]
+          },
+          {
+            "id": "b05",
+            "summary": "A heat pump moves heat rather than burning fuel.",
+            "lines": [
+              {
+                "id": "b05.l01",
+                "text": "So a heat pump moves heat.",
+                "direction": "[emphasis on 'moves']",
+                "on_screen_text": "Moves heat"
+              },
+              {
+                "id": "b05.l02",
+                "text": "It does not burn fuel."
+              },
+              {
+                "id": "b05.l03",
+                "text": "It carries heat from outside to inside."
+              }
+            ]
+          },
+          {
+            "id": "b06",
+            "summary": "Because it moves heat, it can deliver more heat energy than the electricity it uses.",
+            "lines": [
+              {
+                "id": "b06.l01",
+                "text": "This is the key idea."
+              },
+              {
+                "id": "b06.l02",
+                "text": "Because it moves heat, a heat pump can deliver more heat energy than the electricity it uses.",
+                "direction": "[slow, even delivery]",
+                "on_screen_text": "More heat out than electricity in"
+              },
+              {
+                "id": "b06.l03",
+                "text": "Heat from outdoors, moved inside, to warm your home.",
+                "direction": "[calm close, pause before]"
+              }
+            ]
+          }
+        ]
+      },
+      "decisions": [
+        {
+          "about": [
+            "b01",
+            "b02",
+            "b03",
+            "b04",
+            "b05",
+            "b06"
+          ],
+          "choice": "Six beats follow the plan's six beats in order, one idea each, sized to fit the 60-second target.",
+          "citations": [
+            "brief",
+            "craft_rule:intelligibility.one_idea"
+          ]
+        },
+        {
+          "about": [
+            "b02",
+            "b06"
+          ],
+          "choice": "Lines stay short and plain, and every claim restates the brief without prices, brands or savings claims.",
+          "citations": [
+            "brief",
+            "craft_rule:intelligibility.plain_words"
+          ]
+        },
+        {
+          "about": [
+            "b02",
+            "b03",
+            "b04"
+          ],
+          "choice": "Numbered short on-screen labels show the three steps as a sequence, each echoing only its line's claim.",
+          "citations": [
+            "craft_rule:hierarchy.supports_line",
+            "pack_rule:neutral/density.one_idea"
+          ]
+        },
+        {
+          "about": [
+            "b01",
+            "b05",
+            "b06"
+          ],
+          "choice": "On-screen text is kept to two to six words so it can be read while the line is heard, with calm delivery directions.",
+          "citations": [
+            "craft_rule:legibility.read_time",
+            "pack_rule:neutral/density.hold_time",
+            "pack_rule:neutral/type.no_shrink_to_fit",
+            "brief"
+          ]
+        }
+      ]
+    },
+    "model": "claude-opus-5-5",
+    "usage": {
+      "input_tokens": 4410,
+      "output_tokens": 1756
+    },
+    "cost_usd": 0.05276,
+    "stop": "end"
+  }
+}
