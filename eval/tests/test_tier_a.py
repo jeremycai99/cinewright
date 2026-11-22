@@ -220,3 +220,23 @@ def test_no_fixture_index_fails(tmp_path: Path, capsys: pytest.CaptureFixture[st
     opts = TierAOptions(root=tmp_path, cli=["true"], out=tmp_path / "out")
     assert run_tier_a(opts) == 1
     assert "no fixture index" in capsys.readouterr().out
+
+
+def test_the_personal_suite_reports_not_gating_and_never_updates_expected(tmp_path: Path) -> None:
+    from cinewright_eval.suites import SuiteError, suite_root
+
+    opts = setup(tmp_path, clean_run([finding("layout.overflow")]))
+    # Move the fixtures into the personal suite: the default suite no longer sees them.
+    bench = opts.root / "fixtures" / "benchmark" / "tier-a"
+    personal = opts.root / suite_root("personal") / "tier-a"
+    personal.parent.mkdir(parents=True)
+    bench.rename(personal)
+    assert run_tier_a(opts) == 1  # no benchmark index
+    opts.suite = "personal"
+    assert run_tier_a(opts) == 0  # a failing personal fixture still exits 0
+    report, md = read(opts.out)
+    assert report["suite"] == "personal, not gating"
+    assert "personal, not gating" in md
+    opts.update_expected = True
+    with pytest.raises(SuiteError, match="cannot update expected hashes"):
+        run_tier_a(opts)

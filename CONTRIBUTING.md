@@ -35,3 +35,7 @@ uv run cinewright-check-boundaries .
 - If a change alters a decision, update the Decision log in `docs/DESIGN_SPEC.md` in the same PR.
 - Answer the neutrality test in `AGENTS.md` §2.3 in the PR description.
 - Never commit API keys, generated media or cloned-voice assets.
+
+## Fixtures: benchmark and personal
+
+`fixtures/benchmark/` is the neutral suite that gates merges and releases (AGENTS.md §4.1). `fixtures/personal/` is for your own briefs and looks: run it with `--suite personal`; it reports as "personal, not gating", always exits 0, cannot update expected hashes or record a baseline, and never holds media. No code may name it except `eval/src/cinewright_eval/suites.py`. A change that only helps personal fixtures must still not regress the benchmark.

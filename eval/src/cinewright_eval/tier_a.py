@@ -20,8 +20,10 @@ from typing import cast
 
 from cinewright_eval.env import tier_a_env
 from cinewright_eval.report import write_reports
+from cinewright_eval.suites import gating, refuse_personal, suite_root
 
 HASH_FIELDS = ("sha256", "framemd5", "pcm_sha256")
+#: The benchmark suite's index; another suite's is under its own root (M8.4).
 INDEX = Path("fixtures") / "benchmark" / "tier-a" / "index.json"
 
 Json = dict[str, object]
@@ -37,6 +39,7 @@ class TierAOptions:
     runner_class: str = "linux-amd64"
     fixtures: list[str] = field(default_factory=lambda: list[str]())
     update_expected: bool = False
+    suite: str = "benchmark"
     env: dict[str, str] = field(default_factory=lambda: dict(os.environ))
 
 
@@ -173,7 +176,9 @@ def _grade(opts: TierAOptions, entry: Json, folder: Path, critics: dict[str, Jso
 def run_tier_a(opts: TierAOptions) -> int:
     """Render and grade the fixtures; write `tier-a.json` and `tier-a.md` to `opts.out`.
     Returns 0 when every fixture passes, 1 otherwise."""
-    index_file = opts.root / INDEX
+    if opts.update_expected:
+        refuse_personal(opts.suite, "update expected hashes")
+    index_file = opts.root / suite_root(opts.suite) / "tier-a" / "index.json"
     if not index_file.is_file():
         print(f"cinewright-eval tier-a: no fixture index at {index_file}")
         return 1
@@ -209,5 +214,10 @@ def run_tier_a(opts: TierAOptions) -> int:
         "hyperframes": ",".join(hyperframes) or None,
         "fixtures": fixtures,
     }
+    if not gating(opts.suite):
+        report["suite"] = f"{opts.suite}, not gating"
     passed = write_reports(report, opts.out)
+    if not gating(opts.suite):
+        print(f"cinewright-eval tier-a: {opts.suite}, not gating")
+        return 0
     return 0 if passed else 1

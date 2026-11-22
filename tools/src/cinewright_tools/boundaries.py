@@ -57,6 +57,8 @@ BLENDER_PREFIX = "plugins/backend-blender/"
 GPL_MODULES = ("kokoro", "misaki", "phonemizer")
 GPL_ALLOWED = ("plugins/tts-kokoro/", "container/audio/")
 PERSONAL_RE = re.compile(r"fixtures[/\\]personal")
+#: The one module that resolves the personal suite (M8.4); nothing else may name it.
+PERSONAL_ALLOWED = "eval/src/cinewright_eval/suites.py"
 STRING_TOKEN_TYPES = {
     getattr(tokenize, name)
     for name in ("STRING", "FSTRING_MIDDLE", "TSTRING_MIDDLE")
@@ -145,7 +147,7 @@ def _check_python(path: Path, rel: str) -> list[Violation]:
     for tok in tokens:
         if tok.type not in STRING_TOKEN_TYPES:
             continue
-        if PERSONAL_RE.search(tok.string):
+        if PERSONAL_RE.search(tok.string) and rel != PERSONAL_ALLOWED:
             found.append(_personal(rel, tok.start[0], tok.string))
         model = None if in_plugin else MODEL_RE.search(tok.string)
         if model:

@@ -28,7 +28,10 @@ def failures(report: Json) -> list[str]:
 
 
 def summary(report: Json) -> str:
-    lines = [f"# Tier A ({report['runner_class']})", ""]
+    title = f"# Tier A ({report['runner_class']})"
+    if report.get("suite"):
+        title += f": {report['suite']}"
+    lines = [title, ""]
     failed = failures(report)
     lines += ["## Failures", ""]
     lines += [f"- {f}" for f in failed] if failed else ["None."]
