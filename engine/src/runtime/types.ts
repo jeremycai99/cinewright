@@ -24,6 +24,12 @@ export interface Task {
   capability?: string;
   /** A plugin the user pinned: no fallback to another. */
   pinned?: string;
+  /** A fix task's finding (M6.3a), how it was routed, and its fixer when one runs. */
+  finding?: string;
+  via?: string;
+  fixer?: string;
+  /** Submit the patch in propose mode: a suggestion, never applied (routing's `suggest`). */
+  propose?: boolean;
 }
 
 /** A typed failure, shaped like a plugin error. */

@@ -602,6 +602,14 @@ class Insets(BaseModel):
     left: Annotated[float, Field(ge=0.0, le=0.5)]
 
 
+class Kind(Enum):
+    raised = "raised"
+    attempt = "attempt"
+    resolved = "resolved"
+    escalated = "escalated"
+    waived = "waived"
+
+
 class Severity(Enum):
     error = "error"
     warning = "warning"
@@ -2002,6 +2010,39 @@ class Voice(BaseModel):
     bindings: VoiceBindings
 
 
+class FindingEntry(BaseModel):
+    model_config = ConfigDict(
+        extra="forbid",
+    )
+    seq: Annotated[int, Field(ge=1)]
+    at: Annotated[str, Field(min_length=1)]
+    kind: Kind
+    finding: Annotated[str, Field(pattern="^f_[0-9a-f]{12}$")]
+    revision: Annotated[int | None, Field(ge=0)] = None
+    run: Annotated[str | None, Field(max_length=128)] = None
+    doc: Annotated[
+        CriticFinding | None, Field(description="The finding itself, on `raised`.")
+    ] = None
+    owner: Annotated[
+        str | None, Field(description="The owner a fix went to, on `attempt`.")
+    ] = None
+    via: str | None = None
+    task: Annotated[
+        str | None, Field(description="The fix task's key, on `attempt`.")
+    ] = None
+    reason: Annotated[
+        str | None, Field(description="Why it escalated, on `escalated`.")
+    ] = None
+    gate: str | None = None
+    note: Annotated[
+        str | None, Field(description="The user's note, on `waived`.", max_length=2000)
+    ] = None
+    prev: Annotated[
+        Hash | None, Field(description="The previous entry's hash; null for the first.")
+    ]
+    hash: Hash
+
+
 class Layer(BaseModel):
     model_config = ConfigDict(
         extra="forbid",
@@ -2254,6 +2295,7 @@ class IrDocuments(BaseModel):
     asset: Asset | None = None
     cast: CastMember | None = None
     delivery_profile: DeliveryProfile | None = None
+    finding_entry: FindingEntry | None = None
     finding: CriticFinding | None = None
     layer: Layer | None = None
     snapshot: Snapshot | None = None

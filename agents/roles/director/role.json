@@ -9,7 +9,8 @@
     "project.style",
     "pack.rules",
     "pack.layouts",
-    "catalog"
+    "catalog",
+    "findings"
   ],
   "writes": {
     "kinds": ["project", "sequence", "scene", "shot", "layer"],

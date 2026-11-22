@@ -124,11 +124,23 @@ export function buildContextPack(
         }),
       );
     else if (read === "findings") {
-      const mine = (extras.findings ?? []).filter(
-        (f) => task.entities.includes(f.entity) || f.entity.startsWith(`${task.entities[0]}.`),
-      );
+      // A fix task (M6.3a) sees its own finding; otherwise the findings on its entities.
+      const mine = task.finding
+        ? (extras.findings ?? []).filter((f) => f.id === task.finding)
+        : (extras.findings ?? []).filter(
+            (f) => task.entities.includes(f.entity) || f.entity.startsWith(`${task.entities[0]}.`),
+          );
+      // No findings, no section: a role's ordinary context (and its cassettes) stays the same.
+      if (mine.length === 0) continue;
       text = JSON.stringify(
-        mine.map((f) => ({ id: f.id, rule: f.rule, entity: f.entity, message: f.message })),
+        mine.map((f) => ({
+          id: f.id,
+          rule: f.rule,
+          entity: f.entity,
+          message: f.message,
+          evidence: f.evidence,
+          ...(f.data && Object.keys(f.data).length > 0 ? { data: f.data } : {}),
+        })),
       );
     } else {
       const [kind, field] = splitPattern(read);

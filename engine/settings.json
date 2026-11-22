@@ -25,5 +25,10 @@
   "script": {
     "pace_wpm": 150,
     "flex": 0.15
+  },
+  "fix": {
+    "attempts_per_owner": 2,
+    "rounds_per_shot": 3,
+    "qa_rounds": 3
   }
 }

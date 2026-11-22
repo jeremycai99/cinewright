@@ -4,12 +4,17 @@ import { RUNS_DIR, runDir, type Store, sha256Hash, stateHash } from "@cinewright
 import { estimateRun, taskEstimate } from "./cost/estimate.js";
 import { recordSpend, spent } from "./cost/ledger.js";
 import { Budget } from "./cost/reserve.js";
+import { FIXERS } from "./fix/fixers.js";
+import { FindingsLedger, syncFindings } from "./fix/ledger.js";
+import { fixTasks } from "./fix/orchestrate.js";
+import { loadRouting } from "./fix/route.js";
 import { approveGate, type GateName, gatePassed } from "./gates/decide.js";
 import { intake } from "./intake.js";
 import { planRender, type Stage, type StepKind } from "./pipeline/plan.js";
 import { PipelineError, type RenderOptions, type RenderReport, runRender } from "./pipeline/run.js";
 import type { FoundPlugin } from "./plugins/registry.js";
 import {
+  loadEngineSettings,
   loadPreset,
   loadTemplate,
   type TemplatePhase,
@@ -152,6 +157,66 @@ async function executeGate(
   return { status: "done", revision: r.revision };
 }
 
+/** Raise and resolve findings from a critique run, per deliverable it covered (M6.3a). */
+async function syncReport(
+  ledger: FindingsLedger,
+  report: RenderReport,
+  revision: number,
+  run: string,
+): Promise<void> {
+  for (const [deliverable, d] of Object.entries(report.deliverables)) {
+    if (!d.critique) continue;
+    await syncFindings(
+      ledger,
+      d.critique.findings,
+      revision,
+      run,
+      (f) => (f.deliverable ?? deliverable) === deliverable,
+    );
+  }
+}
+
+/**
+ * A fix job (M6.3a): its deterministic fixer's patch, applied as the job `fixer.<id>` under
+ * authorship like any author, or a pipeline re-run (a narration re-take). A fixer that cannot fix,
+ * or a job owner, is done with nothing changed: the attempt is counted and the finding moves on.
+ */
+async function executeFix(
+  store: Store,
+  task: Task,
+  ledger: FindingsLedger,
+  options: WorkflowOptions,
+): Promise<TaskResult> {
+  const finding = ledger.open().find((f) => f.id === task.finding);
+  const fixer = task.fixer ? FIXERS[task.fixer] : undefined;
+  if (!finding || !fixer) return { status: "noop" };
+  const action = fixer(finding, store.ir());
+  if (!action) return { status: "noop" };
+  if ("patch" in action) {
+    const r = await store.apply({
+      base_revision: store.revision(),
+      author: { kind: "job", name: `fixer.${task.fixer}` },
+      mode: "apply",
+      reason: `fix ${finding.id} (${finding.rule})`,
+      ops: action.patch,
+    } as never);
+    return r.status === "applied"
+      ? { status: "done", revision: r.revision }
+      : { status: "noop", output: r };
+  }
+  try {
+    const report = await runRender(store, {
+      ...options.render,
+      ...(action.rerun.retake ? { retake: action.rerun.retake } : {}),
+      until: "narrate",
+    });
+    return { status: "done", revision: report.revision };
+  } catch (error) {
+    if (error instanceof PipelineError) return pipelineFailure(error);
+    throw error;
+  }
+}
+
 /** The pipeline as one job: `render` and `--jobs-only` (M7.1a). */
 function jobsOnlyTasks(state: string, options: WorkflowOptions): Task[] {
   const stage = options.render.until ?? "critique";
@@ -241,11 +306,20 @@ export async function runWorkflow(
       ? template.phases.findIndex((p) => p.gate === "storyboard")
       : template.phases.length - 1;
   const inRange = new Set(template.phases.slice(0, stop + 1).map((p) => p.id));
+  // The fix loop (M6.3a): open findings in the ledger become fix tasks in the fix phase; a
+  // finding with no owner left is escalated to the final gate, once.
+  const findings = new FindingsLedger(store.dir, now);
+  const routing = loadRouting();
+  const policy = { attempts_per_owner: loadEngineSettings().fix.attempts_per_owner };
   const derive = async () => {
-    const now = store.ir();
-    const { tasks } = reconcile(now, template, preset, {
-      plan: planRender(now, options.render.deliverables),
+    const ir = store.ir();
+    const entries = findings.entries();
+    const fixes = fixTasks(findings.open(), entries, ir, routing, policy);
+    for (const e of fixes.escalations) await findings.escalate(e.finding, e.reason, "final");
+    const { tasks } = reconcile(ir, template, preset, {
+      plan: planRender(ir, options.render.deliverables),
       recorded: recordedKeys(store.dir),
+      fixes: fixes.tasks,
     });
     return tasks.filter((t) => inRange.has(t.phase));
   };
@@ -274,6 +348,8 @@ export async function runWorkflow(
   const execute = async (task: Task): Promise<TaskResult> => {
     if (task.kind === "gate") return executeGate(store, task, template, options);
     if (task.kind === "human") return { status: "blocked", pause: { kind: "human", id: task.id } };
+    if (task.kind === "job" && task.step === "fix")
+      return executeFix(store, task, findings, options);
     if (task.kind === "job") return jobs(task, store, run);
     if (options.executors?.agent) return options.executors.agent(task, store, run);
     return {
@@ -287,7 +363,19 @@ export async function runWorkflow(
     preset: preset.id,
     derive,
     execute: async (task) => {
+      // A fix attempt counts before it runs, so a crash mid-fix still uses up the attempt.
+      if (task.finding)
+        await findings.attempt(
+          task.finding,
+          task.role ?? task.fixer ?? task.via ?? "job",
+          task.via ?? "role",
+          task.key,
+          store.revision(),
+        );
       const result = await execute(task);
+      // A critique's findings update the ledger: new ones raised, fixed ones resolved.
+      if (task.kind === "job" && task.step === "critique" && result.output)
+        await syncReport(findings, result.output as RenderReport, store.revision(), run);
       // Each paid call goes to log/spend.jsonl, failed calls included (M7.7).
       for (const item of result.spend ?? [])
         await recordSpend(

@@ -1,0 +1,29 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://cinewright.invalid/ir/0/finding-entry.schema.json",
+  "title": "FindingEntry",
+  "description": "One line of `log/findings.jsonl` (M6.3a): a finding raised, a fix attempted, a finding resolved, escalated to a gate or waived by a user. Append-only and tracked with the other logs, so attempt counts and signature history survive deleting `.cinewright/runs/`. `prev` is the previous entry's `hash`; `hash` is this entry's without it.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["seq", "at", "kind", "finding", "prev", "hash"],
+  "properties": {
+    "seq": { "type": "integer", "minimum": 1 },
+    "at": { "type": "string", "minLength": 1 },
+    "kind": { "enum": ["raised", "attempt", "resolved", "escalated", "waived"] },
+    "finding": { "type": "string", "pattern": "^f_[0-9a-f]{12}$" },
+    "revision": { "type": "integer", "minimum": 0 },
+    "run": { "type": "string", "maxLength": 128 },
+    "doc": { "description": "The finding itself, on `raised`.", "$ref": "finding.schema.json" },
+    "owner": { "description": "The owner a fix went to, on `attempt`.", "type": "string" },
+    "via": { "type": "string" },
+    "task": { "description": "The fix task's key, on `attempt`.", "type": "string" },
+    "reason": { "description": "Why it escalated, on `escalated`.", "type": "string" },
+    "gate": { "type": "string" },
+    "note": { "description": "The user's note, on `waived`.", "type": "string", "maxLength": 2000 },
+    "prev": {
+      "description": "The previous entry's hash; null for the first.",
+      "anyOf": [{ "$ref": "common.schema.json#/$defs/hash" }, { "type": "null" }]
+    },
+    "hash": { "$ref": "common.schema.json#/$defs/hash" }
+  }
+}

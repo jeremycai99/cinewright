@@ -20,6 +20,8 @@ export interface ReconcileInputs {
   recorded: ReadonlyMap<string, string>;
   /** The component catalog's hash, part of every agent task's key. */
   catalogHash?: string;
+  /** The fix tasks for open findings (M6.3a, `fixTasks`), placed in the template's fix phase. */
+  fixes?: readonly Task[];
 }
 
 const short = (value: unknown) => sha256Hash(value).slice(7);
@@ -70,6 +72,12 @@ export function reconcile(
           paid: false,
         });
         mine.push(id);
+      }
+    } else if (phase.kind === "fix") {
+      // Fix tasks follow the critique; each finding's owner works on what its patch dirties next.
+      for (const t of inputs.fixes ?? []) {
+        tasks.push({ ...t, phase: phase.id, needs: [...t.needs, ...needs] });
+        mine.push(t.id);
       }
     } else if (phase.kind === "jobs") {
       for (const step of inputs.plan ?? []) {
