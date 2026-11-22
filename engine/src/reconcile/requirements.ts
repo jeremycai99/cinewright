@@ -96,10 +96,14 @@ export function wrapper(
   return w && typeof w === "object" ? (w as { state?: string; value?: unknown }) : undefined;
 }
 
-/** A field that still needs filling: absent, or in state `open`. */
+/** A field that still needs filling: absent, in state `open`, or a map with no filled entry. */
 export const unfilled = (entity: EntityRef, field: string) => {
   const w = wrapper(entity, field);
-  return w === undefined || w.state === "open";
+  if (w === undefined) return true;
+  if (typeof w.state === "string") return w.state === "open";
+  // A map field (layer props, layouts): one wrapper per entry, unfilled while empty or any is open.
+  const entries = Object.values(w as Record<string, { state?: string }>);
+  return entries.length === 0 || entries.some((e) => e?.state === "open");
 };
 
 /** Values without their authorship wrappers, so a lock or a state change is not an input change. */

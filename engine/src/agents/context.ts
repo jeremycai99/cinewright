@@ -93,6 +93,14 @@ export function buildContextPack(
       text = extras.pack.rules
         .map((r) => `pack_rule:${extras.pack.id}/${r.id} — ${r.title}`)
         .join("\n");
+    else if (read === "pack.layouts")
+      text = JSON.stringify(
+        Object.entries(extras.pack.layouts.templates).map(([id, t]) => ({
+          id,
+          description: t.description,
+          aspects: Object.keys(t.variants),
+        })),
+      );
     else if (read === "packs")
       text = JSON.stringify(
         (extras.packs ?? []).map((p) => ({ id: p.id, description: p.description })),

@@ -1,0 +1,41 @@
+{
+  "id": "director",
+  "version": "1",
+  "tier": "frontier",
+  "reads": [
+    "script.beats",
+    "project.plan",
+    "project.deliverables",
+    "project.style",
+    "pack.rules",
+    "pack.layouts",
+    "catalog"
+  ],
+  "writes": {
+    "kinds": ["project", "sequence", "scene", "shot", "layer"],
+    "paths": [
+      "/sequences",
+      "/title",
+      "/mood",
+      "/music_bed",
+      "/scenes",
+      "/intent",
+      "/lines",
+      "/duration",
+      "/transition_out",
+      "/sound",
+      "/shots",
+      "/type",
+      "/framing",
+      "/anchors",
+      "/layout",
+      "/layers",
+      "/component"
+    ]
+  },
+  "per": "project",
+  "token_budget": 40000,
+  "max_output_tokens": 12000,
+  "repairs": 2,
+  "effort": "high"
+}

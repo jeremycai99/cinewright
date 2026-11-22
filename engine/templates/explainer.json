@@ -52,7 +52,7 @@
       "kind": "agent",
       "role": "shot_builder",
       "per": "shot",
-      "requires": ["shot.layers"],
+      "requires": ["layer.props"],
       "reads": [
         "shot.type",
         "shot.framing",

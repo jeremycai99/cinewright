@@ -1,5 +1,5 @@
 import { loadRoles, type RoleDefinition } from "@cinewright/agents";
-import type { Pack, Store } from "@cinewright/core";
+import type { Catalog, Pack, Store } from "@cinewright/core";
 import { Ajv2020 } from "ajv/dist/2020.js";
 import { ROLE_TO_PATCH, roleChecks } from "../agents/roles/index.js";
 import type { ToPatch } from "../agents/runner.js";
@@ -76,7 +76,7 @@ export async function submitForRole(
   store: Store,
   task: Task,
   output: unknown,
-  options: { pack: Pack; packDirs: readonly string[] },
+  options: { pack: Pack; packDirs: readonly string[]; catalog?: Catalog },
 ): Promise<TaskResult> {
   const role = task.role ? loadRoles().get(task.role) : undefined;
   const toPatch = task.role ? ROLE_TO_PATCH[task.role] : undefined;
@@ -91,6 +91,7 @@ export async function submitForRole(
   const checks = roleChecks(
     options.pack,
     installedPacks(options.packDirs).map((p) => p.id),
+    options.catalog,
   );
   const check = checks[role.id];
   return submitHumanTask(store, task, output, { role, toPatch, ...(check ? { check } : {}) });

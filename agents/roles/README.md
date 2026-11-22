@@ -12,5 +12,6 @@ The v0.1 roles (M7.5a–c):
 | --- | --- | --- |
 | `producer` | `project.plan` (summary, `target_seconds`, beats); `style.pack` only while it is open, otherwise its pack choice is stored as a suggestion | the pack is installed |
 | `writer` | the script: beats and lines, every line spoken by the narrator | ids valid, unique and unused; spoken length (words at `script.pace_wpm` plus the pack's voice pads) within `script.flex` of the plan's target and every deliverable's `max_duration`; on-screen text within the pack's word density |
+| `director` | the scene plan: sequences, scenes (intent, mood, lines, duration in frames, transition, sound), shots (type, framing, start anchor, layout per aspect class) and a layer stub (id and component) per chosen component | ids valid, unique and unused, shot ids under their scene; every line in exactly one scene; shot types and transitions v0.1 can make; a pack template for every deliverable's aspect class; components in the catalog; the first shot starts at its scene's first line, later shots in order, all on the scene's own lines |
 
-The Director, Shot Builder and Editor follow in M7.5b–c.
+The Shot Builder (which fills the layer stubs: the explainer and ad templates derive it while a layer's props are empty or open) and the Editor follow in M7.5c.

@@ -20,8 +20,10 @@ import {
 } from "@cinewright/core";
 import { afterAll, describe, expect, it } from "vitest";
 import { v01Agents } from "../../src/agents/setup.js";
+import { approveGate } from "../../src/gates/decide.js";
 import type { RenderOptions } from "../../src/pipeline/run.js";
 import { type FoundPlugin, findPlugins } from "../../src/plugins/registry.js";
+import { loadTemplate } from "../../src/reconcile/data.js";
 import { runWorkflow } from "../../src/run.js";
 import type { RunOutcome } from "../../src/runtime/types.js";
 
@@ -178,6 +180,18 @@ describe("the v0.1 agents with a scripted model (M7.5a)", () => {
     const second = await project("neutral");
     expect(await toScriptGate(second, "neutral", llm, "replay", cassettes)).toEqual(GATE);
     expect(stateHash(second.ir())).toBe(stateHash(first.ir()));
+
+    // Approving the script gate lets the run go on: the Director plans the scenes, and the run
+    // stops at P5, whose Shot Builder has no role yet (M7.5c).
+    await approveGate(first, loadTemplate("explainer"), "script", { author: { kind: "user" } });
+    const next = await toScriptGate(first, "neutral", llm, "record", cassettes);
+    expect(next, JSON.stringify(next)).toMatchObject({
+      status: "failed",
+      error: { code: "agent.no_role" },
+    });
+    const scene = first.ir().sequences.value?.[0]?.scenes.value?.[0];
+    expect(scene?.shots.value?.map((s) => s.id)).toEqual(["s01.sh01", "s01.sh02"]);
+    expect(scene?.duration.value?.target).toBe(14 * 30);
 
     // Replay never reaches the model: with the cassettes gone the Producer fails on a miss.
     const third = await project("neutral");

@@ -17,6 +17,11 @@ export {
   packText,
 } from "./agents/context.js";
 export { agentExecutor, llmCall } from "./agents/executor.js";
+export {
+  type DirectorOutput,
+  directorCheck,
+  directorToPatch,
+} from "./agents/roles/director.js";
 export { ROLE_SUGGEST, ROLE_TO_PATCH, roleChecks } from "./agents/roles/index.js";
 export {
   type ProducerOutput,
