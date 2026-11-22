@@ -1,0 +1,29 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://cinewright.invalid/cli/0/export.schema.json",
+  "description": "`cinewright export --json` output (M8.1).",
+  "title": "ExportOutput",
+  "type": "object",
+  "required": ["status"],
+  "properties": {
+    "status": {
+      "enum": ["exported", "blocked"]
+    },
+    "run": {
+      "type": "string"
+    },
+    "to": {
+      "type": "string"
+    },
+    "deliverables": {
+      "type": "object"
+    },
+    "findings": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["id", "rule"]
+      }
+    }
+  }
+}

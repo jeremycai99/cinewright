@@ -6,10 +6,9 @@
 
 ```
 cinewright init <dir> --id <project_id> --deliverable <id>=<profile name or path> [--deliverable …] [--pack <id>] [--title <text>] [--workflow <id>] [--budget <usd>] [--json]
-cinewright patch apply   --file <patch.json> [--project <dir>] [--frames] [--json]
-cinewright patch propose --file <patch.json> [--project <dir>] [--frames] [--json]
+cinewright patch apply|propose --file <patch.json> [--project <dir>] [--frames] [--json]
 cinewright patch approve <pending_id> [--project <dir>] [--json]
-cinewright patch reject  <pending_id> [--reason <text>] [--project <dir>] [--json]
+cinewright patch reject <pending_id> [--reason <text>] [--project <dir>] [--json]
 cinewright patch list --pending [--project <dir>] [--json]
 cinewright patch revert <revision> [--project <dir>] [--json]
 cinewright show [<id>] [--depth <n>] [--frames] [--resolved --pack <tokens.json> [--deliverable <id>]] [--json] [--project <dir>]
@@ -19,13 +18,13 @@ cinewright components [<id>] [--json]
 cinewright pack pin <pack_id> [--project <dir>] [--json]
 cinewright compile <shot_id> --deliverable <id> [--timing <timing.json>] --out <dir> [--project <dir>] [--json]
 cinewright render-shot <shot_id> --deliverable <id> [--timing <timing.json>] [--image <ref>] [--project <dir>] [--json]
+cinewright narrate [--project <dir>] [--line <id>]... [--retake <line>]... [--provider <id>] [--plugins <dir>]... [--json]
 cinewright timing [--out <file>] [--project <dir>] [--json]
-cinewright plan [--deliverable <id>]... [--run <id>] [--image <ref>] [--plugins <dir>]... [--project <dir>] [--json]
-cinewright render [--deliverable <id>]... [--until <stage>] [--no-critics] [--vision] [--jobs-only] [--retake <line>]... [--provider <id>] [--out <dir>] [--image <ref>] [--plugins <dir>]... [--project <dir>] [--json]
+cinewright compose [--project <dir>] [--sequence <id>] [--provider <id>] [--plugins <dir>]... [--json]
 cinewright mix --deliverable <id> [--image <ref>] [--project <dir>] [--json]
-cinewright compose [--sequence <id>] [--provider <id>] [--plugins <dir>]... [--project <dir>] [--json]
-cinewright narrate [--line <id>]... [--retake <line>]... [--provider <id>] [--plugins <dir>]... [--project <dir>] [--json]
-cinewright review [<gate>] [--run <id>] [--plugins <dir>]... [--project <dir>] [--json]
+cinewright plan [--deliverable <id>]... [--run <id>] [--image <ref>] [--plugins <dir>]... [--project <dir>] [--json]
+cinewright render [--deliverable <id>]... [--until narrate|timing|compose|shots|mix|captions|assemble|critique] [--no-critics] [--vision] [--jobs-only] [--retake <line>]... [--provider <id>] [--out <dir>] [--image <ref>] [--plugins <dir>]... [--project <dir>] [--json]
+cinewright review [<gate>] [--project <dir>] [--run <id>] [--plugins <dir>]... [--json]
 cinewright review budget [--cap <usd>] [--plugins <dir>]... [--project <dir>] [--json]
 cinewright review approve <gate> [--project <dir>] [--json]
 cinewright review reject <gate> --note <text> [--project <dir>] [--json]
@@ -35,6 +34,9 @@ cinewright review waive <finding> --note <text> [--project <dir>] [--json]
 cinewright tasks [--project <dir>] [--json]
 cinewright tasks show <id> [--project <dir>]
 cinewright tasks submit <id> --file <output.json> [--project <dir>]
+cinewright export --to <dir> [--deliverable <id>]... [--image <ref>] [--plugins <dir>]... [--project <dir>] [--json]
+cinewright log [--decisions | --patches | --events | --spend | --findings] [--entity <id>] [--run <id>] [--limit <n>] [--project <dir>] [--json]
+cinewright assets prune [--dry-run] [--project <dir>] [--json]
 ```
 
 `init` writes a budget cap (D17): `--budget <usd>`, else the engine's default, `default_budget_usd` in `engine/settings.json` ($5). `--workflow <id>` sets `settings.workflow` to a template in `engine/templates/` (`explainer`, `ad`). `--deliverable` takes a delivery profile name from `registry/profiles/` (`landscape_web`, `vertical_social`; see `registry/README.md`) or a path to a profile file: anything with a `/` or ending in `.json`. An unknown name exits 2 and lists the names. `--pack` chooses the style pack (default `neutral`): `init` sets `style.pack` and pins the pack's version and content hash in `packs`, so a later change to the pack never silently changes the project. When a pack changes on disk, compiling fails with `pack.pin_mismatch` until `cinewright pack pin <id>` records the new pin as a new revision. Packs are found in each folder of `CINEWRIGHT_PACK_PATH` (separated like `PATH`), then in the repository's `packs/`.
@@ -56,6 +58,14 @@ cinewright tasks submit <id> --file <output.json> [--project <dir>]
 The budget (M7.7, D17): every paid provider call is appended to `log/spend.jsonl` (`core/schema/spend-entry.schema.json`: run, task and key, plugin, the model the plugin reports, units and USD; each line carries its predecessor's hash, so a rewritten line fails to load). Spent is the sum of that log, so deleting `.cinewright/runs/` never lowers it; it is tracked with the other logs. When a run starts, the estimate to complete (each paid task priced from its plugin's cost model, `budget.task_units` and `budget.unpriced_task_usd` in `engine/settings.json`, plus a fix reserve of `budget.fix_reserve_fraction`) is checked against the cap, and each paid task reserves its estimate before it starts, the fix reserve held back for fixes. A run that would cross the cap pauses before the call and `plan` exits 12, printing spent, reserved, needed and the cap (`--json`: `pause.amounts`). `review budget` prints spent, the cap and the estimate; `review budget --cap <usd>` raises the cap, and the next `plan` resumes the run. Gate packets show the same estimate.
 
 `review` (M7.6) prints the gate packet for each gate of the project's template, or one `<gate>` (`script`, `storyboard`, `final`): the field changes since the gate was last approved, how many fields approving would lock, open suggestions, findings, and the money spent (`log/spend.jsonl`) against the cap. `--json` prints the packet (`engine/schema/gate-packet.schema.json`). `review approve <gate>` locks every field the gate names, as the job `gate.<gate>`; an agent can never approve a gate (D41), and only the final gate can be approved automatically (`--approve-final`, recorded with the reason `auto`). `review reject <gate> --note` appends the note to the project's `instructions`; the gate's owning role (G1 the writer, G2 and G3 the director) reads it in its next context pack as `user_instruction:<seq>`. The fix loop (M6.3): each critique syncs its findings into `log/findings.jsonl` (raised, attempt, resolved, escalated, waived; append-only and tracked, so deleting `runs/` never resets a bound). Each open finding goes to its owner in `engine/fix-routing.json` (a deterministic fixer first where one exists, then the owning role, a suggestion when a gate locked the field, then a person), within the bounds in `policies.fix` (default 2 attempts per owner, 3 fix rounds per shot, 3 QA rounds). A finding that comes back after it was resolved escalates (`oscillation`), as does one past its bounds; the final gate's packet lists each escalated finding with its attempts, and whether export may proceed: no error finding may stay open or escalated. `review waive <finding> --note` closes one as the user; a missing licence or consent (`clearance.*`) cannot be waived. `review choose <variant> --run <id>` applies a stored variant (`.cinewright/runs/<run>/variants/`) as the user's own patch. `review variants` needs the owning role's agent and exits 9 until roles are defined (M7.5). `tasks` lists what waits for a person, derived from the IR: human-role tasks and gates not yet approved; `tasks show <id>` prints one. `tasks submit <id> --file <output.json>` hands in a human role's output: the same typed output the role's agent returns (`agents/roles/<role>/output.schema.json`), checked by its schema and semantic checks (`human.invalid_output`, exit 3, naming each rule), turned into ops by the same mapping and applied as the user. A role with no definition yet exits 9. A gate the template does not have exits 3.
+
+`status` (M1, M8.1) prints the revision (a patch's `base_revision`), state hash and pending ids, then the latest run and its pause, what waits for a person (human tasks and gates), the open findings (errors, warnings, escalated) and the cost: spent, the estimate to complete and the cap. With `--json` the first three fields are unchanged from M1 (`cli/schema/status.schema.json`).
+
+`export --to <dir>` (M8.1) writes each deliverable's MP4, caption sidecars and provenance manifest, the same bytes `render --out` writes, re-making anything stale first. It writes nothing and exits 10, naming each finding, while an error finding is open or escalated without a user's waiver, or a licence or consent is missing (`cli/schema/export.schema.json`).
+
+`log` (M8.1) prints one log, newest last: `--patches` (default), `--decisions` (each with the entities its ops touch, so `--entity <shot>` finds a shot's decisions and their citations), `--events` (a run's; `--run`, default the latest), `--spend` (sums to `status`'s spent) or `--findings`. `--limit <n>` keeps the newest (`cli/schema/log.schema.json`).
+
+`assets prune` (M8.1) removes takes no line selects, stale narration from re-takes; a selected take and one the user inserted are kept. It is the user's patch, so it is in the log and can be reverted; the bytes stay in the CAS. `--dry-run` lists only (`cli/schema/assets.schema.json`).
 
 Assets live in the project's content-addressed store, `.cinewright/cas/`. When an asset is missing there, every command fetches it from the read-only remotes in `CINEWRIGHT_CAS_REMOTE` (comma-separated URL templates with a `{hex}` placeholder, `https:` or `file:`; e.g. `https://example.org/cas/{hex}`), tried in order. No credential is sent. A fetched object is stored only if it hashes to the requested hash and is no larger than the asset's recorded size; otherwise the command fails with `cas.remote_corrupt` or `cas.remote_oversized`. A missing asset names the remotes it tried. `uv run cinewright-eval cas-export <project> --to <dir>` writes a project's referenced assets as flat files named by hex, ready to upload to such a remote.
 

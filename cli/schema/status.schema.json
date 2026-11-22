@@ -1,0 +1,51 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://cinewright.invalid/cli/0/status.schema.json",
+  "description": "`cinewright status --json` output (M8.1).",
+  "title": "StatusOutput",
+  "type": "object",
+  "required": ["revision", "state_hash", "pending", "tasks", "findings", "cost"],
+  "properties": {
+    "revision": {
+      "type": "integer"
+    },
+    "state_hash": {
+      "type": "string",
+      "pattern": "^sha256:[0-9a-f]{64}$"
+    },
+    "pending": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    },
+    "run": {
+      "type": "object",
+      "required": ["id", "outcome"],
+      "properties": {
+        "id": {
+          "type": "string"
+        },
+        "outcome": {
+          "enum": ["done", "paused", "failed", "running"]
+        },
+        "pause": {
+          "type": "object",
+          "required": ["kind", "id"]
+        }
+      }
+    },
+    "tasks": {
+      "type": "object",
+      "required": ["human", "gates"]
+    },
+    "findings": {
+      "type": "object",
+      "required": ["error", "warning", "escalated"]
+    },
+    "cost": {
+      "type": "object",
+      "required": ["spent_usd", "cap_usd", "estimate_to_complete_usd"]
+    }
+  }
+}

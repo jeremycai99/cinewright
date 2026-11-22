@@ -1,5 +1,6 @@
 import { LockTimeoutError, ProjectLoadError } from "@cinewright/core";
 import { UsageError } from "./args.js";
+import { ASSETS_USAGE, assets } from "./commands/assets.js";
 import {
   COMPILE_USAGE,
   compile,
@@ -8,7 +9,9 @@ import {
 } from "./commands/compile.js";
 import { COMPONENTS_USAGE, components } from "./commands/components.js";
 import { COMPOSE_USAGE, compose } from "./commands/compose.js";
+import { EXPORT_USAGE, exportCommand } from "./commands/export.js";
 import { INIT_USAGE, init } from "./commands/init.js";
+import { LOG_USAGE, log } from "./commands/log.js";
 import { MIX_USAGE, mix } from "./commands/mix.js";
 import { NARRATE_USAGE, narrate } from "./commands/narrate.js";
 import { PACK_USAGE, pack } from "./commands/pack.js";
@@ -43,6 +46,9 @@ const COMMANDS: Record<string, (argv: string[], io: Io) => Promise<number>> = {
   render,
   review,
   tasks,
+  export: exportCommand,
+  log,
+  assets,
 };
 const USAGE = [
   `cinewright ${VERSION}`,
@@ -64,6 +70,9 @@ const USAGE = [
   RENDER_USAGE,
   REVIEW_USAGE,
   TASKS_USAGE,
+  EXPORT_USAGE,
+  LOG_USAGE,
+  ASSETS_USAGE,
 ].join("\n");
 
 /** Run one CLI invocation and return its exit code (cli/README.md). */

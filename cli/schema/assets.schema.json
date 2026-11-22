@@ -1,0 +1,23 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://cinewright.invalid/cli/0/assets.schema.json",
+  "description": "`cinewright assets --json` output (M8.1).",
+  "title": "AssetsPruneOutput",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["removed", "would_remove"],
+  "properties": {
+    "removed": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    },
+    "would_remove": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    }
+  }
+}
