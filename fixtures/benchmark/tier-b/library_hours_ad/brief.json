@@ -2,9 +2,7 @@
   "id": "library_hours_ad",
   "genre": "ad",
   "target_seconds": 15,
-  "deliverables": [
-    "vertical_social"
-  ],
+  "deliverables": ["vertical_social"],
   "pack": "playful",
   "brief": "A fifteen-second spot for a neighbourhood public library announcing that it now stays open until nine on weekday evenings. One message only: come after work or school. Close with the words 'Open late, weekdays'. No prices, no named people, no claims beyond the new hours.",
   "narrator": {

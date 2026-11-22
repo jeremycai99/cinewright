@@ -2,9 +2,7 @@
   "id": "bike_repair_ad",
   "genre": "ad",
   "target_seconds": 30,
-  "deliverables": [
-    "landscape_web"
-  ],
+  "deliverables": ["landscape_web"],
   "pack": "neutral",
   "brief": "A thirty-second spot for a free community bike repair workshop held every Saturday morning. Volunteers show you how to fix a flat, adjust brakes and oil a chain, and the tools are provided. The tone is practical and welcoming. End with: 'Bring your bike. Leave knowing how to fix it.'",
   "narrator": {

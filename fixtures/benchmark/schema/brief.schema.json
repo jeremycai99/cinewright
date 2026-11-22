@@ -22,26 +22,16 @@
       "pattern": "^[a-z][a-z0-9_]*$"
     },
     "genre": {
-      "enum": [
-        "explainer",
-        "ad"
-      ]
+      "enum": ["explainer", "ad"]
     },
     "target_seconds": {
-      "enum": [
-        15,
-        30,
-        60
-      ]
+      "enum": [15, 30, 60]
     },
     "deliverables": {
       "type": "array",
       "minItems": 1,
       "items": {
-        "enum": [
-          "landscape_web",
-          "vertical_social"
-        ]
+        "enum": ["landscape_web", "vertical_social"]
       }
     },
     "pack": {
@@ -56,10 +46,7 @@
     "narrator": {
       "type": "object",
       "additionalProperties": false,
-      "required": [
-        "language",
-        "description"
-      ],
+      "required": ["language", "description"],
       "properties": {
         "language": {
           "type": "string"
