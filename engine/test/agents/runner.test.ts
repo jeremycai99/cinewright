@@ -7,7 +7,7 @@ import { initProject, loadPack, Store } from "@cinewright/core";
 import type { GenerateRequest, PluginResponse } from "@cinewright/plugin-sdk";
 import { afterEach, describe, expect, it } from "vitest";
 import { buildContextPack, ContextBudgetError } from "../../src/agents/context.js";
-import { runAgentTask, type ToPatch } from "../../src/agents/runner.js";
+import { decisionsFor, runAgentTask, type ToPatch } from "../../src/agents/runner.js";
 import type { Task } from "../../src/runtime/types.js";
 
 const ROOT = fileURLToPath(new URL("../../../", import.meta.url));
@@ -368,5 +368,35 @@ describe("agentExecutor (M7.4)", () => {
       status: "failed",
       error: { code: "agent.no_role" },
     });
+  });
+});
+
+describe("decisionsFor (M7.5c)", () => {
+  it("maps a decision to an insert that carries the entity it names, nested or by field", () => {
+    const ops = [
+      {
+        op: "insert",
+        entity: "demo",
+        path: "/sequences",
+        value: {
+          id: "seq_a",
+          scenes: [{ id: "s01", shots: [{ id: "s01.sh01", layout: {} }] }],
+        },
+      },
+    ];
+    const envelope = {
+      output: {},
+      decisions: [
+        { about: ["s01"], choice: "a", citations: ["brief"] },
+        { about: ["s01.sh01/layout"], choice: "b", citations: ["brief"] },
+        { about: ["seq_a/music_bed"], choice: "c", citations: ["brief"] },
+        { about: ["s09"], choice: "d", citations: ["brief"] },
+      ],
+    };
+    const { decisions, errors } = decisionsFor(envelope, ops as never);
+    expect(decisions.map((d) => d.choice)).toEqual(["a", "b", "c"]);
+    expect(errors.map((e) => [e.rule, e.pointer])).toEqual([
+      ["decision.unmatched", "/decisions/3/about"],
+    ]);
   });
 });
