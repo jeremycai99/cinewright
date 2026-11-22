@@ -199,6 +199,10 @@ importers:
       '@cinewright/engine':
         specifier: workspace:*
         version: link:../engine
+    devDependencies:
+      ajv:
+        specifier: 8.20.0
+        version: 8.20.0
 
   components:
     dependencies:

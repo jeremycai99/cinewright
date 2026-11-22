@@ -196,7 +196,13 @@ export {
   type SchedulerOptions,
   SYSTEM_CLOCK,
 } from "./scheduler/scheduler.js";
-
+export {
+  exportBlockers,
+  type ProjectStatus,
+  projectStatus,
+  pruneTakes,
+  staleTakes,
+} from "./status.js";
 export { pendingTasks, submitForRole, submitHumanTask } from "./tasks/queue.js";
 
 export const VERSION = "0.0.0";

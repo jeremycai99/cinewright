@@ -1,0 +1,19 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://cinewright.invalid/cli/0/log.schema.json",
+  "description": "`cinewright log --json` output (M8.1).",
+  "title": "LogOutput",
+  "type": "object",
+  "required": ["log", "entries"],
+  "properties": {
+    "log": {
+      "enum": ["patches", "decisions", "events", "spend", "findings"]
+    },
+    "entries": {
+      "type": "array",
+      "items": {
+        "type": "object"
+      }
+    }
+  }
+}

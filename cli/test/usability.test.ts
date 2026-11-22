@@ -68,13 +68,18 @@ describe("finding 5: the current revision", () => {
     const store = await Store.open(dir);
     const result = await run(["status", "--project", dir, "--json"]);
     expect(result.code, result.stderr).toBe(EXIT.ok);
-    expect(JSON.parse(result.stdout)).toEqual({
+    // The M1 fields are unchanged; M8.1 adds run, tasks, findings and cost after them.
+    const json = JSON.parse(result.stdout);
+    expect(Object.keys(json).slice(0, 3)).toEqual(["revision", "state_hash", "pending"]);
+    expect(json).toMatchObject({
       revision: store.revision(),
       state_hash: expect.stringMatching(/^sha256:[0-9a-f]{64}$/),
       pending: [],
+      findings: { error: 0, warning: 0, escalated: 0 },
     });
+    expect(json.run).toBeUndefined();
     const text = await run(["status", "--project", dir]);
-    expect(text.stdout).toMatch(/^revision 8 \(sha256:[0-9a-f]{64}\)\nno pending patches\n$/);
+    expect(text.stdout).toMatch(/^revision 8 \(sha256:[0-9a-f]{64}\)\nno pending patches\n/);
   });
 
   it("the README names `status` for the revision, not `show --json`", () => {

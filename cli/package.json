@@ -22,5 +22,8 @@
     "@cinewright/components": "workspace:*",
     "@cinewright/core": "workspace:*",
     "@cinewright/engine": "workspace:*"
+  },
+  "devDependencies": {
+    "ajv": "8.20.0"
   }
 }
