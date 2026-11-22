@@ -1,19 +1,10 @@
 import { packSearchPath, resolveProjectPack } from "@cinewright/core";
-import { type FoundPlugin, findPlugins, runWorkflow, v01Agents } from "@cinewright/engine";
+import { findPlugins, runWorkflow, v01Agents } from "@cinewright/engine";
 import { parse } from "../args.js";
 import { EXIT } from "../exit-codes.js";
 import { type Io, now, printJson } from "../io.js";
 import { pluginPath } from "./narrate.js";
-import { pipelineSetup, reportFailure } from "./render.js";
-
-/** LLM plugins whose secrets are all set come first: the first one runs the agents (D29). */
-export function usableFirst(
-  plugins: readonly FoundPlugin[],
-  env: Readonly<Record<string, string | undefined>>,
-): FoundPlugin[] {
-  const usable = (p: FoundPlugin) => p.manifest.secrets.every((s) => Boolean(env[s]));
-  return [...plugins.filter(usable), ...plugins.filter((p) => !usable(p))];
-}
+import { pipelineSetup, reportFailure, usableFirst } from "./render.js";
 
 export const PLAN_USAGE =
   "usage: cinewright plan [--deliverable <id>]... [--run <id>] [--image <ref>] [--plugins <dir>]... [--project <dir>] [--json]";

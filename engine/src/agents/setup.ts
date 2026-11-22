@@ -1,8 +1,9 @@
 import { existsSync, mkdtempSync, readdirSync, readFileSync, rmSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
-import { loadRoles } from "@cinewright/agents";
+import { loadCraftRules, loadRoles } from "@cinewright/agents";
 import type { Catalog, Pack } from "@cinewright/core";
+import { loadRubric, type VisionOptions } from "../critics/vision.js";
 import { instructionsFor } from "../gates/decide.js";
 import { PluginPool } from "../plugins/pool.js";
 import type { FoundPlugin } from "../plugins/registry.js";
@@ -77,6 +78,44 @@ export function v01Agents(options: {
   });
   return {
     executor,
+    shutdown: async () => {
+      await pool.shutdown();
+      rmSync(workDir, { recursive: true, force: true });
+    },
+  };
+}
+
+/**
+ * The vision critic for `cinewright render --vision` (M6.2): the built-in role and rubric on the
+ * given LLM plugin, through cassettes per `CINEWRIGHT_CASSETTE_MODE`, its stills copied into the
+ * pool's work folder.
+ */
+export function v01Vision(options: {
+  llm: FoundPlugin;
+  env: Readonly<Record<string, string | undefined>>;
+  pack: Pack;
+  pin?: string;
+}): { vision: VisionOptions; shutdown(): Promise<void> } {
+  const workDir = mkdtempSync(join(tmpdir(), "cinewright-vision-"));
+  const cassettes = cassetteOptions(options.env);
+  const pool = new PluginPool({
+    env: options.env,
+    workDir,
+    callTimeoutMs: 600_000,
+    wrap: (plugin) => withCassettes(plugin, cassettes),
+  });
+  const role = loadRoles().get("vision_critic");
+  if (!role) throw new Error("no vision_critic role in agents/roles");
+  return {
+    vision: {
+      llm: llmCall(pool, options.llm),
+      rubric: loadRubric(),
+      role,
+      pack: options.pack,
+      craftRules: loadCraftRules(),
+      workDir,
+      ...(options.pin ? { pin: options.pin } : {}),
+    },
     shutdown: async () => {
       await pool.shutdown();
       rmSync(workDir, { recursive: true, force: true });

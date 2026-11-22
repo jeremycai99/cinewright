@@ -16,6 +16,7 @@ import {
 } from "@cinewright/core";
 import type { PluginResponse } from "@cinewright/plugin-sdk";
 import { CritiqueError, critique } from "../critics/run.js";
+import type { VisionOptions } from "../critics/vision.js";
 import { ComposeError, compose } from "../jobs/composer.js";
 import { NarrationError, narrate } from "../jobs/narration.js";
 import { backendFor } from "../plugins/backend.js";
@@ -69,6 +70,8 @@ export interface RenderOptions {
   out?: string;
   /** Run the critique step after assembly (default true; `--no-critics`). */
   critics?: boolean;
+  /** The vision critic in the critique step (M6.2, `--vision`): paid, so opt-in. */
+  vision?: VisionOptions;
   /** Freeze a transcript of each selected take for the script critic (default true, M6.1c). */
   transcribe?: boolean;
   plugins: {
@@ -255,6 +258,7 @@ export async function runRender(store: Store, options: RenderOptions): Promise<R
             pool,
             findings,
             record,
+            ...(options.vision ? { vision: options.vision } : {}),
             ...(options.transcribe === false ? {} : { stt: options.plugins.stt, env }),
           });
           entry.critique = { file: done.file, findings: done.findings };

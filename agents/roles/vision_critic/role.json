@@ -1,0 +1,12 @@
+{
+  "id": "vision_critic",
+  "version": "1",
+  "tier": "frontier",
+  "reads": ["shot.type", "scene.intent", "line.text", "pack.rules"],
+  "writes": { "kinds": [], "paths": [] },
+  "per": "shot",
+  "token_budget": 40000,
+  "max_output_tokens": 3000,
+  "repairs": 2,
+  "effort": "medium"
+}

@@ -18,6 +18,7 @@ import { TranscribeError, transcribeTake } from "../jobs/transcribe.js";
 import { backendFor } from "../plugins/backend.js";
 import { PluginCallError, type PluginPool } from "../plugins/pool.js";
 import type { FoundPlugin } from "../plugins/registry.js";
+import { shotViews, type VisionOptions, visionCriticVersion, visionCritique } from "./vision.js";
 
 /** Where critique reports live, by assembly key (M6.1a). Disposable, like every cache. */
 export const REPORTS_DIR = ".cinewright/cache/reports";
@@ -61,6 +62,8 @@ export interface CritiqueOptions {
   stt?: readonly FoundPlugin[];
   env?: Readonly<Record<string, string | undefined>>;
   record?: (step: { id: string; kind: string; key: string; hit: boolean; ms: number }) => void;
+  /** The vision critic (M6.2): opt-in, since it is a paid model call per shot and scene. */
+  vision?: VisionOptions;
 }
 
 /** A check or critic failed: the step and its message (exit 8 in `cinewright render`). */
@@ -111,6 +114,11 @@ export async function critique(
   const running = options.critics
     .filter((c) => c.manifest.capabilities.includes("critic.run"))
     .map((c) => `${c.manifest.id}@${c.manifest.version}`)
+    .concat(
+      options.vision
+        ? [`vision@${visionCriticVersion(options.vision.role, options.vision.rubric)}`]
+        : [],
+    )
     .sort();
 
   // A whole-deliverable report for this assembly, at this revision, by these critics stands.
@@ -204,6 +212,29 @@ export async function critique(
     });
     for (const [name, value] of Object.entries(result.measured))
       measured[`${critic.manifest.id}.${name}`] = value;
+  }
+
+  if (options.vision) {
+    const t0 = Date.now();
+    const vision = await visionCritique({
+      deliverable,
+      shots: shotViews(ir, renders),
+      ...options.vision,
+    });
+    options.record?.({
+      id: `vision@${deliverable}`,
+      kind: "critique",
+      key: options.report.assembly_key,
+      hit: false,
+      ms: Date.now() - t0,
+    });
+    critics.push({
+      id: "vision",
+      version: visionCriticVersion(options.vision.role, options.vision.rubric),
+    });
+    findings.push(...vision.findings);
+    measured["vision.evaluated"] = vision.evaluated ? 1 : 0;
+    for (const s of vision.scores) measured[`vision.${s.criterion}.${s.target}`] = s.score;
   }
 
   if (options.findings?.length) {
