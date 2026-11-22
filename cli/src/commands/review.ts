@@ -5,20 +5,26 @@ import {
   approveGate,
   buildPacket,
   chooseVariant,
+  type FoundPlugin,
+  findPlugins,
   GateError,
   type GateName,
   type GatePacket,
   gatePassed,
   loadTemplate,
+  projectEstimate,
   rejectGate,
+  spent,
 } from "@cinewright/engine";
 import { parse, UsageError } from "../args.js";
 import { EXIT } from "../exit-codes.js";
 import { type Io, printJson } from "../io.js";
 import { findProject, openStore } from "../project.js";
+import { pluginPath } from "./narrate.js";
 
 export const REVIEW_USAGE = [
-  "usage: cinewright review [<gate>] [--project <dir>] [--run <id>] [--json]",
+  "usage: cinewright review [<gate>] [--project <dir>] [--run <id>] [--plugins <dir>]... [--json]",
+  "       cinewright review budget [--cap <usd>] [--plugins <dir>]... [--project <dir>] [--json]",
   "       cinewright review approve <gate> [--project <dir>] [--json]",
   "       cinewright review reject <gate> --note <text> [--project <dir>] [--json]",
   "       cinewright review variants <gate> <entity> [-n <count>] [--project <dir>]",
@@ -40,6 +46,11 @@ export function latestRun(dir: string): string {
   return readdirSync(runs).sort().at(-1) ?? "none";
 }
 
+/** The LLM plugin agent tasks would use, for pricing them (the first one installed). */
+async function llmPlugin(io: Io, folders: string[] | undefined): Promise<FoundPlugin | undefined> {
+  return (await findPlugins("llm", pluginPath(io, folders)))[0];
+}
+
 const templateOf = (store: Store) =>
   loadTemplate(store.ir().settings.workflow?.value ?? "explainer");
 
@@ -56,7 +67,11 @@ function printPacket(io: Io, p: GatePacket, passed: boolean): void {
     lines.push(`  suggestion ${s.pending_id} (${s.author}): ${s.reason}`);
   for (const f of p.findings) lines.push(`  finding ${JSON.stringify(f)}`);
   const cap = p.cost.cap_usd === null ? "no cap" : `cap $${p.cost.cap_usd}`;
-  lines.push(`spent $${p.cost.spent_usd.toFixed(2)}, ${cap}`);
+  const left =
+    p.cost.estimate_to_complete_usd === null
+      ? ""
+      : `, estimate to complete $${p.cost.estimate_to_complete_usd.toFixed(2)}`;
+  lines.push(`spent $${p.cost.spent_usd.toFixed(2)}${left}, ${cap}`);
   io.stdout(`${lines.join("\n")}\n`);
 }
 
@@ -71,6 +86,8 @@ export async function review(argv: string[], io: Io): Promise<number> {
     json: { type: "boolean" },
     note: { type: "string" },
     n: { type: "string", short: "n" },
+    cap: { type: "string" },
+    plugins: { type: "string", multiple: true },
   });
   const [verb, ...args] = positionals;
   const dir = findProject(io, values.project);
@@ -100,6 +117,38 @@ export async function review(argv: string[], io: Io): Promise<number> {
       );
       return EXIT.provider;
     }
+    if (verb === "budget") {
+      if (values.cap !== undefined) {
+        const cap = Number(values.cap);
+        if (!Number.isFinite(cap) || cap <= 0)
+          throw new UsageError("--cap takes an amount in USD above 0");
+        const r = await store.apply({
+          base_revision: store.revision(),
+          author: { kind: "user" },
+          mode: "apply",
+          reason: `set the budget cap to $${cap}`,
+          ops: [
+            { op: "set", entity: store.ir().id, path: "/budget", value: { currency: "USD", cap } },
+          ],
+        } as never);
+        if (r.status !== "applied") {
+          io.stderr(`cinewright review: the cap was not set: ${JSON.stringify(r)}\n`);
+          return EXIT.invalid;
+        }
+      }
+      const estimate = projectEstimate(store, template, await llmPlugin(io, values.plugins));
+      const report = {
+        spent_usd: spent(dir),
+        cap_usd: store.ir().budget.value?.cap ?? null,
+        estimate,
+      };
+      if (values.json) printJson(io, report);
+      else
+        io.stdout(
+          `spent $${report.spent_usd.toFixed(2)}, cap ${report.cap_usd === null ? "none" : `$${report.cap_usd.toFixed(2)}`}, estimate to complete $${estimate.total_usd.toFixed(2)} (fix reserve $${estimate.fix_reserve_usd.toFixed(2)})\n`,
+        );
+      return EXIT.ok;
+    }
     if (verb === "choose") {
       if (!args[0]) throw new UsageError("review choose needs a variant id");
       if (!values.run) throw new UsageError("review choose needs --run <id>");
@@ -112,8 +161,9 @@ export async function review(argv: string[], io: Io): Promise<number> {
       ? [gateArg(verb)]
       : template.phases.flatMap((p) => (p.gate ? [p.gate as GateName] : []));
     const run = values.run ?? latestRun(dir);
+    const estimate = projectEstimate(store, template, await llmPlugin(io, values.plugins));
     const packets = gates.map((g) => ({
-      packet: buildPacket(store, template, g, run),
+      packet: buildPacket(store, template, g, run, { estimate }),
       passed: gatePassed(store, template, g),
     }));
     if (values.json) printJson(io, verb ? packets[0]?.packet : packets.map((p) => p.packet));

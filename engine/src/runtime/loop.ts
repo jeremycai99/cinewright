@@ -1,6 +1,6 @@
 import { Scheduler } from "../scheduler/scheduler.js";
 import type {
-  PauseKind,
+  Pause,
   RunContext,
   RunOutcome,
   Task,
@@ -23,7 +23,7 @@ export class LoopRuntime implements WorkflowRuntime {
     const { ledger, events } = ctx;
     events.emit("run.started", { outcome: ctx.template });
     const failed = new Map<string, TaskError>();
-    const paused = new Map<string, { kind: PauseKind; id: string }>();
+    const paused = new Map<string, Pause>();
     const outputs: Record<string, unknown> = {};
     let order: string[] = [];
     for (;;) {
@@ -60,6 +60,7 @@ export class LoopRuntime implements WorkflowRuntime {
         },
         signal,
         ctx.route,
+        ctx.reserve,
       );
       for (const next of ready) {
         const result = results.get(next.id) as TaskResult;
@@ -74,7 +75,7 @@ export class LoopRuntime implements WorkflowRuntime {
     }
     const firstPaused = order.find((id) => paused.has(id)) ?? [...paused.keys()][0];
     if (firstPaused !== undefined) {
-      const pause = paused.get(firstPaused) as { kind: PauseKind; id: string };
+      const pause = paused.get(firstPaused) as Pause;
       events.emit("run.paused", { task: firstPaused, outcome: `${pause.kind}:${pause.id}` });
       return { status: "paused", pause };
     }
@@ -89,7 +90,7 @@ export class LoopRuntime implements WorkflowRuntime {
     ms: number,
     state: {
       failed: Map<string, TaskError>;
-      paused: Map<string, { kind: PauseKind; id: string }>;
+      paused: Map<string, Pause>;
       outputs: Record<string, unknown>;
     },
   ): void {
@@ -109,7 +110,10 @@ export class LoopRuntime implements WorkflowRuntime {
       state.failed.set(next.id, error);
       events.emit("task.failed", { task: next.id, ms, outcome: `${error.code}: ${error.message}` });
     } else {
-      const pause = result.pause ?? { kind: next.kind === "human" ? "human" : "gate", id: next.id };
+      const pause: Pause = result.pause ?? {
+        kind: next.kind === "human" ? "human" : "gate",
+        id: next.id,
+      };
       state.paused.set(next.id, pause);
       events.emit("task.blocked", { task: next.id, ms, outcome: `${pause.kind}:${pause.id}` });
     }

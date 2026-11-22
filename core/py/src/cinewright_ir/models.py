@@ -1549,6 +1549,38 @@ class Music(BaseModel):
     value: Id | None = None
 
 
+class SpendEntry(BaseModel):
+    model_config = ConfigDict(
+        extra="forbid",
+    )
+    seq: Annotated[int, Field(ge=1)]
+    at: Annotated[str, Field(min_length=1)]
+    run: Annotated[str, Field(pattern="^[A-Za-z0-9_.-]{1,128}$")]
+    task: Annotated[str, Field(max_length=256, min_length=1)]
+    key: Annotated[str, Field(max_length=256, min_length=1)]
+    plugin: Annotated[str, Field(pattern="^[a-z][a-z0-9_]*$")]
+    model: Annotated[
+        str | None,
+        Field(
+            description="The model id the plugin reports, when it reports one.",
+            max_length=128,
+        ),
+    ] = None
+    unit: Annotated[
+        str,
+        Field(
+            description="The plugin's cost unit (`token`, `character`, ...).",
+            pattern="^[a-z_]+$",
+        ),
+    ]
+    units: Annotated[float, Field(ge=0.0)]
+    usd: Annotated[float, Field(ge=0.0)]
+    prev: Annotated[
+        Hash | None, Field(description="The previous entry's hash; null for the first.")
+    ]
+    hash: Hash
+
+
 class Style(RootModel[Any]):
     root: Annotated[
         Any,
@@ -2227,5 +2259,6 @@ class IrDocuments(BaseModel):
     script: Script | None = None
     sequence: Sequence | None = None
     shot: Shot | None = None
+    spend_entry: SpendEntry | None = None
     style: Style | None = None
     timing: TimingTable | None = None

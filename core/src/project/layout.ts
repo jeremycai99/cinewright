@@ -4,6 +4,8 @@ export const SEQUENCES_DIR = "sequences";
 export const LOG_DIR = "log";
 export const PATCH_LOG = "log/patches.jsonl";
 export const DECISION_LOG = "log/decisions.jsonl";
+/** One line per paid provider call (M7.7, D17): spent is its sum, so deleting runs never resets it. */
+export const SPEND_LOG = "log/spend.jsonl";
 /** Caches and transient state, ignored by git; never production state (D37). */
 export const CACHE_DIR = ".cinewright";
 export const CAS_DIR = ".cinewright/cas";

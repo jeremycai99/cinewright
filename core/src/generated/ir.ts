@@ -155,6 +155,7 @@ export interface IrDocuments {
   script?: Script;
   sequence?: Sequence;
   shot?: Shot;
+  spend_entry?: SpendEntry;
   style?: Style;
   timing?: TimingTable;
 }
@@ -1254,6 +1255,32 @@ export interface Sequence {
     state: State;
     value?: Scene[];
   };
+}
+/**
+ * One paid provider call in `log/spend.jsonl` (M7.7, D17): append-only and tracked with the other logs, so spend survives deleting `.cinewright/runs/`. `prev` is the previous entry's `hash` and `hash` is the hash of this entry without it, so a rewritten line fails to load. Ids and amounts only: no prompt, output or secret.
+ */
+export interface SpendEntry {
+  seq: number;
+  at: string;
+  run: string;
+  task: string;
+  key: string;
+  plugin: string;
+  /**
+   * The model id the plugin reports, when it reports one.
+   */
+  model?: string;
+  /**
+   * The plugin's cost unit (`token`, `character`, ...).
+   */
+  unit: string;
+  units: number;
+  usd: number;
+  /**
+   * The previous entry's hash; null for the first.
+   */
+  prev: Hash | null;
+  hash: Hash;
 }
 /**
  * Style references shared by every level of the cascade (M1.3). Pack tokens are a plain token tree; the pack format is M2.1.

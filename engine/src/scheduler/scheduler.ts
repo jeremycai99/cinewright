@@ -1,4 +1,5 @@
 import { cpus } from "node:os";
+import type { Reservation } from "../cost/reserve.js";
 import type { FoundPlugin } from "../plugins/registry.js";
 import { loadEngineSettings } from "../reconcile/data.js";
 import type { Task, TaskResult } from "../runtime/types.js";
@@ -58,6 +59,9 @@ const cancelled = (): TaskResult => ({
  * - **Fallback:** after the attempts the next plugin with the capability is tried, unless the task
  *   pins one; a pinned task that still fails is `blocked` with a `provider` pause.
  * - **Abort:** queued tasks never start; running ones get the signal.
+ * - **Budget (M7.7):** a paid task reserves its estimate before each attempt; a reservation that
+ *   would cross the cap makes the task `blocked` with a `budget` pause and the amounts. The
+ *   attempt's actual cost (`cost_usd`, also on a failure) replaces the reservation.
  */
 export class Scheduler {
   private readonly clock: Clock;
@@ -92,6 +96,7 @@ export class Scheduler {
     execute: Execute,
     signal: AbortSignal,
     route: (task: Task) => FoundPlugin[] = () => [],
+    reserve?: (task: Task, plugin?: FoundPlugin) => Reservation,
   ): Promise<Map<string, TaskResult>> {
     const byKey = new Map<string, Promise<TaskResult>>();
     const results = new Map<string, TaskResult>();
@@ -99,7 +104,7 @@ export class Scheduler {
       tasks.map(async (task) => {
         let shared = byKey.get(task.key);
         if (!shared) {
-          shared = this.one(task, execute, signal, route);
+          shared = this.one(task, execute, signal, route, reserve);
           byKey.set(task.key, shared);
         }
         results.set(task.id, await shared);
@@ -113,6 +118,7 @@ export class Scheduler {
     execute: Execute,
     signal: AbortSignal,
     route: (task: Task) => FoundPlugin[],
+    reserve?: (task: Task, plugin?: FoundPlugin) => Reservation,
   ): Promise<TaskResult> {
     const candidates = task.capability ? route(task) : [];
     const plugins: (FoundPlugin | undefined)[] = candidates.length > 0 ? candidates : [undefined];
@@ -128,7 +134,13 @@ export class Scheduler {
             return cancelled();
           }
         }
+        // Reserved before the first await, so the reservations of parallel tasks add up.
+        const held = task.paid && reserve ? reserve(task, plugin) : undefined;
+        if (held && !held.ok)
+          return { status: "blocked", pause: { kind: "budget", id: task.id, amounts: held.pause } };
         const releases: (() => void)[] = [];
+        // A cancelled attempt charges nothing; never the previous attempt's cost again.
+        last = cancelled();
         try {
           if (pooled) releases.push(await this.render.acquire(signal));
           if (plugin) releases.push(await this.limitsOf(plugin).acquire(signal));
@@ -141,6 +153,7 @@ export class Scheduler {
           };
         } finally {
           for (const release of releases.reverse()) release();
+          if (held?.ok) held.release(last.cost_usd ?? 0);
         }
         if (last.status !== "failed" || !last.error?.retryable || signal.aborted) return last;
       }

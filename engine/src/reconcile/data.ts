@@ -51,6 +51,15 @@ export interface EngineSettings {
   v0_1: { shot_types: Record<string, string>; transitions: string[] };
   /** Retries (`attempts` in all, backoff doubling from `backoff_ms`) and the render pool's cap (M7.2). */
   scheduler: { attempts: number; backoff_ms: number; backoff_factor: number; render_pool: number };
+  /**
+   * Estimates (M7.7): the fix reserve as a fraction of production, the estimate for a paid plugin
+   * with no published price, and the units a task may use per plugin kind (`default` otherwise).
+   */
+  budget: {
+    fix_reserve_fraction: number;
+    unpriced_task_usd: number;
+    task_units: Record<string, number>;
+  };
 }
 
 const read = (path: string) => JSON.parse(readFileSync(new URL(path, import.meta.url), "utf8"));

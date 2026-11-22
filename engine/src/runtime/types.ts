@@ -1,3 +1,5 @@
+import type { SpendItem } from "../cost/ledger.js";
+import type { BudgetAmounts, Reservation } from "../cost/reserve.js";
 import type { FoundPlugin } from "../plugins/registry.js";
 import type { EventLog } from "./events.js";
 import type { RunLedger } from "./ledger.js";
@@ -35,22 +37,31 @@ export interface TaskError {
 /** `provider`: a pinned plugin kept failing after its retries (M7.2). */
 export type PauseKind = "gate" | "human" | "budget" | "provider";
 
+/** Why a run stopped; a budget pause carries the amounts (M7.7). */
+export interface Pause {
+  kind: PauseKind;
+  id: string;
+  amounts?: BudgetAmounts;
+}
+
 export interface TaskResult {
   /** `blocked`: the task cannot finish yet (a gate not approved, a human task waiting, the budget). */
   status: "done" | "noop" | "failed" | "blocked";
   revision?: number;
   cost_usd?: number;
+  /** Each paid call the task made, for `log/spend.jsonl` (M7.7). */
+  spend?: SpendItem[];
   findings?: unknown[];
   error?: TaskError;
   /** For `blocked`; the default is the task's own kind and id. */
-  pause?: { kind: PauseKind; id: string };
+  pause?: Pause;
   /** What the task produced for the caller (a job's render report). Never logged. */
   output?: unknown;
 }
 
 export type RunOutcome =
   | { status: "done"; outputs: Record<string, unknown> }
-  | { status: "paused"; pause: { kind: PauseKind; id: string } }
+  | { status: "paused"; pause: Pause }
   | { status: "failed"; task: string; error: TaskError };
 
 /** What a runtime needs: how to derive tasks, how to run one, and where to record it. */
@@ -63,6 +74,8 @@ export interface RunContext {
   execute(task: Task, signal: AbortSignal, plugin?: FoundPlugin): Promise<TaskResult>;
   /** The plugins for a task's capability, best first (`routeCapability`). */
   route?: (task: Task) => FoundPlugin[];
+  /** Reserve a paid task's estimate before it starts (M7.7); none means no budget. */
+  reserve?: (task: Task, plugin?: FoundPlugin) => Reservation;
   ledger: RunLedger;
   events: EventLog;
 }

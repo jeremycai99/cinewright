@@ -1,7 +1,8 @@
-import { existsSync, readFileSync } from "node:fs";
-import { join } from "node:path";
+import { readFileSync } from "node:fs";
 import { type CriticFinding, type InlinedIr, replayLog, type Store } from "@cinewright/core";
 import { Ajv2020, type ValidateFunction } from "ajv/dist/2020.js";
+import type { Estimate } from "../cost/estimate.js";
+import { spent } from "../cost/ledger.js";
 import type { WorkflowTemplate } from "../reconcile/data.js";
 import { entities } from "../reconcile/requirements.js";
 import type { GateName } from "./decide.js";
@@ -25,18 +26,6 @@ export interface GatePacket {
     render_key: string;
   }[];
   cost: { spent_usd: number; estimate_to_complete_usd: number | null; cap_usd: number | null };
-}
-
-/** `log/spend.jsonl` (M7.7); until it exists nothing has been spent. */
-export const SPEND_LOG = "log/spend.jsonl";
-
-function spent(dir: string): number {
-  const file = join(dir, SPEND_LOG);
-  if (!existsSync(file)) return 0;
-  return readFileSync(file, "utf8")
-    .split("\n")
-    .filter(Boolean)
-    .reduce((n, l) => n + ((JSON.parse(l) as { usd?: number }).usd ?? 0), 0);
 }
 
 /** Every field wrapper's value, by `entity + path`. */
@@ -68,14 +57,14 @@ function values(ir: InlinedIr): Map<string, { entity: string; path: string; valu
  * The gate packet (M7.6): the field changes since this gate was last approved (by value; a lock
  * alone is no change), the fields approving would lock, open suggestions, the findings given, the
  * stills given (by render key and file hash), and the cost figures: spent (`log/spend.jsonl`), the
- * estimate to complete (M7.7; null until then) and the cap.
+ * estimate to complete (when given; M7.7) and the cap.
  */
 export function buildPacket(
   store: Store,
   template: WorkflowTemplate,
   gate: GateName,
   run: string,
-  extras: { findings?: CriticFinding[]; stills?: GatePacket["stills"] } = {},
+  extras: { findings?: CriticFinding[]; stills?: GatePacket["stills"]; estimate?: Estimate } = {},
 ): GatePacket {
   const log = store.log();
   const approval = [...log]
@@ -119,7 +108,7 @@ export function buildPacket(
     ...(extras.stills ? { stills: extras.stills } : {}),
     cost: {
       spent_usd: spent(store.dir),
-      estimate_to_complete_usd: null,
+      estimate_to_complete_usd: extras.estimate?.total_usd ?? null,
       cap_usd: ir.budget.value?.cap ?? null,
     },
   };

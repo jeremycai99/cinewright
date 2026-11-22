@@ -1,6 +1,9 @@
 import { existsSync, readdirSync, readFileSync, writeFileSync } from "node:fs";
 import { join } from "node:path";
 import { RUNS_DIR, runDir, type Store, sha256Hash, stateHash } from "@cinewright/core";
+import { estimateRun, taskEstimate } from "./cost/estimate.js";
+import { recordSpend, spent } from "./cost/ledger.js";
+import { Budget } from "./cost/reserve.js";
 import { approveGate, type GateName, gatePassed } from "./gates/decide.js";
 import { intake } from "./intake.js";
 import { planRender, type Stage, type StepKind } from "./pipeline/plan.js";
@@ -238,32 +241,63 @@ export async function runWorkflow(
       ? template.phases.findIndex((p) => p.gate === "storyboard")
       : template.phases.length - 1;
   const inRange = new Set(template.phases.slice(0, stop + 1).map((p) => p.id));
+  const derive = async () => {
+    const now = store.ir();
+    const { tasks } = reconcile(now, template, preset, {
+      plan: planRender(now, options.render.deliverables),
+      recorded: recordedKeys(store.dir),
+    });
+    return tasks.filter((t) => inRange.has(t.phase));
+  };
+
+  // The budget (M7.7, D17): estimate what is left, pause before any paid work when it would cross
+  // the cap, and reserve each paid task's estimate as it starts.
+  const llm = options.llm?.[0];
+  const pluginFor = (t: Task) => (t.kind === "agent" ? llm : undefined);
+  const cap = ir.budget.value?.cap ?? null;
+  const spentNow = spent(store.dir);
+  const estimate = estimateRun(
+    (await derive()).filter((t) => !ledger.isDone(t)),
+    pluginFor,
+  );
+  if (cap !== null && spentNow + estimate.total_usd > cap + 1e-9) {
+    const pause = {
+      kind: "budget" as const,
+      id: "estimate",
+      amounts: { spent: spentNow, reserved: 0, needed: estimate.total_usd, cap },
+    };
+    events.emit("run.paused", { task: "estimate", outcome: `budget:estimate` });
+    return finish({ status: "paused", pause });
+  }
+  const budget = new Budget({ cap, spent: spentNow, fixReserve: estimate.fix_reserve_usd });
+  const secrets = secretValues(options.render.env ?? process.env);
+  const execute = async (task: Task): Promise<TaskResult> => {
+    if (task.kind === "gate") return executeGate(store, task, template, options);
+    if (task.kind === "human") return { status: "blocked", pause: { kind: "human", id: task.id } };
+    if (task.kind === "job") return jobs(task, store, run);
+    if (options.executors?.agent) return options.executors.agent(task, store, run);
+    return {
+      status: "failed",
+      error: { code: "agent.unavailable", message: `no agent runner for ${task.role}` },
+    };
+  };
   const ctx: RunContext = {
     runId: run,
     template: `${template.id}@${template.version}`,
     preset: preset.id,
-    derive: async () => {
-      const now = store.ir();
-      const { tasks } = reconcile(now, template, preset, {
-        plan: planRender(now, options.render.deliverables),
-        recorded: recordedKeys(store.dir),
-      });
-      return tasks.filter((t) => inRange.has(t.phase));
-    },
+    derive,
     execute: async (task) => {
-      if (task.kind === "gate") return executeGate(store, task, template, options);
-      if (task.kind === "human")
-        return { status: "blocked", pause: { kind: "human", id: task.id } };
-      if (task.kind === "job") return jobs(task, store, run);
-      if (options.executors?.agent) return options.executors.agent(task, store, run);
-      return {
-        status: "failed",
-        error: {
-          code: "agent.unavailable",
-          message: `no agent runner for ${task.role} yet (M7.4)`,
-        },
-      };
+      const result = await execute(task);
+      // Each paid call goes to log/spend.jsonl, failed calls included (M7.7).
+      for (const item of result.spend ?? [])
+        await recordSpend(
+          store.dir,
+          { at: now(), run, task: task.id, key: task.key, ...item },
+          { secrets },
+        );
+      return result;
     },
+    reserve: (task, plugin) => budget.reserve(task, taskEstimate(task, plugin ?? pluginFor(task))),
     ledger,
     events,
   };
