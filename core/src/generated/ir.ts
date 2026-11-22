@@ -991,6 +991,15 @@ export interface Budget {
 }
 export interface Policies {
   require_commercial_license: boolean;
+  fix?: FixPolicy;
+}
+/**
+ * Fix-loop bounds (M6.3b): project policy; absent values default from engine/settings.json.
+ */
+export interface FixPolicy {
+  attempts_per_owner?: number;
+  rounds_per_shot?: number;
+  qa_rounds?: number;
 }
 export interface ProjectSettings {
   /**

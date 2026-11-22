@@ -1322,11 +1322,27 @@ class Budget(BaseModel):
     cap: Annotated[float, Field(gt=0.0)]
 
 
+class FixPolicy(BaseModel):
+    model_config = ConfigDict(
+        extra="forbid",
+    )
+    attempts_per_owner: Annotated[int | None, Field(ge=0, le=10)] = None
+    rounds_per_shot: Annotated[int | None, Field(ge=0, le=20)] = None
+    qa_rounds: Annotated[int | None, Field(ge=0, le=20)] = None
+
+
 class Policies(BaseModel):
     model_config = ConfigDict(
         extra="forbid",
     )
     require_commercial_license: bool
+    fix: Annotated[
+        FixPolicy | None,
+        Field(
+            description="Fix-loop bounds (M6.3b): project policy; absent values default from engine/settings.json.",
+            title="FixPolicy",
+        ),
+    ] = None
 
 
 class Profile(BaseModel):

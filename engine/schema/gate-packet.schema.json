@@ -7,9 +7,16 @@
   "additionalProperties": false,
   "required": ["gate", "run", "revision", "diff", "locks", "suggestions", "findings", "cost"],
   "properties": {
-    "gate": { "enum": ["script", "storyboard", "final"] },
-    "run": { "type": "string" },
-    "revision": { "type": "integer", "minimum": 0 },
+    "gate": {
+      "enum": ["script", "storyboard", "final"]
+    },
+    "run": {
+      "type": "string"
+    },
+    "revision": {
+      "type": "integer",
+      "minimum": 0
+    },
     "since": {
       "description": "The revision of the gate's last approval, when there was one.",
       "type": "integer",
@@ -22,8 +29,12 @@
         "additionalProperties": false,
         "required": ["entity", "path"],
         "properties": {
-          "entity": { "type": "string" },
-          "path": { "type": "string" },
+          "entity": {
+            "type": "string"
+          },
+          "path": {
+            "type": "string"
+          },
           "before": {},
           "after": {}
         }
@@ -36,9 +47,15 @@
         "additionalProperties": false,
         "required": ["entity", "path", "state"],
         "properties": {
-          "entity": { "type": "string" },
-          "path": { "type": "string" },
-          "state": { "type": "string" }
+          "entity": {
+            "type": "string"
+          },
+          "path": {
+            "type": "string"
+          },
+          "state": {
+            "type": "string"
+          }
         }
       }
     },
@@ -49,13 +66,24 @@
         "additionalProperties": false,
         "required": ["pending_id", "reason", "author"],
         "properties": {
-          "pending_id": { "type": "string" },
-          "reason": { "type": "string" },
-          "author": { "type": "string" }
+          "pending_id": {
+            "type": "string"
+          },
+          "reason": {
+            "type": "string"
+          },
+          "author": {
+            "type": "string"
+          }
         }
       }
     },
-    "findings": { "type": "array", "items": { "type": "object" } },
+    "findings": {
+      "type": "array",
+      "items": {
+        "type": "object"
+      }
+    },
     "stills": {
       "type": "array",
       "items": {
@@ -63,12 +91,25 @@
         "additionalProperties": false,
         "required": ["shot", "deliverable", "frame", "file", "sha256", "render_key"],
         "properties": {
-          "shot": { "type": "string" },
-          "deliverable": { "type": "string" },
-          "frame": { "type": "integer", "minimum": 0 },
-          "file": { "type": "string" },
-          "sha256": { "type": "string" },
-          "render_key": { "type": "string" }
+          "shot": {
+            "type": "string"
+          },
+          "deliverable": {
+            "type": "string"
+          },
+          "frame": {
+            "type": "integer",
+            "minimum": 0
+          },
+          "file": {
+            "type": "string"
+          },
+          "sha256": {
+            "type": "string"
+          },
+          "render_key": {
+            "type": "string"
+          }
         }
       }
     },
@@ -77,10 +118,56 @@
       "additionalProperties": false,
       "required": ["spent_usd", "estimate_to_complete_usd", "cap_usd"],
       "properties": {
-        "spent_usd": { "type": "number", "minimum": 0 },
-        "estimate_to_complete_usd": { "type": ["number", "null"], "minimum": 0 },
-        "cap_usd": { "type": ["number", "null"], "minimum": 0 }
+        "spent_usd": {
+          "type": "number",
+          "minimum": 0
+        },
+        "estimate_to_complete_usd": {
+          "type": ["number", "null"],
+          "minimum": 0
+        },
+        "cap_usd": {
+          "type": ["number", "null"],
+          "minimum": 0
+        }
       }
+    },
+    "escalated": {
+      "description": "Findings the fix loop escalated to this gate (M6.3b), with their attempts and reason.",
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["finding", "rule", "entity", "severity", "reason", "attempts"],
+        "properties": {
+          "finding": {
+            "type": "string"
+          },
+          "rule": {
+            "type": "string"
+          },
+          "entity": {
+            "type": "string"
+          },
+          "severity": {
+            "enum": ["error", "warning"]
+          },
+          "reason": {
+            "type": "string"
+          },
+          "attempts": {
+            "type": "integer",
+            "minimum": 0
+          },
+          "message": {
+            "type": "string"
+          }
+        }
+      }
+    },
+    "exportable": {
+      "description": "No error finding open or escalated without a user's waiver (M6.3b).",
+      "type": "boolean"
     }
   }
 }
