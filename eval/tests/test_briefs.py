@@ -107,6 +107,6 @@ def test_snapshot_refuses_an_open_error_and_freezes_a_clean_run(tmp_path: Path) 
         == "sha256:" + "a" * 64
     )
     index = json.loads((root / "fixtures" / "benchmark" / "tier-a" / "index.json").read_text())
-    assert index == {"fixtures": [{"id": "tides_neutral"}]}
+    assert index == {"fixtures": [{"id": "tides_neutral", "path": "tides_neutral"}]}
     with pytest.raises(SnapshotError, match="already exists"):
         snapshot(clean, "tides_neutral", root)
