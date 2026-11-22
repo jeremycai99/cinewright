@@ -1,0 +1,71 @@
+{
+  "id": "craft",
+  "version": "1",
+  "floor": 2,
+  "criteria": [
+    {
+      "id": "hierarchy",
+      "level": "shot",
+      "question": "Does the frame give one clear focal point, and does that point support the line being spoken?",
+      "craft_rules": ["hierarchy.one_focus", "hierarchy.supports_line"],
+      "anchors": {
+        "1": "No element leads, or the leading element shows a claim the line does not make.",
+        "3": "One element leads, but another competes for attention or the link to the line is loose.",
+        "5": "One element clearly leads and shows exactly the claim the line makes."
+      }
+    },
+    {
+      "id": "composition",
+      "level": "shot",
+      "question": "Do the elements sit in the regions of the shot's layout, inside the safe area, with the spacing the pack rules ask for?",
+      "anchors": {
+        "1": "Elements overlap, crowd an edge or leave the safe area.",
+        "3": "Placement follows the layout, but spacing or alignment is uneven against the pack rules.",
+        "5": "Placement follows the layout and the pack rules throughout."
+      }
+    },
+    {
+      "id": "legibility",
+      "level": "shot",
+      "question": "Can every piece of on-screen text be read once, at its size and contrast, in the time it is held?",
+      "craft_rules": ["legibility.read_time", "legibility.size_floor"],
+      "anchors": {
+        "1": "Some text cannot be read: too small, too low in contrast, or too long for its hold.",
+        "3": "All text can be read, but some needs effort.",
+        "5": "All text reads at a glance."
+      }
+    },
+    {
+      "id": "pack_conformance",
+      "level": "shot",
+      "question": "Do the colours, type, spacing and motion follow the resolved pack rules given in the context?",
+      "anchors": {
+        "1": "Several visible choices contradict the pack rules.",
+        "3": "Choices follow the pack rules with a visible exception.",
+        "5": "Every visible choice follows the pack rules."
+      }
+    },
+    {
+      "id": "rhythm",
+      "level": "scene",
+      "question": "Do the cuts fall on the narration's sense units, with each shot held long enough to read?",
+      "craft_rules": ["rhythm.cut_on_sense", "rhythm.hold_to_read"],
+      "anchors": {
+        "1": "Cuts land mid-thought or shots flash by before they can be read.",
+        "3": "Most cuts follow the narration; one shot is held too briefly or too long.",
+        "5": "Every cut follows the narration and every shot holds to be read."
+      }
+    },
+    {
+      "id": "continuity",
+      "level": "scene",
+      "question": "Does the same idea keep the same position, colour and form across the scene's shots, with transitions that carry meaning?",
+      "craft_rules": ["continuity.same_thing_same_look", "continuity.transitions_mean"],
+      "anchors": {
+        "1": "The same idea changes form or place between shots without reason.",
+        "3": "Continuity holds with one unexplained change.",
+        "5": "Continuity holds throughout, and every transition carries meaning."
+      }
+    }
+  ]
+}

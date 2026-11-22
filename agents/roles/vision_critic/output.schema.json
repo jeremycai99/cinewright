@@ -1,0 +1,10 @@
+{
+  "description": "Placeholder: the engine builds each call's schema from the rubric and the shot or scene judged (engine/src/critics/vision.ts).",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["scores", "findings"],
+  "properties": {
+    "scores": { "type": "array", "items": { "type": "object" } },
+    "findings": { "type": "array", "items": { "type": "object" } }
+  }
+}

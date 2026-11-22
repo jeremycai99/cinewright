@@ -8,6 +8,7 @@ import {
   type Store,
 } from "@cinewright/core";
 import {
+  type FoundPlugin,
   findPlugins,
   type RenderOptions,
   type RenderReport,
@@ -15,6 +16,7 @@ import {
   runWorkflow,
   STAGES,
   type Stage,
+  v01Vision,
 } from "@cinewright/engine";
 import { parse, UsageError } from "../args.js";
 import { EXIT } from "../exit-codes.js";
@@ -23,9 +25,18 @@ import { findProject, openStore } from "../project.js";
 import { pluginPath } from "./narrate.js";
 
 export const RENDER_USAGE =
-  "usage: cinewright render [--deliverable <id>]... [--until narrate|timing|compose|shots|mix|captions|assemble|critique] [--no-critics] [--jobs-only] [--retake <line>]... [--provider <id>] [--out <dir>] [--image <ref>] [--plugins <dir>]... [--project <dir>] [--json]";
+  "usage: cinewright render [--deliverable <id>]... [--until narrate|timing|compose|shots|mix|captions|assemble|critique] [--no-critics] [--vision] [--jobs-only] [--retake <line>]... [--provider <id>] [--out <dir>] [--image <ref>] [--plugins <dir>]... [--project <dir>] [--json]";
 
 /** What `render` and `plan` share: the store and the pipeline's options. */
+/** LLM plugins whose secrets are all set come first: the first one runs the agents (D29). */
+export function usableFirst(
+  plugins: readonly FoundPlugin[],
+  env: Readonly<Record<string, string | undefined>>,
+): FoundPlugin[] {
+  const usable = (p: FoundPlugin) => p.manifest.secrets.every((s) => Boolean(env[s]));
+  return [...plugins.filter(usable), ...plugins.filter((p) => !usable(p))];
+}
+
 export async function pipelineSetup(
   values: {
     deliverable?: string[];
@@ -117,7 +128,8 @@ export function reportFailure(
 /**
  * `cinewright render` (M5.4b): every non-agent job in order (narrate, timing, compose, shots,
  * mix, captions, assemble), re-doing only what an edit changed, then the critique step (M6.1a)
- * unless `--no-critics`. It runs as a workflow run (M7.1a) whose one task is the pipeline: preset
+ * unless `--no-critics`; `--vision` adds the vision critic (M6.2), whose findings are warnings.
+ * It runs as a workflow run (M7.1a) whose one task is the pipeline: preset
  * `manual` until presets land. Prints a report of every step with its key and whether its cache
  * hit. Exit 3 for IR and compile findings, 8 for a render failure, 9 for a provider, 10 when a
  * critic reports an error finding.
@@ -135,14 +147,32 @@ export async function render(argv: string[], io: Io): Promise<number> {
     json: { type: "boolean" },
     "no-critics": { type: "boolean" },
     "jobs-only": { type: "boolean" },
+    vision: { type: "boolean" },
   });
   const setup = await pipelineSetup(values, io, "render");
   if (typeof setup === "number") return setup;
-  const { run, outcome } = await runWorkflow(setup.store, {
-    render: setup.options,
-    jobsOnly: true,
-    now: now(io),
-  });
+  // The vision critic (M6.2) is a paid model call per shot and scene: only with --vision.
+  let vision: ReturnType<typeof v01Vision> | undefined;
+  if (values.vision) {
+    const llm = usableFirst(await findPlugins("llm", pluginPath(io, values.plugins)), io.env)[0];
+    if (!llm) throw new UsageError("--vision needs an installed llm plugin with its key set");
+    vision = v01Vision({
+      llm,
+      env: io.env,
+      pack: resolveProjectPack(setup.store.ir(), packSearchPath(io.env)),
+    });
+  }
+  let result: Awaited<ReturnType<typeof runWorkflow>>;
+  try {
+    result = await runWorkflow(setup.store, {
+      render: { ...setup.options, ...(vision ? { vision: vision.vision } : {}) },
+      jobsOnly: true,
+      now: now(io),
+    });
+  } finally {
+    await vision?.shutdown();
+  }
+  const { run, outcome } = result;
   if (outcome.status === "failed")
     return reportFailure(io, "render", outcome, values.json === true);
   if (outcome.status === "paused")

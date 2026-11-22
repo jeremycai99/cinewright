@@ -1,4 +1,4 @@
-"""`cinewright-eval`: benchmark tooling. Subcommands `cas-export` (A.1) and `tier-a` (M8.3a)."""
+"""`cinewright-eval`: benchmark tooling: `cas-export` (A.1), `tier-a` (M8.3a), `baseline` (M6.2)."""
 
 from __future__ import annotations
 
@@ -9,6 +9,7 @@ import shlex
 import sys
 from pathlib import Path
 
+from cinewright_eval.baseline import check, load_runs, record
 from cinewright_eval.cas_export import ExportError, export
 from cinewright_eval.tier_a import TierAOptions, run_tier_a
 
@@ -35,7 +36,28 @@ def main(argv: list[str] | None = None) -> int:
         default=os.environ.get("CINEWRIGHT_CLI"),
         help="the cinewright command (default: node <root>/cli/dist/bin.js)",
     )
+    base = sub.add_parser("baseline", help="record or check a vision baseline (M6.2)")
+    base_sub = base.add_subparsers(dest="action", required=True)
+    rec = base_sub.add_parser("record", help="a baseline from run files")
+    rec.add_argument("runs", nargs="+", type=Path)
+    rec.add_argument("--pins", required=True, type=Path, help="JSON of the pinned versions (D36)")
+    rec.add_argument("--floor", type=int, default=2)
+    rec.add_argument("--out", required=True, type=Path)
+    chk = base_sub.add_parser("check", help="runs against a baseline's thresholds")
+    chk.add_argument("runs", nargs="+", type=Path)
+    chk.add_argument("--against", required=True, type=Path)
     args = parser.parse_args(argv)
+    if args.command == "baseline":
+        runs = load_runs(args.runs)
+        if args.action == "record":
+            doc = record(runs, json.loads(args.pins.read_text()), args.floor)
+            args.out.parent.mkdir(parents=True, exist_ok=True)
+            args.out.write_text(json.dumps(doc, indent=2, sort_keys=True) + "\n")
+            return 0
+        rows = check(runs, json.loads(args.against.read_text()))
+        for row in rows:
+            print(json.dumps(row))
+        return 0 if rows and all(r["pass"] for r in rows) else 1
     if args.command == "tier-a":
         root = args.root.resolve()
         cli = shlex.split(args.cli) if args.cli else ["node", str(root / "cli" / "dist" / "bin.js")]

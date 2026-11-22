@@ -43,20 +43,21 @@
       "properties": {
         "kinds": {
           "type": "array",
-          "minItems": 1,
+          "minItems": 0,
           "items": {
             "type": "string"
           }
         },
         "paths": {
           "type": "array",
-          "minItems": 1,
+          "minItems": 0,
           "items": {
             "type": "string",
             "pattern": "^(/[^/]+)+$"
           }
         }
-      }
+      },
+      "description": "What the role may write; empty for a critic, which only reports (M6.2)."
     },
     "per": {
       "enum": ["project", "sequence", "shot"]

@@ -50,7 +50,7 @@ export {
   type ToPatch,
 } from "./agents/runner.js";
 export { shotOutputSchema, shotStubs } from "./agents/schema/layers.js";
-export { installedPacks, v01Agents } from "./agents/setup.js";
+export { installedPacks, v01Agents, v01Vision } from "./agents/setup.js";
 export { type OutputError, type SemanticCheck, validateOutput } from "./agents/validate.js";
 export { WavError, type WavInfo, wavInfo } from "./audio/wav.js";
 export {
@@ -71,6 +71,18 @@ export {
   SOLVER_CRITIC,
   TRANSCRIBE_CRITIC,
 } from "./critics/run.js";
+export {
+  loadRubric,
+  type Rubric,
+  type ShotView,
+  shotViews,
+  type VisionOptions,
+  type VisionResult,
+  type VisionScore,
+  visionCriticVersion,
+  visionCritique,
+  visionSchema,
+} from "./critics/vision.js";
 export {
   approveGate,
   GateError,
