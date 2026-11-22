@@ -1,4 +1,6 @@
-import { loadTemplate, pendingTasks, type Task } from "@cinewright/engine";
+import { readFileSync } from "node:fs";
+import { packSearchPath, resolveProjectPack } from "@cinewright/core";
+import { loadTemplate, pendingTasks, submitForRole, type Task } from "@cinewright/engine";
 import { parse, UsageError } from "../args.js";
 import { EXIT } from "../exit-codes.js";
 import { type Io, printJson } from "../io.js";
@@ -39,10 +41,22 @@ export async function tasks(argv: string[], io: Io): Promise<number> {
     if (!values.file) throw new UsageError("tasks submit needs --file <output.json>");
     if (task.kind === "gate")
       throw new UsageError(`${task.id} is a gate: use cinewright review approve`);
-    io.stderr(
-      `cinewright tasks: role ${task.role ?? "?"} has no definition or patch mapping yet (M7.5)\n`,
-    );
-    return EXIT.provider;
+    let output: unknown;
+    try {
+      output = JSON.parse(readFileSync(values.file, "utf8"));
+    } catch (error) {
+      throw new UsageError(`--file: ${(error as Error).message}`);
+    }
+    const env = io.env;
+    const result = await submitForRole(store, task, output, {
+      pack: resolveProjectPack(store.ir(), packSearchPath(env)),
+      packDirs: packSearchPath(env),
+    });
+    if (values.json) printJson(io, result);
+    else if (result.status === "done") io.stdout(`${task.id} done (revision ${result.revision})\n`);
+    else io.stderr(`cinewright tasks: ${result.error?.code}: ${result.error?.message}\n`);
+    if (result.status === "done") return EXIT.ok;
+    return result.error?.code === "human.no_role" ? EXIT.provider : EXIT.invalid;
   }
   if (verb) throw new UsageError(`unknown tasks command ${verb}`);
   if (values.json) printJson(io, pending);

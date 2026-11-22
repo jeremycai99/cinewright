@@ -178,6 +178,8 @@ describe("intake (M7.1b, P0)", () => {
       ).map((f) => f.rule);
     expect(rules({})).toContain("intake.no_provider");
     expect(rules({ LLM_KEY: "k" })).toEqual([]);
+    // Replaying cassettes calls no provider, so no key is needed (M7.5a).
+    expect(rules({ CINEWRIGHT_CASSETTE_MODE: "replay" })).toEqual([]);
   });
 
   it("needs a deliverable", async () => {

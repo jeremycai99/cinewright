@@ -7,7 +7,7 @@ import { PROFILES, tempDir } from "./tree.js";
 
 const ENV = { CINEWRIGHT_FIXED_TIME: "2026-11-21T00:00:00Z" };
 
-async function project(): Promise<string> {
+async function project(beats = true): Promise<string> {
   const dir = join(tempDir(), "demo");
   const init = ["init", dir, "--id", "demo", "--pack", "neutral"];
   const profile = `web=${PROFILES}landscape_1080p30.json`;
@@ -34,16 +34,20 @@ async function project(): Promise<string> {
             on_screen: false,
           },
         },
-        {
-          op: "insert",
-          entity: "script",
-          path: "/beats",
-          value: {
-            id: "b01",
-            summary: "S",
-            lines: [{ id: "b01.l01", text: "Hello there.", speaker: "narrator" }],
-          },
-        },
+        ...(beats
+          ? [
+              {
+                op: "insert",
+                entity: "script",
+                path: "/beats",
+                value: {
+                  id: "b01",
+                  summary: "S",
+                  lines: [{ id: "b01.l01", text: "Hello there.", speaker: "narrator" }],
+                },
+              },
+            ]
+          : []),
       ],
     }),
   );
@@ -100,5 +104,64 @@ describe("cinewright review and tasks (M7.6)", () => {
     expect(after.cap_usd).toBe(12.5);
     expect((await json(["review", "script", ...p])).cost.cap_usd).toBe(12.5);
     expect((await run(["review", "budget", "--cap", "-1", ...p], ENV)).code).toBe(EXIT.usage);
+  });
+});
+
+describe("cinewright tasks submit (M7.5a)", () => {
+  it("applies a human Producer's and Writer's output after the role's checks", async () => {
+    const dir = await project(false);
+    const p = ["--project", dir];
+    const roles = join(tempDir(), "roles.json");
+    writeFileSync(
+      roles,
+      JSON.stringify({
+        base_revision: 1,
+        author: { kind: "user" },
+        mode: "apply",
+        reason: "people in both seats",
+        ops: [
+          {
+            op: "set",
+            entity: "demo",
+            path: "/settings/roles",
+            value: { producer: "human", writer: "human" },
+          },
+        ],
+      }),
+    );
+    expect((await run(["patch", "apply", "--file", roles, ...p], ENV)).code).toBe(0);
+    const ids = (await json(["tasks", ...p])).map((t: { id: string }) => t.id);
+    expect(ids).toEqual(expect.arrayContaining(["producer", "writer"]));
+
+    const file = (name: string, value: unknown) => {
+      const f = join(tempDir(), name);
+      writeFileSync(f, JSON.stringify(value));
+      return f;
+    };
+    const plan = file("plan.json", {
+      plan: { summary: "Why heat pumps work", target_seconds: 10, beats: ["Heat moves"] },
+    });
+    expect((await run(["tasks", "submit", "producer", "--file", plan, ...p], ENV)).code).toBe(
+      EXIT.ok,
+    );
+    const words = (n: number) => Array.from({ length: n }, (_, i) => `w${i}`).join(" ");
+    const script = (n: number) => ({
+      beats: [
+        {
+          id: "b02",
+          summary: "Heat moves",
+          lines: [0, 1, 2, 3].map((i) => ({ id: `b02.l0${i + 1}`, text: words(n) })),
+        },
+      ],
+    });
+    const long = file("long.json", script(60));
+    const bad = await run(["tasks", "submit", "writer", "--file", long, ...p], ENV);
+    expect(bad.code).toBe(EXIT.invalid);
+    expect(bad.stderr).toContain("script.too_long");
+    const good = file("good.json", script(5));
+    const ok = await run(["tasks", "submit", "writer", "--file", good, ...p], ENV);
+    expect(ok.code, ok.stderr).toBe(EXIT.ok);
+    const left = (await json(["tasks", ...p])).map((t: { id: string }) => t.id);
+    expect(left).not.toContain("writer");
   });
 });

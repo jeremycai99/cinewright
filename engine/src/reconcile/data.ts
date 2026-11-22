@@ -55,6 +55,8 @@ export interface EngineSettings {
    * Estimates (M7.7): the fix reserve as a fraction of production, the estimate for a paid plugin
    * with no published price, and the units a task may use per plugin kind (`default` otherwise).
    */
+  /** The Writer's length check (M7.5a): narration pace and the allowed miss of the plan's target. */
+  script: { pace_wpm: number; flex: number };
   budget: {
     fix_reserve_fraction: number;
     unpriced_task_usd: number;

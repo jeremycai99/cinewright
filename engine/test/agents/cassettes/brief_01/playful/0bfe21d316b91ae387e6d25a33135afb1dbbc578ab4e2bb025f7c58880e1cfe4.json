@@ -1,0 +1,228 @@
+{
+  "request_hash": "sha256:0bfe21d316b91ae387e6d25a33135afb1dbbc578ab4e2bb025f7c58880e1cfe4",
+  "response": {
+    "output": {
+      "output": {
+        "beats": [
+          {
+            "id": "b01",
+            "summary": "For homeowners replacing a gas furnace: a heat pump can warm a house using heat taken from cold outdoor air.",
+            "lines": [
+              {
+                "id": "b01.l01",
+                "text": "If you are thinking about replacing a gas furnace, here is one option worth understanding."
+              },
+              {
+                "id": "b01.l02",
+                "text": "A heat pump can warm your house."
+              },
+              {
+                "id": "b01.l03",
+                "text": "It does this using heat taken from the cold air outside.",
+                "on_screen_text": "Heat from outdoor air"
+              },
+              {
+                "id": "b01.l04",
+                "text": "Here is how it works, step by step.",
+                "direction": "[short pause after]"
+              }
+            ]
+          },
+          {
+            "id": "b02",
+            "summary": "Outside, a refrigerant absorbs heat from the cold outdoor air.",
+            "lines": [
+              {
+                "id": "b02.l01",
+                "text": "It starts outside, with a fluid called a refrigerant."
+              },
+              {
+                "id": "b02.l02",
+                "text": "Outside, the refrigerant meets the cold outdoor air."
+              },
+              {
+                "id": "b02.l03",
+                "text": "It absorbs heat from that air.",
+                "on_screen_text": "Refrigerant absorbs heat"
+              },
+              {
+                "id": "b02.l04",
+                "text": "Yes, even when the air feels cold.",
+                "direction": "[gentle emphasis on 'cold']"
+              }
+            ]
+          },
+          {
+            "id": "b03",
+            "summary": "A compressor raises the refrigerant's temperature.",
+            "lines": [
+              {
+                "id": "b03.l01",
+                "text": "Next comes the compressor."
+              },
+              {
+                "id": "b03.l02",
+                "text": "The compressor raises the refrigerant's temperature.",
+                "on_screen_text": "Compressor raises temperature"
+              },
+              {
+                "id": "b03.l03",
+                "text": "Now the refrigerant is warm enough to heat your home."
+              }
+            ]
+          },
+          {
+            "id": "b04",
+            "summary": "Indoors, the heat is released to warm the house.",
+            "lines": [
+              {
+                "id": "b04.l01",
+                "text": "Then the refrigerant moves indoors."
+              },
+              {
+                "id": "b04.l02",
+                "text": "There, it releases its heat.",
+                "on_screen_text": "Heat released indoors"
+              },
+              {
+                "id": "b04.l03",
+                "text": "That heat warms the rooms of your house."
+              }
+            ]
+          },
+          {
+            "id": "b05",
+            "summary": "A heat pump moves heat rather than burning fuel.",
+            "lines": [
+              {
+                "id": "b05.l01",
+                "text": "Notice what is not happening here.",
+                "direction": "[pause after]"
+              },
+              {
+                "id": "b05.l02",
+                "text": "Nothing is burned."
+              },
+              {
+                "id": "b05.l03",
+                "text": "A heat pump moves heat rather than burning fuel.",
+                "on_screen_text": "Moves heat. Burns no fuel."
+              },
+              {
+                "id": "b05.l04",
+                "text": "It carries heat from outside to inside."
+              }
+            ]
+          },
+          {
+            "id": "b06",
+            "summary": "Because it moves heat, it can deliver more heat energy than the electricity it uses.",
+            "lines": [
+              {
+                "id": "b06.l01",
+                "text": "That difference matters."
+              },
+              {
+                "id": "b06.l02",
+                "text": "Because it moves heat, a heat pump can deliver more heat energy than the electricity it uses.",
+                "on_screen_text": "More heat out than electricity in"
+              },
+              {
+                "id": "b06.l03",
+                "text": "The electricity runs the system. The heat itself comes from the outdoor air."
+              },
+              {
+                "id": "b06.l04",
+                "text": "A refrigerant, a compressor, and heat brought in from the cold."
+              },
+              {
+                "id": "b06.l05",
+                "text": "That is how a heat pump warms a home.",
+                "direction": "[calm, settle the ending]"
+              }
+            ]
+          }
+        ]
+      },
+      "decisions": [
+        {
+          "about": [
+            "b01",
+            "b02",
+            "b03",
+            "b04",
+            "b05",
+            "b06"
+          ],
+          "choice": "One beat per plan beat, in the plan's order, each carrying a single idea.",
+          "citations": [
+            "craft_rule:intelligibility.one_idea",
+            "brief"
+          ]
+        },
+        {
+          "about": [
+            "b01",
+            "b02",
+            "b03",
+            "b04",
+            "b05",
+            "b06"
+          ],
+          "choice": "About 180 words of short, plain sentences to fit the 75-second target at a calm pace, adding restatement rather than new ideas.",
+          "citations": [
+            "craft_rule:intelligibility.plain_words",
+            "brief"
+          ]
+        },
+        {
+          "about": [
+            "b01",
+            "b02",
+            "b03",
+            "b04",
+            "b05",
+            "b06"
+          ],
+          "choice": "Kept every claim within the brief, with a calm, factual tone and no prices, brands or savings claims.",
+          "citations": [
+            "brief"
+          ]
+        },
+        {
+          "about": [
+            "b01",
+            "b02",
+            "b03",
+            "b04",
+            "b05",
+            "b06"
+          ],
+          "choice": "Each beat has one on-screen text of a few words restating its key line's claim, keeping items few and holds long.",
+          "citations": [
+            "craft_rule:hierarchy.supports_line",
+            "craft_rule:legibility.read_time",
+            "pack_rule:playful/type.short_lines",
+            "pack_rule:playful/density.fewer_items"
+          ]
+        },
+        {
+          "about": [
+            "b06"
+          ],
+          "choice": "The closing beat clarifies that electricity runs the system while the heat comes from outdoor air, restating the brief's moves-heat explanation without adding a new claim.",
+          "citations": [
+            "brief"
+          ]
+        }
+      ]
+    },
+    "model": "claude-opus-5-5",
+    "usage": {
+      "input_tokens": 4228,
+      "output_tokens": 1718
+    },
+    "cost_usd": 0.051272,
+    "stop": "end"
+  }
+}

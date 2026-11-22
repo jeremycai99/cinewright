@@ -17,6 +17,19 @@ export {
   packText,
 } from "./agents/context.js";
 export { agentExecutor, llmCall } from "./agents/executor.js";
+export { ROLE_SUGGEST, ROLE_TO_PATCH, roleChecks } from "./agents/roles/index.js";
+export {
+  type ProducerOutput,
+  producerCheck,
+  producerSuggest,
+  producerToPatch,
+} from "./agents/roles/producer.js";
+export {
+  estimateScriptSeconds,
+  type WriterOutput,
+  writerCheck,
+  writerToPatch,
+} from "./agents/roles/writer.js";
 export {
   type AgentDeps,
   decisionsFor,
@@ -25,6 +38,7 @@ export {
   runAgentTask,
   type ToPatch,
 } from "./agents/runner.js";
+export { installedPacks, v01Agents } from "./agents/setup.js";
 export { type OutputError, type SemanticCheck, validateOutput } from "./agents/validate.js";
 export { WavError, type WavInfo, wavInfo } from "./audio/wav.js";
 export {
@@ -136,6 +150,6 @@ export {
   SYSTEM_CLOCK,
 } from "./scheduler/scheduler.js";
 
-export { pendingTasks, submitHumanTask } from "./tasks/queue.js";
+export { pendingTasks, submitForRole, submitHumanTask } from "./tasks/queue.js";
 
 export const VERSION = "0.0.0";

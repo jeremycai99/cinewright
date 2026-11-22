@@ -12,7 +12,8 @@
       "!**/*.md",
       "!core/src/generated",
       "!core/test/generated",
-      "!cli/test/fixtures/m1-reference/project"
+      "!cli/test/fixtures/m1-reference/project",
+      "!engine/test/agents/cassettes"
     ]
   },
   "formatter": {

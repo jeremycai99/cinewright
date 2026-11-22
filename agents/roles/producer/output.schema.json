@@ -1,0 +1,23 @@
+{
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["plan"],
+  "properties": {
+    "plan": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["summary", "target_seconds", "beats"],
+      "properties": {
+        "summary": { "type": "string", "minLength": 1, "maxLength": 4000 },
+        "target_seconds": { "type": "number", "minimum": 5, "maximum": 600 },
+        "beats": {
+          "type": "array",
+          "minItems": 1,
+          "maxItems": 20,
+          "items": { "type": "string", "minLength": 1, "maxLength": 300 }
+        }
+      }
+    },
+    "pack": { "type": "string", "pattern": "^[a-z][a-z0-9_]*$" }
+  }
+}

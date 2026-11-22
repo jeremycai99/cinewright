@@ -1,7 +1,9 @@
-import type { RoleDefinition } from "@cinewright/agents";
-import type { Store } from "@cinewright/core";
+import { loadRoles, type RoleDefinition } from "@cinewright/agents";
+import type { Pack, Store } from "@cinewright/core";
 import { Ajv2020 } from "ajv/dist/2020.js";
+import { ROLE_TO_PATCH, roleChecks } from "../agents/roles/index.js";
 import type { ToPatch } from "../agents/runner.js";
+import { installedPacks } from "../agents/setup.js";
 import type { SemanticCheck } from "../agents/validate.js";
 import { type GateName, gatePassed } from "../gates/decide.js";
 import { planRender } from "../pipeline/plan.js";
@@ -41,7 +43,9 @@ export async function submitHumanTask(
 ): Promise<TaskResult> {
   const validate = new Ajv2020({ strict: false, allErrors: true }).compile(deps.role.output);
   const errors = validate(output)
-    ? (deps.check?.(output, store.ir(), task) ?? []).map((e) => `${e.pointer} ${e.message}`)
+    ? (deps.check?.(output, store.ir(), task) ?? []).map(
+        (e) => `${e.pointer} ${e.rule}: ${e.message}`,
+      )
     : (validate.errors ?? []).map((e) => `${e.instancePath || "/"} ${e.message ?? e.keyword}`);
   if (errors.length > 0)
     return {
@@ -61,4 +65,33 @@ export async function submitHumanTask(
     status: "failed",
     error: { code: "human.rejected", message: JSON.stringify(r), data: r },
   };
+}
+
+/**
+ * `cinewright tasks submit` (M7.5a): a human's output for a built-in role, checked and applied
+ * like that role's agent output. A role with no definition or no `toPatch` yet fails with
+ * `human.no_role`.
+ */
+export async function submitForRole(
+  store: Store,
+  task: Task,
+  output: unknown,
+  options: { pack: Pack; packDirs: readonly string[] },
+): Promise<TaskResult> {
+  const role = task.role ? loadRoles().get(task.role) : undefined;
+  const toPatch = task.role ? ROLE_TO_PATCH[task.role] : undefined;
+  if (!role || !toPatch)
+    return {
+      status: "failed",
+      error: {
+        code: "human.no_role",
+        message: `role ${task.role ?? task.id} has no definition or patch mapping yet`,
+      },
+    };
+  const checks = roleChecks(
+    options.pack,
+    installedPacks(options.packDirs).map((p) => p.id),
+  );
+  const check = checks[role.id];
+  return submitHumanTask(store, task, output, { role, toPatch, ...(check ? { check } : {}) });
 }

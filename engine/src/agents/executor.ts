@@ -1,8 +1,10 @@
 import type { RoleDefinition } from "@cinewright/agents";
+import type { Store } from "@cinewright/core";
 import type { PluginResponse } from "@cinewright/plugin-sdk";
 import { PluginCallError, type PluginPool } from "../plugins/pool.js";
 import type { FoundPlugin } from "../plugins/registry.js";
 import type { TaskExecutor } from "../run.js";
+import type { Task } from "../runtime/types.js";
 import type { ContextExtras } from "./context.js";
 import { type LlmCall, runAgentTask, type ToPatch } from "./runner.js";
 import type { SemanticCheck } from "./validate.js";
@@ -28,8 +30,11 @@ export function agentExecutor(options: {
   roles: ReadonlyMap<string, RoleDefinition>;
   toPatch: Readonly<Record<string, ToPatch>>;
   checks?: Readonly<Record<string, SemanticCheck>>;
+  /** Per role, ops it may only suggest (`AgentDeps.suggest`). */
+  suggest?: Readonly<Record<string, ToPatch>>;
   llm: LlmCall;
-  extras: ContextExtras;
+  /** The context extras, or a function of the task and store (notes differ per role). */
+  extras: ContextExtras | ((task: Task, store: Store) => ContextExtras);
   /** The LLM plugin's id, for the spend log (M7.7). */
   plugin?: string;
 }): TaskExecutor {
@@ -51,9 +56,10 @@ export function agentExecutor(options: {
       role,
       toPatch,
       run,
-      extras: options.extras,
+      extras: typeof options.extras === "function" ? options.extras(task, store) : options.extras,
       ...(check ? { check } : {}),
       ...(options.plugin ? { plugin: options.plugin } : {}),
+      ...(task.role && options.suggest?.[task.role] ? { suggest: options.suggest[task.role] } : {}),
     });
   };
 }

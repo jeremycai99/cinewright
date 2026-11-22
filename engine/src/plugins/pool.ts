@@ -1,5 +1,11 @@
 import { join } from "node:path";
-import { type LoadedPlugin, loadPlugin, type PluginError } from "@cinewright/plugin-sdk";
+import {
+  type LoadedPlugin,
+  loadPlugin,
+  type Plugin,
+  type PluginError,
+  type PluginManifest,
+} from "@cinewright/plugin-sdk";
 import type { FoundPlugin } from "./registry.js";
 
 /** A plugin call that returned a typed error. */
@@ -28,6 +34,8 @@ export class PluginPool {
       env: Readonly<Record<string, string | undefined>>;
       workDir: string;
       callTimeoutMs: number;
+      /** Wrap each plugin once loaded, such as with cassettes (M7.5a). */
+      wrap?: (plugin: Plugin, manifest: PluginManifest) => Plugin;
     },
   ) {}
 
@@ -51,7 +59,10 @@ export class PluginPool {
     let entry = this.loaded.get(found.manifest.id);
     if (!entry) {
       entry = (async () => {
-        const loaded = await loadPlugin(join(found.dir, "manifest.json"));
+        const raw = await loadPlugin(join(found.dir, "manifest.json"));
+        const loaded = this.options.wrap
+          ? { ...raw, plugin: this.options.wrap(raw.plugin, raw.manifest) }
+          : raw;
         const secrets: Record<string, string> = {};
         for (const name of loaded.manifest.secrets) {
           const value = this.options.env[name];
