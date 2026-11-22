@@ -44,3 +44,7 @@ def test_required_checks_read_from_ruleset() -> None:
         "boundaries",
         "workflow-safety",
     }
+
+
+def test_rejects_a_workflow_that_spends_money_on_pull_request() -> None:
+    assert check_workflows(FIX / "tierbpr", set()) == ["tier-b.yml: spends money on pull_request"]

@@ -1,5 +1,5 @@
 """`cinewright-eval`: benchmark tooling: `cas-export` (A.1), `tier-a` (M8.3a), `baseline` (M6.2),
-`briefs` and `snapshot` (M8.2)."""
+`briefs` and `snapshot` (M8.2), `tier-b` and `compare` (M8.3b)."""
 
 from __future__ import annotations
 
@@ -16,6 +16,8 @@ from cinewright_eval.briefs import init_project
 from cinewright_eval.cas_export import ExportError, export
 from cinewright_eval.snapshot import SnapshotError, snapshot
 from cinewright_eval.tier_a import TierAOptions, run_tier_a
+from cinewright_eval.tier_b import TierBOptions, run_tier_b
+from cinewright_eval.tier_b import compare as compare_tier_b
 
 
 def main(argv: list[str] | None = None) -> int:
@@ -64,7 +66,43 @@ def main(argv: list[str] | None = None) -> int:
     snap.add_argument("project", type=Path)
     snap.add_argument("--as", dest="fixture", required=True)
     snap.add_argument("--root", type=Path, default=Path.cwd())
+    tb = sub.add_parser("tier-b", help="briefs through live agents and providers (M8.3b)")
+    tb.add_argument("--mode", choices=["nightly", "release"], default="release")
+    tb.add_argument("--brief", action="append", default=[], help="only this brief id")
+    tb.add_argument("--runs", type=int, default=None, help="home-pack runs per brief")
+    tb.add_argument("--cap-usd", type=float, default=3.0, help="each run's budget cap")
+    tb.add_argument("--month-cap-usd", type=float, default=25.0)
+    tb.add_argument("--parallel", type=int, default=2)
+    tb.add_argument("--out", type=Path, default=Path("tier-b-report"))
+    tb.add_argument("--root", type=Path, default=Path.cwd())
+    tb.add_argument("--cli", default=os.environ.get("CINEWRIGHT_CLI"))
+    cmp = sub.add_parser("compare", help="a tier B report against a baseline, per category")
+    cmp.add_argument("report", type=Path)
+    cmp.add_argument("--against", required=True, type=Path)
     args = parser.parse_args(argv)
+    if args.command == "tier-b":
+        root = args.root.resolve()
+        cli = shlex.split(args.cli) if args.cli else ["node", str(root / "cli" / "dist" / "bin.js")]
+        return run_tier_b(
+            TierBOptions(
+                root=root,
+                cli=cli,
+                out=args.out,
+                mode=args.mode,
+                briefs=args.brief,
+                runs=args.runs,
+                cap_usd=args.cap_usd,
+                month_cap_usd=args.month_cap_usd,
+                parallel=args.parallel,
+            )
+        )
+    if args.command == "compare":
+        problems = compare_tier_b(
+            json.loads(args.report.read_text()), json.loads(args.against.read_text())
+        )
+        for problem in problems:
+            print(f"cinewright-eval compare: {problem}")
+        return 1 if problems else 0
     if args.command == "briefs":
         root = args.root.resolve()
         if args.action == "check":

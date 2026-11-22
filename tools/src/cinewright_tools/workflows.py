@@ -8,6 +8,8 @@ Rules:
 4. Every required check is the check name (job ``name``, else job id) of a job in a
    workflow triggered by ``pull_request``.
 5. Required jobs reference no secrets.
+6. A workflow that spends money (tier B, or one that references a provider key) is never
+   triggered by ``pull_request`` (M8.3b).
 """
 
 from __future__ import annotations
@@ -50,6 +52,12 @@ def check_workflows(workflow_dir: Path, required: set[str]) -> list[str]:
         workflow = cast(Mapping, loaded)
         triggers = _triggers(workflow)
         on_pr = "pull_request" in triggers
+        text = path.read_text(encoding="utf-8")
+        spends = name.startswith("tier-b") or any(
+            f"secrets.{key}" in text for key in ("ANTHROPIC_API_KEY", "ELEVENLABS_API_KEY")
+        )
+        if on_pr and spends:
+            problems.append(f"{name}: spends money on pull_request")
         if "pull_request_target" in triggers:
             problems.append(f"{name}: uses pull_request_target")
         if "permissions" not in workflow:
