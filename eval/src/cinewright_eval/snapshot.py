@@ -78,6 +78,6 @@ def snapshot(project: Path, fixture_id: str, root: Path) -> Path:
         json.loads(index_path.read_text()) if index_path.is_file() else {"fixtures": []}
     )
     fixtures = cast(list[dict[str, Any]], index.setdefault("fixtures", []))
-    fixtures.append({"id": fixture_id})
+    fixtures.append({"id": fixture_id, "path": fixture_id})
     index_path.write_text(json.dumps(index, indent=2) + "\n")
     return folder
