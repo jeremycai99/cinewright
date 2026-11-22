@@ -23,3 +23,14 @@ Renders every fixture in `fixtures/benchmark/tier-a/index.json` and grades it. E
 `--cli` (or `CINEWRIGHT_CLI`) is the command that runs `cinewright`; the default is `node <root>/cli/dist/bin.js`.
 
 In CI, `.github/workflows/tier-a.yml` runs it on every PR (with the cache restored) and on `main` (cold, saving the cache), and writes the summary to the job summary. Until the fixtures land (A.2) the job reports that and passes. It becomes a required check after decision 9 (`docs/plans/alpha-gate.md`).
+
+## Tier B (M8.3b)
+
+`uv run cinewright-eval tier-b --mode release|nightly [--brief <id>]… [--runs <n>] [--cap-usd <n>] [--month-cap-usd <n>] [--parallel <n>] [--out <dir>]` runs the benchmark briefs (`fixtures/benchmark/tier-b/`) through live agents and providers. Each run is a fresh project (`briefs init`) capped with `review budget --cap`, run with `cinewright render --approve-final --vision --json`, exported, and read back with `status --json` and the critique report. Runs of one brief run in parallel, each with its own project folder, cassette folder and caches.
+
+- **Scope (decision 11):** release mode runs 2 runs per brief in its home pack plus 1 pack-swap run in the other pack; nightly runs 1. A run passes only when it completes with no manual edit (a pause for a person fails it) and exports with no blocking finding.
+- **Caps:** a run that could cross `--month-cap-usd` is not started and is reported as skipped, never as passed. Release mode exits 1 on a skipped or failing brief; nightly exits 0. If every run fails on the provider, the result is "not evaluated" (exit 2), distinct from a quality failure.
+- **Report:** `tier-b.json`: per brief, each run (pack, completed, manual edits, deterministic failures by rule, vision scores, cost, wall time, export hashes) and the pass rate, vision statistics and cost; per category (genre, length, pack, aspect) the pass rate and vision means; the skipped runs and the total spent.
+- `uv run cinewright-eval compare tier-b.json --against <baseline>`: per category, the deterministic pass rate and each vision mean against the baseline's thresholds; exit 1 on any regressed category, even when the average rises.
+
+The `tier-b` workflow runs only on a maintainer trigger; the workflow check fails if it, or any workflow that references a provider key, is triggered by a pull request.

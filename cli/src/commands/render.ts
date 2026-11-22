@@ -16,6 +16,7 @@ import {
   runWorkflow,
   STAGES,
   type Stage,
+  v01Agents,
   v01Vision,
 } from "@cinewright/engine";
 import { parse, UsageError } from "../args.js";
@@ -25,7 +26,7 @@ import { findProject, openStore } from "../project.js";
 import { pluginPath } from "./narrate.js";
 
 export const RENDER_USAGE =
-  "usage: cinewright render [--deliverable <id>]... [--until narrate|timing|compose|shots|mix|captions|assemble|critique] [--no-critics] [--vision] [--jobs-only] [--retake <line>]... [--provider <id>] [--out <dir>] [--image <ref>] [--plugins <dir>]... [--project <dir>] [--json]";
+  "usage: cinewright render [--deliverable <id>]... [--until narrate|timing|compose|shots|mix|captions|assemble|critique] [--no-critics] [--vision] [--approve-final] [--jobs-only] [--retake <line>]... [--provider <id>] [--out <dir>] [--image <ref>] [--plugins <dir>]... [--project <dir>] [--json]";
 
 /** What `render` and `plan` share: the store and the pipeline's options. */
 /** LLM plugins whose secrets are all set come first: the first one runs the agents (D29). */
@@ -148,6 +149,7 @@ export async function render(argv: string[], io: Io): Promise<number> {
     "no-critics": { type: "boolean" },
     "jobs-only": { type: "boolean" },
     vision: { type: "boolean" },
+    "approve-final": { type: "boolean" },
   });
   const setup = await pipelineSetup(values, io, "render");
   if (typeof setup === "number") return setup;
@@ -161,6 +163,45 @@ export async function render(argv: string[], io: Io): Promise<number> {
       env: io.env,
       pack: resolveProjectPack(setup.store.ir(), packSearchPath(io.env)),
     });
+  }
+  // `--approve-final` (tier B, M8.3b): the whole workflow with agents, the final gate approving
+  // itself with the reason `auto` (D41: only this flag approves without a person).
+  if (values["approve-final"]) {
+    const llms = usableFirst(await findPlugins("llm", pluginPath(io, values.plugins)), io.env);
+    const agents = llms[0]
+      ? v01Agents({
+          llm: llms[0],
+          env: io.env,
+          pack: resolveProjectPack(setup.store.ir(), packSearchPath(io.env)),
+          catalog: setup.options.catalog,
+          packDirs: packSearchPath(io.env),
+        })
+      : undefined;
+    let full: Awaited<ReturnType<typeof runWorkflow>>;
+    try {
+      full = await runWorkflow(setup.store, {
+        render: { ...setup.options, ...(vision ? { vision: vision.vision } : {}) },
+        until: "final",
+        approveFinal: true,
+        llm: llms,
+        ...(agents ? { executors: { agent: agents.executor } } : {}),
+        now: now(io),
+      });
+    } finally {
+      await agents?.shutdown();
+      await vision?.shutdown();
+    }
+    if (full.outcome.status === "failed")
+      return reportFailure(io, "render", full.outcome, values.json === true);
+    if (full.outcome.status === "paused") {
+      const pause = full.outcome.pause;
+      if (values.json) printJson(io, { status: "paused", run: full.run, pause });
+      else io.stdout(`paused at ${pause.kind} ${pause.id} (run ${full.run})\n`);
+      return pause.kind === "budget" ? EXIT.budget : EXIT.paused;
+    }
+    if (values.json) printJson(io, { status: "done", run: full.run });
+    else io.stdout(`done (run ${full.run})\n`);
+    return EXIT.ok;
   }
   let result: Awaited<ReturnType<typeof runWorkflow>>;
   try {
