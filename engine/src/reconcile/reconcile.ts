@@ -1,4 +1,5 @@
 import { type Finding, finding, type InlinedIr, sha256Hash, stateHash } from "@cinewright/core";
+import { gateFields } from "../gates/locks.js";
 import type { PlannedStep } from "../pipeline/plan.js";
 import type { Task } from "../runtime/types.js";
 import type { Preset, TemplatePhase, WorkflowTemplate } from "./data.js";
@@ -56,14 +57,8 @@ export function reconcile(
     const needs = needsOf(phase);
     if (phase.kind === "gate") {
       if (phase.gate && preset.gates.includes(phase.gate)) {
-        const locks = (phase.locks ?? []).flatMap((p) => {
-          const [kind, field] = splitPattern(p);
-          return inScope(all, kind, null).map((e) => [
-            e.id,
-            field,
-            wrapper(e, field)?.state ?? "absent",
-          ]);
-        });
+        // The fields the gate locks and their states: an edit or a lock changes the key (`*` at G3).
+        const locks = gateFields(ir, phase.locks ?? []).map((f) => [f.entity, f.path, f.state]);
         const id = `gate:${phase.gate}`;
         tasks.push({
           id,

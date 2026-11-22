@@ -1189,6 +1189,28 @@ class Plan(BaseModel):
     value: Annotated[ProjectPlan | None, Field(title="ProjectPlan")] = None
 
 
+class Gate(Enum):
+    script = "script"
+    storyboard = "storyboard"
+    final = "final"
+
+
+class GateInstruction(BaseModel):
+    model_config = ConfigDict(
+        extra="forbid",
+    )
+    gate: Gate
+    text: Annotated[str, Field(max_length=4000, min_length=1)]
+
+
+class Instructions(BaseModel):
+    model_config = ConfigDict(
+        extra="forbid",
+    )
+    state: State
+    value: list[GateInstruction] | None = None
+
+
 class Summary(BaseModel):
     model_config = ConfigDict(
         extra="forbid",
@@ -2114,6 +2136,12 @@ class Project(BaseModel):
         Plan | None,
         Field(
             description="The Producer's plan (M7.1b; filled in P1): a summary, the cost estimate and the fix reserve, in USD."
+        ),
+    ] = None
+    instructions: Annotated[
+        Instructions | None,
+        Field(
+            description="Notes the user left when rejecting a gate (M7.6): each goes to the gate's owning role, whose decisions cite it as `user_instruction:<log seq>`."
         ),
     ] = None
 

@@ -368,6 +368,37 @@
           }
         }
       }
+    },
+    "instructions": {
+      "description": "Notes the user left when rejecting a gate (M7.6): each goes to the gate's owning role, whose decisions cite it as `user_instruction:<log seq>`.",
+      "x-authorable": "field",
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["state"],
+      "properties": {
+        "state": {
+          "$ref": "common.schema.json#/$defs/state"
+        },
+        "value": {
+          "type": "array",
+          "items": {
+            "title": "GateInstruction",
+            "type": "object",
+            "additionalProperties": false,
+            "required": ["gate", "text"],
+            "properties": {
+              "gate": {
+                "enum": ["script", "storyboard", "final"]
+              },
+              "text": {
+                "type": "string",
+                "minLength": 1,
+                "maxLength": 4000
+              }
+            }
+          }
+        }
+      }
     }
   },
   "$defs": {

@@ -900,6 +900,13 @@ export interface Project {
     state: State;
     value?: ProjectPlan;
   };
+  /**
+   * Notes the user left when rejecting a gate (M7.6): each goes to the gate's owning role, whose decisions cite it as `user_instruction:<log seq>`.
+   */
+  instructions?: {
+    state: State;
+    value?: GateInstruction[];
+  };
 }
 /**
  * Copies of the delivery profiles the deliverables use, keyed by profile id, with the hash of each body (convention 16). Written only by init.
@@ -1077,6 +1084,10 @@ export interface ProjectPlan {
   summary: string;
   estimate_usd: number;
   fix_reserve_usd?: number;
+}
+export interface GateInstruction {
+  gate: "script" | "storyboard" | "final";
+  text: string;
 }
 /**
  * A scene spec with typed fields (the spec's "What a scene spec holds").

@@ -24,6 +24,8 @@ export interface ContextExtras {
   pack: Pack;
   catalog?: Catalog;
   findings?: readonly CriticFinding[];
+  /** Notes from rejected gates for this role (M7.6), with the log sequence each is cited by. */
+  instructions?: readonly { seq: number; gate: string; text: string }[];
 }
 
 /** Input tokens a text costs, estimated (the provider counts exactly; this only bounds packs). */
@@ -122,6 +124,13 @@ export function buildContextPack(
     }
     sections.push({ id: read, text });
   }
+  if (extras.instructions && extras.instructions.length > 0)
+    sections.push({
+      id: "instructions",
+      text: extras.instructions
+        .map((i) => `user_instruction:${i.seq} (at the ${i.gate} gate): ${i.text}`)
+        .join("\n"),
+    });
   const system = `${role.prompt.trim()}\n\n${CONTRACT}`;
   const schema = envelopeSchema(role);
   let tokens = Math.ceil((system.length + JSON.stringify(schema).length) / CHARS_PER_TOKEN);

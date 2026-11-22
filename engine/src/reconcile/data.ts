@@ -22,6 +22,8 @@ export interface TemplatePhase {
   requires?: string[];
   reads?: string[];
   locks?: string[];
+  /** The role a gate's rejection note goes to. */
+  owner?: string;
   paid?: boolean;
   needs: string[];
 }
