@@ -84,6 +84,23 @@ export {
   visionSchema,
 } from "./critics/vision.js";
 export {
+  exportable,
+  type FixBounds,
+  fixBounds,
+  oscillating,
+  withinBounds,
+} from "./fix/bounds.js";
+export { FIXERS, type FixAction, type Fixer } from "./fix/fixers.js";
+export { FindingsLedger, FindingsLogError, readFindingsLog, syncFindings } from "./fix/ledger.js";
+export { FIX_PHASE, fixTasks } from "./fix/orchestrate.js";
+export {
+  type FixRouting,
+  loadRouting,
+  type Owner,
+  ownersOf,
+  route as routeFinding,
+} from "./fix/route.js";
+export {
   approveGate,
   GateError,
   type GateName,
@@ -92,7 +109,13 @@ export {
   rejectGate,
 } from "./gates/decide.js";
 export { type GateField, gateFields } from "./gates/locks.js";
-export { buildPacket, type GatePacket, validatePacket } from "./gates/packet.js";
+export {
+  buildPacket,
+  type EscalatedFinding,
+  escalatedFindings,
+  type GatePacket,
+  validatePacket,
+} from "./gates/packet.js";
 export {
   chooseVariant,
   requestVariants,

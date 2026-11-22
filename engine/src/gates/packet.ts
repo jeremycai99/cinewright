@@ -1,8 +1,15 @@
 import { readFileSync } from "node:fs";
-import { type CriticFinding, type InlinedIr, replayLog, type Store } from "@cinewright/core";
+import {
+  type CriticFinding,
+  type FindingEntry,
+  type InlinedIr,
+  replayLog,
+  type Store,
+} from "@cinewright/core";
 import { Ajv2020, type ValidateFunction } from "ajv/dist/2020.js";
 import type { Estimate } from "../cost/estimate.js";
 import { spent } from "../cost/ledger.js";
+import { exportable } from "../fix/bounds.js";
 import type { WorkflowTemplate } from "../reconcile/data.js";
 import { entities } from "../reconcile/requirements.js";
 import type { GateName } from "./decide.js";
@@ -26,6 +33,45 @@ export interface GatePacket {
     render_key: string;
   }[];
   cost: { spent_usd: number; estimate_to_complete_usd: number | null; cap_usd: number | null };
+  escalated?: EscalatedFinding[];
+  exportable?: boolean;
+}
+
+/** A finding the fix loop escalated to a gate (M6.3b). */
+export interface EscalatedFinding {
+  finding: string;
+  rule: string;
+  entity: string;
+  severity: "error" | "warning";
+  reason: string;
+  attempts: number;
+  message?: string;
+}
+
+/** The escalated findings in the ledger, with their attempts and reason (M6.3b). */
+export function escalatedFindings(entries: readonly FindingEntry[]): EscalatedFinding[] {
+  const last = new Map<string, FindingEntry>();
+  const docs = new Map<string, CriticFinding>();
+  const attempts = new Map<string, number>();
+  for (const e of entries) {
+    last.set(e.finding, e);
+    if (e.kind === "raised" && e.doc) docs.set(e.finding, e.doc as CriticFinding);
+    if (e.kind === "attempt") attempts.set(e.finding, (attempts.get(e.finding) ?? 0) + 1);
+  }
+  return [...last.values()]
+    .filter((e) => e.kind === "escalated" && docs.has(e.finding))
+    .map((e) => {
+      const f = docs.get(e.finding) as CriticFinding;
+      return {
+        finding: f.id,
+        rule: f.rule,
+        entity: f.entity,
+        severity: f.severity,
+        reason: e.reason ?? "escalated",
+        attempts: attempts.get(f.id) ?? 0,
+        ...(f.message ? { message: f.message } : {}),
+      };
+    });
 }
 
 /** Every field wrapper's value, by `entity + path`. */
@@ -64,7 +110,13 @@ export function buildPacket(
   template: WorkflowTemplate,
   gate: GateName,
   run: string,
-  extras: { findings?: CriticFinding[]; stills?: GatePacket["stills"]; estimate?: Estimate } = {},
+  extras: {
+    findings?: CriticFinding[];
+    stills?: GatePacket["stills"];
+    estimate?: Estimate;
+    /** The findings ledger's entries (M6.3b): escalated findings and whether export may proceed. */
+    ledger?: readonly FindingEntry[];
+  } = {},
 ): GatePacket {
   const log = store.log();
   const approval = [...log]
@@ -106,6 +158,9 @@ export function buildPacket(
     })),
     findings: extras.findings ?? [],
     ...(extras.stills ? { stills: extras.stills } : {}),
+    ...(extras.ledger
+      ? { escalated: escalatedFindings(extras.ledger), exportable: exportable(extras.ledger).ok }
+      : {}),
     cost: {
       spent_usd: spent(store.dir),
       estimate_to_complete_usd: extras.estimate?.total_usd ?? null,

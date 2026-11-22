@@ -165,3 +165,35 @@ describe("cinewright tasks submit (M7.5a)", () => {
     expect(left).not.toContain("writer");
   });
 });
+
+describe("cinewright review waive (M6.3b)", () => {
+  it("waives an escalated error, refuses a clearance finding, and reports whether export may proceed", async () => {
+    const { sign } = await import("@cinewright/core");
+    const { FindingsLedger } = await import("@cinewright/engine");
+    const dir = await project();
+    const p = ["--project", dir];
+    const make = (rule: string, entity: string) =>
+      sign(
+        { rule, severity: "error", entity, message: rule, data: {} },
+        { critic: { id: "t", version: "1" }, deliverable: "web", evidence: {}, key: rule },
+      );
+    const overflow = make("layout.overflow", "b01.l01");
+    const consent = make("clearance.consent_missing", "narrator");
+    const ledger = new FindingsLedger(dir);
+    await ledger.raise([overflow, consent], 1, "run_1");
+    await ledger.escalate(overflow.id, "attempts", "final");
+    const before = await json(["review", "final", ...p]);
+    expect(before.escalated.map((e: { finding: string }) => e.finding)).toEqual([overflow.id]);
+    expect(before.exportable).toBe(false);
+    const waive = ["review", "waive", overflow.id, "--note", "Reads fine at full size", ...p];
+    expect((await run(waive, ENV)).code).toBe(EXIT.ok);
+    const refused = await run(["review", "waive", consent.id, "--note", "x", ...p], ENV);
+    expect(refused.code).toBe(EXIT.invalid);
+    expect(refused.stderr).toContain("cannot be waived");
+    // The consent finding still blocks export.
+    expect((await json(["review", "final", ...p])).exportable).toBe(false);
+    expect((await run(["review", "waive", "f_000000000000", "--note", "x", ...p], ENV)).code).toBe(
+      EXIT.usage,
+    );
+  });
+});

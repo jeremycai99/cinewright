@@ -4,6 +4,7 @@ import { RUNS_DIR, runDir, type Store, sha256Hash, stateHash } from "@cinewright
 import { estimateRun, taskEstimate } from "./cost/estimate.js";
 import { recordSpend, spent } from "./cost/ledger.js";
 import { Budget } from "./cost/reserve.js";
+import { fixBounds } from "./fix/bounds.js";
 import { FIXERS } from "./fix/fixers.js";
 import { FindingsLedger, syncFindings } from "./fix/ledger.js";
 import { fixTasks } from "./fix/orchestrate.js";
@@ -14,7 +15,6 @@ import { planRender, type Stage, type StepKind } from "./pipeline/plan.js";
 import { PipelineError, type RenderOptions, type RenderReport, runRender } from "./pipeline/run.js";
 import type { FoundPlugin } from "./plugins/registry.js";
 import {
-  loadEngineSettings,
   loadPreset,
   loadTemplate,
   type TemplatePhase,
@@ -196,12 +196,13 @@ async function executeFix(
     const r = await store.apply({
       base_revision: store.revision(),
       author: { kind: "job", name: `fixer.${task.fixer}` },
-      mode: "apply",
+      // Under the Manual preset a fix is a suggestion (M6.3b).
+      mode: task.propose ? "propose" : "apply",
       reason: `fix ${finding.id} (${finding.rule})`,
       ops: action.patch,
     } as never);
-    return r.status === "applied"
-      ? { status: "done", revision: r.revision }
+    return r.status === "applied" || r.status === "pending"
+      ? { status: "done", revision: store.revision() }
       : { status: "noop", output: r };
   }
   try {
@@ -310,11 +311,12 @@ export async function runWorkflow(
   // finding with no owner left is escalated to the final gate, once.
   const findings = new FindingsLedger(store.dir, now);
   const routing = loadRouting();
-  const policy = { attempts_per_owner: loadEngineSettings().fix.attempts_per_owner };
   const derive = async () => {
     const ir = store.ir();
     const entries = findings.entries();
-    const fixes = fixTasks(findings.open(), entries, ir, routing, policy);
+    const fixes = fixTasks(findings.open(), entries, ir, routing, fixBounds(ir), {
+      manual: !preset.agents,
+    });
     for (const e of fixes.escalations) await findings.escalate(e.finding, e.reason, "final");
     const { tasks } = reconcile(ir, template, preset, {
       plan: planRender(ir, options.render.deliverables),

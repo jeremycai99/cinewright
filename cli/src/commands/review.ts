@@ -5,6 +5,7 @@ import {
   approveGate,
   buildPacket,
   chooseVariant,
+  FindingsLedger,
   type FoundPlugin,
   findPlugins,
   GateError,
@@ -29,6 +30,7 @@ export const REVIEW_USAGE = [
   "       cinewright review reject <gate> --note <text> [--project <dir>] [--json]",
   "       cinewright review variants <gate> <entity> [-n <count>] [--project <dir>]",
   "       cinewright review choose <variant> --run <id> [--project <dir>] [--json]",
+  "       cinewright review waive <finding> --note <text> [--project <dir>] [--json]",
 ].join("\n");
 
 const GATES: readonly GateName[] = ["script", "storyboard", "final"];
@@ -72,6 +74,12 @@ function printPacket(io: Io, p: GatePacket, passed: boolean): void {
       ? ""
       : `, estimate to complete $${p.cost.estimate_to_complete_usd.toFixed(2)}`;
   lines.push(`spent $${p.cost.spent_usd.toFixed(2)}${left}, ${cap}`);
+  for (const e of p.escalated ?? [])
+    lines.push(
+      `  escalated ${e.finding} ${e.severity} ${e.rule} ${e.entity} (${e.reason}, ${e.attempts} attempts)${e.message ? `: ${e.message}` : ""}`,
+    );
+  if (p.exportable === false)
+    lines.push("export is blocked until each error finding is fixed or waived");
   io.stdout(`${lines.join("\n")}\n`);
 }
 
@@ -116,6 +124,26 @@ export async function review(argv: string[], io: Io): Promise<number> {
         "cinewright review: variants come from the owning role's agent, and no roles are defined yet (M7.5)\n",
       );
       return EXIT.provider;
+    }
+    if (verb === "waive") {
+      // A user's waiver closes an escalated or open finding (M6.3b); never a missing licence or consent.
+      if (!args[0]) throw new UsageError("review waive needs a finding id (f_...)");
+      if (!values.note) throw new UsageError("review waive needs --note <text>");
+      const ledger = new FindingsLedger(dir);
+      const doc = ledger.entries().find((e) => e.kind === "raised" && e.finding === args[0])?.doc as
+        | { rule?: string }
+        | undefined;
+      if (!doc) throw new UsageError(`no finding ${args[0]} in log/findings.jsonl`);
+      if (doc.rule?.startsWith("clearance.")) {
+        io.stderr(
+          `cinewright review: ${args[0]} is ${doc.rule}: a missing licence or consent cannot be waived\n`,
+        );
+        return EXIT.invalid;
+      }
+      await ledger.waive(args[0], values.note);
+      if (values.json) printJson(io, { waived: args[0] });
+      else io.stdout(`waived ${args[0]}\n`);
+      return EXIT.ok;
     }
     if (verb === "budget") {
       if (values.cap !== undefined) {
@@ -163,7 +191,10 @@ export async function review(argv: string[], io: Io): Promise<number> {
     const run = values.run ?? latestRun(dir);
     const estimate = projectEstimate(store, template, await llmPlugin(io, values.plugins));
     const packets = gates.map((g) => ({
-      packet: buildPacket(store, template, g, run, { estimate }),
+      packet: buildPacket(store, template, g, run, {
+        estimate,
+        ledger: new FindingsLedger(dir).entries(),
+      }),
       passed: gatePassed(store, template, g),
     }));
     if (values.json) printJson(io, verb ? packets[0]?.packet : packets.map((p) => p.packet));
