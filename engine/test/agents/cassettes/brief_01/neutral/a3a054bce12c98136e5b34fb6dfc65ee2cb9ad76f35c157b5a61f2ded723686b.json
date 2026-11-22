@@ -1,0 +1,58 @@
+{
+  "request_hash": "sha256:a3a054bce12c98136e5b34fb6dfc65ee2cb9ad76f35c157b5a61f2ded723686b",
+  "response": {
+    "output": {
+      "output": {
+        "plan": {
+          "summary": "For homeowners thinking about replacing a gas furnace: a calm, factual explanation of how a heat pump warms a house using heat taken from cold outdoor air. A refrigerant absorbs heat outside, a compressor raises its temperature, and the heat is released indoors. Because it moves heat rather than burning fuel, it can deliver more heat energy than the electricity it uses. No prices, brands or savings claims.",
+          "target_seconds": 60,
+          "beats": [
+            "If you are thinking about replacing a gas furnace, a heat pump is a way to warm your house using heat taken from cold outdoor air.",
+            "Outside, a refrigerant absorbs heat from the cold outdoor air.",
+            "A compressor then raises the refrigerant's temperature.",
+            "Indoors, that heat is released to warm the house.",
+            "A heat pump moves heat rather than burning fuel.",
+            "Because it moves heat, it can deliver more heat energy than the electricity it uses."
+          ]
+        }
+      },
+      "decisions": [
+        {
+          "about": [
+            "brief_01/plan"
+          ],
+          "choice": "The summary addresses homeowners considering replacing a gas furnace and restates only the brief's mechanism and efficiency point, with no prices, brands or savings.",
+          "citations": [
+            "brief"
+          ]
+        },
+        {
+          "about": [
+            "brief_01/plan"
+          ],
+          "choice": "Run 60 seconds for the single web deliverable, enough for a short, calm six-beat explainer.",
+          "citations": [
+            "brief"
+          ]
+        },
+        {
+          "about": [
+            "brief_01/plan"
+          ],
+          "choice": "The beats follow the brief's order, one idea each: the furnace-replacement framing, absorption outside, compression, release indoors, moving rather than burning fuel, then more heat than the electricity used.",
+          "citations": [
+            "brief",
+            "craft_rule:intelligibility.one_idea"
+          ]
+        }
+      ]
+    },
+    "model": "claude-opus-5-5",
+    "usage": {
+      "input_tokens": 2387,
+      "output_tokens": 777
+    },
+    "cost_usd": 0.025088,
+    "stop": "end"
+  }
+}

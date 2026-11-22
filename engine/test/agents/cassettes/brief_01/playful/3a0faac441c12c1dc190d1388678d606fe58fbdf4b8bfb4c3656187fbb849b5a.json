@@ -1,0 +1,111 @@
+{
+  "request_hash": "sha256:3a0faac441c12c1dc190d1388678d606fe58fbdf4b8bfb4c3656187fbb849b5a",
+  "response": {
+    "output": {
+      "output": {
+        "layers": [
+          {
+            "id": "s01.sh01.l1",
+            "component": "kinetic_title",
+            "props": {
+              "text": "Heat from outdoor air",
+              "subtitle": "A heat pump can warm your house",
+              "emphasis": [
+                2,
+                3
+              ]
+            },
+            "timing": {
+              "enter": {
+                "line": "b01.l03",
+                "point": "start",
+                "offset": 0
+              },
+              "exit": {
+                "line": "b01.l03",
+                "point": "end",
+                "offset": 0
+              }
+            },
+            "layout": {
+              "landscape": {
+                "region": "title"
+              }
+            }
+          }
+        ]
+      },
+      "decisions": [
+        {
+          "about": [
+            "s01.sh01.l1/props/text"
+          ],
+          "choice": "Use the line's on-screen text 'Heat from outdoor air' as the headline, since it states the claim of line 3 in a few words.",
+          "citations": [
+            "line:b01.l03",
+            "craft_rule:hierarchy.supports_line",
+            "craft_rule:legibility.read_time",
+            "pack_rule:playful/type.short_lines"
+          ]
+        },
+        {
+          "about": [
+            "s01.sh01.l1/props/subtitle"
+          ],
+          "choice": "Take the subtitle from line 2 ('A heat pump can warm your house'), trimmed of its full stop, so it names the subject without a second claim.",
+          "citations": [
+            "line:b01.l02",
+            "craft_rule:hierarchy.supports_line"
+          ]
+        },
+        {
+          "about": [
+            "s01.sh01.l1/props/emphasis"
+          ],
+          "choice": "Accent 'outdoor air' (word indices 2 and 3) as the surprising heat source.",
+          "citations": [
+            "line:b01.l03",
+            "pack_rule:playful/color.one_focus"
+          ]
+        },
+        {
+          "about": [
+            "s01.sh01.l1/timing"
+          ],
+          "choice": "Enter as line 3 starts, when the narration reaches the claim. Exit at the end of line 3. This holds the title for the whole spoken line, long enough to read.",
+          "citations": [
+            "line:b01.l03",
+            "craft_rule:rhythm.hold_to_read",
+            "pack_rule:playful/density.fewer_items"
+          ]
+        },
+        {
+          "about": [
+            "s01.sh01.l1/layout"
+          ],
+          "choice": "Place the title layer in the 'title' region of the title template for landscape. It is the only layer and so the focal point.",
+          "citations": [
+            "craft_rule:hierarchy.one_focus",
+            "pack_rule:playful/layout.centred_focus"
+          ]
+        },
+        {
+          "about": [
+            "s01.sh01.l1/style"
+          ],
+          "choice": "Leave style to the pack; no token overrides.",
+          "citations": [
+            "craft_rule:contrast.meaning"
+          ]
+        }
+      ]
+    },
+    "model": "claude-sonnet-5-5",
+    "usage": {
+      "input_tokens": 6216,
+      "output_tokens": 783
+    },
+    "cost_usd": 0.020262,
+    "stop": "end"
+  }
+}

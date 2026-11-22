@@ -62,6 +62,11 @@ const tokenAt = (pack: Pack, path: string): number | undefined => {
  * (`engine/settings.json`), plus the pack's head and tail pads and a gap between lines
  * (`sound.voice`). The solver times the real takes later; this only bounds the Writer.
  */
+/** How long one line runs when spoken, estimated: its words at `script.pace_wpm`. */
+export function lineSeconds(text: string): number {
+  return (wordCount(text) / loadEngineSettings().script.pace_wpm) * 60;
+}
+
 export function estimateScriptSeconds(lines: readonly { text: string }[], pack: Pack): number {
   const { pace_wpm } = loadEngineSettings().script;
   const words = lines.reduce((n, l) => n + wordCount(l.text), 0);

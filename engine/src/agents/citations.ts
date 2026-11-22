@@ -7,7 +7,8 @@ export interface CitationError {
 }
 
 /**
- * Every decision's citations resolve (M7.4, invariant 8): `brief` (the project has one),
+ * Every decision's citations resolve (M7.4, invariant 8): `brief` (the project has one), `plan`
+ * (the Producer's plan exists), `script` (the script has lines), `line:<id>` (a line of it, M7.5),
  * `user_instruction:<log seq>` (a user's entry in the patch log), `pack_rule:<pack>/<rule>` (a
  * rule of the selected pack), `craft_rule:<id>` (in agents/craft-rules.json), `finding:<id>` (a
  * finding given to the task). A decision with no citation, or one that does not resolve, is an
@@ -32,15 +33,21 @@ export function resolveCitations(
       "author" in e && e.author?.kind === "user" ? [String(e.seq)] : [],
     ),
   );
+  const lines = new Set(
+    (facts.ir.script.beats.value ?? []).flatMap((b) => (b.lines.value ?? []).map((l) => l.id)),
+  );
   const resolves = (c: string): boolean => {
     if (c === "brief")
       return typeof facts.ir.brief.value === "string" && facts.ir.brief.value.length > 0;
+    if (c === "plan") return facts.ir.plan?.value !== undefined;
+    if (c === "script") return lines.size > 0;
     const [form, ...rest] = c.split(":");
     const ref = rest.join(":");
     if (form === "user_instruction") return userSeqs.has(ref);
     if (form === "pack_rule") return rules.has(ref);
     if (form === "craft_rule") return crafts.has(ref);
     if (form === "finding") return findings.has(ref);
+    if (form === "line") return lines.has(ref);
     return false;
   };
   decisions.forEach((d, i) => {

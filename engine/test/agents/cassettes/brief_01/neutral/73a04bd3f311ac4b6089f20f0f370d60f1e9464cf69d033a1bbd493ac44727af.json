@@ -1,0 +1,91 @@
+{
+  "request_hash": "sha256:73a04bd3f311ac4b6089f20f0f370d60f1e9464cf69d033a1bbd493ac44727af",
+  "response": {
+    "output": {
+      "output": {
+        "layers": [
+          {
+            "id": "s01.sh03.l1",
+            "component": "kinetic_title",
+            "props": {
+              "text": "Heat from cold outdoor air",
+              "emphasis": [
+                2,
+                3,
+                4
+              ]
+            },
+            "timing": {
+              "enter": {
+                "line": "b01.l03",
+                "point": "start",
+                "offset": 0
+              },
+              "exit": {
+                "line": "b01.l03",
+                "point": "end",
+                "offset": 15
+              }
+            },
+            "layout": {
+              "landscape": {
+                "region": "title"
+              }
+            }
+          }
+        ]
+      },
+      "decisions": [
+        {
+          "about": [
+            "s01.sh03.l1/props/text"
+          ],
+          "choice": "Use the line's on-screen text 'Heat from cold outdoor air' as the headline, which restates the spoken claim in a few words and adds no second claim.",
+          "citations": [
+            "line:b01.l03",
+            "craft_rule:hierarchy.supports_line",
+            "craft_rule:legibility.read_time"
+          ]
+        },
+        {
+          "about": [
+            "s01.sh03.l1/props/emphasis"
+          ],
+          "choice": "Accent words 2-4 ('cold outdoor air') to match the shot framing, using a single accent.",
+          "citations": [
+            "pack_rule:neutral/color.one_accent",
+            "craft_rule:hierarchy.one_focus"
+          ]
+        },
+        {
+          "about": [
+            "s01.sh03.l1/timing"
+          ],
+          "choice": "Enter as line b01.l03 starts, when the narration reaches the claim, and exit 15 frames after the line ends so the text can be read.",
+          "citations": [
+            "line:b01.l03",
+            "craft_rule:rhythm.hold_to_read",
+            "pack_rule:neutral/density.hold_time"
+          ]
+        },
+        {
+          "about": [
+            "s01.sh03.l1/layout"
+          ],
+          "choice": "Place the title in the 'title' region of the title layout for landscape. No subtitle is used, and no style overrides are made.",
+          "citations": [
+            "pack_rule:neutral/density.one_idea",
+            "craft_rule:continuity.same_thing_same_look"
+          ]
+        }
+      ]
+    },
+    "model": "claude-sonnet-5-5",
+    "usage": {
+      "input_tokens": 6448,
+      "output_tokens": 602
+    },
+    "cost_usd": 0.018916,
+    "stop": "end"
+  }
+}

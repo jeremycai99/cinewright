@@ -16,19 +16,25 @@ export {
   envelopeSchema,
   packText,
 } from "./agents/context.js";
-export { agentExecutor, llmCall } from "./agents/executor.js";
+export { agentExecutor, llmCall, type OutputFor } from "./agents/executor.js";
 export {
   type DirectorOutput,
   directorCheck,
   directorToPatch,
 } from "./agents/roles/director.js";
-export { ROLE_SUGGEST, ROLE_TO_PATCH, roleChecks } from "./agents/roles/index.js";
+export { type EditorOutput, editorCheck, editorToPatch } from "./agents/roles/editor.js";
+export { ROLE_SUGGEST, ROLE_TO_PATCH, roleChecks, roleOutputs } from "./agents/roles/index.js";
 export {
   type ProducerOutput,
   producerCheck,
   producerSuggest,
   producerToPatch,
 } from "./agents/roles/producer.js";
+export {
+  type ShotBuilderOutput,
+  shotBuilderCheck,
+  shotBuilderToPatch,
+} from "./agents/roles/shot_builder.js";
 export {
   estimateScriptSeconds,
   type WriterOutput,
@@ -43,6 +49,7 @@ export {
   runAgentTask,
   type ToPatch,
 } from "./agents/runner.js";
+export { shotOutputSchema, shotStubs } from "./agents/schema/layers.js";
 export { installedPacks, v01Agents } from "./agents/setup.js";
 export { type OutputError, type SemanticCheck, validateOutput } from "./agents/validate.js";
 export { WavError, type WavInfo, wavInfo } from "./audio/wav.js";

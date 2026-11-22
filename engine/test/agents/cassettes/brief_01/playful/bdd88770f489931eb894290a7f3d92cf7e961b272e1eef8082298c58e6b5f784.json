@@ -1,0 +1,258 @@
+{
+  "request_hash": "sha256:bdd88770f489931eb894290a7f3d92cf7e961b272e1eef8082298c58e6b5f784",
+  "response": {
+    "output": {
+      "output": {
+        "scenes": [
+          {
+            "id": "s01",
+            "duration": {
+              "target_seconds": 17,
+              "flex": 0.15,
+              "sync": "voiceover"
+            },
+            "transition_out": {
+              "type": "wipe",
+              "duration_frames": 15
+            }
+          },
+          {
+            "id": "s02",
+            "duration": {
+              "target_seconds": 14,
+              "flex": 0.15,
+              "sync": "voiceover"
+            },
+            "transition_out": {
+              "type": "wipe",
+              "duration_frames": 15
+            }
+          },
+          {
+            "id": "s03",
+            "duration": {
+              "target_seconds": 10,
+              "flex": 0.15,
+              "sync": "voiceover"
+            },
+            "transition_out": {
+              "type": "wipe",
+              "duration_frames": 15
+            }
+          },
+          {
+            "id": "s04",
+            "duration": {
+              "target_seconds": 10,
+              "flex": 0.15,
+              "sync": "voiceover"
+            },
+            "transition_out": {
+              "type": "wipe",
+              "duration_frames": 15
+            }
+          },
+          {
+            "id": "s05",
+            "duration": {
+              "target_seconds": 12,
+              "flex": 0.15,
+              "sync": "voiceover"
+            },
+            "transition_out": {
+              "type": "cut"
+            }
+          },
+          {
+            "id": "s06",
+            "duration": {
+              "target_seconds": 24,
+              "flex": 0.15,
+              "sync": "voiceover"
+            },
+            "transition_out": {
+              "type": "cut"
+            }
+          }
+        ],
+        "shots": [
+          {
+            "id": "s01.sh02",
+            "anchors": {
+              "start": {
+                "line": "b01.l02",
+                "point": "start",
+                "offset": 0
+              }
+            }
+          },
+          {
+            "id": "s02.sh02",
+            "anchors": {
+              "start": {
+                "line": "b02.l02",
+                "point": "start",
+                "offset": 0
+              }
+            }
+          },
+          {
+            "id": "s03.sh02",
+            "anchors": {
+              "start": {
+                "line": "b03.l02",
+                "point": "start",
+                "offset": 6
+              }
+            }
+          },
+          {
+            "id": "s04.sh02",
+            "anchors": {
+              "start": {
+                "line": "b04.l02",
+                "point": "start",
+                "offset": 0
+              }
+            }
+          },
+          {
+            "id": "s05.sh02",
+            "anchors": {
+              "start": {
+                "line": "b05.l02",
+                "point": "start",
+                "offset": 0
+              }
+            }
+          },
+          {
+            "id": "s05.sh03",
+            "anchors": {
+              "start": {
+                "line": "b05.l04",
+                "point": "start",
+                "offset": 0
+              }
+            }
+          },
+          {
+            "id": "s06.sh02",
+            "anchors": {
+              "start": {
+                "line": "b06.l02",
+                "point": "start",
+                "offset": 15
+              }
+            }
+          },
+          {
+            "id": "s06.sh04",
+            "anchors": {
+              "start": {
+                "line": "b06.l04",
+                "point": "start",
+                "offset": 0
+              }
+            }
+          }
+        ]
+      },
+      "decisions": [
+        {
+          "about": [
+            "s01",
+            "s02",
+            "s03",
+            "s04",
+            "s05",
+            "s06"
+          ],
+          "choice": "Set voiceover-synced targets sized to each scene's spoken lines with 15% flex so the narration is not overrun.",
+          "citations": [
+            "line:b01.l01",
+            "line:b02.l01",
+            "line:b06.l02",
+            "pack_rule:playful/density.fewer_items"
+          ]
+        },
+        {
+          "about": [
+            "s01.sh02"
+          ],
+          "choice": "Start the second shot at b01.l02 so shot 1 does not flash by and cuts fall on sentence boundaries.",
+          "citations": [
+            "craft_rule:rhythm.cut_on_sense",
+            "craft_rule:rhythm.hold_to_read",
+            "line:b01.l02"
+          ]
+        },
+        {
+          "about": [
+            "s02.sh02"
+          ],
+          "choice": "Move the step shot start to b02.l02 so it sits in order between the heading and the 'cold' line and each holds long enough.",
+          "citations": [
+            "craft_rule:rhythm.hold_to_read",
+            "line:b02.l02"
+          ]
+        },
+        {
+          "about": [
+            "s04.sh02"
+          ],
+          "choice": "Start the step list at b04.l02 so the heading shot at b04.l01 has a hold, and cuts land on sentences.",
+          "citations": [
+            "craft_rule:rhythm.cut_on_sense",
+            "line:b04.l02"
+          ]
+        },
+        {
+          "about": [
+            "s05.sh02",
+            "s05.sh03"
+          ],
+          "choice": "Space the shot starts to b05.l02 and b05.l04 so each is in order and held for its own sentence.",
+          "citations": [
+            "craft_rule:rhythm.hold_to_read",
+            "craft_rule:rhythm.cut_on_sense",
+            "line:b05.l02"
+          ]
+        },
+        {
+          "about": [
+            "s06.sh02",
+            "s06.sh04"
+          ],
+          "choice": "Keep the claim shot at b06.l02 offset 15 and the recap at b06.l04 so both fall on sense units in order.",
+          "citations": [
+            "craft_rule:rhythm.cut_on_sense",
+            "line:b06.l04"
+          ]
+        },
+        {
+          "about": [
+            "s01/transition_out",
+            "s02/transition_out",
+            "s03/transition_out",
+            "s04/transition_out",
+            "s05/transition_out",
+            "s06/transition_out"
+          ],
+          "choice": "Leave all transitions unchanged because no transition carries new meaning.",
+          "citations": [
+            "craft_rule:continuity.transitions_mean",
+            "pack_rule:playful/transition.wipe_by_default"
+          ]
+        }
+      ]
+    },
+    "model": "claude-sonnet-5-5",
+    "usage": {
+      "input_tokens": 8497,
+      "output_tokens": 1487
+    },
+    "cost_usd": 0.031864,
+    "stop": "end"
+  }
+}

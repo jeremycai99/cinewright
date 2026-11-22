@@ -1,0 +1,218 @@
+{
+  "request_hash": "sha256:b844b5a1f3b8fa8c46ab4508bf8851592739a2d6baf1a238092ee85ea628dd8d",
+  "response": {
+    "output": {
+      "output": {
+        "scenes": [
+          {
+            "id": "s01",
+            "duration": {
+              "target_seconds": 14,
+              "flex": 0.15,
+              "sync": "voiceover"
+            },
+            "transition_out": {
+              "type": "cross_dissolve",
+              "duration_frames": 12
+            }
+          },
+          {
+            "id": "s02",
+            "duration": {
+              "target_seconds": 10,
+              "flex": 0.15,
+              "sync": "voiceover"
+            },
+            "transition_out": {
+              "type": "wipe",
+              "duration_frames": 12
+            }
+          },
+          {
+            "id": "s03",
+            "duration": {
+              "target_seconds": 9,
+              "flex": 0.15,
+              "sync": "voiceover"
+            },
+            "transition_out": {
+              "type": "wipe",
+              "duration_frames": 12
+            }
+          },
+          {
+            "id": "s04",
+            "duration": {
+              "target_seconds": 8,
+              "flex": 0.15,
+              "sync": "voiceover"
+            },
+            "transition_out": {
+              "type": "cross_dissolve",
+              "duration_frames": 12
+            }
+          },
+          {
+            "id": "s05",
+            "duration": {
+              "target_seconds": 8,
+              "flex": 0.15,
+              "sync": "voiceover"
+            },
+            "transition_out": {
+              "type": "cross_dissolve",
+              "duration_frames": 12
+            }
+          },
+          {
+            "id": "s06",
+            "duration": {
+              "target_seconds": 14,
+              "flex": 0.15,
+              "sync": "voiceover"
+            },
+            "transition_out": {
+              "type": "cut"
+            }
+          }
+        ],
+        "shots": [
+          {
+            "id": "s01.sh01",
+            "anchors": {
+              "start": {
+                "line": "b01.l01",
+                "point": "start",
+                "offset": 0
+              }
+            }
+          },
+          {
+            "id": "s01.sh02",
+            "anchors": {
+              "start": {
+                "line": "b01.l02",
+                "point": "start",
+                "offset": 0
+              }
+            }
+          },
+          {
+            "id": "s01.sh03",
+            "anchors": {
+              "start": {
+                "line": "b01.l03",
+                "point": "start",
+                "offset": 0
+              }
+            }
+          },
+          {
+            "id": "s05.sh02",
+            "anchors": {
+              "start": {
+                "line": "b05.l03",
+                "point": "start",
+                "offset": 0
+              }
+            }
+          },
+          {
+            "id": "s06.sh02",
+            "anchors": {
+              "start": {
+                "line": "b06.l03",
+                "point": "start",
+                "offset": 0
+              }
+            }
+          },
+          {
+            "id": "s06.sh03",
+            "anchors": {
+              "start": {
+                "line": "b06.l04",
+                "point": "start",
+                "offset": 0
+              }
+            }
+          }
+        ]
+      },
+      "decisions": [
+        {
+          "about": [
+            "s01",
+            "s02",
+            "s03",
+            "s04",
+            "s05",
+            "s06"
+          ],
+          "choice": "Set voiceover-synced duration targets sized to each scene's narration, with 15% flex so the solver can fit the spoken length.",
+          "citations": [
+            "craft_rule:rhythm.hold_to_read",
+            "pack_rule:neutral/density.hold_time"
+          ]
+        },
+        {
+          "about": [
+            "s01.sh01",
+            "s01.sh02"
+          ],
+          "choice": "Moved s01.sh01 to start at b01.l01 and kept s01.sh02 at b01.l02, so the question title is not cut off by the subject title and each cut lands at a line boundary.",
+          "citations": [
+            "craft_rule:rhythm.cut_on_sense",
+            "line:b01.l01",
+            "line:b01.l02"
+          ]
+        },
+        {
+          "about": [
+            "s05.sh02"
+          ],
+          "choice": "Start s05.sh02 at b05.l03 so the 'outside to inside' title appears when that line is spoken, after 'Moves heat' has had b05.l01 and b05.l02 to be read.",
+          "citations": [
+            "craft_rule:rhythm.cut_on_sense",
+            "line:b05.l03"
+          ]
+        },
+        {
+          "about": [
+            "s06.sh02",
+            "s06.sh03"
+          ],
+          "choice": "Keep s06.sh02 at b06.l03 and the closing card at b06.l04 so the key claim holds for its full sentence before the closing takeaway.",
+          "citations": [
+            "craft_rule:rhythm.hold_to_read",
+            "line:b06.l03",
+            "line:b06.l04"
+          ]
+        },
+        {
+          "about": [
+            "s01",
+            "s02",
+            "s03",
+            "s04",
+            "s05",
+            "s06"
+          ],
+          "choice": "Left all transitions unchanged: dissolves between ideas, wipes for step progression, and a final cut.",
+          "citations": [
+            "craft_rule:continuity.transitions_mean",
+            "pack_rule:neutral/transition.wipe_for_sequence",
+            "pack_rule:neutral/transition.dissolve_between_ideas"
+          ]
+        }
+      ]
+    },
+    "model": "claude-sonnet-5-5",
+    "usage": {
+      "input_tokens": 6792,
+      "output_tokens": 1286
+    },
+    "cost_usd": 0.026444,
+    "stop": "end"
+  }
+}

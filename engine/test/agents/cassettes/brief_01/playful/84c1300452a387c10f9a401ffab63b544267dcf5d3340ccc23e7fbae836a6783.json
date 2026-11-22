@@ -1,0 +1,94 @@
+{
+  "request_hash": "sha256:84c1300452a387c10f9a401ffab63b544267dcf5d3340ccc23e7fbae836a6783",
+  "response": {
+    "output": {
+      "output": {
+        "layers": [
+          {
+            "id": "s06.sh04.l1",
+            "component": "bullet_reveal",
+            "props": {
+              "items": [
+                "Electricity runs the system",
+                "Heat comes from the outdoor air",
+                "More heat out than electricity in"
+              ]
+            },
+            "timing": {
+              "enter": {
+                "line": "b06.l03",
+                "point": "start",
+                "offset": 0
+              },
+              "exit": {
+                "line": "b06.l05",
+                "point": "end",
+                "offset": 0
+              }
+            },
+            "layout": {
+              "landscape": {
+                "region": "body"
+              }
+            }
+          }
+        ]
+      },
+      "decisions": [
+        {
+          "about": [
+            "s06.sh04.l1/props/items"
+          ],
+          "choice": "Three short bullets recap the scene's claims, using wording from lines b06.l02 and b06.l03, so the screen shows no second claim and the list stays short for young readers.",
+          "citations": [
+            "line:b06.l02",
+            "line:b06.l03",
+            "craft_rule:hierarchy.supports_line",
+            "craft_rule:legibility.read_time",
+            "pack_rule:playful/density.fewer_items",
+            "pack_rule:playful/type.short_lines"
+          ]
+        },
+        {
+          "about": [
+            "s06.sh04.l1/timing"
+          ],
+          "choice": "The list enters as b06.l03 starts, so the first bullet appears with its claim and the others follow. It stays up through the end of b06.l05 for a long hold.",
+          "citations": [
+            "line:b06.l03",
+            "line:b06.l05",
+            "craft_rule:rhythm.hold_to_read",
+            "pack_rule:playful/density.fewer_items"
+          ]
+        },
+        {
+          "about": [
+            "s06.sh04.l1/layout"
+          ],
+          "choice": "The single layer goes in the body region of title_body as the shot's one focus. The title region stays empty because the shot has no title layer.",
+          "citations": [
+            "craft_rule:hierarchy.one_focus",
+            "pack_rule:playful/layout.centred_focus",
+            "pack_rule:playful/color.one_focus"
+          ]
+        },
+        {
+          "about": [
+            "s06.sh04.l1/style"
+          ],
+          "choice": "No style overrides, leaving styling to the pack.",
+          "citations": [
+            "craft_rule:contrast.meaning"
+          ]
+        }
+      ]
+    },
+    "model": "claude-sonnet-5-5",
+    "usage": {
+      "input_tokens": 6225,
+      "output_tokens": 648
+    },
+    "cost_usd": 0.01893,
+    "stop": "end"
+  }
+}

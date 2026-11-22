@@ -1,0 +1,100 @@
+{
+  "request_hash": "sha256:e33b210480bd8397da6d581a4ab018e61a9d8ee90e939c4ba5f12d1b4986c47a",
+  "response": {
+    "output": {
+      "output": {
+        "layers": [
+          {
+            "id": "s01.sh02.l1",
+            "component": "kinetic_title",
+            "props": {
+              "text": "Heat from outdoor air",
+              "emphasis": [
+                2,
+                3
+              ]
+            },
+            "timing": {
+              "enter": {
+                "line": "b01.l03",
+                "point": "start",
+                "offset": 0
+              },
+              "exit": {
+                "line": "b01.l03",
+                "point": "end",
+                "offset": 15
+              }
+            },
+            "layout": {
+              "landscape": {
+                "region": "title"
+              }
+            }
+          }
+        ]
+      },
+      "decisions": [
+        {
+          "about": [
+            "s01.sh02.l1/props/text"
+          ],
+          "choice": "Use the line's on-screen text 'Heat from outdoor air' as the headline. It is short and states the claim of line b01.l03 without adding a second one.",
+          "citations": [
+            "line:b01.l03",
+            "craft_rule:hierarchy.supports_line",
+            "craft_rule:legibility.read_time",
+            "pack_rule:playful/type.short_lines"
+          ]
+        },
+        {
+          "about": [
+            "s01.sh02.l1/props/emphasis"
+          ],
+          "choice": "Accent the words 'outdoor air' (indices 2 and 3), the surprising heat source, so the title has one focus.",
+          "citations": [
+            "craft_rule:hierarchy.one_focus",
+            "pack_rule:playful/color.one_focus"
+          ]
+        },
+        {
+          "about": [
+            "s01.sh02.l1/timing"
+          ],
+          "choice": "Enter as line b01.l03 starts, when the narration reaches the claim. Exit 15 frames after the line ends, so the title stays up through the whole line and a little after.",
+          "citations": [
+            "line:b01.l03",
+            "craft_rule:rhythm.hold_to_read",
+            "pack_rule:playful/density.fewer_items"
+          ]
+        },
+        {
+          "about": [
+            "s01.sh02.l1/layout/landscape/region"
+          ],
+          "choice": "Place the headline in the centred 'title' region of the title layout. No subtitle is used, since the headline carries the claim.",
+          "citations": [
+            "pack_rule:playful/layout.centred_focus",
+            "craft_rule:continuity.same_thing_same_look"
+          ]
+        },
+        {
+          "about": [
+            "s01.sh02.l1/style"
+          ],
+          "choice": "No style overrides, so the pack's styling applies.",
+          "citations": [
+            "craft_rule:contrast.meaning"
+          ]
+        }
+      ]
+    },
+    "model": "claude-sonnet-5-5",
+    "usage": {
+      "input_tokens": 6211,
+      "output_tokens": 696
+    },
+    "cost_usd": 0.019382,
+    "stop": "end"
+  }
+}

@@ -1,0 +1,102 @@
+{
+  "request_hash": "sha256:897f15e4153b547077e017e10e60e0cddade0e85d1c40416a1a42f0e8d745af4",
+  "response": {
+    "output": {
+      "output": {
+        "layers": [
+          {
+            "id": "s06.sh01.l1",
+            "component": "kinetic_title",
+            "props": {
+              "text": "More heat out than electricity in",
+              "emphasis": [
+                1,
+                4
+              ]
+            },
+            "timing": {
+              "enter": {
+                "line": "b06.l02",
+                "point": "start",
+                "offset": 0
+              },
+              "exit": {
+                "line": "b06.l02",
+                "point": "end",
+                "offset": 15
+              }
+            },
+            "layout": {
+              "landscape": {
+                "region": "title"
+              }
+            }
+          }
+        ]
+      },
+      "decisions": [
+        {
+          "about": [
+            "s06.sh01.l1/props/text"
+          ],
+          "choice": "Used the line's on-screen text 'More heat out than electricity in' as the headline, which restates the claim of b06.l02 without adding a second one and is short enough to read while the line is heard.",
+          "citations": [
+            "line:b06.l02",
+            "craft_rule:hierarchy.supports_line",
+            "craft_rule:legibility.read_time",
+            "pack_rule:playful/type.short_lines"
+          ]
+        },
+        {
+          "about": [
+            "s06.sh01.l1/props/emphasis"
+          ],
+          "choice": "Accented 'heat' (word 1) and 'electricity' (word 4) so the contrast between output and input carries the focus.",
+          "citations": [
+            "line:b06.l02",
+            "craft_rule:hierarchy.one_focus",
+            "pack_rule:playful/color.one_focus"
+          ]
+        },
+        {
+          "about": [
+            "s06.sh01.l1/timing"
+          ],
+          "choice": "Enters at the start of b06.l02 where the claim begins, and exits 15 frames after that line ends so the text holds long enough to read.",
+          "citations": [
+            "line:b06.l02",
+            "craft_rule:rhythm.hold_to_read",
+            "pack_rule:playful/density.fewer_items"
+          ]
+        },
+        {
+          "about": [
+            "s06.sh01.l1/layout"
+          ],
+          "choice": "Placed the headline in the centred 'title' region of the title template for landscape, with no subtitle to keep the frame to one focus.",
+          "citations": [
+            "pack_rule:playful/layout.centred_focus",
+            "craft_rule:hierarchy.one_focus"
+          ]
+        },
+        {
+          "about": [
+            "s06.sh01.l1/style"
+          ],
+          "choice": "No style overrides; the pack handles type and colour.",
+          "citations": [
+            "pack_rule:playful/type.big_and_round",
+            "craft_rule:contrast.meaning"
+          ]
+        }
+      ]
+    },
+    "model": "claude-sonnet-5-5",
+    "usage": {
+      "input_tokens": 6297,
+      "output_tokens": 716
+    },
+    "cost_usd": 0.019754,
+    "stop": "end"
+  }
+}

@@ -60,8 +60,8 @@ const describe = (errors: readonly OutputError[]) =>
   errors.map((e) => `- ${e.rule} at ${e.pointer}: ${e.message}`).join("\n");
 
 /**
- * Each decision maps to the ops it is about: an op on an entity it names, a field path under one
- * (`s01.sh01/framing`), or an inserted entity it names. Every op needs a decision and every
+ * Each decision maps to the ops it is about: an op on an entity it names (or a field of one,
+ * `s01.sh01/framing`), or an insert whose value carries that entity at any depth. Every op needs a decision and every
  * decision an op (invariant 8).
  */
 export function decisionsFor(
@@ -69,20 +69,29 @@ export function decisionsFor(
   ops: readonly Op[],
 ): { decisions: { ops: number[]; choice: string; citations: string[] }[]; errors: OutputError[] } {
   const errors: OutputError[] = [];
-  const target = (op: Op) => [
-    op.entity,
-    `${op.entity}${op.path ?? ""}`,
-    ...(op.value && typeof op.value === "object" && "id" in (op.value as object)
-      ? [String((op.value as { id: unknown }).id)]
-      : []),
-  ];
-  const covers = (about: string, op: Op) =>
-    target(op).some((t) => {
-      const a = about.replace("/", "/").replace(/^([^/]+)\/(.*)$/, "$1/$2");
-      return t === a || t.startsWith(`${a}/`) || `${op.entity}${op.path ?? ""}` === a;
-    });
+  /** Every entity id an inserted value carries, nested subtrees included. */
+  const carried = (value: unknown, out: string[] = []): string[] => {
+    if (Array.isArray(value)) for (const v of value) carried(v, out);
+    else if (value && typeof value === "object") {
+      const o = value as Record<string, unknown>;
+      if (typeof o.id === "string") out.push(o.id);
+      for (const [k, v] of Object.entries(o)) if (k !== "id") carried(v, out);
+    }
+    return out;
+  };
+  const targets = ops.map((op) => ({
+    path: `${op.entity}${op.path ?? ""}`,
+    entities: new Set([op.entity, ...(op.op === "insert" ? carried(op.value) : [])]),
+  }));
+  // A decision names an entity (`s01`) or a field of one (`s01.sh01/layout`): it covers an op on
+  // that entity, an insert that carries it, or an op on that exact path.
+  const covers = (about: string, k: number) => {
+    const t = targets[k] as { path: string; entities: Set<string> };
+    const entity = about.split("/")[0] as string;
+    return t.entities.has(entity) || t.path === about || t.path.startsWith(`${about}/`);
+  };
   const decisions = envelope.decisions.map((d, i) => {
-    const mine = ops.flatMap((op, k) => (d.about.some((a) => covers(a, op)) ? [k] : []));
+    const mine = ops.flatMap((_op, k) => (d.about.some((a) => covers(a, k)) ? [k] : []));
     if (mine.length === 0)
       errors.push({
         pointer: `/decisions/${i}/about`,

@@ -1,0 +1,100 @@
+{
+  "request_hash": "sha256:62d10066b80e96a8d4248197a2e5102a4a8fa64842c0343374b751413b587a73",
+  "response": {
+    "output": {
+      "output": {
+        "layers": [
+          {
+            "id": "s03.sh01.l1",
+            "component": "kinetic_title",
+            "props": {
+              "text": "Compressor raises temperature",
+              "emphasis": [
+                2
+              ]
+            },
+            "timing": {
+              "enter": {
+                "line": "b03.l02",
+                "point": "start",
+                "offset": 0
+              },
+              "exit": {
+                "line": "b03.l03",
+                "point": "end",
+                "offset": 0
+              }
+            },
+            "layout": {
+              "landscape": {
+                "region": "title"
+              }
+            }
+          }
+        ]
+      },
+      "decisions": [
+        {
+          "about": [
+            "s03.sh01.l1/props/text"
+          ],
+          "choice": "Use the line's on-screen text 'Compressor raises temperature', a short headline that restates the b03.l02 claim without adding a second one.",
+          "citations": [
+            "line:b03.l02",
+            "craft_rule:hierarchy.supports_line",
+            "craft_rule:legibility.read_time",
+            "pack_rule:playful/type.short_lines"
+          ]
+        },
+        {
+          "about": [
+            "s03.sh01.l1/props/emphasis"
+          ],
+          "choice": "Accent only word 2, 'temperature', as the single focal word of the claim.",
+          "citations": [
+            "craft_rule:hierarchy.one_focus",
+            "pack_rule:playful/color.one_focus"
+          ]
+        },
+        {
+          "about": [
+            "s03.sh01.l1/timing"
+          ],
+          "choice": "Enter as b03.l02 starts, when the narration reaches the claim. Hold through the end of b03.l03 so it can be read and the payoff stays on screen.",
+          "citations": [
+            "line:b03.l02",
+            "line:b03.l03",
+            "craft_rule:rhythm.hold_to_read",
+            "pack_rule:playful/density.fewer_items"
+          ]
+        },
+        {
+          "about": [
+            "s03.sh01.l1/layout"
+          ],
+          "choice": "Place the headline in the 'title' region of the title template, centred as the shot's single focus. The subtitle region is left unused.",
+          "citations": [
+            "pack_rule:playful/layout.centred_focus",
+            "craft_rule:continuity.same_thing_same_look"
+          ]
+        },
+        {
+          "about": [
+            "s03.sh01.l1/style"
+          ],
+          "choice": "No style overrides, leaving styling to the pack.",
+          "citations": [
+            "pack_rule:playful/type.big_and_round"
+          ]
+        }
+      ]
+    },
+    "model": "claude-sonnet-5-5",
+    "usage": {
+      "input_tokens": 6149,
+      "output_tokens": 679
+    },
+    "cost_usd": 0.019088,
+    "stop": "end"
+  }
+}

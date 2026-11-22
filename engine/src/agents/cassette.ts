@@ -52,8 +52,8 @@ export function cassetteOptions(env: Readonly<Record<string, string | undefined>
 /**
  * An LLM plugin wrapped with cassettes (M7.3, AGENTS.md §4.3). `replay` answers `llm.generate`
  * from `<dir>/<hex>.json` and never calls the provider; a miss is `invalid_request` naming the
- * hash (`data.reason: "cassette_miss"`). `record` calls the provider and writes each successful
- * response. `off` passes everything through. Other methods always pass through.
+ * hash (`data.reason: "cassette_miss"`). `record` answers from an existing cassette too, and calls
+ * the provider only on a miss, writing each successful response. `off` passes everything through. Other methods always pass through.
  */
 export function withCassettes(
   plugin: Plugin,
@@ -69,20 +69,22 @@ export function withCassettes(
         return plugin.call(request, signal);
       const hash = requestHash(request.params as GenerateRequest);
       const file = fileOf(hash);
-      if (options.mode === "replay") {
-        if (!existsSync(file))
-          return {
-            ok: false,
-            error: {
-              code: "invalid_request",
-              message: `no cassette for request ${hash} in ${options.dir}`,
-              retryable: false,
-              data: { reason: "cassette_miss", hash },
-            },
-          };
+      // Both modes serve a recorded answer; record mode calls the provider only on a miss, so
+      // extending a recording never re-spends on (or changes) the calls already recorded.
+      if (existsSync(file)) {
         const cassette = JSON.parse(readFileSync(file, "utf8")) as Cassette;
         return { ok: true, result: cassette.response };
       }
+      if (options.mode === "replay")
+        return {
+          ok: false,
+          error: {
+            code: "invalid_request",
+            message: `no cassette for request ${hash} in ${options.dir}`,
+            retryable: false,
+            data: { reason: "cassette_miss", hash },
+          },
+        };
       const response = await plugin.call(request, signal);
       if (response.ok) {
         mkdirSync(options.dir, { recursive: true });

@@ -1,0 +1,100 @@
+{
+  "request_hash": "sha256:752470b6d0e15355cafeffbdbb5108c995c623497e8c895416bc972e725107d8",
+  "response": {
+    "output": {
+      "output": {
+        "layers": [
+          {
+            "id": "s04.sh01.l1",
+            "component": "kinetic_title",
+            "props": {
+              "text": "Heat released indoors",
+              "emphasis": [
+                2
+              ]
+            },
+            "timing": {
+              "enter": {
+                "line": "b04.l02",
+                "point": "start",
+                "offset": 0
+              },
+              "exit": {
+                "line": "b04.l03",
+                "point": "end",
+                "offset": 0
+              }
+            },
+            "layout": {
+              "landscape": {
+                "region": "title"
+              }
+            }
+          }
+        ]
+      },
+      "decisions": [
+        {
+          "about": [
+            "s04.sh01.l1/props/text"
+          ],
+          "choice": "Use the on-screen text of line b04.l02, 'Heat released indoors', as the headline: short, and it restates the spoken claim without adding another.",
+          "citations": [
+            "line:b04.l02",
+            "craft_rule:hierarchy.supports_line",
+            "craft_rule:legibility.read_time",
+            "pack_rule:playful/type.short_lines"
+          ]
+        },
+        {
+          "about": [
+            "s04.sh01.l1/props/emphasis"
+          ],
+          "choice": "Accent only word 2, 'indoors', so the title has a single focus and it names the place where the scene happens.",
+          "citations": [
+            "craft_rule:hierarchy.one_focus",
+            "pack_rule:playful/color.one_focus"
+          ]
+        },
+        {
+          "about": [
+            "s04.sh01.l1/timing"
+          ],
+          "choice": "Enter as b04.l02 starts, when the narration reaches 'releases its heat'. Hold through the end of b04.l03 so the title stays up long enough to read and covers the follow-on claim that the heat warms the rooms.",
+          "citations": [
+            "line:b04.l02",
+            "line:b04.l03",
+            "craft_rule:rhythm.hold_to_read",
+            "pack_rule:playful/density.fewer_items"
+          ]
+        },
+        {
+          "about": [
+            "s04.sh01.l1/layout"
+          ],
+          "choice": "Place the title in the 'title' region of the title template, centred. No subtitle is used, to keep the frame sparse.",
+          "citations": [
+            "pack_rule:playful/layout.centred_focus",
+            "craft_rule:continuity.same_thing_same_look"
+          ]
+        },
+        {
+          "about": [
+            "s04.sh01.l1/style"
+          ],
+          "choice": "No style overrides, leaving styling to the pack.",
+          "citations": [
+            "craft_rule:contrast.meaning"
+          ]
+        }
+      ]
+    },
+    "model": "claude-sonnet-5-5",
+    "usage": {
+      "input_tokens": 6139,
+      "output_tokens": 705
+    },
+    "cost_usd": 0.019328,
+    "stop": "end"
+  }
+}

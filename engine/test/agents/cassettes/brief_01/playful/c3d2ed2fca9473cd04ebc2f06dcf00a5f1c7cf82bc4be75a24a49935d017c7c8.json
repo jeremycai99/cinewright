@@ -1,0 +1,100 @@
+{
+  "request_hash": "sha256:c3d2ed2fca9473cd04ebc2f06dcf00a5f1c7cf82bc4be75a24a49935d017c7c8",
+  "response": {
+    "output": {
+      "output": {
+        "layers": [
+          {
+            "id": "s05.sh02.l1",
+            "component": "kinetic_title",
+            "props": {
+              "text": "Moves heat. Burns no fuel.",
+              "emphasis": [
+                0,
+                3
+              ]
+            },
+            "timing": {
+              "enter": {
+                "line": "b05.l03",
+                "point": "start",
+                "offset": 0
+              },
+              "exit": {
+                "line": "b05.l03",
+                "point": "end",
+                "offset": 30
+              }
+            },
+            "layout": {
+              "landscape": {
+                "region": "title"
+              }
+            }
+          }
+        ]
+      },
+      "decisions": [
+        {
+          "about": [
+            "s05.sh02.l1/props/text"
+          ],
+          "choice": "Use the line's on-screen text 'Moves heat. Burns no fuel.' as the headline, so it restates the spoken claim and stays short to read.",
+          "citations": [
+            "line:b05.l03",
+            "craft_rule:hierarchy.supports_line",
+            "craft_rule:legibility.read_time",
+            "pack_rule:playful/type.short_lines"
+          ]
+        },
+        {
+          "about": [
+            "s05.sh02.l1/props/emphasis"
+          ],
+          "choice": "Accent 'Moves' and 'fuel' (indices 0 and 3) to set the contrast between moving heat and burning fuel, with a single focus.",
+          "citations": [
+            "craft_rule:hierarchy.one_focus",
+            "pack_rule:playful/color.one_focus"
+          ]
+        },
+        {
+          "about": [
+            "s05.sh02.l1/timing"
+          ],
+          "choice": "Enter as b05.l03 starts, when the narration reaches the claim, and exit 30 frames after it ends so the text can be read.",
+          "citations": [
+            "line:b05.l03",
+            "craft_rule:rhythm.hold_to_read",
+            "pack_rule:playful/density.fewer_items"
+          ]
+        },
+        {
+          "about": [
+            "s05.sh02.l1/layout"
+          ],
+          "choice": "Place the title in the 'title' region of the centred title template, with no subtitle, in landscape.",
+          "citations": [
+            "pack_rule:playful/layout.centred_focus",
+            "craft_rule:continuity.same_thing_same_look"
+          ]
+        },
+        {
+          "about": [
+            "s05.sh02.l1/style"
+          ],
+          "choice": "Leave style to the pack with no token overrides.",
+          "citations": [
+            "pack_rule:playful/type.big_and_round"
+          ]
+        }
+      ]
+    },
+    "model": "claude-sonnet-5-5",
+    "usage": {
+      "input_tokens": 6198,
+      "output_tokens": 688
+    },
+    "cost_usd": 0.019276,
+    "stop": "end"
+  }
+}

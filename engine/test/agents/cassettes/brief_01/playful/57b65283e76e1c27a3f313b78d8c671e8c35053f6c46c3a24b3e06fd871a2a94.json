@@ -1,0 +1,87 @@
+{
+  "request_hash": "sha256:57b65283e76e1c27a3f313b78d8c671e8c35053f6c46c3a24b3e06fd871a2a94",
+  "response": {
+    "output": {
+      "output": {
+        "layers": [
+          {
+            "id": "s02.sh01.l1",
+            "component": "plate",
+            "props": {
+              "asset": "s02.sh01.diagram",
+              "fit": "contain",
+              "ken_burns": true,
+              "focus": {
+                "x": 0.25,
+                "y": 0.5
+              }
+            },
+            "timing": {
+              "enter": {
+                "line": "b02.l01",
+                "point": "start",
+                "offset": 0
+              }
+            },
+            "layout": {
+              "landscape": {
+                "region": "main"
+              }
+            }
+          }
+        ]
+      },
+      "decisions": [
+        {
+          "about": [
+            "s02.sh01.l1/props/asset"
+          ],
+          "choice": "Use the diagram plate with the outdoor stage highlighted as the shot's single focal layer. No asset list was provided, so the asset id s02.sh01.diagram is a placeholder to be matched to the real diagram asset.",
+          "citations": [
+            "craft_rule:hierarchy.one_focus",
+            "pack_rule:playful/color.one_focus"
+          ]
+        },
+        {
+          "about": [
+            "s02.sh01.l1/props/fit",
+            "s02.sh01.l1/props/focus"
+          ],
+          "choice": "Fit with contain so the whole diagram stays visible, and push slowly toward the outdoor stage on the left to match the scene's claim.",
+          "citations": [
+            "line:b02.l02",
+            "pack_rule:playful/motion.lively_but_brief"
+          ]
+        },
+        {
+          "about": [
+            "s02.sh01.l1/timing"
+          ],
+          "choice": "Enter at the start of the first line and stay up through the scene with no exit, so the diagram holds while all four lines are heard.",
+          "citations": [
+            "line:b02.l01",
+            "craft_rule:rhythm.hold_to_read",
+            "pack_rule:playful/density.fewer_items"
+          ]
+        },
+        {
+          "about": [
+            "s02.sh01.l1/layout"
+          ],
+          "choice": "Place the plate in the main region of the full layout, with no on-screen words so the narration carries the claim.",
+          "citations": [
+            "pack_rule:playful/layout.centred_focus",
+            "craft_rule:hierarchy.supports_line"
+          ]
+        }
+      ]
+    },
+    "model": "claude-sonnet-5-5",
+    "usage": {
+      "input_tokens": 6380,
+      "output_tokens": 881
+    },
+    "cost_usd": 0.02157,
+    "stop": "end"
+  }
+}

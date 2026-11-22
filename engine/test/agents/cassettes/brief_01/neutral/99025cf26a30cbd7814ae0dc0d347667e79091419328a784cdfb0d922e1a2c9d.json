@@ -1,0 +1,131 @@
+{
+  "request_hash": "sha256:99025cf26a30cbd7814ae0dc0d347667e79091419328a784cdfb0d922e1a2c9d",
+  "response": {
+    "output": {
+      "output": {
+        "scenes": [
+          {
+            "id": "s01",
+            "duration": {
+              "target_seconds": 14,
+              "flex": 0.15,
+              "sync": "voiceover"
+            },
+            "transition_out": {
+              "type": "cross_dissolve",
+              "duration_frames": 12
+            }
+          },
+          {
+            "id": "s02",
+            "duration": {
+              "target_seconds": 10,
+              "flex": 0.15,
+              "sync": "voiceover"
+            },
+            "transition_out": {
+              "type": "wipe",
+              "duration_frames": 12
+            }
+          },
+          {
+            "id": "s03",
+            "duration": {
+              "target_seconds": 9,
+              "flex": 0.15,
+              "sync": "voiceover"
+            },
+            "transition_out": {
+              "type": "wipe",
+              "duration_frames": 12
+            }
+          },
+          {
+            "id": "s04",
+            "duration": {
+              "target_seconds": 8,
+              "flex": 0.15,
+              "sync": "voiceover"
+            },
+            "transition_out": {
+              "type": "cross_dissolve",
+              "duration_frames": 12
+            }
+          },
+          {
+            "id": "s05",
+            "duration": {
+              "target_seconds": 10,
+              "flex": 0.15,
+              "sync": "voiceover"
+            },
+            "transition_out": {
+              "type": "cross_dissolve",
+              "duration_frames": 12
+            }
+          },
+          {
+            "id": "s06",
+            "duration": {
+              "target_seconds": 17.5,
+              "flex": 0.15,
+              "sync": "voiceover"
+            },
+            "transition_out": {
+              "type": "cut"
+            }
+          }
+        ],
+        "shots": []
+      },
+      "decisions": [
+        {
+          "about": [
+            "s05",
+            "s06"
+          ],
+          "choice": "Raised s05 target to 10 s and s06 target to 17.5 s so each fits its estimated spoken narration (about 10.0 s and 17.1 s) within the flex.",
+          "citations": [
+            "craft_rule:rhythm.hold_to_read",
+            "pack_rule:neutral/density.hold_time"
+          ]
+        },
+        {
+          "about": [
+            "s01",
+            "s02",
+            "s03",
+            "s04"
+          ],
+          "choice": "Kept the voiceover-synced targets for the other scenes, which fit their narration.",
+          "citations": [
+            "craft_rule:rhythm.hold_to_read"
+          ]
+        },
+        {
+          "about": [
+            "s01",
+            "s02",
+            "s03",
+            "s04",
+            "s05",
+            "s06"
+          ],
+          "choice": "Left all transitions unchanged: dissolves between ideas, wipes for step progression, and a final cut.",
+          "citations": [
+            "craft_rule:continuity.transitions_mean",
+            "pack_rule:neutral/transition.wipe_for_sequence",
+            "pack_rule:neutral/transition.dissolve_between_ideas"
+          ]
+        }
+      ]
+    },
+    "model": "claude-sonnet-5-5",
+    "usage": {
+      "input_tokens": 8213,
+      "output_tokens": 745
+    },
+    "cost_usd": 0.023876,
+    "stop": "end"
+  }
+}

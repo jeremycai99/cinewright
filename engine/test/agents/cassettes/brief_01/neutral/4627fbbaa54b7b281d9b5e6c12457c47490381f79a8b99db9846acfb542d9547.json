@@ -1,0 +1,198 @@
+{
+  "request_hash": "sha256:4627fbbaa54b7b281d9b5e6c12457c47490381f79a8b99db9846acfb542d9547",
+  "response": {
+    "output": {
+      "output": {
+        "scenes": [
+          {
+            "id": "s01",
+            "duration": {
+              "target_seconds": 13,
+              "flex": 0.15,
+              "sync": "voiceover"
+            },
+            "transition_out": {
+              "type": "cross_dissolve",
+              "duration_frames": 12
+            }
+          },
+          {
+            "id": "s02",
+            "duration": {
+              "target_seconds": 10,
+              "flex": 0.15,
+              "sync": "voiceover"
+            },
+            "transition_out": {
+              "type": "wipe",
+              "duration_frames": 12
+            }
+          },
+          {
+            "id": "s03",
+            "duration": {
+              "target_seconds": 9,
+              "flex": 0.15,
+              "sync": "voiceover"
+            },
+            "transition_out": {
+              "type": "wipe",
+              "duration_frames": 12
+            }
+          },
+          {
+            "id": "s04",
+            "duration": {
+              "target_seconds": 8,
+              "flex": 0.15,
+              "sync": "voiceover"
+            },
+            "transition_out": {
+              "type": "cross_dissolve",
+              "duration_frames": 12
+            }
+          },
+          {
+            "id": "s05",
+            "duration": {
+              "target_seconds": 9,
+              "flex": 0.15,
+              "sync": "voiceover"
+            },
+            "transition_out": {
+              "type": "cross_dissolve",
+              "duration_frames": 12
+            }
+          },
+          {
+            "id": "s06",
+            "duration": {
+              "target_seconds": 15,
+              "flex": 0.15,
+              "sync": "voiceover"
+            },
+            "transition_out": {
+              "type": "cut"
+            }
+          }
+        ],
+        "shots": [
+          {
+            "id": "s01.sh02",
+            "anchors": {
+              "start": {
+                "line": "b01.l02",
+                "point": "start",
+                "offset": 0
+              }
+            }
+          },
+          {
+            "id": "s05.sh02",
+            "anchors": {
+              "start": {
+                "line": "b05.l03",
+                "point": "start",
+                "offset": 0
+              }
+            }
+          },
+          {
+            "id": "s06.sh02",
+            "anchors": {
+              "start": {
+                "line": "b06.l03",
+                "point": "start",
+                "offset": 0
+              }
+            }
+          },
+          {
+            "id": "s06.sh03",
+            "anchors": {
+              "start": {
+                "line": "b06.l04",
+                "point": "start",
+                "offset": 0
+              }
+            }
+          }
+        ]
+      },
+      "decisions": [
+        {
+          "about": [
+            "s01",
+            "s02",
+            "s03",
+            "s04",
+            "s05",
+            "s06"
+          ],
+          "choice": "Set voiceover-synced targets sized to each scene's narration at a spoken pace, with 15% flex so the solver can fit the real speech length.",
+          "citations": [
+            "line:b01.l01",
+            "line:b02.l03",
+            "line:b06.l03",
+            "craft_rule:rhythm.hold_to_read"
+          ]
+        },
+        {
+          "about": [
+            "s05.sh02/anchors/start"
+          ],
+          "choice": "Start the 'outside to inside' title at b05.l03 where that phrase is spoken, so it is not up at the same moment as the earlier title and the cut follows the sense unit.",
+          "citations": [
+            "line:b05.l03",
+            "craft_rule:rhythm.cut_on_sense"
+          ]
+        },
+        {
+          "about": [
+            "s06.sh02/anchors/start",
+            "s06.sh03/anchors/start"
+          ],
+          "choice": "Keep the key-claim title on b06.l03 and the closing card on b06.l04 so each shot holds through its own sentence and the card matches the closing line.",
+          "citations": [
+            "line:b06.l03",
+            "line:b06.l04",
+            "craft_rule:rhythm.cut_on_sense"
+          ]
+        },
+        {
+          "about": [
+            "s01.sh02/anchors/start"
+          ],
+          "choice": "Keep the subject title starting at b01.l02, in order after sh01, so it holds through the line naming the heat pump.",
+          "citations": [
+            "line:b01.l02",
+            "craft_rule:rhythm.hold_to_read"
+          ]
+        },
+        {
+          "about": [
+            "s01",
+            "s02",
+            "s03",
+            "s04",
+            "s05",
+            "s06"
+          ],
+          "choice": "Leave transitions unchanged: dissolves between ideas, wipes for step progression, and a final cut.",
+          "citations": [
+            "craft_rule:continuity.transitions_mean",
+            "pack_rule:neutral/transition.wipe_for_sequence",
+            "pack_rule:neutral/transition.dissolve_between_ideas"
+          ]
+        }
+      ]
+    },
+    "model": "claude-sonnet-5-5",
+    "usage": {
+      "input_tokens": 6792,
+      "output_tokens": 1187
+    },
+    "cost_usd": 0.025454,
+    "stop": "end"
+  }
+}

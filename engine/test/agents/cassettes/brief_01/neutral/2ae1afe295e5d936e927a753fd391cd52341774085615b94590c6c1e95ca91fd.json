@@ -1,0 +1,105 @@
+{
+  "request_hash": "sha256:2ae1afe295e5d936e927a753fd391cd52341774085615b94590c6c1e95ca91fd",
+  "response": {
+    "output": {
+      "output": {
+        "layers": [
+          {
+            "id": "s01.sh02.l1",
+            "component": "kinetic_title",
+            "props": {
+              "text": "The heat pump",
+              "subtitle": "Heat from cold outdoor air",
+              "emphasis": [
+                1,
+                2
+              ]
+            },
+            "timing": {
+              "enter": {
+                "line": "b01.l02",
+                "point": "start",
+                "offset": 0
+              }
+            },
+            "layout": {
+              "landscape": {
+                "region": "title"
+              }
+            }
+          }
+        ]
+      },
+      "decisions": [
+        {
+          "about": [
+            "s01.sh02.l1/props/text"
+          ],
+          "choice": "Use the on-screen text of line b01.l02, 'The heat pump', as the headline, so the words name the subject and match the spoken claim.",
+          "citations": [
+            "line:b01.l02",
+            "craft_rule:hierarchy.supports_line",
+            "craft_rule:legibility.read_time"
+          ]
+        },
+        {
+          "about": [
+            "s01.sh02.l1/props/subtitle"
+          ],
+          "choice": "Use the on-screen text of line b01.l03, 'Heat from cold outdoor air', as the subtitle. It is short and supports the one idea of the scene.",
+          "citations": [
+            "line:b01.l03",
+            "pack_rule:neutral/density.one_idea"
+          ]
+        },
+        {
+          "about": [
+            "s01.sh02.l1/props/emphasis"
+          ],
+          "choice": "Accent the words 'heat pump' (indices 1 and 2) to make the subject the focal point, using a single accent.",
+          "citations": [
+            "craft_rule:hierarchy.one_focus",
+            "pack_rule:neutral/color.one_accent"
+          ]
+        },
+        {
+          "about": [
+            "s01.sh02.l1/timing/enter"
+          ],
+          "choice": "Enter at the start of b01.l02, just as the narration names the heat pump. There is no exit, so the title holds to the end of the shot long enough to read.",
+          "citations": [
+            "line:b01.l02",
+            "craft_rule:rhythm.hold_to_read",
+            "pack_rule:neutral/density.hold_time"
+          ]
+        },
+        {
+          "about": [
+            "s01.sh02.l1/layout/landscape"
+          ],
+          "choice": "Place the title layer in the title region of the title template. The subtitle is part of the same component and sits beneath it.",
+          "citations": [
+            "craft_rule:continuity.same_thing_same_look",
+            "pack_rule:neutral/layout.safe_area"
+          ]
+        },
+        {
+          "about": [
+            "s01.sh02.l1/style"
+          ],
+          "choice": "Leave style to the pack, with no token overrides.",
+          "citations": [
+            "pack_rule:neutral/type.hierarchy"
+          ]
+        }
+      ]
+    },
+    "model": "claude-sonnet-5-5",
+    "usage": {
+      "input_tokens": 6442,
+      "output_tokens": 771
+    },
+    "cost_usd": 0.020594,
+    "stop": "end"
+  }
+}

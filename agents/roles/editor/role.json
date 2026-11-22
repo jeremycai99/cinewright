@@ -1,0 +1,19 @@
+{
+  "id": "editor",
+  "version": "1",
+  "tier": "mid",
+  "reads": [
+    "scene.intent",
+    "scene.lines",
+    "scene.shots",
+    "scene.transition_out",
+    "line.text",
+    "pack.rules"
+  ],
+  "writes": { "kinds": ["scene", "shot"], "paths": ["/duration", "/transition_out", "/anchors"] },
+  "per": "project",
+  "token_budget": 30000,
+  "max_output_tokens": 6000,
+  "repairs": 2,
+  "effort": "medium"
+}

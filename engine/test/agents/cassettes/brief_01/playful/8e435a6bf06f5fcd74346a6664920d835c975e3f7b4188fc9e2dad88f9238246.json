@@ -1,0 +1,98 @@
+{
+  "request_hash": "sha256:8e435a6bf06f5fcd74346a6664920d835c975e3f7b4188fc9e2dad88f9238246",
+  "response": {
+    "output": {
+      "output": {
+        "layers": [
+          {
+            "id": "s02.sh03.l1",
+            "component": "kinetic_title",
+            "props": {
+              "text": "Even when the air feels cold",
+              "emphasis": [
+                5
+              ]
+            },
+            "timing": {
+              "enter": {
+                "line": "b02.l04",
+                "point": "start",
+                "offset": 0
+              },
+              "exit": {
+                "line": "b02.l04",
+                "point": "end",
+                "offset": 15
+              }
+            },
+            "layout": {
+              "landscape": {
+                "region": "title"
+              }
+            }
+          }
+        ]
+      },
+      "decisions": [
+        {
+          "about": [
+            "s02.sh03.l1/props/text"
+          ],
+          "choice": "Used a short phrase cut from line b02.l04, 'Even when the air feels cold', so the screen shows the spoken claim and nothing else.",
+          "citations": [
+            "line:b02.l04",
+            "craft_rule:hierarchy.supports_line",
+            "craft_rule:legibility.read_time",
+            "pack_rule:playful/type.short_lines"
+          ]
+        },
+        {
+          "about": [
+            "s02.sh03.l1/props/emphasis"
+          ],
+          "choice": "Accented word index 5, 'cold', as the shot framing specifies. It is the single focal point.",
+          "citations": [
+            "craft_rule:hierarchy.one_focus",
+            "pack_rule:playful/color.one_focus"
+          ]
+        },
+        {
+          "about": [
+            "s02.sh03.l1/timing"
+          ],
+          "choice": "Enters as b02.l04 starts, when the narration reaches the claim. Exits 15 frames after the line ends so the text can be read.",
+          "citations": [
+            "line:b02.l04",
+            "craft_rule:rhythm.hold_to_read",
+            "pack_rule:playful/density.fewer_items"
+          ]
+        },
+        {
+          "about": [
+            "s02.sh03.l1/layout"
+          ],
+          "choice": "Placed in the 'title' region of the title template, which is centred. No subtitle is used.",
+          "citations": [
+            "pack_rule:playful/layout.centred_focus"
+          ]
+        },
+        {
+          "about": [
+            "s02.sh03.l1/style"
+          ],
+          "choice": "No style overrides, so the pack styling applies.",
+          "citations": [
+            "pack_rule:playful/type.big_and_round"
+          ]
+        }
+      ]
+    },
+    "model": "claude-sonnet-5-5",
+    "usage": {
+      "input_tokens": 6230,
+      "output_tokens": 939
+    },
+    "cost_usd": 0.02185,
+    "stop": "end"
+  }
+}

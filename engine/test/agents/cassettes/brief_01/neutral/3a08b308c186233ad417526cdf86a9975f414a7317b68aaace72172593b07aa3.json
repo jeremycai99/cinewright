@@ -1,0 +1,111 @@
+{
+  "request_hash": "sha256:3a08b308c186233ad417526cdf86a9975f414a7317b68aaace72172593b07aa3",
+  "response": {
+    "output": {
+      "output": {
+        "layers": [
+          {
+            "id": "s01.sh02.l1",
+            "component": "kinetic_title",
+            "props": {
+              "text": "The heat pump",
+              "subtitle": "Heat from cold outdoor air",
+              "emphasis": [
+                1,
+                2
+              ]
+            },
+            "timing": {
+              "enter": {
+                "line": "b01.l02",
+                "point": "start",
+                "offset": 0
+              },
+              "exit": {
+                "line": "b01.l03",
+                "point": "end",
+                "offset": 0
+              }
+            },
+            "layout": {
+              "landscape": {
+                "region": "title"
+              }
+            }
+          }
+        ]
+      },
+      "decisions": [
+        {
+          "about": [
+            "s01.sh02.l1/props/text"
+          ],
+          "choice": "Headline uses the on-screen text for line 2, naming the subject the narration introduces.",
+          "citations": [
+            "line:b01.l02",
+            "craft_rule:hierarchy.supports_line",
+            "craft_rule:legibility.read_time"
+          ]
+        },
+        {
+          "about": [
+            "s01.sh02.l1/props/subtitle"
+          ],
+          "choice": "Subtitle uses line 3's on-screen text so the claim about outdoor air is shown without new wording.",
+          "citations": [
+            "line:b01.l03",
+            "craft_rule:hierarchy.supports_line"
+          ]
+        },
+        {
+          "about": [
+            "s01.sh02.l1/props/emphasis"
+          ],
+          "choice": "Accent on 'heat pump' (words 1 and 2) using weight and a single accent colour.",
+          "citations": [
+            "pack_rule:neutral/color.one_accent",
+            "craft_rule:hierarchy.one_focus"
+          ]
+        },
+        {
+          "about": [
+            "s01.sh02.l1/timing"
+          ],
+          "choice": "Enters as line 2 starts, and stays until line 3 ends so the subtitle can be read while its claim is heard.",
+          "citations": [
+            "line:b01.l02",
+            "line:b01.l03",
+            "craft_rule:rhythm.hold_to_read",
+            "pack_rule:neutral/density.hold_time"
+          ]
+        },
+        {
+          "about": [
+            "s01.sh02.l1/layout/landscape"
+          ],
+          "choice": "Placed in the title region of the title layout; the subtitle is drawn beneath it by the component.",
+          "citations": [
+            "pack_rule:neutral/layout.breathing_room",
+            "craft_rule:continuity.same_thing_same_look"
+          ]
+        },
+        {
+          "about": [
+            "s01.sh02.l1/style"
+          ],
+          "choice": "No style overrides; the pack handles styling.",
+          "citations": [
+            "craft_rule:contrast.meaning"
+          ]
+        }
+      ]
+    },
+    "model": "claude-sonnet-5-5",
+    "usage": {
+      "input_tokens": 6433,
+      "output_tokens": 739
+    },
+    "cost_usd": 0.020256,
+    "stop": "end"
+  }
+}

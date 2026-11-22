@@ -1,0 +1,81 @@
+{
+  "request_hash": "sha256:031e603b7d77aba8c70662c0c746d70a89c493367100becbbaff7a0125b289fe",
+  "response": {
+    "output": {
+      "output": {
+        "layers": [
+          {
+            "id": "s06.sh05.l1",
+            "component": "end_card",
+            "props": {
+              "headline": "That is how a heat pump warms a home."
+            },
+            "timing": {
+              "enter": {
+                "line": "b06.l05",
+                "point": "start",
+                "offset": 0
+              }
+            },
+            "layout": {
+              "landscape": {
+                "region": "main"
+              }
+            }
+          }
+        ]
+      },
+      "decisions": [
+        {
+          "about": [
+            "s06.sh05.l1/props"
+          ],
+          "choice": "Use the locked closing line b06.l05 verbatim as the headline. Omit subline, cta and logo because no asset or call to action exists and the card stays short.",
+          "citations": [
+            "line:b06.l05",
+            "craft_rule:hierarchy.supports_line",
+            "craft_rule:legibility.read_time",
+            "pack_rule:playful/type.short_lines"
+          ]
+        },
+        {
+          "about": [
+            "s06.sh05.l1/timing"
+          ],
+          "choice": "Enter as the narration of b06.l05 starts, with no exit so the card holds through the end of the shot and can be read.",
+          "citations": [
+            "line:b06.l05",
+            "craft_rule:rhythm.hold_to_read",
+            "pack_rule:playful/density.fewer_items"
+          ]
+        },
+        {
+          "about": [
+            "s06.sh05.l1/layout"
+          ],
+          "choice": "Place the headline in the centred main region of the end_card template, leaving the footer empty.",
+          "citations": [
+            "pack_rule:playful/layout.centred_focus",
+            "craft_rule:hierarchy.one_focus"
+          ]
+        },
+        {
+          "about": [
+            "s06.sh05.l1/style"
+          ],
+          "choice": "No style overrides, leaving styling to the pack.",
+          "citations": [
+            "pack_rule:playful/color.one_focus"
+          ]
+        }
+      ]
+    },
+    "model": "claude-sonnet-5-5",
+    "usage": {
+      "input_tokens": 6291,
+      "output_tokens": 520
+    },
+    "cost_usd": 0.017782,
+    "stop": "end"
+  }
+}

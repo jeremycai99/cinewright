@@ -59,7 +59,8 @@
         "shot.layout",
         "scene.intent",
         "scene.lines",
-        "project.style"
+        "project.style",
+        "line.text"
       ],
       "paid": true,
       "needs": ["P4"]

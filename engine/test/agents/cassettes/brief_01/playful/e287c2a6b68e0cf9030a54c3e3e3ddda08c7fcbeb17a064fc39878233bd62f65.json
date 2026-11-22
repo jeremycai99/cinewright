@@ -1,0 +1,100 @@
+{
+  "request_hash": "sha256:e287c2a6b68e0cf9030a54c3e3e3ddda08c7fcbeb17a064fc39878233bd62f65",
+  "response": {
+    "output": {
+      "output": {
+        "layers": [
+          {
+            "id": "s01.sh02.l1",
+            "component": "plate",
+            "props": {
+              "asset": "s01.sh02.house_illustration",
+              "fit": "cover",
+              "ken_burns": true,
+              "focus": {
+                "x": 0.5,
+                "y": 0.55
+              }
+            },
+            "timing": {
+              "enter": {
+                "line": "b01.l02",
+                "point": "start",
+                "offset": 0
+              },
+              "exit": {
+                "line": "b01.l03",
+                "point": "end",
+                "offset": 0
+              }
+            },
+            "layout": {
+              "landscape": {
+                "region": "main"
+              }
+            }
+          }
+        ]
+      },
+      "decisions": [
+        {
+          "about": [
+            "s01.sh02.l1/props/asset"
+          ],
+          "choice": "Use the illustrated cosy house image as the single full-frame plate, matching the shot framing, with no words on top so the picture is the one focus.",
+          "citations": [
+            "craft_rule:hierarchy.one_focus",
+            "pack_rule:playful/color.one_focus"
+          ]
+        },
+        {
+          "about": [
+            "s01.sh02.l1/props/fit",
+            "s01.sh02.l1/props/focus"
+          ],
+          "choice": "Cover the full region with a centred focus slightly below middle so the house sits in the centre of the frame.",
+          "citations": [
+            "pack_rule:playful/layout.centred_focus"
+          ]
+        },
+        {
+          "about": [
+            "s01.sh02.l1/props/ken_burns"
+          ],
+          "choice": "Add a slow push to give gentle life over the held shot.",
+          "citations": [
+            "pack_rule:playful/motion.lively_but_brief",
+            "pack_rule:playful/density.fewer_items"
+          ]
+        },
+        {
+          "about": [
+            "s01.sh02.l1/timing"
+          ],
+          "choice": "Enter as line b01.l02 starts ('A heat pump can warm your house') and hold until the end of b01.l03 so the image stays while the claim is spoken.",
+          "citations": [
+            "line:b01.l02",
+            "line:b01.l03",
+            "craft_rule:rhythm.hold_to_read"
+          ]
+        },
+        {
+          "about": [
+            "s01.sh02.l1/layout"
+          ],
+          "choice": "Place the plate in the main region of the full template for landscape.",
+          "citations": [
+            "craft_rule:continuity.same_thing_same_look"
+          ]
+        }
+      ]
+    },
+    "model": "claude-sonnet-5-5",
+    "usage": {
+      "input_tokens": 6380,
+      "output_tokens": 661
+    },
+    "cost_usd": 0.01937,
+    "stop": "end"
+  }
+}

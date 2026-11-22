@@ -1,0 +1,204 @@
+{
+  "request_hash": "sha256:58b6153b440c4f30470df9d7d105856cf97d3a0b45add310cc59ba1e98353d66",
+  "response": {
+    "output": {
+      "output": {
+        "scenes": [
+          {
+            "id": "s01",
+            "duration": {
+              "target_seconds": 16,
+              "flex": 0.15,
+              "sync": "voiceover"
+            },
+            "transition_out": {
+              "type": "wipe",
+              "duration_frames": 15
+            }
+          },
+          {
+            "id": "s02",
+            "duration": {
+              "target_seconds": 14,
+              "flex": 0.15,
+              "sync": "voiceover"
+            },
+            "transition_out": {
+              "type": "wipe",
+              "duration_frames": 15
+            }
+          },
+          {
+            "id": "s03",
+            "duration": {
+              "target_seconds": 11,
+              "flex": 0.15,
+              "sync": "voiceover"
+            },
+            "transition_out": {
+              "type": "wipe",
+              "duration_frames": 15
+            }
+          },
+          {
+            "id": "s04",
+            "duration": {
+              "target_seconds": 10,
+              "flex": 0.15,
+              "sync": "voiceover"
+            },
+            "transition_out": {
+              "type": "wipe",
+              "duration_frames": 15
+            }
+          },
+          {
+            "id": "s05",
+            "duration": {
+              "target_seconds": 12,
+              "flex": 0.15,
+              "sync": "voiceover"
+            },
+            "transition_out": {
+              "type": "cut"
+            }
+          },
+          {
+            "id": "s06",
+            "duration": {
+              "target_seconds": 22,
+              "flex": 0.15,
+              "sync": "voiceover"
+            },
+            "transition_out": {
+              "type": "cut"
+            }
+          }
+        ],
+        "shots": [
+          {
+            "id": "s01.sh02",
+            "anchors": {
+              "start": {
+                "line": "b01.l03",
+                "point": "start",
+                "offset": 0
+              }
+            }
+          },
+          {
+            "id": "s02.sh02",
+            "anchors": {
+              "start": {
+                "line": "b02.l03",
+                "point": "start",
+                "offset": 0
+              }
+            }
+          },
+          {
+            "id": "s05.sh02",
+            "anchors": {
+              "start": {
+                "line": "b05.l03",
+                "point": "start",
+                "offset": 0
+              }
+            }
+          },
+          {
+            "id": "s06.sh02",
+            "anchors": {
+              "start": {
+                "line": "b06.l02",
+                "point": "start",
+                "offset": 15
+              }
+            }
+          }
+        ]
+      },
+      "decisions": [
+        {
+          "about": [
+            "s01",
+            "s02",
+            "s03",
+            "s04",
+            "s05",
+            "s06"
+          ],
+          "choice": "Set voiceover-synced durations sized to each scene's spoken narration with 15% flex so the engine can solve without overrunning.",
+          "citations": [
+            "brief",
+            "pack_rule:playful/density.fewer_items"
+          ]
+        },
+        {
+          "about": [
+            "s01.sh02/anchors/start"
+          ],
+          "choice": "Start the second shot at b01.l03 so the first shot holds through the short line b01.l02 and the cut falls on a sense unit.",
+          "citations": [
+            "craft_rule:rhythm.hold_to_read",
+            "craft_rule:rhythm.cut_on_sense",
+            "line:b01.l03"
+          ]
+        },
+        {
+          "about": [
+            "s02.sh02/anchors/start"
+          ],
+          "choice": "Start the step list at b02.l03 where the absorbing is stated, so it appears with its sense unit and the preceding shot holds through l02.",
+          "citations": [
+            "craft_rule:rhythm.cut_on_sense",
+            "line:b02.l03"
+          ]
+        },
+        {
+          "about": [
+            "s05.sh02/anchors/start"
+          ],
+          "choice": "Start the statement at b05.l03 so the short line b05.l02 is not a flash-by and the cut matches the claim's sentence.",
+          "citations": [
+            "craft_rule:rhythm.hold_to_read",
+            "line:b05.l03"
+          ]
+        },
+        {
+          "about": [
+            "s06.sh02/anchors/start"
+          ],
+          "choice": "Keep the claim starting 15 frames into b06.l02 so the preceding shot on the short line b06.l01 holds past the 1.8 s minimum.",
+          "citations": [
+            "craft_rule:rhythm.hold_to_read",
+            "line:b06.l01",
+            "line:b06.l02"
+          ]
+        },
+        {
+          "about": [
+            "s01/transition_out",
+            "s02/transition_out",
+            "s03/transition_out",
+            "s04/transition_out",
+            "s05/transition_out",
+            "s06/transition_out"
+          ],
+          "choice": "Keep existing transitions unchanged because no transition carries added meaning.",
+          "citations": [
+            "craft_rule:continuity.transitions_mean",
+            "pack_rule:playful/transition.wipe_by_default"
+          ]
+        }
+      ]
+    },
+    "model": "claude-sonnet-5-5",
+    "usage": {
+      "input_tokens": 9798,
+      "output_tokens": 1685
+    },
+    "cost_usd": 0.036446,
+    "stop": "end"
+  }
+}

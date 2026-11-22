@@ -59,7 +59,8 @@
         "shot.layout",
         "scene.intent",
         "scene.lines",
-        "project.style"
+        "project.style",
+        "line.text"
       ],
       "paid": true,
       "needs": ["P4"]
@@ -76,7 +77,7 @@
       "role": "editor",
       "per": "project",
       "requires": ["scene.duration"],
-      "reads": ["scene.intent", "scene.lines", "scene.shots"],
+      "reads": ["scene.intent", "scene.lines", "scene.shots", "line.text"],
       "paid": true,
       "needs": ["P5", "P6m"]
     },

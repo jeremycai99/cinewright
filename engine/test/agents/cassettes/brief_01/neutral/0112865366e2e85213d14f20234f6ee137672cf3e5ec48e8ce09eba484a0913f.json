@@ -1,0 +1,68 @@
+{
+  "request_hash": "sha256:0112865366e2e85213d14f20234f6ee137672cf3e5ec48e8ce09eba484a0913f",
+  "response": {
+    "output": {
+      "output": {
+        "plan": {
+          "summary": "For homeowners thinking about replacing a gas furnace: a calm, factual explanation of how a heat pump warms a house using heat taken from cold outdoor air. A refrigerant absorbs heat outside, a compressor raises its temperature, and the heat is released indoors. Because it moves heat rather than burning fuel, it can deliver more heat energy than the electricity it uses. No prices, brands or savings claims.",
+          "target_seconds": 60,
+          "beats": [
+            "If you are thinking about replacing a gas furnace, a heat pump is a way to warm your house using heat taken from cold outdoor air.",
+            "Outside, a refrigerant absorbs heat from the cold outdoor air.",
+            "A compressor then raises the refrigerant's temperature.",
+            "Indoors, that heat is released to warm the house.",
+            "A heat pump moves heat rather than burning fuel.",
+            "Because it moves heat, it can deliver more heat energy than the electricity it uses."
+          ]
+        }
+      },
+      "decisions": [
+        {
+          "about": [
+            "plan/summary"
+          ],
+          "choice": "The summary addresses homeowners considering replacing a gas furnace and restates only the brief's mechanism and its efficiency point, excluding prices, brands and savings.",
+          "citations": [
+            "brief"
+          ]
+        },
+        {
+          "about": [
+            "plan/target_seconds"
+          ],
+          "choice": "Run 60 seconds for the web deliverable, enough for a short, calm six-beat explainer.",
+          "citations": [
+            "brief",
+            "craft_rule:intelligibility.one_idea"
+          ]
+        },
+        {
+          "about": [
+            "plan/beats"
+          ],
+          "choice": "Beats follow the brief's order: framing for furnace replacers, absorption outside, compression, release indoors, moving rather than burning, then more heat than electricity used. Each beat carries one idea.",
+          "citations": [
+            "brief",
+            "craft_rule:intelligibility.one_idea"
+          ]
+        },
+        {
+          "about": [
+            "pack"
+          ],
+          "choice": "Name no pack, keeping the neutral default, because the brief's calm, factual tone gives no reason to change it.",
+          "citations": [
+            "brief"
+          ]
+        }
+      ]
+    },
+    "model": "claude-opus-5-5",
+    "usage": {
+      "input_tokens": 1528,
+      "output_tokens": 995
+    },
+    "cost_usd": 0.026012,
+    "stop": "end"
+  }
+}
