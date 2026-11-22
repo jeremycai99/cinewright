@@ -1,0 +1,103 @@
+{
+  "request_hash": "sha256:d761dff98348f657c5a57626b5aa9ec4961d244938ec69b4d08fba7e69837e1c",
+  "response": {
+    "output": {
+      "output": {
+        "layers": [
+          {
+            "id": "s01.sh01.l1",
+            "component": "kinetic_title",
+            "props": {
+              "text": "Heat from outdoor air",
+              "emphasis": [
+                0,
+                2,
+                3
+              ]
+            },
+            "timing": {
+              "enter": {
+                "line": "b01.l03",
+                "point": "start",
+                "offset": 0
+              },
+              "exit": {
+                "line": "b01.l04",
+                "point": "end",
+                "offset": 0
+              }
+            },
+            "layout": {
+              "landscape": {
+                "region": "title"
+              }
+            }
+          }
+        ]
+      },
+      "decisions": [
+        {
+          "about": [
+            "s01.sh01.l1/props/text"
+          ],
+          "choice": "Use the line's on-screen text 'Heat from outdoor air' as the headline, since it states the claim of line 3 without adding a second one and is short enough to read while the line is heard.",
+          "citations": [
+            "line:b01.l03",
+            "craft_rule:hierarchy.supports_line",
+            "craft_rule:legibility.read_time",
+            "pack_rule:playful/type.short_lines"
+          ]
+        },
+        {
+          "about": [
+            "s01.sh01.l1/props/emphasis"
+          ],
+          "choice": "Accent the words 'Heat', 'outdoor' and 'air' (indices 0, 2, 3) so the core idea of heat from outside air is the one focus.",
+          "citations": [
+            "craft_rule:hierarchy.one_focus",
+            "pack_rule:playful/color.one_focus"
+          ]
+        },
+        {
+          "about": [
+            "s01.sh01.l1/timing"
+          ],
+          "choice": "Enter as line 3 begins, when the narration reaches the claim, and hold through the end of line 4 to give a long read time.",
+          "citations": [
+            "line:b01.l03",
+            "line:b01.l04",
+            "craft_rule:rhythm.hold_to_read",
+            "pack_rule:playful/density.fewer_items"
+          ]
+        },
+        {
+          "about": [
+            "s01.sh01.l1/layout"
+          ],
+          "choice": "Place the title in the 'title' region of the title template, centred in landscape, matching the framing of a big centred title.",
+          "citations": [
+            "pack_rule:playful/layout.centred_focus",
+            "craft_rule:continuity.same_thing_same_look"
+          ]
+        },
+        {
+          "about": [
+            "s01.sh01.l1/style"
+          ],
+          "choice": "No style overrides; the pack handles type and colour.",
+          "citations": [
+            "craft_rule:contrast.meaning",
+            "pack_rule:playful/type.big_and_round"
+          ]
+        }
+      ]
+    },
+    "model": "claude-sonnet-5-5",
+    "usage": {
+      "input_tokens": 6228,
+      "output_tokens": 721
+    },
+    "cost_usd": 0.019666,
+    "stop": "end"
+  }
+}

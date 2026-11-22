@@ -89,13 +89,18 @@ export function shotOutputSchema(catalog: Catalog): (ir: InlinedIr, task: Task) 
           additionalProperties: false,
           required: ["overrides"],
           properties: {
+            // A list, not a map: providers cannot constrain open-ended objects.
             overrides: {
-              type: "object",
-              additionalProperties: {
+              type: "array",
+              maxItems: 6,
+              items: {
                 type: "object",
                 additionalProperties: false,
-                required: ["token"],
-                properties: { token: { type: "string", minLength: 1 } },
+                required: ["token_path", "token"],
+                properties: {
+                  token_path: { type: "string", minLength: 1 },
+                  token: { type: "string", minLength: 1 },
+                },
               },
             },
           },

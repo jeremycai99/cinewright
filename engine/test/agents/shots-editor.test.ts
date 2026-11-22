@@ -6,6 +6,7 @@ import { loadRoles, type RoleDefinition } from "@cinewright/agents";
 import { initProject, loadCatalog, loadPack, Store } from "@cinewright/core";
 import type { GenerateRequest, PluginResponse } from "@cinewright/plugin-sdk";
 import { afterEach, describe, expect, it } from "vitest";
+import { resolveCitations } from "../../src/agents/citations.js";
 import { directorToPatch } from "../../src/agents/roles/director.js";
 import { type EditorOutput, editorCheck, editorToPatch } from "../../src/agents/roles/editor.js";
 import { roleOutputs } from "../../src/agents/roles/index.js";
@@ -210,7 +211,7 @@ describe("the Shot Builder (M7.5c)", () => {
       {
         output: build("s01.sh01", {
           props: { text: "Heat is moved", size: 3 },
-          style: { overrides: { "palette.accent": "#ff0000" as never } },
+          style: { overrides: [{ token_path: "palette.accent", token: 7 as never }] },
         }),
         decisions,
       },
@@ -263,7 +264,7 @@ describe("the Shot Builder (M7.5c)", () => {
     expect(
       rules(
         build("s01.sh01", {
-          style: { overrides: { "palette.nope": { token: "palette.accent" } } },
+          style: { overrides: [{ token_path: "palette.nope", token: "palette.accent" }] },
         }),
       ),
     ).toEqual(["shot_builder.unknown_token"]);
@@ -398,5 +399,18 @@ describe("the Editor (M7.5c)", () => {
     expect(store.ir().sequences.value?.[0]?.scenes.value?.[0]?.transition_out.value).toEqual({
       type: "cut",
     });
+  });
+});
+
+describe("citations of the script (M7.5)", () => {
+  it("resolves `script` and `line:<id>` against the script, and `plan` only once there is one", async () => {
+    const store = await project();
+    const facts = { ir: store.ir(), pack: PACK, craftRules: [] };
+    const unresolved = (c: string) =>
+      resolveCitations([{ citations: [c] }], facts).map((e) => e.rule);
+    expect(unresolved("script")).toEqual([]);
+    expect(unresolved("line:b01.l02")).toEqual([]);
+    expect(unresolved("line:b09.l01")).toEqual(["citation.unresolved"]);
+    expect(unresolved("plan")).toEqual(["citation.unresolved"]);
   });
 });

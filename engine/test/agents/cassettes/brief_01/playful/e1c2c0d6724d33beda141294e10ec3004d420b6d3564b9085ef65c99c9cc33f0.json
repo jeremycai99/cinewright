@@ -1,0 +1,112 @@
+{
+  "request_hash": "sha256:e1c2c0d6724d33beda141294e10ec3004d420b6d3564b9085ef65c99c9cc33f0",
+  "response": {
+    "output": {
+      "output": {
+        "layers": [
+          {
+            "id": "s05.sh01.l1",
+            "component": "kinetic_title",
+            "props": {
+              "text": "Moves heat. Burns no fuel.",
+              "emphasis": [
+                0,
+                1
+              ]
+            },
+            "timing": {
+              "enter": {
+                "line": "b05.l03",
+                "point": "start",
+                "offset": 0
+              },
+              "exit": {
+                "line": "b05.l04",
+                "point": "end",
+                "offset": 0
+              }
+            },
+            "layout": {
+              "landscape": {
+                "region": "title"
+              }
+            }
+          }
+        ]
+      },
+      "decisions": [
+        {
+          "about": [
+            "s05.sh01.l1/props/text"
+          ],
+          "choice": "Use the line's on-screen text 'Moves heat. Burns no fuel.' as the headline; it is short and states the claim of b05.l03 without adding a second one.",
+          "citations": [
+            "line:b05.l03",
+            "craft_rule:hierarchy.supports_line",
+            "craft_rule:legibility.read_time",
+            "pack_rule:playful/type.short_lines"
+          ]
+        },
+        {
+          "about": [
+            "s05.sh01.l1/props/emphasis"
+          ],
+          "choice": "Accent 'Moves heat' (words 0 and 1) so the positive action is the single point of emphasis.",
+          "citations": [
+            "line:b05.l03",
+            "craft_rule:hierarchy.one_focus",
+            "pack_rule:playful/color.one_focus"
+          ]
+        },
+        {
+          "about": [
+            "s05.sh01.l1/props/subtitle"
+          ],
+          "choice": "Omit the subtitle so the one headline remains the sole focus and the wording stays minimal.",
+          "citations": [
+            "pack_rule:playful/density.fewer_items",
+            "craft_rule:hierarchy.one_focus"
+          ]
+        },
+        {
+          "about": [
+            "s05.sh01.l1/timing"
+          ],
+          "choice": "Enter at the start of b05.l03 as the narration reaches the claim, and hold through the end of b05.l04 so it can be read and stay up through the closing explanation.",
+          "citations": [
+            "line:b05.l03",
+            "line:b05.l04",
+            "craft_rule:rhythm.hold_to_read",
+            "pack_rule:playful/density.fewer_items"
+          ]
+        },
+        {
+          "about": [
+            "s05.sh01.l1/layout"
+          ],
+          "choice": "Place the headline in the title region of the title template, centred in landscape.",
+          "citations": [
+            "pack_rule:playful/layout.centred_focus",
+            "craft_rule:continuity.same_thing_same_look"
+          ]
+        },
+        {
+          "about": [
+            "s05.sh01.l1/style"
+          ],
+          "choice": "Leave style to the pack with no token overrides.",
+          "citations": [
+            "craft_rule:contrast.meaning"
+          ]
+        }
+      ]
+    },
+    "model": "claude-sonnet-5-5",
+    "usage": {
+      "input_tokens": 6204,
+      "output_tokens": 791
+    },
+    "cost_usd": 0.020318,
+    "stop": "end"
+  }
+}

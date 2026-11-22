@@ -1,0 +1,111 @@
+{
+  "request_hash": "sha256:19d677a82421ed9ed657ea3bd9e9e1355fe423dc6a5c5a3cbd95999a52d98b18",
+  "response": {
+    "output": {
+      "output": {
+        "layers": [
+          {
+            "id": "s01.sh01.l1",
+            "component": "kinetic_title",
+            "props": {
+              "text": "The heat pump",
+              "subtitle": "Heat from cold outdoor air",
+              "emphasis": [
+                2
+              ]
+            },
+            "timing": {
+              "enter": {
+                "line": "b01.l02",
+                "point": "start",
+                "offset": 0
+              },
+              "exit": {
+                "line": "b01.l04",
+                "point": "end",
+                "offset": 0
+              }
+            },
+            "layout": {
+              "landscape": {
+                "region": "title"
+              }
+            }
+          }
+        ]
+      },
+      "decisions": [
+        {
+          "about": [
+            "s01.sh01.l1/props/text"
+          ],
+          "choice": "Use the on-screen text for line b01.l02, 'The heat pump', as the headline so the words repeat the spoken claim and stay short enough to read.",
+          "citations": [
+            "line:b01.l02",
+            "craft_rule:hierarchy.supports_line",
+            "craft_rule:legibility.read_time"
+          ]
+        },
+        {
+          "about": [
+            "s01.sh01.l1/props/subtitle"
+          ],
+          "choice": "Use the on-screen text for line b01.l03, 'Heat from cold outdoor air', as the subtitle, so it supports the headline without adding a new claim.",
+          "citations": [
+            "line:b01.l03",
+            "craft_rule:hierarchy.supports_line",
+            "pack_rule:neutral/density.one_idea"
+          ]
+        },
+        {
+          "about": [
+            "s01.sh01.l1/props/emphasis"
+          ],
+          "choice": "Accent only the word 'heat' (index 1)... correction: accent the word 'pump' (index 2)? Keep a single accent word so that the headline is the one focal point.",
+          "citations": [
+            "craft_rule:hierarchy.one_focus",
+            "pack_rule:neutral/color.one_accent"
+          ]
+        },
+        {
+          "about": [
+            "s01.sh01.l1/timing"
+          ],
+          "choice": "Enter as b01.l02 starts, when the narration reaches the heat pump claim, and hold through the end of b01.l04 so the subtitle can be read as b01.l03 is heard.",
+          "citations": [
+            "line:b01.l02",
+            "line:b01.l03",
+            "craft_rule:rhythm.hold_to_read",
+            "pack_rule:neutral/density.hold_time"
+          ]
+        },
+        {
+          "about": [
+            "s01.sh01.l1/layout"
+          ],
+          "choice": "Place the layer in the title region of the title template, centred, as the shot framing calls for. The subtitle is part of the same component.",
+          "citations": [
+            "pack_rule:neutral/layout.safe_area",
+            "craft_rule:continuity.same_thing_same_look"
+          ]
+        },
+        {
+          "about": [
+            "s01.sh01.l1/style"
+          ],
+          "choice": "Add no style overrides and leave styling to the pack.",
+          "citations": [
+            "pack_rule:neutral/type.hierarchy"
+          ]
+        }
+      ]
+    },
+    "model": "claude-sonnet-5-5",
+    "usage": {
+      "input_tokens": 6438,
+      "output_tokens": 851
+    },
+    "cost_usd": 0.021386,
+    "stop": "end"
+  }
+}

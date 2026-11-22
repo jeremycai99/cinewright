@@ -1,0 +1,112 @@
+{
+  "request_hash": "sha256:82606563a73bd2af4abfd5da0a3ab647da88ac9b2f9721bae893a3d3caead73e",
+  "response": {
+    "output": {
+      "output": {
+        "layers": [
+          {
+            "id": "s06.sh03.l1",
+            "component": "kinetic_title",
+            "props": {
+              "text": "Electricity runs it",
+              "emphasis": [
+                0
+              ]
+            },
+            "timing": {
+              "enter": {
+                "line": "b06.l03",
+                "point": "start",
+                "offset": 0
+              },
+              "exit": {
+                "line": "b06.l03",
+                "point": "end",
+                "offset": 0
+              }
+            },
+            "layout": {
+              "landscape": {
+                "region": "a"
+              }
+            }
+          },
+          {
+            "id": "s06.sh03.l2",
+            "component": "kinetic_title",
+            "props": {
+              "text": "Heat comes from outdoor air",
+              "emphasis": [
+                3,
+                4
+              ]
+            },
+            "timing": {
+              "enter": {
+                "line": "b06.l03",
+                "point": "start",
+                "offset": 45
+              },
+              "exit": {
+                "line": "b06.l03",
+                "point": "end",
+                "offset": 30
+              }
+            },
+            "layout": {
+              "landscape": {
+                "region": "b"
+              }
+            }
+          }
+        ]
+      },
+      "decisions": [
+        {
+          "about": [
+            "s06.sh03.l1",
+            "s06.sh03.l2"
+          ],
+          "choice": "Use two short kinetic titles that restate line b06.l03's claim, electricity runs the system and heat comes from outdoor air, taking wording from the line text.",
+          "citations": [
+            "line:b06.l03",
+            "craft_rule:hierarchy.supports_line",
+            "craft_rule:legibility.read_time",
+            "pack_rule:playful/type.short_lines"
+          ]
+        },
+        {
+          "about": [
+            "s06.sh03.l1/timing",
+            "s06.sh03.l2/timing"
+          ],
+          "choice": "Enter each title as the narration reaches its sentence, the second slightly later, and hold both to the end of the line so they can be read.",
+          "citations": [
+            "line:b06.l03",
+            "craft_rule:rhythm.hold_to_read",
+            "pack_rule:playful/density.fewer_items"
+          ]
+        },
+        {
+          "about": [
+            "s06.sh03.l1/layout",
+            "s06.sh03.l2/layout"
+          ],
+          "choice": "Place electricity in region a and outdoor heat in region b of the split template, matching the framing; emphasis on the key words carries focus, with no style overrides.",
+          "citations": [
+            "craft_rule:hierarchy.one_focus",
+            "craft_rule:continuity.same_thing_same_look",
+            "pack_rule:playful/color.one_focus"
+          ]
+        }
+      ]
+    },
+    "model": "claude-sonnet-5-5",
+    "usage": {
+      "input_tokens": 7478,
+      "output_tokens": 694
+    },
+    "cost_usd": 0.021896,
+    "stop": "end"
+  }
+}

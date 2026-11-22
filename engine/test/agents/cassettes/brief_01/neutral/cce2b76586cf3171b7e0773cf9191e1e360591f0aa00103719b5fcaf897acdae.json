@@ -1,0 +1,102 @@
+{
+  "request_hash": "sha256:cce2b76586cf3171b7e0773cf9191e1e360591f0aa00103719b5fcaf897acdae",
+  "response": {
+    "output": {
+      "output": {
+        "layers": [
+          {
+            "id": "s02.sh01.l1",
+            "component": "kinetic_title",
+            "props": {
+              "text": "Outside",
+              "subtitle": "Refrigerant absorbs heat",
+              "emphasis": [
+                0
+              ]
+            },
+            "timing": {
+              "enter": {
+                "line": "b02.l01",
+                "point": "start",
+                "offset": 0
+              },
+              "exit": {
+                "line": "b02.l03",
+                "point": "end",
+                "offset": 0
+              }
+            },
+            "layout": {
+              "landscape": {
+                "region": "title"
+              }
+            }
+          }
+        ]
+      },
+      "decisions": [
+        {
+          "about": [
+            "s02.sh01.l1/props"
+          ],
+          "choice": "Headline is the single word 'Outside' from line b02.l01, taken from the spoken line, with the subtitle 'Refrigerant absorbs heat' shortened from the on-screen text of b02.l03, so the words support the scene claim and stay quick to read.",
+          "citations": [
+            "line:b02.l01",
+            "line:b02.l03",
+            "craft_rule:hierarchy.supports_line",
+            "craft_rule:legibility.read_time",
+            "pack_rule:neutral/type.no_shrink_to_fit"
+          ]
+        },
+        {
+          "about": [
+            "s02.sh01.l1/props/emphasis"
+          ],
+          "choice": "Accent only word 0 so the place heading is the shot's single focal point.",
+          "citations": [
+            "craft_rule:hierarchy.one_focus",
+            "pack_rule:neutral/color.one_accent"
+          ]
+        },
+        {
+          "about": [
+            "s02.sh01.l1/timing"
+          ],
+          "choice": "Enter as the narration starts with 'outside the house' and hold through the end of b02.l03 so the text stays up long enough to read while the claim is made.",
+          "citations": [
+            "line:b02.l01",
+            "line:b02.l03",
+            "craft_rule:rhythm.hold_to_read",
+            "pack_rule:neutral/density.hold_time"
+          ]
+        },
+        {
+          "about": [
+            "s02.sh01.l1/layout"
+          ],
+          "choice": "Place the layer in the title region of the title template for landscape, the only aspect class given in the shot layout, matching the centred place heading framing.",
+          "citations": [
+            "pack_rule:neutral/layout.safe_area",
+            "craft_rule:continuity.same_thing_same_look"
+          ]
+        },
+        {
+          "about": [
+            "s02.sh01.l1/style"
+          ],
+          "choice": "No style overrides; the pack styles the title.",
+          "citations": [
+            "craft_rule:contrast.meaning"
+          ]
+        }
+      ]
+    },
+    "model": "claude-sonnet-5-5",
+    "usage": {
+      "input_tokens": 6361,
+      "output_tokens": 738
+    },
+    "cost_usd": 0.020102,
+    "stop": "end"
+  }
+}

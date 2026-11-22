@@ -1,0 +1,83 @@
+{
+  "request_hash": "sha256:83303be45e6df0a3529f0436b85ace7157bd2d8c6b8be7a612b1bc1527789308",
+  "response": {
+    "output": {
+      "output": {
+        "layers": [
+          {
+            "id": "s03.sh01.l1",
+            "component": "bullet_reveal",
+            "props": {
+              "items": [
+                "2. Compressor raises temperature"
+              ]
+            },
+            "timing": {
+              "enter": {
+                "line": "b03.l02",
+                "point": "start",
+                "offset": 0
+              }
+            },
+            "layout": {
+              "landscape": {
+                "region": "body"
+              }
+            }
+          }
+        ]
+      },
+      "decisions": [
+        {
+          "about": [
+            "s03.sh01.l1/props/items"
+          ],
+          "choice": "Use the line's on-screen text as the single list item, so the words repeat the spoken claim about temperature and add no second one.",
+          "citations": [
+            "line:b03.l02",
+            "craft_rule:hierarchy.supports_line",
+            "craft_rule:legibility.read_time"
+          ]
+        },
+        {
+          "about": [
+            "s03.sh01.l1/timing/enter"
+          ],
+          "choice": "Enter at the start of b03.l02, when the narration reaches the temperature claim. No exit is given, so the item holds to the end of the shot and stays readable.",
+          "citations": [
+            "line:b03.l02",
+            "craft_rule:rhythm.hold_to_read",
+            "pack_rule:neutral/density.hold_time"
+          ]
+        },
+        {
+          "about": [
+            "s03.sh01.l1/layout/landscape"
+          ],
+          "choice": "Place the list in the body region of the title_body template, the same place the step list used in the other shots.",
+          "citations": [
+            "craft_rule:continuity.same_thing_same_look",
+            "pack_rule:neutral/layout.grid"
+          ]
+        },
+        {
+          "about": [
+            "s03.sh01.l1/style"
+          ],
+          "choice": "Leave style to the pack and add no overrides, since contrast carries no extra meaning here.",
+          "citations": [
+            "craft_rule:contrast.meaning",
+            "pack_rule:neutral/density.one_idea"
+          ]
+        }
+      ]
+    },
+    "model": "claude-sonnet-5-5",
+    "usage": {
+      "input_tokens": 6291,
+      "output_tokens": 545
+    },
+    "cost_usd": 0.018032,
+    "stop": "end"
+  }
+}

@@ -1,0 +1,99 @@
+{
+  "request_hash": "sha256:3350c6a792fbeb7096eb26505c21a80a65abfa7644205ad9d6cc0e499f41c7f3",
+  "response": {
+    "output": {
+      "output": {
+        "layers": [
+          {
+            "id": "s01.sh03.l1",
+            "component": "kinetic_title",
+            "props": {
+              "text": "Heat from outdoor air",
+              "emphasis": [
+                2,
+                3
+              ]
+            },
+            "timing": {
+              "enter": {
+                "line": "b01.l03",
+                "point": "start",
+                "offset": 0
+              },
+              "exit": {
+                "line": "b01.l03",
+                "point": "end",
+                "offset": 30
+              }
+            },
+            "layout": {
+              "landscape": {
+                "region": "title"
+              }
+            }
+          }
+        ]
+      },
+      "decisions": [
+        {
+          "about": [
+            "s01.sh03.l1/props/text"
+          ],
+          "choice": "Use the on-screen text for line b01.l03 verbatim, a short phrase that restates the spoken claim without adding a second one.",
+          "citations": [
+            "line:b01.l03",
+            "craft_rule:hierarchy.supports_line",
+            "craft_rule:legibility.read_time"
+          ]
+        },
+        {
+          "about": [
+            "s01.sh03.l1/props/emphasis"
+          ],
+          "choice": "Accent the words 'outdoor air' (indices 2 and 3) because the surprising part of the claim is that the heat source is cold outdoor air. This is the shot's single focal point.",
+          "citations": [
+            "craft_rule:hierarchy.one_focus",
+            "pack_rule:playful/color.one_focus"
+          ]
+        },
+        {
+          "about": [
+            "s01.sh03.l1/timing"
+          ],
+          "choice": "Enter as b01.l03 starts so the title lands with the claim. Exit 30 frames after the line ends so it can be read during the pause.",
+          "citations": [
+            "line:b01.l03",
+            "craft_rule:rhythm.hold_to_read",
+            "pack_rule:playful/density.fewer_items"
+          ]
+        },
+        {
+          "about": [
+            "s01.sh03.l1/layout/landscape"
+          ],
+          "choice": "Place the title in the 'title' region of the title template, centred, and leave the subtitle region unused.",
+          "citations": [
+            "pack_rule:playful/layout.centred_focus",
+            "craft_rule:continuity.same_thing_same_look"
+          ]
+        },
+        {
+          "about": [
+            "s01.sh03.l1/style"
+          ],
+          "choice": "No style overrides, leaving styling to the pack.",
+          "citations": [
+            "craft_rule:contrast.meaning"
+          ]
+        }
+      ]
+    },
+    "model": "claude-sonnet-5-5",
+    "usage": {
+      "input_tokens": 6227,
+      "output_tokens": 673
+    },
+    "cost_usd": 0.019184,
+    "stop": "end"
+  }
+}

@@ -1,0 +1,103 @@
+{
+  "request_hash": "sha256:92d233c47d5a590323b3466f7bf28853816e2808f54bec4b00f816a95160e2cb",
+  "response": {
+    "output": {
+      "output": {
+        "layers": [
+          {
+            "id": "s01.sh01.l1",
+            "component": "kinetic_title",
+            "props": {
+              "text": "Thinking about replacing a gas furnace?",
+              "subtitle": "The heat pump",
+              "emphasis": [
+                5,
+                6
+              ]
+            },
+            "timing": {
+              "enter": {
+                "line": "b01.l01",
+                "point": "start",
+                "offset": 0
+              },
+              "exit": {
+                "line": "b01.l04",
+                "point": "end",
+                "offset": 0
+              }
+            },
+            "layout": {
+              "landscape": {
+                "region": "title"
+              }
+            }
+          }
+        ]
+      },
+      "decisions": [
+        {
+          "about": [
+            "s01.sh01.l1/props/text"
+          ],
+          "choice": "Headline uses the wording of the opening line b01.l01 verbatim, as the question that opens the film and carries the shot's focus.",
+          "citations": [
+            "line:b01.l01",
+            "craft_rule:hierarchy.supports_line",
+            "craft_rule:hierarchy.one_focus"
+          ]
+        },
+        {
+          "about": [
+            "s01.sh01.l1/props/subtitle"
+          ],
+          "choice": "Subtitle is the on-screen text 'The heat pump' from b01.l02, naming the answer without adding a second claim.",
+          "citations": [
+            "line:b01.l02",
+            "craft_rule:legibility.read_time"
+          ]
+        },
+        {
+          "about": [
+            "s01.sh01.l1/props/emphasis"
+          ],
+          "choice": "Accent the words 'gas furnace?' (indices 5 and 6) as the single accent, leaving the rest to weight and hierarchy.",
+          "citations": [
+            "pack_rule:neutral/color.one_accent",
+            "pack_rule:neutral/type.weight_for_emphasis"
+          ]
+        },
+        {
+          "about": [
+            "s01.sh01.l1/timing"
+          ],
+          "choice": "Enter at the start of b01.l01 and hold through the end of b01.l04 so the single opening title stays readable across the whole shot.",
+          "citations": [
+            "line:b01.l01",
+            "line:b01.l04",
+            "craft_rule:rhythm.hold_to_read",
+            "pack_rule:neutral/density.hold_time"
+          ]
+        },
+        {
+          "about": [
+            "s01.sh01.l1/layout"
+          ],
+          "choice": "Place the title in the 'title' region of the title template, centred as framed; the subtitle is drawn by the component beneath it. No style overrides.",
+          "citations": [
+            "pack_rule:neutral/layout.safe_area",
+            "pack_rule:neutral/density.one_idea",
+            "craft_rule:continuity.same_thing_same_look"
+          ]
+        }
+      ]
+    },
+    "model": "claude-sonnet-5-5",
+    "usage": {
+      "input_tokens": 6433,
+      "output_tokens": 757
+    },
+    "cost_usd": 0.020436,
+    "stop": "end"
+  }
+}

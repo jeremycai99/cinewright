@@ -1,0 +1,617 @@
+{
+  "request_hash": "sha256:425b7b542f1a17b241655384f474052fe654c6ee1a89993f599a5f85f806de2b",
+  "response": {
+    "output": {
+      "output": {
+        "sequences": [
+          {
+            "id": "seq_a",
+            "title": "A different way to heat",
+            "mood": [
+              "calm",
+              "inviting"
+            ],
+            "music_bed": "Soft, warm ambient bed kept well under the voice",
+            "scenes": [
+              {
+                "id": "s01",
+                "intent": "The viewer grasps that a heat pump is an alternative to a gas furnace that heats using heat taken from cold outdoor air.",
+                "mood": [
+                  "calm",
+                  "curious"
+                ],
+                "lines": [
+                  "b01.l01",
+                  "b01.l02",
+                  "b01.l03",
+                  "b01.l04"
+                ],
+                "transition_out": {
+                  "type": "cross_dissolve",
+                  "duration_frames": 15
+                },
+                "shots": [
+                  {
+                    "id": "s01.sh01",
+                    "type": "motion_graphics",
+                    "framing": "Centred question title on a plain field",
+                    "anchors": {
+                      "start": {
+                        "line": "b01.l01",
+                        "point": "start",
+                        "offset": 0
+                      }
+                    },
+                    "layout": {
+                      "landscape": {
+                        "template": "title"
+                      }
+                    },
+                    "components": [
+                      "kinetic_title"
+                    ]
+                  },
+                  {
+                    "id": "s01.sh02",
+                    "type": "motion_graphics",
+                    "framing": "Centred title: The heat pump",
+                    "anchors": {
+                      "start": {
+                        "line": "b01.l02",
+                        "point": "start",
+                        "offset": 0
+                      }
+                    },
+                    "layout": {
+                      "landscape": {
+                        "template": "title"
+                      }
+                    },
+                    "components": [
+                      "kinetic_title"
+                    ]
+                  },
+                  {
+                    "id": "s01.sh03",
+                    "type": "motion_graphics",
+                    "framing": "Centred title, 'cold outdoor air' accent",
+                    "anchors": {
+                      "start": {
+                        "line": "b01.l03",
+                        "point": "start",
+                        "offset": 0
+                      }
+                    },
+                    "layout": {
+                      "landscape": {
+                        "template": "title"
+                      }
+                    },
+                    "components": [
+                      "kinetic_title"
+                    ]
+                  }
+                ]
+              }
+            ]
+          },
+          {
+            "id": "seq_b",
+            "title": "How it works",
+            "mood": [
+              "clear",
+              "steady"
+            ],
+            "music_bed": "Light, even pulse under the voice, ducked during narration",
+            "scenes": [
+              {
+                "id": "s02",
+                "intent": "The viewer grasps step 1: outside, refrigerant absorbs heat that even cold air holds.",
+                "mood": [
+                  "cool",
+                  "clear"
+                ],
+                "lines": [
+                  "b02.l01",
+                  "b02.l02",
+                  "b02.l03"
+                ],
+                "transition_out": {
+                  "type": "wipe",
+                  "duration_frames": 12
+                },
+                "shots": [
+                  {
+                    "id": "s02.sh01",
+                    "type": "motion_graphics",
+                    "framing": "Chapter title: outside the house",
+                    "anchors": {
+                      "start": {
+                        "line": "b02.l01",
+                        "point": "start",
+                        "offset": 0
+                      }
+                    },
+                    "layout": {
+                      "landscape": {
+                        "template": "title"
+                      }
+                    },
+                    "components": [
+                      "kinetic_title"
+                    ]
+                  },
+                  {
+                    "id": "s02.sh02",
+                    "type": "motion_graphics",
+                    "framing": "Steps list with step 1 revealed",
+                    "anchors": {
+                      "start": {
+                        "line": "b02.l03",
+                        "point": "start",
+                        "offset": 0
+                      }
+                    },
+                    "layout": {
+                      "landscape": {
+                        "template": "title_body"
+                      }
+                    },
+                    "components": [
+                      "bullet_reveal"
+                    ]
+                  }
+                ]
+              },
+              {
+                "id": "s03",
+                "intent": "The viewer grasps step 2: the compressor raises the refrigerant's temperature so its heat is usable.",
+                "mood": [
+                  "focused",
+                  "steady"
+                ],
+                "lines": [
+                  "b03.l01",
+                  "b03.l02",
+                  "b03.l03"
+                ],
+                "transition_out": {
+                  "type": "wipe",
+                  "duration_frames": 12
+                },
+                "shots": [
+                  {
+                    "id": "s03.sh01",
+                    "type": "motion_graphics",
+                    "framing": "Chapter title: the compressor",
+                    "anchors": {
+                      "start": {
+                        "line": "b03.l01",
+                        "point": "start",
+                        "offset": 0
+                      }
+                    },
+                    "layout": {
+                      "landscape": {
+                        "template": "title"
+                      }
+                    },
+                    "components": [
+                      "kinetic_title"
+                    ]
+                  },
+                  {
+                    "id": "s03.sh02",
+                    "type": "motion_graphics",
+                    "framing": "Same steps list, step 2 revealed",
+                    "anchors": {
+                      "start": {
+                        "line": "b03.l02",
+                        "point": "start",
+                        "offset": 0
+                      }
+                    },
+                    "layout": {
+                      "landscape": {
+                        "template": "title_body"
+                      }
+                    },
+                    "components": [
+                      "bullet_reveal"
+                    ]
+                  }
+                ]
+              },
+              {
+                "id": "s04",
+                "intent": "The viewer grasps step 3: indoors, the refrigerant releases its heat and warms the house.",
+                "mood": [
+                  "warm",
+                  "reassuring"
+                ],
+                "lines": [
+                  "b04.l01",
+                  "b04.l02",
+                  "b04.l03"
+                ],
+                "transition_out": {
+                  "type": "cross_dissolve",
+                  "duration_frames": 15
+                },
+                "shots": [
+                  {
+                    "id": "s04.sh01",
+                    "type": "motion_graphics",
+                    "framing": "Chapter title: moving indoors",
+                    "anchors": {
+                      "start": {
+                        "line": "b04.l01",
+                        "point": "start",
+                        "offset": 0
+                      }
+                    },
+                    "layout": {
+                      "landscape": {
+                        "template": "title"
+                      }
+                    },
+                    "components": [
+                      "kinetic_title"
+                    ]
+                  },
+                  {
+                    "id": "s04.sh02",
+                    "type": "motion_graphics",
+                    "framing": "Same steps list, step 3 revealed",
+                    "anchors": {
+                      "start": {
+                        "line": "b04.l02",
+                        "point": "start",
+                        "offset": 0
+                      }
+                    },
+                    "layout": {
+                      "landscape": {
+                        "template": "title_body"
+                      }
+                    },
+                    "components": [
+                      "bullet_reveal"
+                    ]
+                  }
+                ]
+              }
+            ]
+          },
+          {
+            "id": "seq_c",
+            "title": "The key idea",
+            "mood": [
+              "calm",
+              "confident"
+            ],
+            "music_bed": "Same warm bed as the opening, resolving gently at the close",
+            "scenes": [
+              {
+                "id": "s05",
+                "intent": "The viewer grasps that a heat pump moves heat from outside to inside rather than burning fuel.",
+                "mood": [
+                  "clear",
+                  "simple"
+                ],
+                "lines": [
+                  "b05.l01",
+                  "b05.l02",
+                  "b05.l03"
+                ],
+                "transition_out": {
+                  "type": "cross_dissolve",
+                  "duration_frames": 15
+                },
+                "shots": [
+                  {
+                    "id": "s05.sh01",
+                    "type": "motion_graphics",
+                    "framing": "Centred title, 'moves' weighted",
+                    "anchors": {
+                      "start": {
+                        "line": "b05.l01",
+                        "point": "start",
+                        "offset": 0
+                      }
+                    },
+                    "layout": {
+                      "landscape": {
+                        "template": "title"
+                      }
+                    },
+                    "components": [
+                      "kinetic_title"
+                    ]
+                  },
+                  {
+                    "id": "s05.sh02",
+                    "type": "motion_graphics",
+                    "framing": "Centred title: outside to inside",
+                    "anchors": {
+                      "start": {
+                        "line": "b05.l03",
+                        "point": "start",
+                        "offset": 0
+                      }
+                    },
+                    "layout": {
+                      "landscape": {
+                        "template": "title"
+                      }
+                    },
+                    "components": [
+                      "kinetic_title"
+                    ]
+                  }
+                ]
+              },
+              {
+                "id": "s06",
+                "intent": "The viewer grasps that, because it moves heat, a heat pump can deliver more heat energy than the electricity it uses.",
+                "mood": [
+                  "calm",
+                  "conclusive"
+                ],
+                "lines": [
+                  "b06.l01",
+                  "b06.l02",
+                  "b06.l03"
+                ],
+                "transition_out": {
+                  "type": "cut"
+                },
+                "shots": [
+                  {
+                    "id": "s06.sh01",
+                    "type": "motion_graphics",
+                    "framing": "Centred key-idea title, held long",
+                    "anchors": {
+                      "start": {
+                        "line": "b06.l01",
+                        "point": "start",
+                        "offset": 0
+                      }
+                    },
+                    "layout": {
+                      "landscape": {
+                        "template": "title"
+                      }
+                    },
+                    "components": [
+                      "kinetic_title"
+                    ]
+                  },
+                  {
+                    "id": "s06.sh02",
+                    "type": "motion_graphics",
+                    "framing": "Closing card with the takeaway line",
+                    "anchors": {
+                      "start": {
+                        "line": "b06.l03",
+                        "point": "start",
+                        "offset": 0
+                      }
+                    },
+                    "layout": {
+                      "landscape": {
+                        "template": "end_card"
+                      }
+                    },
+                    "components": [
+                      "end_card"
+                    ]
+                  }
+                ]
+              }
+            ]
+          }
+        ]
+      },
+      "decisions": [
+        {
+          "about": [
+            "seq_a",
+            "seq_b",
+            "seq_c"
+          ],
+          "choice": "Split the film into an opening (b01), the three-step mechanism (b02–b04) and the meaning (b05–b06).",
+          "citations": [
+            "brief",
+            "craft_rule:intelligibility.one_idea"
+          ]
+        },
+        {
+          "about": [
+            "s01",
+            "s02",
+            "s03",
+            "s04",
+            "s05",
+            "s06"
+          ],
+          "choice": "One scene per script beat, since each beat already carries a single idea, in script order.",
+          "citations": [
+            "craft_rule:intelligibility.one_idea",
+            "pack_rule:neutral/density.one_idea"
+          ]
+        },
+        {
+          "about": [
+            "s01.sh01/type",
+            "s01.sh02/type",
+            "s01.sh03/type",
+            "s02.sh01/type",
+            "s02.sh02/type",
+            "s03.sh01/type",
+            "s03.sh02/type",
+            "s04.sh01/type",
+            "s04.sh02/type",
+            "s05.sh01/type",
+            "s05.sh02/type",
+            "s06.sh01/type",
+            "s06.sh02/type"
+          ],
+          "choice": "Make every shot motion graphics built from titles, a step list and an end card, since the engine makes only that type and the project has no image assets for plates.",
+          "citations": [
+            "brief",
+            "pack_rule:neutral/motion.purpose"
+          ]
+        },
+        {
+          "about": [
+            "s01.sh01/layout",
+            "s01.sh02/layout",
+            "s01.sh03/layout",
+            "s02.sh01/layout",
+            "s02.sh02/layout",
+            "s03.sh01/layout",
+            "s03.sh02/layout",
+            "s04.sh01/layout",
+            "s04.sh02/layout",
+            "s05.sh01/layout",
+            "s05.sh02/layout",
+            "s06.sh01/layout",
+            "s06.sh02/layout"
+          ],
+          "choice": "Give every shot a landscape template only, because the single deliverable is landscape_web.",
+          "citations": [
+            "brief",
+            "pack_rule:neutral/layout.safe_area"
+          ]
+        },
+        {
+          "about": [
+            "s01.sh02",
+            "s01.sh03",
+            "s05.sh01",
+            "s06.sh01"
+          ],
+          "choice": "Put the script's on-screen text in kinetic_title shots that start on the line that speaks it, so the text restates the line rather than adding a claim.",
+          "citations": [
+            "craft_rule:hierarchy.supports_line",
+            "craft_rule:rhythm.cut_on_sense"
+          ]
+        },
+        {
+          "about": [
+            "s02.sh01",
+            "s03.sh01",
+            "s04.sh01"
+          ],
+          "choice": "Open each step scene on a short chapter title naming where the step happens or what acts, so the step label that follows has one clear focus.",
+          "citations": [
+            "craft_rule:hierarchy.one_focus",
+            "craft_rule:rhythm.cut_on_sense"
+          ]
+        },
+        {
+          "about": [
+            "s02.sh02",
+            "s03.sh02",
+            "s04.sh02"
+          ],
+          "choice": "Show the three numbered steps as one bullet_reveal in the same title_body layout, revealing one more step in each scene.",
+          "citations": [
+            "craft_rule:continuity.same_thing_same_look",
+            "pack_rule:neutral/motion.consistent_entrances"
+          ]
+        },
+        {
+          "about": [
+            "s01.sh03",
+            "s02.sh01",
+            "s03.sh02",
+            "s04.sh02",
+            "s05.sh01",
+            "s06.sh01"
+          ],
+          "choice": "Let short lead-in or follow-on lines (b01.l04, b02.l02, b03.l03, b04.l03, b05.l02, b06.l02) stay on the current shot instead of cutting, so each shot holds long enough to read.",
+          "citations": [
+            "craft_rule:rhythm.hold_to_read",
+            "pack_rule:neutral/density.hold_time"
+          ]
+        },
+        {
+          "about": [
+            "s01.sh03",
+            "s05.sh01"
+          ],
+          "choice": "Mark the stressed words ('cold outdoor air', 'moves') with weight and the single accent, following the script's delivery directions.",
+          "citations": [
+            "script",
+            "pack_rule:neutral/type.weight_for_emphasis",
+            "pack_rule:neutral/color.one_accent"
+          ]
+        },
+        {
+          "about": [
+            "s02/transition_out",
+            "s03/transition_out"
+          ],
+          "choice": "Wipe between the step scenes to mark each step forward in the process.",
+          "citations": [
+            "pack_rule:neutral/transition.wipe_for_sequence",
+            "craft_rule:continuity.transitions_mean"
+          ]
+        },
+        {
+          "about": [
+            "s01/transition_out",
+            "s04/transition_out",
+            "s05/transition_out"
+          ],
+          "choice": "Cross-dissolve where the film moves to a new idea: into the mechanism, into the meaning, and into the key idea.",
+          "citations": [
+            "pack_rule:neutral/transition.dissolve_between_ideas",
+            "craft_rule:continuity.transitions_mean"
+          ]
+        },
+        {
+          "about": [
+            "s06/transition_out"
+          ],
+          "choice": "End the last scene on a plain cut; no transition is needed after the close.",
+          "citations": [
+            "pack_rule:neutral/transition.cut_by_default"
+          ]
+        },
+        {
+          "about": [
+            "s06.sh02"
+          ],
+          "choice": "Close on an end_card carrying the takeaway line, with no prices, brands or savings claims.",
+          "citations": [
+            "brief",
+            "craft_rule:hierarchy.supports_line"
+          ]
+        },
+        {
+          "about": [
+            "seq_a/music_bed",
+            "seq_b/music_bed",
+            "seq_c/music_bed"
+          ],
+          "choice": "Keep music beds calm and underneath the narration, and add no sound effects.",
+          "citations": [
+            "pack_rule:neutral/sound.music_supports",
+            "pack_rule:neutral/sound.sparse_effects",
+            "brief"
+          ]
+        }
+      ]
+    },
+    "model": "claude-opus-5-5",
+    "usage": {
+      "input_tokens": 17028,
+      "output_tokens": 4690
+    },
+    "cost_usd": 0.161912,
+    "stop": "end"
+  }
+}

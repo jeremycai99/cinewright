@@ -1,0 +1,147 @@
+{
+  "request_hash": "sha256:cd03343e8d2995591ce23efb73e251e540bff3c37b66ef543f2024e57acf0eee",
+  "response": {
+    "output": {
+      "output": {
+        "layers": [
+          {
+            "id": "s02.sh02.l1",
+            "component": "kinetic_title",
+            "props": {
+              "text": "Refrigerant absorbs heat",
+              "emphasis": [
+                2
+              ]
+            },
+            "timing": {
+              "enter": {
+                "line": "b02.l03",
+                "point": "start",
+                "offset": 0
+              },
+              "exit": {
+                "line": "b02.l04",
+                "point": "end",
+                "offset": 0
+              }
+            },
+            "layout": {
+              "landscape": {
+                "region": "title"
+              }
+            }
+          },
+          {
+            "id": "s02.sh02.l2",
+            "component": "plate",
+            "props": {
+              "asset": "s02_outdoor_diagram",
+              "fit": "contain"
+            },
+            "timing": {
+              "enter": {
+                "line": "b02.l01",
+                "point": "start",
+                "offset": 0
+              },
+              "exit": {
+                "line": "b02.l04",
+                "point": "end",
+                "offset": 0
+              }
+            },
+            "layout": {
+              "landscape": {
+                "region": "body"
+              }
+            }
+          }
+        ]
+      },
+      "decisions": [
+        {
+          "about": [
+            "s02.sh02.l1/props/text"
+          ],
+          "choice": "Used the line's on-screen text 'Refrigerant absorbs heat' as the headline, so it repeats the narrated claim of b02.l03 and nothing more.",
+          "citations": [
+            "line:b02.l03",
+            "craft_rule:hierarchy.supports_line",
+            "craft_rule:legibility.read_time",
+            "pack_rule:playful/type.short_lines"
+          ]
+        },
+        {
+          "about": [
+            "s02.sh02.l1/props/emphasis"
+          ],
+          "choice": "Accented the word 'heat' (index 2) as the one bold accent in the headline.",
+          "citations": [
+            "pack_rule:playful/color.one_focus",
+            "craft_rule:hierarchy.one_focus"
+          ]
+        },
+        {
+          "about": [
+            "s02.sh02.l1/timing"
+          ],
+          "choice": "Title enters at the start of b02.l03, where the narration reaches the claim, and stays through the end of b02.l04 so it can be read and held.",
+          "citations": [
+            "line:b02.l03",
+            "craft_rule:rhythm.hold_to_read",
+            "pack_rule:playful/density.fewer_items"
+          ]
+        },
+        {
+          "about": [
+            "s02.sh02.l2/props/asset"
+          ],
+          "choice": "Used the placeholder asset id 's02_outdoor_diagram' for the outdoor diagram, shown whole with contain so no part of it is cropped. No asset list was supplied, so this id must be confirmed against the project's assets.",
+          "citations": [
+            "brief",
+            "craft_rule:hierarchy.supports_line"
+          ]
+        },
+        {
+          "about": [
+            "s02.sh02.l2/timing"
+          ],
+          "choice": "Diagram plate is up from the start of b02.l01 through the end of b02.l04 so the scene's setting is visible from the first line.",
+          "citations": [
+            "line:b02.l01",
+            "line:b02.l04"
+          ]
+        },
+        {
+          "about": [
+            "s02.sh02.l1/layout",
+            "s02.sh02.l2/layout"
+          ],
+          "choice": "Placed the title in the title region and the diagram in the body region of the title_body template, with the title as the single focal point.",
+          "citations": [
+            "pack_rule:playful/layout.centred_focus",
+            "craft_rule:hierarchy.one_focus",
+            "craft_rule:continuity.same_thing_same_look"
+          ]
+        },
+        {
+          "about": [
+            "s02.sh02.l1/style",
+            "s02.sh02.l2/style"
+          ],
+          "choice": "Left style to the pack with no token overrides, since contrast does not need to carry extra meaning here.",
+          "citations": [
+            "craft_rule:contrast.meaning"
+          ]
+        }
+      ]
+    },
+    "model": "claude-sonnet-5-5",
+    "usage": {
+      "input_tokens": 7551,
+      "output_tokens": 1415
+    },
+    "cost_usd": 0.029252,
+    "stop": "end"
+  }
+}

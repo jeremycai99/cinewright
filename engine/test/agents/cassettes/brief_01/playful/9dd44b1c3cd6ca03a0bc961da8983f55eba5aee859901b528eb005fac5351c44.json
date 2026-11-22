@@ -1,0 +1,100 @@
+{
+  "request_hash": "sha256:9dd44b1c3cd6ca03a0bc961da8983f55eba5aee859901b528eb005fac5351c44",
+  "response": {
+    "output": {
+      "output": {
+        "layers": [
+          {
+            "id": "s06.sh02.l1",
+            "component": "kinetic_title",
+            "props": {
+              "text": "More heat out than electricity in",
+              "emphasis": [
+                0,
+                1
+              ]
+            },
+            "timing": {
+              "enter": {
+                "line": "b06.l02",
+                "point": "start",
+                "offset": 0
+              },
+              "exit": {
+                "line": "b06.l02",
+                "point": "end",
+                "offset": 15
+              }
+            },
+            "layout": {
+              "landscape": {
+                "region": "title"
+              }
+            }
+          }
+        ]
+      },
+      "decisions": [
+        {
+          "about": [
+            "s06.sh02.l1/props/text"
+          ],
+          "choice": "Used the on-screen text of line b06.l02 verbatim; it is short and states the line's claim without adding a second one.",
+          "citations": [
+            "line:b06.l02",
+            "craft_rule:hierarchy.supports_line",
+            "craft_rule:legibility.read_time",
+            "pack_rule:playful/type.short_lines"
+          ]
+        },
+        {
+          "about": [
+            "s06.sh02.l1/props/emphasis"
+          ],
+          "choice": "Accented words 0 and 1 ('More heat') to match the framing note; no subtitle so the title is the single focus.",
+          "citations": [
+            "craft_rule:hierarchy.one_focus",
+            "pack_rule:playful/color.one_focus"
+          ]
+        },
+        {
+          "about": [
+            "s06.sh02.l1/timing"
+          ],
+          "choice": "Enter as line b06.l02 starts, when the narration reaches the claim, and hold until 15 frames after the line ends so it can be read.",
+          "citations": [
+            "line:b06.l02",
+            "craft_rule:rhythm.hold_to_read",
+            "pack_rule:playful/density.fewer_items"
+          ]
+        },
+        {
+          "about": [
+            "s06.sh02.l1/layout"
+          ],
+          "choice": "Placed the title in the landscape 'title' region of the title template, centred as the framing asks.",
+          "citations": [
+            "pack_rule:playful/layout.centred_focus",
+            "craft_rule:continuity.same_thing_same_look"
+          ]
+        },
+        {
+          "about": [
+            "s06.sh02.l1/style"
+          ],
+          "choice": "No style overrides; the pack handles styling.",
+          "citations": [
+            "craft_rule:contrast.meaning"
+          ]
+        }
+      ]
+    },
+    "model": "claude-sonnet-5-5",
+    "usage": {
+      "input_tokens": 6306,
+      "output_tokens": 656
+    },
+    "cost_usd": 0.019172,
+    "stop": "end"
+  }
+}

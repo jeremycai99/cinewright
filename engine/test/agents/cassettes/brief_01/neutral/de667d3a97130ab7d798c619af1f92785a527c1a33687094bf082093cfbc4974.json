@@ -1,0 +1,94 @@
+{
+  "request_hash": "sha256:de667d3a97130ab7d798c619af1f92785a527c1a33687094bf082093cfbc4974",
+  "response": {
+    "output": {
+      "output": {
+        "layers": [
+          {
+            "id": "s06.sh02.l1",
+            "component": "kinetic_title",
+            "props": {
+              "text": "More heat out than electricity in",
+              "emphasis": [
+                0,
+                1
+              ]
+            },
+            "timing": {
+              "enter": {
+                "line": "b06.l03",
+                "point": "start",
+                "offset": 0
+              }
+            },
+            "layout": {
+              "landscape": {
+                "region": "title"
+              }
+            }
+          }
+        ]
+      },
+      "decisions": [
+        {
+          "about": [
+            "s06.sh02.l1/props/text"
+          ],
+          "choice": "Used the on-screen text of line b06.l03 verbatim as the headline; it states the scene's claim in seven words, short enough to read while the line is spoken.",
+          "citations": [
+            "line:b06.l03",
+            "craft_rule:hierarchy.supports_line",
+            "craft_rule:legibility.read_time"
+          ]
+        },
+        {
+          "about": [
+            "s06.sh02.l1/props/emphasis"
+          ],
+          "choice": "Accented 'More heat' (words 0 and 1) as the single focal point, using the accent colour on one phrase only.",
+          "citations": [
+            "craft_rule:hierarchy.one_focus",
+            "pack_rule:neutral/color.one_accent"
+          ]
+        },
+        {
+          "about": [
+            "s06.sh02.l1/timing/enter"
+          ],
+          "choice": "Entered at the start of b06.l03, where the narration reaches the claim; no exit is given so the title holds through the end of the shot for reading time.",
+          "citations": [
+            "line:b06.l03",
+            "craft_rule:rhythm.hold_to_read",
+            "pack_rule:neutral/density.hold_time"
+          ]
+        },
+        {
+          "about": [
+            "s06.sh02.l1/layout/landscape"
+          ],
+          "choice": "Placed the title in the 'title' region of the title layout template, centred as the framing asks; no subtitle, to keep one idea.",
+          "citations": [
+            "pack_rule:neutral/density.one_idea",
+            "craft_rule:continuity.same_thing_same_look"
+          ]
+        },
+        {
+          "about": [
+            "s06.sh02.l1/style"
+          ],
+          "choice": "Left style to the pack with no token overrides, since contrast carries no extra meaning here.",
+          "citations": [
+            "craft_rule:contrast.meaning"
+          ]
+        }
+      ]
+    },
+    "model": "claude-sonnet-5-5",
+    "usage": {
+      "input_tokens": 6443,
+      "output_tokens": 662
+    },
+    "cost_usd": 0.019506,
+    "stop": "end"
+  }
+}

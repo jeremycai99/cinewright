@@ -1,0 +1,82 @@
+{
+  "request_hash": "sha256:c30fc93c8ab4b58f4379a6b2c521f8daa8b71d83e800d44adee7a37e4b5ae259",
+  "response": {
+    "output": {
+      "output": {
+        "layers": [
+          {
+            "id": "s02.sh02.l1",
+            "component": "bullet_reveal",
+            "props": {
+              "items": [
+                "1. Refrigerant absorbs heat"
+              ]
+            },
+            "timing": {
+              "enter": {
+                "line": "b02.l03",
+                "point": "start",
+                "offset": 0
+              }
+            },
+            "layout": {
+              "landscape": {
+                "region": "body"
+              }
+            }
+          }
+        ]
+      },
+      "decisions": [
+        {
+          "about": [
+            "s02.sh02.l1/props/items"
+          ],
+          "choice": "Use the line's on-screen text as the single list item, so the screen shows only the claim of line b02.l03 and stays short enough to read.",
+          "citations": [
+            "line:b02.l03",
+            "craft_rule:hierarchy.supports_line",
+            "craft_rule:legibility.read_time"
+          ]
+        },
+        {
+          "about": [
+            "s02.sh02.l1/timing/enter"
+          ],
+          "choice": "Enter as the narration of b02.l03 starts, when the refrigerant absorbing heat is spoken, with no exit so the text holds to the end of the shot.",
+          "citations": [
+            "line:b02.l03",
+            "craft_rule:rhythm.hold_to_read",
+            "pack_rule:neutral/density.hold_time"
+          ]
+        },
+        {
+          "about": [
+            "s02.sh02.l1/layout"
+          ],
+          "choice": "Place the list in the body region of the title_body template. It is the only layer, so it carries the focus.",
+          "citations": [
+            "craft_rule:hierarchy.one_focus",
+            "pack_rule:neutral/layout.grid"
+          ]
+        },
+        {
+          "about": [
+            "s02.sh02.l1/style"
+          ],
+          "choice": "No style overrides, leaving styling to the pack.",
+          "citations": [
+            "pack_rule:neutral/type.hierarchy"
+          ]
+        }
+      ]
+    },
+    "model": "claude-sonnet-5-5",
+    "usage": {
+      "input_tokens": 6294,
+      "output_tokens": 524
+    },
+    "cost_usd": 0.017828,
+    "stop": "end"
+  }
+}

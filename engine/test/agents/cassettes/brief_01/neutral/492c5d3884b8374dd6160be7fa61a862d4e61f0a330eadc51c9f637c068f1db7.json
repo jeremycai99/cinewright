@@ -1,0 +1,85 @@
+{
+  "request_hash": "sha256:492c5d3884b8374dd6160be7fa61a862d4e61f0a330eadc51c9f637c068f1db7",
+  "response": {
+    "output": {
+      "output": {
+        "layers": [
+          {
+            "id": "s04.sh01.l1",
+            "component": "bullet_reveal",
+            "props": {
+              "items": [
+                "3. Heat released indoors"
+              ]
+            },
+            "timing": {
+              "enter": {
+                "line": "b04.l02",
+                "point": "start",
+                "offset": 0
+              }
+            },
+            "layout": {
+              "landscape": {
+                "region": "body"
+              }
+            }
+          }
+        ]
+      },
+      "decisions": [
+        {
+          "about": [
+            "s04.sh01.l1/props/items"
+          ],
+          "choice": "Use the on-screen text of line b04.l02 verbatim as the single item, so the words show the spoken claim and stay short enough to read while heard.",
+          "citations": [
+            "line:b04.l02",
+            "craft_rule:hierarchy.supports_line",
+            "craft_rule:legibility.read_time",
+            "pack_rule:neutral/density.one_idea"
+          ]
+        },
+        {
+          "about": [
+            "s04.sh01.l1/timing/enter"
+          ],
+          "choice": "Enter at the start of b04.l02, when the narration reaches 'releases its heat'. Leave out an exit so the item stays up through b04.l03 and can be read.",
+          "citations": [
+            "line:b04.l02",
+            "craft_rule:rhythm.hold_to_read",
+            "pack_rule:neutral/density.hold_time"
+          ]
+        },
+        {
+          "about": [
+            "s04.sh01.l1/layout"
+          ],
+          "choice": "Place the list in the body region of title_body for landscape. It is the only layer and so the focal point, and the body region matches the earlier step-list shots.",
+          "citations": [
+            "craft_rule:hierarchy.one_focus",
+            "craft_rule:continuity.same_thing_same_look",
+            "pack_rule:neutral/layout.grid"
+          ]
+        },
+        {
+          "about": [
+            "s04.sh01.l1/style"
+          ],
+          "choice": "Add no style overrides and leave styling to the pack, since contrast carries no extra meaning here.",
+          "citations": [
+            "craft_rule:contrast.meaning",
+            "pack_rule:neutral/type.hierarchy"
+          ]
+        }
+      ]
+    },
+    "model": "claude-sonnet-5-5",
+    "usage": {
+      "input_tokens": 6277,
+      "output_tokens": 606
+    },
+    "cost_usd": 0.018614,
+    "stop": "end"
+  }
+}

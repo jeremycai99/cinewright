@@ -13,7 +13,7 @@ export interface ShotBuilderOutput {
     props: Record<string, unknown>;
     timing: { enter: Anchor; exit?: Anchor };
     layout: Record<string, { region: string }>;
-    style?: { overrides: Record<string, { token: string }> };
+    style?: { overrides: { token_path: string; token: string }[] };
   }[];
 }
 
@@ -30,8 +30,13 @@ export const shotBuilderToPatch: ToPatch = (_role, output) => {
     ops.push({ op: "set", entity: layer.id, path: "/timing", value: layer.timing });
     for (const [aspect, place] of Object.entries(layer.layout))
       ops.push({ op: "set", entity: layer.id, path: `/layout/${aspect}`, value: place });
-    for (const [token, ref] of Object.entries(layer.style?.overrides ?? {}))
-      ops.push({ op: "set", entity: layer.id, path: `/style/overrides/${token}`, value: ref });
+    for (const o of layer.style?.overrides ?? [])
+      ops.push({
+        op: "set",
+        entity: layer.id,
+        path: `/style/overrides/${o.token_path}`,
+        value: { token: o.token },
+      });
   }
   return ops;
 };
@@ -107,13 +112,14 @@ export function shotBuilderCheck(pack: Pack, _catalog: Catalog): SemanticCheck {
             `${layer.id} exits before it enters`,
           );
       }
-      for (const [token, ref] of Object.entries(layer.style?.overrides ?? {}))
-        if (!hasToken(pack, token) || !hasToken(pack, ref.token))
+      (layer.style?.overrides ?? []).forEach((o, k) => {
+        if (!hasToken(pack, o.token_path) || !hasToken(pack, o.token))
           err(
-            `${at}/style/overrides/${token}`,
+            `${at}/style/overrides/${k}`,
             "shot_builder.unknown_token",
-            `pack ${pack.id} has no token ${hasToken(pack, token) ? ref.token : token}`,
+            `pack ${pack.id} has no token ${hasToken(pack, o.token_path) ? o.token : o.token_path}`,
           );
+      });
     });
     for (const stub of stubs) {
       const n = count.get(stub.id) ?? 0;

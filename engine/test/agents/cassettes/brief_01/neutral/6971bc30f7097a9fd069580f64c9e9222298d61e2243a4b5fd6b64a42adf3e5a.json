@@ -1,0 +1,83 @@
+{
+  "request_hash": "sha256:6971bc30f7097a9fd069580f64c9e9222298d61e2243a4b5fd6b64a42adf3e5a",
+  "response": {
+    "output": {
+      "output": {
+        "layers": [
+          {
+            "id": "s02.sh02.l1",
+            "component": "bullet_reveal",
+            "props": {
+              "items": [
+                "1. Refrigerant absorbs heat"
+              ]
+            },
+            "timing": {
+              "enter": {
+                "line": "b02.l03",
+                "point": "start",
+                "offset": 0
+              }
+            },
+            "layout": {
+              "landscape": {
+                "region": "body"
+              }
+            }
+          }
+        ]
+      },
+      "decisions": [
+        {
+          "about": [
+            "s02.sh02.l1/props/items"
+          ],
+          "choice": "Use the line's on-screen text as the single step, with no extra words, so the screen shows only the claim being spoken.",
+          "citations": [
+            "line:b02.l03",
+            "craft_rule:hierarchy.supports_line",
+            "craft_rule:legibility.read_time"
+          ]
+        },
+        {
+          "about": [
+            "s02.sh02.l1/timing/enter"
+          ],
+          "choice": "Enter at the start of b02.l03 so the step appears as the narration reaches the refrigerant absorbing heat; no exit is given, so it holds through the end of the shot.",
+          "citations": [
+            "line:b02.l03",
+            "craft_rule:rhythm.hold_to_read",
+            "pack_rule:neutral/density.hold_time"
+          ]
+        },
+        {
+          "about": [
+            "s02.sh02.l1/layout"
+          ],
+          "choice": "Place the list in the body region of title_body as the shot's single focal component, and leave the title region empty.",
+          "citations": [
+            "craft_rule:hierarchy.one_focus",
+            "pack_rule:neutral/density.one_idea",
+            "pack_rule:neutral/layout.breathing_room"
+          ]
+        },
+        {
+          "about": [
+            "s02.sh02.l1/style"
+          ],
+          "choice": "No style overrides, so the pack's styling applies.",
+          "citations": [
+            "craft_rule:contrast.meaning"
+          ]
+        }
+      ]
+    },
+    "model": "claude-sonnet-5-5",
+    "usage": {
+      "input_tokens": 6288,
+      "output_tokens": 538
+    },
+    "cost_usd": 0.017956,
+    "stop": "end"
+  }
+}

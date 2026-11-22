@@ -1,0 +1,92 @@
+{
+  "request_hash": "sha256:99f59e757fa81e99e70541d84659b96a3f1904c29004b313d6bbfb4c63eeaa3d",
+  "response": {
+    "output": {
+      "output": {
+        "layers": [
+          {
+            "id": "s05.sh01.l1",
+            "component": "kinetic_title",
+            "props": {
+              "text": "Moves heat",
+              "emphasis": [
+                0
+              ]
+            },
+            "timing": {
+              "enter": {
+                "line": "b05.l01",
+                "point": "start",
+                "offset": 0
+              },
+              "exit": {
+                "line": "b05.l03",
+                "point": "end",
+                "offset": 0
+              }
+            },
+            "layout": {
+              "landscape": {
+                "region": "title"
+              }
+            }
+          }
+        ]
+      },
+      "decisions": [
+        {
+          "about": [
+            "s05.sh01.l1/props"
+          ],
+          "choice": "Use the line's on-screen text 'Moves heat' as the headline and accent word 0 ('Moves'), with no subtitle, so the words state only the spoken claim.",
+          "citations": [
+            "line:b05.l01",
+            "craft_rule:hierarchy.supports_line",
+            "craft_rule:legibility.read_time",
+            "pack_rule:neutral/color.one_accent"
+          ]
+        },
+        {
+          "about": [
+            "s05.sh01.l1/timing"
+          ],
+          "choice": "Enter as the narration begins 'a heat pump moves heat' and hold through the end of b05.l03 so the single idea stays up while the contrast and the direction of the heat are explained.",
+          "citations": [
+            "line:b05.l01",
+            "line:b05.l03",
+            "craft_rule:rhythm.hold_to_read",
+            "pack_rule:neutral/density.hold_time"
+          ]
+        },
+        {
+          "about": [
+            "s05.sh01.l1/layout"
+          ],
+          "choice": "Place the title in the 'title' region of the title template, landscape only as the layout defines, leaving the subtitle region empty.",
+          "citations": [
+            "pack_rule:neutral/layout.breathing_room",
+            "pack_rule:neutral/density.one_idea",
+            "craft_rule:hierarchy.one_focus"
+          ]
+        },
+        {
+          "about": [
+            "s05.sh01.l1/style"
+          ],
+          "choice": "No style overrides; the pack handles accent and weight.",
+          "citations": [
+            "craft_rule:contrast.meaning",
+            "pack_rule:neutral/type.weight_for_emphasis"
+          ]
+        }
+      ]
+    },
+    "model": "claude-sonnet-5-5",
+    "usage": {
+      "input_tokens": 6357,
+      "output_tokens": 633
+    },
+    "cost_usd": 0.019044,
+    "stop": "end"
+  }
+}

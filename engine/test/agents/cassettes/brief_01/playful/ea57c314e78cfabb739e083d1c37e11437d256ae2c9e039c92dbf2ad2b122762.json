@@ -1,0 +1,88 @@
+{
+  "request_hash": "sha256:ea57c314e78cfabb739e083d1c37e11437d256ae2c9e039c92dbf2ad2b122762",
+  "response": {
+    "output": {
+      "output": {
+        "layers": [
+          {
+            "id": "s03.sh02.l1",
+            "component": "bullet_reveal",
+            "props": {
+              "items": [
+                "Compressor raises temperature"
+              ]
+            },
+            "timing": {
+              "enter": {
+                "line": "b03.l02",
+                "point": "start",
+                "offset": 6
+              },
+              "exit": {
+                "line": "b03.l03",
+                "point": "end",
+                "offset": 0
+              }
+            },
+            "layout": {
+              "landscape": {
+                "region": "body"
+              }
+            }
+          }
+        ]
+      },
+      "decisions": [
+        {
+          "about": [
+            "s03.sh02.l1/props/items"
+          ],
+          "choice": "Use a single short item taken from the on-screen text of line b03.l02, so the words show the spoken claim and nothing more.",
+          "citations": [
+            "line:b03.l02",
+            "craft_rule:hierarchy.supports_line",
+            "craft_rule:legibility.read_time",
+            "pack_rule:playful/density.fewer_items"
+          ]
+        },
+        {
+          "about": [
+            "s03.sh02.l1/timing"
+          ],
+          "choice": "Enter just after the start of b03.l02 as the narration reaches the compressor claim, and hold through the end of b03.l03 so it stays readable.",
+          "citations": [
+            "line:b03.l02",
+            "line:b03.l03",
+            "craft_rule:rhythm.hold_to_read"
+          ]
+        },
+        {
+          "about": [
+            "s03.sh02.l1/layout"
+          ],
+          "choice": "Place the list in the body region of the title_body template for landscape. It is the only layer, so it carries the focus.",
+          "citations": [
+            "craft_rule:hierarchy.one_focus",
+            "pack_rule:playful/layout.centred_focus"
+          ]
+        },
+        {
+          "about": [
+            "s03.sh02.l1/style"
+          ],
+          "choice": "Leave style to the pack with no token overrides.",
+          "citations": [
+            "craft_rule:contrast.meaning"
+          ]
+        }
+      ]
+    },
+    "model": "claude-sonnet-5-5",
+    "usage": {
+      "input_tokens": 6073,
+      "output_tokens": 542
+    },
+    "cost_usd": 0.017566,
+    "stop": "end"
+  }
+}

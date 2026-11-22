@@ -1,0 +1,104 @@
+{
+  "request_hash": "sha256:7c11124011e9c238037b6b089ba74479a6de9ecc868a128dd86a377a06e2c164",
+  "response": {
+    "output": {
+      "output": {
+        "layers": [
+          {
+            "id": "s02.sh01.l1",
+            "component": "kinetic_title",
+            "props": {
+              "text": "1. Refrigerant absorbs heat",
+              "subtitle": "It starts outside the house",
+              "emphasis": [
+                1
+              ]
+            },
+            "timing": {
+              "enter": {
+                "line": "b02.l01",
+                "point": "start",
+                "offset": 0
+              }
+            },
+            "layout": {
+              "landscape": {
+                "region": "title"
+              }
+            }
+          }
+        ]
+      },
+      "decisions": [
+        {
+          "about": [
+            "s02.sh01.l1/props/text"
+          ],
+          "choice": "Use the on-screen text of b02.l03 as the headline: short, states the scene's claim, and is taken from the given wording.",
+          "citations": [
+            "line:b02.l03",
+            "craft_rule:hierarchy.supports_line",
+            "craft_rule:legibility.read_time"
+          ]
+        },
+        {
+          "about": [
+            "s02.sh01.l1/props/subtitle"
+          ],
+          "choice": "Use the words of b02.l01 as a subtitle to anchor the outdoor setting without introducing a second claim.",
+          "citations": [
+            "line:b02.l01",
+            "craft_rule:hierarchy.supports_line"
+          ]
+        },
+        {
+          "about": [
+            "s02.sh01.l1/props/emphasis"
+          ],
+          "choice": "Accent only word 1 (Refrigerant), the subject of the step, so there is one focal point and one accent.",
+          "citations": [
+            "craft_rule:hierarchy.one_focus",
+            "pack_rule:neutral/color.one_accent"
+          ]
+        },
+        {
+          "about": [
+            "s02.sh01.l1/timing/enter"
+          ],
+          "choice": "Enter at the start of b02.l01 so the title is up as the narration opens the step. No exit is given, so it holds through the shot for reading.",
+          "citations": [
+            "line:b02.l01",
+            "craft_rule:rhythm.hold_to_read",
+            "pack_rule:neutral/density.hold_time"
+          ]
+        },
+        {
+          "about": [
+            "s02.sh01.l1/layout/landscape"
+          ],
+          "choice": "Place the title in the title region of the centred title template, matching the framing.",
+          "citations": [
+            "pack_rule:neutral/layout.safe_area",
+            "pack_rule:neutral/density.one_idea"
+          ]
+        },
+        {
+          "about": [
+            "s02.sh01.l1/style"
+          ],
+          "choice": "No style overrides, leaving styling to the pack.",
+          "citations": [
+            "craft_rule:contrast.meaning"
+          ]
+        }
+      ]
+    },
+    "model": "claude-sonnet-5-5",
+    "usage": {
+      "input_tokens": 6367,
+      "output_tokens": 728
+    },
+    "cost_usd": 0.020014,
+    "stop": "end"
+  }
+}

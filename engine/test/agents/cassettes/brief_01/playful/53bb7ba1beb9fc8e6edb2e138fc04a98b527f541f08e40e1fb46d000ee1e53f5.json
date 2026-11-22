@@ -1,0 +1,74 @@
+{
+  "request_hash": "sha256:53bb7ba1beb9fc8e6edb2e138fc04a98b527f541f08e40e1fb46d000ee1e53f5",
+  "response": {
+    "output": {
+      "output": {
+        "layers": [
+          {
+            "id": "s02.sh02.l1",
+            "component": "bullet_reveal",
+            "props": {
+              "items": [
+                "Refrigerant absorbs heat"
+              ]
+            },
+            "timing": {
+              "enter": {
+                "line": "b02.l03",
+                "point": "start",
+                "offset": 0
+              }
+            },
+            "layout": {
+              "landscape": {
+                "region": "body"
+              }
+            }
+          }
+        ]
+      },
+      "decisions": [
+        {
+          "about": [
+            "s02.sh02.l1/props/items"
+          ],
+          "choice": "Use the line's on-screen text 'Refrigerant absorbs heat' as the single first step, kept short for young readers and matching the spoken claim.",
+          "citations": [
+            "line:b02.l03",
+            "craft_rule:hierarchy.supports_line",
+            "craft_rule:legibility.read_time",
+            "pack_rule:playful/type.short_lines",
+            "pack_rule:playful/density.fewer_items"
+          ]
+        },
+        {
+          "about": [
+            "s02.sh02.l1/timing/enter"
+          ],
+          "choice": "Enter at the start of b02.l03, as narration reaches the absorbing claim, with no exit so it holds through the end of the shot for reading.",
+          "citations": [
+            "line:b02.l03",
+            "craft_rule:rhythm.hold_to_read"
+          ]
+        },
+        {
+          "about": [
+            "s02.sh02.l1/layout/landscape"
+          ],
+          "choice": "Place the list in the body region of the title_body template as the single focal component.",
+          "citations": [
+            "craft_rule:hierarchy.one_focus",
+            "pack_rule:playful/color.one_focus"
+          ]
+        }
+      ]
+    },
+    "model": "claude-sonnet-5-5",
+    "usage": {
+      "input_tokens": 6152,
+      "output_tokens": 468
+    },
+    "cost_usd": 0.016984,
+    "stop": "end"
+  }
+}

@@ -1,0 +1,103 @@
+{
+  "request_hash": "sha256:a2268f39fd35b485a286404a1fbcb496d243ccfd69ae7e59b17530e4f2742be2",
+  "response": {
+    "output": {
+      "output": {
+        "layers": [
+          {
+            "id": "s01.sh03.l1",
+            "component": "kinetic_title",
+            "props": {
+              "text": "The heat pump",
+              "subtitle": "Heat from cold outdoor air",
+              "emphasis": [
+                2
+              ]
+            },
+            "timing": {
+              "enter": {
+                "line": "b01.l02",
+                "point": "start",
+                "offset": 0
+              },
+              "exit": {
+                "line": "b01.l03",
+                "point": "end",
+                "offset": 15
+              }
+            },
+            "layout": {
+              "landscape": {
+                "region": "title"
+              }
+            }
+          }
+        ]
+      },
+      "decisions": [
+        {
+          "about": [
+            "s01.sh03.l1/props/text"
+          ],
+          "choice": "Use the on-screen text 'The heat pump' as the headline, so it states the claim of line b01.l02 and nothing more.",
+          "citations": [
+            "line:b01.l02",
+            "craft_rule:hierarchy.supports_line",
+            "craft_rule:legibility.read_time"
+          ]
+        },
+        {
+          "about": [
+            "s01.sh03.l1/props/subtitle"
+          ],
+          "choice": "Use 'Heat from cold outdoor air' from b01.l03 as the subtitle; it supports the headline and stays short enough to read without shrinking text.",
+          "citations": [
+            "line:b01.l03",
+            "craft_rule:legibility.size_floor",
+            "pack_rule:neutral/type.no_shrink_to_fit"
+          ]
+        },
+        {
+          "about": [
+            "s01.sh03.l1/props/emphasis"
+          ],
+          "choice": "Accent only the word 'pump' (index 2) with a single accent; no style overrides are needed.",
+          "citations": [
+            "pack_rule:neutral/color.one_accent",
+            "pack_rule:neutral/type.hierarchy",
+            "craft_rule:hierarchy.one_focus"
+          ]
+        },
+        {
+          "about": [
+            "s01.sh03.l1/timing"
+          ],
+          "choice": "Enter as b01.l02 starts, when the heat pump is named, and hold through the end of b01.l03 plus 15 frames so the subtitle can be read.",
+          "citations": [
+            "line:b01.l02",
+            "line:b01.l03",
+            "craft_rule:rhythm.hold_to_read",
+            "pack_rule:neutral/density.hold_time"
+          ]
+        },
+        {
+          "about": [
+            "s01.sh03.l1/layout"
+          ],
+          "choice": "Place the kinetic title in the title region of the centred title template, with the subtitle carried in the same component.",
+          "citations": [
+            "pack_rule:neutral/layout.safe_area",
+            "craft_rule:continuity.same_thing_same_look"
+          ]
+        }
+      ]
+    },
+    "model": "claude-sonnet-5-5",
+    "usage": {
+      "input_tokens": 6430,
+      "output_tokens": 759
+    },
+    "cost_usd": 0.02045,
+    "stop": "end"
+  }
+}

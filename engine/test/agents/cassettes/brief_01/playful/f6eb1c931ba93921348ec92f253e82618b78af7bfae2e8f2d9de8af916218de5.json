@@ -1,0 +1,68 @@
+{
+  "request_hash": "sha256:f6eb1c931ba93921348ec92f253e82618b78af7bfae2e8f2d9de8af916218de5",
+  "response": {
+    "output": {
+      "output": {
+        "plan": {
+          "summary": "For homeowners thinking about replacing a gas furnace: a heat pump can warm a house using heat taken from cold outdoor air. A refrigerant absorbs heat outside, a compressor raises its temperature, and the heat is released indoors. Because it moves heat rather than burning fuel, it can deliver more heat energy than the electricity it uses. The tone is calm and factual, with no prices, brands or claims about savings.",
+          "target_seconds": 60,
+          "beats": [
+            "If you are thinking about replacing a gas furnace, a heat pump is another way to warm your house, using heat taken from cold outdoor air.",
+            "Outside, a refrigerant absorbs heat from the cold outdoor air.",
+            "A compressor then raises the refrigerant's temperature.",
+            "Indoors, that heat is released to warm the house.",
+            "A heat pump moves heat rather than burning fuel.",
+            "Because it moves heat, it can deliver more heat energy than the electricity it uses."
+          ]
+        },
+        "pack": "neutral"
+      },
+      "decisions": [
+        {
+          "about": [
+            "brief_01/plan/summary"
+          ],
+          "choice": "The summary restates only the brief's audience, mechanism and heat-moving claim, plus its tone limits: calm, factual, and no prices, brands or savings claims.",
+          "citations": [
+            "brief"
+          ]
+        },
+        {
+          "about": [
+            "brief_01/plan/target_seconds"
+          ],
+          "choice": "Set 60 seconds, because the brief asks for a short explainer of six simple ideas and the landscape_web deliverable states no shorter maximum.",
+          "citations": [
+            "brief"
+          ]
+        },
+        {
+          "about": [
+            "brief_01/plan/beats"
+          ],
+          "choice": "Six beats follow the brief's order, one idea each: homeowner context, absorb outside, compress, release indoors, moves rather than burns, and more heat than electricity.",
+          "citations": [
+            "brief",
+            "craft_rule:intelligibility.one_idea"
+          ]
+        },
+        {
+          "about": [
+            "brief_01/style"
+          ],
+          "choice": "Switch from the unchosen 'playful' pack to 'neutral', because the brief asks for a calm, factual tone for homeowners. That fits neutral's restrained, professional description rather than playful's children's and light-hearted one.",
+          "citations": [
+            "brief"
+          ]
+        }
+      ]
+    },
+    "model": "claude-opus-5-5",
+    "usage": {
+      "input_tokens": 3209,
+      "output_tokens": 1215
+    },
+    "cost_usd": 0.037136,
+    "stop": "end"
+  }
+}

@@ -1,0 +1,685 @@
+{
+  "request_hash": "sha256:5f81614e600c5dbe1429291c973a853fa12f745fb3476f3d54d3ed212bdfa608",
+  "response": {
+    "output": {
+      "output": {
+        "sequences": [
+          {
+            "id": "seq_a",
+            "title": "An option worth understanding",
+            "mood": [
+              "warm",
+              "calm",
+              "inviting"
+            ],
+            "music_bed": "Light, warm, gently upbeat bed kept low and unhurried under the narration",
+            "scenes": [
+              {
+                "id": "s01",
+                "intent": "For someone replacing a gas furnace, a heat pump can warm the house using heat from cold outdoor air.",
+                "mood": [
+                  "warm",
+                  "welcoming",
+                  "curious"
+                ],
+                "lines": [
+                  "b01.l01",
+                  "b01.l02",
+                  "b01.l03",
+                  "b01.l04"
+                ],
+                "transition_out": {
+                  "type": "cut"
+                },
+                "shots": [
+                  {
+                    "id": "s01.sh01",
+                    "type": "motion_graphics",
+                    "framing": "Big centred title on the warm ground",
+                    "anchors": {
+                      "start": {
+                        "line": "b01.l01",
+                        "point": "start",
+                        "offset": 0
+                      }
+                    },
+                    "layout": {
+                      "landscape": {
+                        "template": "title"
+                      }
+                    },
+                    "components": [
+                      "kinetic_title"
+                    ]
+                  },
+                  {
+                    "id": "s01.sh02",
+                    "type": "generative_footage",
+                    "framing": "Wide shot of a cosy house on a cold winter day, windows glowing",
+                    "anchors": {
+                      "start": {
+                        "line": "b01.l02",
+                        "point": "start",
+                        "offset": 0
+                      }
+                    },
+                    "layout": {
+                      "landscape": {
+                        "template": "full"
+                      }
+                    },
+                    "components": [
+                      "plate"
+                    ]
+                  },
+                  {
+                    "id": "s01.sh03",
+                    "type": "motion_graphics",
+                    "framing": "Centred title holding through the pause before the steps",
+                    "anchors": {
+                      "start": {
+                        "line": "b01.l03",
+                        "point": "start",
+                        "offset": 0
+                      }
+                    },
+                    "layout": {
+                      "landscape": {
+                        "template": "title"
+                      }
+                    },
+                    "components": [
+                      "kinetic_title"
+                    ]
+                  }
+                ]
+              }
+            ]
+          },
+          {
+            "id": "seq_b",
+            "title": "How it works, step by step",
+            "mood": [
+              "clear",
+              "steady",
+              "friendly"
+            ],
+            "music_bed": "Same bed continues, a touch more forward motion",
+            "scenes": [
+              {
+                "id": "s02",
+                "intent": "Outside, a refrigerant absorbs heat from the outdoor air, even when it feels cold.",
+                "mood": [
+                  "crisp",
+                  "cool",
+                  "reassuring"
+                ],
+                "lines": [
+                  "b02.l01",
+                  "b02.l02",
+                  "b02.l03",
+                  "b02.l04"
+                ],
+                "transition_out": {
+                  "type": "wipe",
+                  "duration_frames": 12
+                },
+                "sound": {
+                  "sfx": [
+                    "soft airy whoosh as the outdoor stage lights up"
+                  ]
+                },
+                "shots": [
+                  {
+                    "id": "s02.sh01",
+                    "type": "motion_graphics",
+                    "framing": "System diagram (outdoor left, compressor centre, house right) with the outdoor stage highlighted",
+                    "anchors": {
+                      "start": {
+                        "line": "b02.l01",
+                        "point": "start",
+                        "offset": 0
+                      }
+                    },
+                    "layout": {
+                      "landscape": {
+                        "template": "full"
+                      }
+                    },
+                    "components": [
+                      "plate"
+                    ]
+                  },
+                  {
+                    "id": "s02.sh02",
+                    "type": "motion_graphics",
+                    "framing": "Title above the same diagram, outdoor stage still highlighted",
+                    "anchors": {
+                      "start": {
+                        "line": "b02.l03",
+                        "point": "start",
+                        "offset": 0
+                      }
+                    },
+                    "layout": {
+                      "landscape": {
+                        "template": "title_body"
+                      }
+                    },
+                    "components": [
+                      "kinetic_title",
+                      "plate"
+                    ]
+                  }
+                ]
+              },
+              {
+                "id": "s03",
+                "intent": "The compressor raises the refrigerant's temperature until it is warm enough to heat the home.",
+                "mood": [
+                  "energetic",
+                  "warming",
+                  "clear"
+                ],
+                "lines": [
+                  "b03.l01",
+                  "b03.l02",
+                  "b03.l03"
+                ],
+                "transition_out": {
+                  "type": "wipe",
+                  "duration_frames": 12
+                },
+                "sound": {
+                  "sfx": [
+                    "gentle compressor hum rising in pitch"
+                  ]
+                },
+                "shots": [
+                  {
+                    "id": "s03.sh01",
+                    "type": "motion_graphics",
+                    "framing": "Same system diagram with the compressor highlighted",
+                    "anchors": {
+                      "start": {
+                        "line": "b03.l01",
+                        "point": "start",
+                        "offset": 0
+                      }
+                    },
+                    "layout": {
+                      "landscape": {
+                        "template": "full"
+                      }
+                    },
+                    "components": [
+                      "plate"
+                    ]
+                  },
+                  {
+                    "id": "s03.sh02",
+                    "type": "motion_graphics",
+                    "framing": "Title above the same diagram, compressor glowing warmer",
+                    "anchors": {
+                      "start": {
+                        "line": "b03.l02",
+                        "point": "start",
+                        "offset": 0
+                      }
+                    },
+                    "layout": {
+                      "landscape": {
+                        "template": "title_body"
+                      }
+                    },
+                    "components": [
+                      "kinetic_title",
+                      "plate"
+                    ]
+                  }
+                ]
+              },
+              {
+                "id": "s04",
+                "intent": "Indoors, the refrigerant releases its heat and warms the rooms.",
+                "mood": [
+                  "cosy",
+                  "warm",
+                  "settled"
+                ],
+                "lines": [
+                  "b04.l01",
+                  "b04.l02",
+                  "b04.l03"
+                ],
+                "transition_out": {
+                  "type": "cut"
+                },
+                "sound": {
+                  "sfx": [
+                    "soft warm swell as heat spreads into the rooms"
+                  ]
+                },
+                "shots": [
+                  {
+                    "id": "s04.sh01",
+                    "type": "motion_graphics",
+                    "framing": "Same system diagram with the indoor stage highlighted",
+                    "anchors": {
+                      "start": {
+                        "line": "b04.l01",
+                        "point": "start",
+                        "offset": 0
+                      }
+                    },
+                    "layout": {
+                      "landscape": {
+                        "template": "full"
+                      }
+                    },
+                    "components": [
+                      "plate"
+                    ]
+                  },
+                  {
+                    "id": "s04.sh02",
+                    "type": "motion_graphics",
+                    "framing": "Title above the same diagram, warmth filling the house",
+                    "anchors": {
+                      "start": {
+                        "line": "b04.l02",
+                        "point": "start",
+                        "offset": 0
+                      }
+                    },
+                    "layout": {
+                      "landscape": {
+                        "template": "title_body"
+                      }
+                    },
+                    "components": [
+                      "kinetic_title",
+                      "plate"
+                    ]
+                  }
+                ]
+              }
+            ]
+          },
+          {
+            "id": "seq_c",
+            "title": "Why the difference matters",
+            "mood": [
+              "thoughtful",
+              "calm",
+              "assured"
+            ],
+            "music_bed": "Same bed, thinning out toward a calm resolve",
+            "scenes": [
+              {
+                "id": "s05",
+                "intent": "A heat pump moves heat from outside to inside; nothing is burned.",
+                "mood": [
+                  "thoughtful",
+                  "quiet",
+                  "clear"
+                ],
+                "lines": [
+                  "b05.l01",
+                  "b05.l02",
+                  "b05.l03",
+                  "b05.l04"
+                ],
+                "transition_out": {
+                  "type": "cut"
+                },
+                "shots": [
+                  {
+                    "id": "s05.sh01",
+                    "type": "motion_graphics",
+                    "framing": "The whole system diagram at rest, no flame anywhere, held through the pause",
+                    "anchors": {
+                      "start": {
+                        "line": "b05.l01",
+                        "point": "start",
+                        "offset": 0
+                      }
+                    },
+                    "layout": {
+                      "landscape": {
+                        "template": "full"
+                      }
+                    },
+                    "components": [
+                      "plate"
+                    ]
+                  },
+                  {
+                    "id": "s05.sh02",
+                    "type": "motion_graphics",
+                    "framing": "Big centred title",
+                    "anchors": {
+                      "start": {
+                        "line": "b05.l03",
+                        "point": "start",
+                        "offset": 0
+                      }
+                    },
+                    "layout": {
+                      "landscape": {
+                        "template": "title"
+                      }
+                    },
+                    "components": [
+                      "kinetic_title"
+                    ]
+                  },
+                  {
+                    "id": "s05.sh03",
+                    "type": "motion_graphics",
+                    "framing": "Same diagram with one arrow carrying heat from outside to inside",
+                    "anchors": {
+                      "start": {
+                        "line": "b05.l04",
+                        "point": "start",
+                        "offset": 0
+                      }
+                    },
+                    "layout": {
+                      "landscape": {
+                        "template": "full"
+                      }
+                    },
+                    "components": [
+                      "plate"
+                    ]
+                  }
+                ]
+              },
+              {
+                "id": "s06",
+                "intent": "Because it moves heat, it delivers more heat energy than the electricity it uses; recap and close.",
+                "mood": [
+                  "assured",
+                  "calm",
+                  "resolved"
+                ],
+                "lines": [
+                  "b06.l01",
+                  "b06.l02",
+                  "b06.l03",
+                  "b06.l04",
+                  "b06.l05"
+                ],
+                "transition_out": {
+                  "type": "cut"
+                },
+                "shots": [
+                  {
+                    "id": "s06.sh01",
+                    "type": "motion_graphics",
+                    "framing": "Big centred title, held from the setup line into the claim",
+                    "anchors": {
+                      "start": {
+                        "line": "b06.l01",
+                        "point": "start",
+                        "offset": 0
+                      }
+                    },
+                    "layout": {
+                      "landscape": {
+                        "template": "title"
+                      }
+                    },
+                    "components": [
+                      "kinetic_title"
+                    ]
+                  },
+                  {
+                    "id": "s06.sh02",
+                    "type": "motion_graphics",
+                    "framing": "Same system diagram: small electricity input at the compressor, large heat flow from the outdoor air",
+                    "anchors": {
+                      "start": {
+                        "line": "b06.l03",
+                        "point": "start",
+                        "offset": 0
+                      }
+                    },
+                    "layout": {
+                      "landscape": {
+                        "template": "full"
+                      }
+                    },
+                    "components": [
+                      "plate"
+                    ]
+                  },
+                  {
+                    "id": "s06.sh03",
+                    "type": "motion_graphics",
+                    "framing": "Three-item recap revealed one at a time",
+                    "anchors": {
+                      "start": {
+                        "line": "b06.l04",
+                        "point": "start",
+                        "offset": 0
+                      }
+                    },
+                    "layout": {
+                      "landscape": {
+                        "template": "title_body"
+                      }
+                    },
+                    "components": [
+                      "bullet_reveal"
+                    ]
+                  },
+                  {
+                    "id": "s06.sh04",
+                    "type": "motion_graphics",
+                    "framing": "Calm centred closing card, no call to action or logo",
+                    "anchors": {
+                      "start": {
+                        "line": "b06.l05",
+                        "point": "start",
+                        "offset": 0
+                      }
+                    },
+                    "layout": {
+                      "landscape": {
+                        "template": "end_card"
+                      }
+                    },
+                    "components": [
+                      "end_card"
+                    ]
+                  }
+                ]
+              }
+            ]
+          }
+        ]
+      },
+      "decisions": [
+        {
+          "about": [
+            "s01",
+            "s02",
+            "s03",
+            "s04",
+            "s05",
+            "s06"
+          ],
+          "choice": "One scene per script beat, since each beat carries a single idea and its lines stay in script order.",
+          "citations": [
+            "craft_rule:intelligibility.one_idea",
+            "brief"
+          ]
+        },
+        {
+          "about": [
+            "seq_a",
+            "seq_b",
+            "seq_c"
+          ],
+          "choice": "Three sequences: the setup, the three-step mechanism, and why moving heat matters.",
+          "citations": [
+            "brief",
+            "craft_rule:intelligibility.one_idea"
+          ]
+        },
+        {
+          "about": [
+            "s01.sh01/layout",
+            "s02.sh01/layout",
+            "s06.sh04/layout"
+          ],
+          "choice": "Layouts are given for landscape only because the sole deliverable is landscape_web.",
+          "citations": [
+            "brief"
+          ]
+        },
+        {
+          "about": [
+            "s02.sh01",
+            "s03.sh01",
+            "s04.sh01",
+            "s05.sh01",
+            "s05.sh03",
+            "s06.sh02"
+          ],
+          "choice": "One system diagram plate is reused with outdoor on the left, compressor in the centre and house on the right, highlighting only the current stage.",
+          "citations": [
+            "craft_rule:continuity.same_thing_same_look",
+            "craft_rule:hierarchy.one_focus",
+            "pack_rule:playful/color.one_focus"
+          ]
+        },
+        {
+          "about": [
+            "s01.sh03",
+            "s02.sh02",
+            "s03.sh02",
+            "s04.sh02",
+            "s05.sh02",
+            "s06.sh01"
+          ],
+          "choice": "Each on-screen text line gets a kinetic_title shot that starts on the line carrying that text, so the title echoes the spoken claim and adds nothing new.",
+          "citations": [
+            "craft_rule:hierarchy.supports_line",
+            "craft_rule:rhythm.cut_on_sense",
+            "pack_rule:playful/motion.word_by_word"
+          ]
+        },
+        {
+          "about": [
+            "s02.sh02",
+            "s03.sh02",
+            "s04.sh02"
+          ],
+          "choice": "Step titles sit in title_body above the same diagram, so the stage being named stays visible in the same place.",
+          "citations": [
+            "craft_rule:continuity.same_thing_same_look",
+            "pack_rule:playful/layout.centred_focus"
+          ]
+        },
+        {
+          "about": [
+            "s01.sh03",
+            "s02.sh02",
+            "s03.sh02",
+            "s04.sh02",
+            "s05.sh02"
+          ],
+          "choice": "Short follow-up lines and pauses hold on the current shot instead of cutting, giving fewer items and longer holds.",
+          "citations": [
+            "craft_rule:rhythm.hold_to_read",
+            "pack_rule:playful/density.fewer_items"
+          ]
+        },
+        {
+          "about": [
+            "s01.sh02"
+          ],
+          "choice": "A generated wide shot of a warm house on a cold day grounds 'warm your house' for homeowners.",
+          "citations": [
+            "brief",
+            "craft_rule:hierarchy.supports_line"
+          ]
+        },
+        {
+          "about": [
+            "s06.sh01"
+          ],
+          "choice": "The heat-out-versus-electricity-in idea is a title rather than a chart, since the script gives no figures and a chart would imply a specific claim.",
+          "citations": [
+            "brief",
+            "craft_rule:hierarchy.supports_line"
+          ]
+        },
+        {
+          "about": [
+            "s06.sh03"
+          ],
+          "choice": "bullet_reveal recaps refrigerant, compressor and heat from the cold, because the line walks through three parallel items.",
+          "citations": [
+            "craft_rule:rhythm.cut_on_sense",
+            "pack_rule:playful/density.fewer_items"
+          ]
+        },
+        {
+          "about": [
+            "s06.sh04"
+          ],
+          "choice": "The film closes on an end_card with the final line and no call to action or logo, since the brief excludes brands and sales claims.",
+          "citations": [
+            "brief"
+          ]
+        },
+        {
+          "about": [
+            "s02/transition_out",
+            "s03/transition_out"
+          ],
+          "choice": "Wipes link the three mechanism steps, carrying the refrigerant along its path; other scene changes are cuts because a wipe there would carry no meaning.",
+          "citations": [
+            "pack_rule:playful/transition.wipe_by_default",
+            "craft_rule:continuity.transitions_mean"
+          ]
+        },
+        {
+          "about": [
+            "s02/sound",
+            "s03/sound",
+            "s04/sound"
+          ],
+          "choice": "Light effects mark only the three mechanism moments: air, compressor and released warmth.",
+          "citations": [
+            "pack_rule:playful/sound.effects_mark_moments",
+            "pack_rule:playful/motion.lively_but_brief"
+          ]
+        },
+        {
+          "about": [
+            "seq_a/music_bed",
+            "seq_b/music_bed",
+            "seq_c/music_bed"
+          ],
+          "choice": "A gently upbeat bed is kept low so the tone stays calm and factual.",
+          "citations": [
+            "pack_rule:playful/sound.upbeat_bed",
+            "brief"
+          ]
+        }
+      ]
+    },
+    "model": "claude-opus-5-5",
+    "usage": {
+      "input_tokens": 8035,
+      "output_tokens": 6495
+    },
+    "cost_usd": 0.16204,
+    "stop": "end"
+  }
+}

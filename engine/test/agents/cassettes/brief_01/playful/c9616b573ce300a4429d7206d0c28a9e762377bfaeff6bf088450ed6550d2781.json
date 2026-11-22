@@ -1,0 +1,101 @@
+{
+  "request_hash": "sha256:c9616b573ce300a4429d7206d0c28a9e762377bfaeff6bf088450ed6550d2781",
+  "response": {
+    "output": {
+      "output": {
+        "layers": [
+          {
+            "id": "s02.sh01.l1",
+            "component": "kinetic_title",
+            "props": {
+              "text": "Refrigerant absorbs heat",
+              "emphasis": [
+                0
+              ]
+            },
+            "timing": {
+              "enter": {
+                "line": "b02.l03",
+                "point": "start",
+                "offset": 0
+              },
+              "exit": {
+                "line": "b02.l04",
+                "point": "end",
+                "offset": 0
+              }
+            },
+            "layout": {
+              "landscape": {
+                "region": "title"
+              }
+            }
+          }
+        ]
+      },
+      "decisions": [
+        {
+          "about": [
+            "s02.sh01.l1/props/text"
+          ],
+          "choice": "Used the line's on-screen text 'Refrigerant absorbs heat' as the headline, short enough to read while the line is heard, with no second claim.",
+          "citations": [
+            "line:b02.l03",
+            "craft_rule:hierarchy.supports_line",
+            "craft_rule:legibility.read_time",
+            "pack_rule:playful/type.short_lines"
+          ]
+        },
+        {
+          "about": [
+            "s02.sh01.l1/props/emphasis"
+          ],
+          "choice": "Accented only the word 'Refrigerant' (index 0) so the subject is the single focal point, and left out the subtitle to keep the frame sparse.",
+          "citations": [
+            "craft_rule:hierarchy.one_focus",
+            "pack_rule:playful/color.one_focus",
+            "pack_rule:playful/density.fewer_items"
+          ]
+        },
+        {
+          "about": [
+            "s02.sh01.l1/timing"
+          ],
+          "choice": "Enters at the start of b02.l03 as the narration reaches the claim, and holds through the end of b02.l04 for a long read.",
+          "citations": [
+            "line:b02.l03",
+            "line:b02.l04",
+            "craft_rule:rhythm.hold_to_read",
+            "pack_rule:playful/density.fewer_items"
+          ]
+        },
+        {
+          "about": [
+            "s02.sh01.l1/layout"
+          ],
+          "choice": "Placed the headline in the 'title' region of the title template, which is centred.",
+          "citations": [
+            "pack_rule:playful/layout.centred_focus",
+            "craft_rule:continuity.same_thing_same_look"
+          ]
+        },
+        {
+          "about": [
+            "s02.sh01.l1/style"
+          ],
+          "choice": "No style overrides; the pack handles styling.",
+          "citations": [
+            "craft_rule:contrast.meaning"
+          ]
+        }
+      ]
+    },
+    "model": "claude-sonnet-5-5",
+    "usage": {
+      "input_tokens": 6230,
+      "output_tokens": 694
+    },
+    "cost_usd": 0.0194,
+    "stop": "end"
+  }
+}

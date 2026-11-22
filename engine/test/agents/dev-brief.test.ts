@@ -158,7 +158,7 @@ function decisionsCite(store: Store): void {
   for (const d of decisions)
     expect(
       d.citations.some(
-        (c) => c === "brief" || c.startsWith("pack_rule:") || c.startsWith("craft_rule:"),
+        (c) => ["brief", "plan", "script"].includes(c) || /^(pack_rule|craft_rule|line):/.test(c),
       ),
     ).toBe(true);
 }
@@ -241,6 +241,18 @@ describe.each(["neutral", "playful"])("the development brief under %s (M7.5a)", 
       // the provider only for requests not yet recorded.
       if (RECORD || saved.g2) {
         await approveGate(store, loadTemplate("explainer"), "script", { author: { kind: "user" } });
+        // As a user would with `review budget --cap`: the brief's $2 cap holds the script, but
+        // the Shot Builders' coarse reservations (no per-token price in the manifest) would
+        // pause there. No role after the script gate reads the budget.
+        await store.apply({
+          base_revision: store.revision(),
+          author: { kind: "user" },
+          mode: "apply",
+          reason: "raise the cap for production",
+          ops: [
+            { op: "set", entity: "brief_01", path: "/budget", value: { currency: "USD", cap: 10 } },
+          ],
+        } as never);
         const next = await toScriptGate(
           store,
           packId,

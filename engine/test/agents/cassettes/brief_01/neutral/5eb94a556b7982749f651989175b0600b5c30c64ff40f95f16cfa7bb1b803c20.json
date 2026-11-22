@@ -1,0 +1,98 @@
+{
+  "request_hash": "sha256:5eb94a556b7982749f651989175b0600b5c30c64ff40f95f16cfa7bb1b803c20",
+  "response": {
+    "output": {
+      "output": {
+        "layers": [
+          {
+            "id": "s05.sh02.l1",
+            "component": "kinetic_title",
+            "props": {
+              "text": "Moves heat",
+              "subtitle": "From outside to inside",
+              "emphasis": [
+                1
+              ]
+            },
+            "timing": {
+              "enter": {
+                "line": "b05.l01",
+                "point": "start",
+                "offset": 0
+              },
+              "exit": {
+                "line": "b05.l03",
+                "point": "end",
+                "offset": 0
+              }
+            },
+            "layout": {
+              "landscape": {
+                "region": "title"
+              }
+            }
+          }
+        ]
+      },
+      "decisions": [
+        {
+          "about": [
+            "s05.sh02.l1/props/text"
+          ],
+          "choice": "Use the line's on-screen text 'Moves heat' as the headline, with 'heat' accented as the one emphasised word.",
+          "citations": [
+            "line:b05.l01",
+            "craft_rule:hierarchy.supports_line",
+            "craft_rule:legibility.read_time"
+          ]
+        },
+        {
+          "about": [
+            "s05.sh02.l1/props/subtitle"
+          ],
+          "choice": "Subtitle 'From outside to inside' is taken from line b05.l03 and matches the shot framing, a single idea.",
+          "citations": [
+            "line:b05.l03",
+            "pack_rule:neutral/density.one_idea"
+          ]
+        },
+        {
+          "about": [
+            "s05.sh02.l1/timing"
+          ],
+          "choice": "Enter as b05.l01 starts and hold until b05.l03 ends so the text stays up long enough to read across the three lines.",
+          "citations": [
+            "craft_rule:rhythm.hold_to_read",
+            "pack_rule:neutral/density.hold_time"
+          ]
+        },
+        {
+          "about": [
+            "s05.sh02.l1/layout"
+          ],
+          "choice": "Place the title in the title region of the title template; this is the single focal component.",
+          "citations": [
+            "craft_rule:hierarchy.one_focus",
+            "pack_rule:neutral/layout.safe_area"
+          ]
+        },
+        {
+          "about": [
+            "s05.sh02.l1/style"
+          ],
+          "choice": "No style overrides; leave styling to the pack.",
+          "citations": [
+            "pack_rule:neutral/color.one_accent"
+          ]
+        }
+      ]
+    },
+    "model": "claude-sonnet-5-5",
+    "usage": {
+      "input_tokens": 6349,
+      "output_tokens": 624
+    },
+    "cost_usd": 0.018938,
+    "stop": "end"
+  }
+}
