@@ -1,0 +1,14 @@
+{
+  "id": "library_hours_ad",
+  "genre": "ad",
+  "target_seconds": 15,
+  "deliverables": ["vertical_social"],
+  "pack": "playful",
+  "brief": "A fifteen-second spot for a neighbourhood public library announcing that it now stays open until nine on weekday evenings. One message only: come after work or school. Close with the words 'Open late, weekdays'. No prices, no named people, no claims beyond the new hours.",
+  "narrator": {
+    "language": "en",
+    "description": "A cheerful, clear adult voice"
+  },
+  "author": "An agent session (Claude Code), given only AGENTS.md \u00a74.1 and the coverage matrix (decision 10)",
+  "reviewed_by": "pending: maintainer neutrality review"
+}

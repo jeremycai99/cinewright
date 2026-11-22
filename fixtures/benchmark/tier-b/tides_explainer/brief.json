@@ -1,0 +1,14 @@
+{
+  "id": "tides_explainer",
+  "genre": "explainer",
+  "target_seconds": 60,
+  "deliverables": ["landscape_web"],
+  "pack": "neutral",
+  "brief": "Explain to curious adults why most coasts see two high tides a day. The Moon's gravity pulls the ocean into a bulge on the side facing it, and a second bulge forms on the far side; as the Earth turns, a coastline passes through both. Mention that the Sun adds to the effect, making larger tides when Sun and Moon line up. Keep it accurate and unhurried; no myths, no exaggeration.",
+  "narrator": {
+    "language": "en",
+    "description": "An even, warm adult voice"
+  },
+  "author": "An agent session (Claude Code), given only AGENTS.md \u00a74.1 and the coverage matrix (decision 10)",
+  "reviewed_by": "pending: maintainer neutrality review"
+}

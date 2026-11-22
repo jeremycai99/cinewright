@@ -1,4 +1,5 @@
-"""`cinewright-eval`: benchmark tooling: `cas-export` (A.1), `tier-a` (M8.3a), `baseline` (M6.2)."""
+"""`cinewright-eval`: benchmark tooling: `cas-export` (A.1), `tier-a` (M8.3a), `baseline` (M6.2),
+`briefs` and `snapshot` (M8.2)."""
 
 from __future__ import annotations
 
@@ -10,7 +11,10 @@ import sys
 from pathlib import Path
 
 from cinewright_eval.baseline import check, load_runs, record
+from cinewright_eval.briefs import check as check_briefs
+from cinewright_eval.briefs import init_project
 from cinewright_eval.cas_export import ExportError, export
+from cinewright_eval.snapshot import SnapshotError, snapshot
 from cinewright_eval.tier_a import TierAOptions, run_tier_a
 
 
@@ -46,7 +50,39 @@ def main(argv: list[str] | None = None) -> int:
     chk = base_sub.add_parser("check", help="runs against a baseline's thresholds")
     chk.add_argument("runs", nargs="+", type=Path)
     chk.add_argument("--against", required=True, type=Path)
+    briefs = sub.add_parser("briefs", help="check the benchmark briefs or make a project for one")
+    briefs_sub = briefs.add_subparsers(dest="action", required=True)
+    bcheck = briefs_sub.add_parser("check", help="validate every brief and the coverage rules")
+    bcheck.add_argument("--root", type=Path, default=Path.cwd())
+    binit = briefs_sub.add_parser("init", help="a project for one brief")
+    binit.add_argument("id")
+    binit.add_argument("--to", required=True, type=Path)
+    binit.add_argument("--pack", default=None)
+    binit.add_argument("--root", type=Path, default=Path.cwd())
+    binit.add_argument("--cli", default=os.environ.get("CINEWRIGHT_CLI"))
+    snap = sub.add_parser("snapshot", help="freeze a clean tier B run as a tier A fixture")
+    snap.add_argument("project", type=Path)
+    snap.add_argument("--as", dest="fixture", required=True)
+    snap.add_argument("--root", type=Path, default=Path.cwd())
     args = parser.parse_args(argv)
+    if args.command == "briefs":
+        root = args.root.resolve()
+        if args.action == "check":
+            errors, table = check_briefs(root)
+            print(table)
+            for e in errors:
+                print(f"cinewright-eval briefs: {e}", file=sys.stderr)
+            return 1 if errors else 0
+        cli = shlex.split(args.cli) if args.cli else ["node", str(root / "cli" / "dist" / "bin.js")]
+        return init_project(root, args.id, args.to, cli, args.pack)
+    if args.command == "snapshot":
+        try:
+            folder = snapshot(args.project.resolve(), args.fixture, args.root.resolve())
+        except SnapshotError as error:
+            print(f"cinewright-eval snapshot: {error}", file=sys.stderr)
+            return 1
+        print(folder)
+        return 0
     if args.command == "baseline":
         runs = load_runs(args.runs)
         if args.action == "record":

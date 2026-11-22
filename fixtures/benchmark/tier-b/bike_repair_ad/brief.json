@@ -1,0 +1,14 @@
+{
+  "id": "bike_repair_ad",
+  "genre": "ad",
+  "target_seconds": 30,
+  "deliverables": ["landscape_web"],
+  "pack": "neutral",
+  "brief": "A thirty-second spot for a free community bike repair workshop held every Saturday morning. Volunteers show you how to fix a flat, adjust brakes and oil a chain, and the tools are provided. The tone is practical and welcoming. End with: 'Bring your bike. Leave knowing how to fix it.'",
+  "narrator": {
+    "language": "en",
+    "description": "A relaxed, practical adult voice"
+  },
+  "author": "An agent session (Claude Code), given only AGENTS.md \u00a74.1 and the coverage matrix (decision 10)",
+  "reviewed_by": "pending: maintainer neutrality review"
+}

@@ -47,6 +47,9 @@ jobs:
       - run: uv run --locked ruff format --check .
       - run: pnpm exec pyright
       - run: uv run --locked pytest
+      # The benchmark briefs validate and cover the v0.1 matrix (M8.2, decision 11).
+      - name: Benchmark briefs
+        run: uv run --locked cinewright-eval briefs check
       # The audio image runs plugins on Python 3.12, so the plugin SDK must pass there (M4).
       - name: Plugin SDK on Python 3.12
         run: uv run --no-project --python 3.12 --with pytest==9.2.0 python -m pytest plugins/sdk-py/tests -p no:cacheprovider
