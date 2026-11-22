@@ -64,18 +64,17 @@ const shot = (id: string, layers = true) => ({
   type: "motion_graphics",
   framing: "full_frame",
   layout: { landscape: { template: "title" }, portrait: { template: "title" } },
-  ...(layers
-    ? {
-        layers: [
-          {
-            id: `${id}.title`,
-            component: "kinetic_title",
-            props: { text: "T" },
-            layout: { landscape: { region: "title" }, portrait: { region: "title" } },
-          },
-        ],
-      }
-    : {}),
+  // The Director writes a layer stub (id and component); the Shot Builder fills its props.
+  layers: [
+    layers
+      ? {
+          id: `${id}.title`,
+          component: "kinetic_title",
+          props: { text: "T" },
+          layout: { landscape: { region: "title" }, portrait: { region: "title" } },
+        }
+      : { id: `${id}.title`, component: "kinetic_title" },
+  ],
 });
 const SEQUENCE = (layers: boolean[]) => ({
   op: "insert",
@@ -148,7 +147,7 @@ describe("reconcile (M7.1b)", () => {
     expect(ids(await derive(again), "agent")).toEqual(["director"]);
   });
 
-  it("fans out one Shot Builder per shot with open layers, and none for a filled one", async () => {
+  it("fans out one Shot Builder per shot whose layer stubs are still open, and none for a filled one", async () => {
     const store = await project([PLAN, SCRIPT, SEQUENCE([true, false, false])]);
     expect(ids(await derive(store), "agent")).toEqual([
       "shot_builder:s01.sh02",

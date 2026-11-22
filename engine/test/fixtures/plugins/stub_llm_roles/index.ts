@@ -1,4 +1,4 @@
-// A scripted LLM for the engine's tests (M7.5a): answers as the Producer or the Writer, chosen by
+// A scripted LLM for the engine's tests (M7.5a–b): answers as the Producer, Writer or Director, chosen by
 // the system prompt, with outputs that pass their checks. Every call is counted in `CALLS`.
 import type { GenerateRequest } from "../../../../../plugins/sdk-ts/src/kinds/llm.js";
 import type {
@@ -37,6 +37,43 @@ const WRITER = {
   decisions: [{ about: ["b01"], choice: "one beat in three lines", citations: ["brief"] }],
 };
 
+const shot = (id: string, line: string) => ({
+  id,
+  type: "motion_graphics",
+  anchors: { start: { line, point: "start", offset: 0 } },
+  layout: { landscape: { template: "title" } },
+  components: ["kinetic_title"],
+});
+
+const DIRECTOR = {
+  output: {
+    sequences: [
+      {
+        id: "seq_a",
+        title: "Heat is moved",
+        mood: ["calm"],
+        scenes: [
+          {
+            id: "s01",
+            intent: "A heat pump moves heat rather than making it",
+            mood: ["calm"],
+            lines: ["b01.l01", "b01.l02", "b01.l03"],
+            transition_out: { type: "cut" },
+            shots: [shot("s01.sh01", "b01.l01"), shot("s01.sh02", "b01.l03")],
+          },
+        ],
+      },
+    ],
+  },
+  decisions: [
+    {
+      about: ["seq_a"],
+      choice: "one scene, cut on the last line",
+      citations: ["craft_rule:rhythm.cut_on_sense"],
+    },
+  ],
+};
+
 export function createPlugin(): Plugin {
   return {
     async init() {},
@@ -47,7 +84,11 @@ export function createPlugin(): Plugin {
       if (request.method === "llm.estimate") return { ok: true, result: { usd_max: 0 } };
       const p = request.params as GenerateRequest;
       CALLS.count += 1;
-      const output = p.system.includes("You are the Producer") ? PRODUCER : WRITER;
+      const output = p.system.includes("You are the Producer")
+        ? PRODUCER
+        : p.system.includes("You are the Director")
+          ? DIRECTOR
+          : WRITER;
       return {
         ok: true,
         result: {

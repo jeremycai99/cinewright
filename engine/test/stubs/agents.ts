@@ -80,6 +80,7 @@ export function explainerAgents(options: { killAt?: number } = {}) {
                     type: "motion_graphics",
                     framing: "full_frame",
                     layout: { landscape: { template: "title" }, portrait: { template: "title" } },
+                    layers: [{ id: `${id}.sh01.title`, component: "kinetic_title" }],
                   },
                 ],
               })),
@@ -87,19 +88,12 @@ export function explainerAgents(options: { killAt?: number } = {}) {
           },
         ];
       case "shot_builder": {
-        const shot = task.entities[0] as string;
+        // Fills the Director's layer stub.
+        const layer = `${task.entities[0] as string}.title`;
         return [
-          {
-            op: "insert",
-            entity: shot,
-            path: "/layers",
-            value: {
-              id: `${shot}.title`,
-              component: "kinetic_title",
-              props: { text: shot },
-              layout: { landscape: { region: "title" }, portrait: { region: "title" } },
-            },
-          },
+          { op: "set", entity: layer, path: "/props/text", value: task.entities[0] },
+          { op: "set", entity: layer, path: "/layout/landscape", value: { region: "title" } },
+          { op: "set", entity: layer, path: "/layout/portrait", value: { region: "title" } },
         ];
       }
       case "editor":

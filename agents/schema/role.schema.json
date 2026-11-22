@@ -29,11 +29,11 @@
       "enum": ["frontier", "mid"]
     },
     "reads": {
-      "description": "`<entity kind>.<field>` (a slice of the IR, values with their states), or `pack.rules`, `packs` (the installed packs and their descriptions), `catalog` or `findings`.",
+      "description": "`<entity kind>.<field>` (a slice of the IR, values with their states), or `pack.rules`, `pack.layouts` (the pack's layout templates by aspect class), `packs` (the installed packs and their descriptions), `catalog` or `findings`.",
       "type": "array",
       "items": {
         "type": "string",
-        "pattern": "^((project|script|beat|line|cast|sequence|scene|shot|layer)\\.[a-z_]+|pack\\.rules|packs|catalog|findings)$"
+        "pattern": "^((project|script|beat|line|cast|sequence|scene|shot|layer)\\.[a-z_]+|pack\\.rules|pack\\.layouts|packs|catalog|findings)$"
       }
     },
     "writes": {

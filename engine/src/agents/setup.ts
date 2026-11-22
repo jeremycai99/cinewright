@@ -59,6 +59,7 @@ export function v01Agents(options: {
     checks: roleChecks(
       options.pack,
       packs.map((p) => p.id),
+      options.catalog,
     ),
     llm: llmCall(pool, options.llm),
     plugin: options.llm.manifest.id,

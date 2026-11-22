@@ -1,5 +1,6 @@
 import { readFileSync } from "node:fs";
-import { packSearchPath, resolveProjectPack } from "@cinewright/core";
+import { catalogDir } from "@cinewright/components";
+import { loadCatalog, packSearchPath, resolveProjectPack } from "@cinewright/core";
 import { loadTemplate, pendingTasks, submitForRole, type Task } from "@cinewright/engine";
 import { parse, UsageError } from "../args.js";
 import { EXIT } from "../exit-codes.js";
@@ -51,6 +52,7 @@ export async function tasks(argv: string[], io: Io): Promise<number> {
     const result = await submitForRole(store, task, output, {
       pack: resolveProjectPack(store.ir(), packSearchPath(env)),
       packDirs: packSearchPath(env),
+      catalog: loadCatalog(catalogDir),
     });
     if (values.json) printJson(io, result);
     else if (result.status === "done") io.stdout(`${task.id} done (revision ${result.revision})\n`);
