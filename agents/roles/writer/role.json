@@ -1,0 +1,15 @@
+{
+  "id": "writer",
+  "version": "1",
+  "tier": "frontier",
+  "reads": ["project.brief", "project.plan", "project.cast", "project.deliverables", "pack.rules"],
+  "writes": {
+    "kinds": ["script", "beat", "line"],
+    "paths": ["/beats", "/summary", "/lines", "/text", "/speaker", "/direction", "/on_screen_text"]
+  },
+  "per": "project",
+  "token_budget": 12000,
+  "max_output_tokens": 6000,
+  "repairs": 2,
+  "effort": "medium"
+}

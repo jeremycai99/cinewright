@@ -319,7 +319,7 @@
       }
     },
     "assets": {
-      "description": "The asset registry: every asset the IR references, by content hash (AGENTS.md §6).",
+      "description": "The asset registry: every asset the IR references, by content hash (AGENTS.md \u00a76).",
       "x-authorable": "list",
       "type": "object",
       "additionalProperties": false,
@@ -337,7 +337,7 @@
       }
     },
     "plan": {
-      "description": "The Producer's plan (M7.1b; filled in P1): a summary, the cost estimate and the fix reserve, in USD.",
+      "description": "The Producer's plan (M7.1b; filled in P1, M7.5a): a summary, the running time, the beats, and the cost estimate and fix reserve in USD.",
       "x-authorable": "field",
       "type": "object",
       "additionalProperties": false,
@@ -350,7 +350,7 @@
           "title": "ProjectPlan",
           "type": "object",
           "additionalProperties": false,
-          "required": ["summary", "estimate_usd"],
+          "required": ["summary"],
           "properties": {
             "summary": {
               "type": "string",
@@ -364,6 +364,20 @@
             "fix_reserve_usd": {
               "type": "number",
               "minimum": 0
+            },
+            "target_seconds": {
+              "description": "The running time the Producer planned (M7.5a).",
+              "type": "number",
+              "minimum": 1
+            },
+            "beats": {
+              "description": "The film's argument, one idea per beat, in order (M7.5a).",
+              "type": "array",
+              "items": {
+                "type": "string",
+                "minLength": 1,
+                "maxLength": 300
+              }
             }
           }
         }

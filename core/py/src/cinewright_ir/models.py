@@ -1172,13 +1172,25 @@ class Sequences(BaseModel):
     value: list[Id] | None = None
 
 
+class Beat(RootModel[str]):
+    root: Annotated[str, Field(max_length=300, min_length=1)]
+
+
 class ProjectPlan(BaseModel):
     model_config = ConfigDict(
         extra="forbid",
     )
     summary: Annotated[str, Field(max_length=4000, min_length=1)]
-    estimate_usd: Annotated[float, Field(ge=0.0)]
+    estimate_usd: Annotated[float | None, Field(ge=0.0)] = None
     fix_reserve_usd: Annotated[float | None, Field(ge=0.0)] = None
+    target_seconds: Annotated[
+        float | None,
+        Field(description="The running time the Producer planned (M7.5a).", ge=1.0),
+    ] = None
+    beats: Annotated[
+        list[Beat] | None,
+        Field(description="The film's argument, one idea per beat, in order (M7.5a)."),
+    ] = None
 
 
 class Plan(BaseModel):
@@ -1876,7 +1888,7 @@ class Lines(BaseModel):
     value: list[Line] | None = None
 
 
-class Beat(BaseModel):
+class BeatModel(BaseModel):
     model_config = ConfigDict(
         extra="forbid",
     )
@@ -2042,7 +2054,7 @@ class Beats(BaseModel):
         extra="forbid",
     )
     state: State
-    value: list[Beat] | None = None
+    value: list[BeatModel] | None = None
 
 
 class Script(BaseModel):
@@ -2167,7 +2179,7 @@ class Project(BaseModel):
     plan: Annotated[
         Plan | None,
         Field(
-            description="The Producer's plan (M7.1b; filled in P1): a summary, the cost estimate and the fix reserve, in USD."
+            description="The Producer's plan (M7.1b; filled in P1, M7.5a): a summary, the running time, the beats, and the cost estimate and fix reserve in USD."
         ),
     ] = None
     instructions: Annotated[

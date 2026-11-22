@@ -44,6 +44,11 @@ export interface AgentDeps {
   signal?: AbortSignal;
   /** The LLM plugin's id, for the spend log (M7.7); default `llm`. */
   plugin?: string;
+  /**
+   * Ops the role may only suggest (M7.5a): stored as a pending patch after the main patch
+   * applies, such as the Producer's pack choice when the user set the pack.
+   */
+  suggest?: ToPatch;
 }
 
 interface Envelope {
@@ -206,8 +211,22 @@ async function runTask(task: Task, deps: AgentDeps, spend: SpendItem[]): Promise
         } as never,
         { scope: { role: role.id, entities: task.entities, writes: role.writes } },
       );
-      if (applied.status === "applied")
-        return { status: "done", revision: applied.revision, cost_usd: cost };
+      if (applied.status === "applied") {
+        const extra = deps.suggest?.(role, envelope.output, store.ir(), task) ?? [];
+        if (extra.length > 0)
+          await store.apply(
+            {
+              base_revision: store.revision(),
+              author: { kind: "agent", role: role.id },
+              mode: "propose",
+              reason: `${role.id}: ${task.id} (suggestion)`,
+              ops: extra,
+              task: { id: task.id, key: task.key, context_hash: pack.hash, run: deps.run },
+            } as never,
+            { scope: { role: role.id, entities: task.entities, writes: role.writes } },
+          );
+        return { status: "done", revision: store.revision(), cost_usd: cost };
+      }
       if (applied.status === "pending")
         return { status: "blocked", pause: { kind: "gate", id: task.id }, cost_usd: cost };
       if (applied.status === "conflict") {

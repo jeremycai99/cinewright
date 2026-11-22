@@ -1,0 +1,12 @@
+{
+  "id": "producer",
+  "version": "1",
+  "tier": "frontier",
+  "reads": ["project.brief", "project.deliverables", "project.budget", "project.style", "packs"],
+  "writes": { "kinds": ["project"], "paths": ["/plan", "/style/pack"] },
+  "per": "project",
+  "token_budget": 8000,
+  "max_output_tokens": 2000,
+  "repairs": 2,
+  "effort": "medium"
+}

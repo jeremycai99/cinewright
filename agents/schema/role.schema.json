@@ -17,15 +17,23 @@
     "repairs"
   ],
   "properties": {
-    "id": { "type": "string", "pattern": "^[a-z][a-z0-9_]*$" },
-    "version": { "type": "string", "minLength": 1 },
-    "tier": { "enum": ["frontier", "mid"] },
+    "id": {
+      "type": "string",
+      "pattern": "^[a-z][a-z0-9_]*$"
+    },
+    "version": {
+      "type": "string",
+      "minLength": 1
+    },
+    "tier": {
+      "enum": ["frontier", "mid"]
+    },
     "reads": {
-      "description": "`<entity kind>.<field>` (a slice of the IR, values with their states), or `pack.rules`, `catalog` or `findings`.",
+      "description": "`<entity kind>.<field>` (a slice of the IR, values with their states), or `pack.rules`, `packs` (the installed packs and their descriptions), `catalog` or `findings`.",
       "type": "array",
       "items": {
         "type": "string",
-        "pattern": "^((project|script|beat|line|cast|sequence|scene|shot|layer)\\.[a-z_]+|pack\\.rules|catalog|findings)$"
+        "pattern": "^((project|script|beat|line|cast|sequence|scene|shot|layer)\\.[a-z_]+|pack\\.rules|packs|catalog|findings)$"
       }
     },
     "writes": {
@@ -33,26 +41,42 @@
       "additionalProperties": false,
       "required": ["kinds", "paths"],
       "properties": {
-        "kinds": { "type": "array", "minItems": 1, "items": { "type": "string" } },
+        "kinds": {
+          "type": "array",
+          "minItems": 1,
+          "items": {
+            "type": "string"
+          }
+        },
         "paths": {
           "type": "array",
           "minItems": 1,
-          "items": { "type": "string", "pattern": "^(/[^/]+)+$" }
+          "items": {
+            "type": "string",
+            "pattern": "^(/[^/]+)+$"
+          }
         }
       }
     },
-    "per": { "enum": ["project", "sequence", "shot"] },
+    "per": {
+      "enum": ["project", "sequence", "shot"]
+    },
     "token_budget": {
       "description": "The most input the context pack may hold, in estimated tokens.",
       "type": "integer",
       "minimum": 1
     },
-    "max_output_tokens": { "type": "integer", "minimum": 1 },
+    "max_output_tokens": {
+      "type": "integer",
+      "minimum": 1
+    },
     "repairs": {
       "description": "Rounds of invalid output returned to the model before the task fails.",
       "type": "integer",
       "minimum": 0
     },
-    "effort": { "enum": ["low", "medium", "high"] }
+    "effort": {
+      "enum": ["low", "medium", "high"]
+    }
   }
 }

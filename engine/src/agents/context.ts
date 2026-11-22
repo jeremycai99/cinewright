@@ -26,6 +26,8 @@ export interface ContextExtras {
   findings?: readonly CriticFinding[];
   /** Notes from rejected gates for this role (M7.6), with the log sequence each is cited by. */
   instructions?: readonly { seq: number; gate: string; text: string }[];
+  /** The installed packs a role may choose from (`packs`, the Producer), with descriptions. */
+  packs?: readonly { id: string; description: string }[];
 }
 
 /** Input tokens a text costs, estimated (the provider counts exactly; this only bounds packs). */
@@ -91,6 +93,10 @@ export function buildContextPack(
       text = extras.pack.rules
         .map((r) => `pack_rule:${extras.pack.id}/${r.id} — ${r.title}`)
         .join("\n");
+    else if (read === "packs")
+      text = JSON.stringify(
+        (extras.packs ?? []).map((p) => ({ id: p.id, description: p.description })),
+      );
     else if (read === "catalog")
       text = JSON.stringify(
         (extras.catalog?.ids() ?? []).map((id) => {

@@ -895,7 +895,7 @@ export interface Project {
     value?: Asset[];
   };
   /**
-   * The Producer's plan (M7.1b; filled in P1): a summary, the cost estimate and the fix reserve, in USD.
+   * The Producer's plan (M7.1b; filled in P1, M7.5a): a summary, the running time, the beats, and the cost estimate and fix reserve in USD.
    */
   plan?: {
     state: State;
@@ -1083,8 +1083,16 @@ export interface Line {
 }
 export interface ProjectPlan {
   summary: string;
-  estimate_usd: number;
+  estimate_usd?: number;
   fix_reserve_usd?: number;
+  /**
+   * The running time the Producer planned (M7.5a).
+   */
+  target_seconds?: number;
+  /**
+   * The film's argument, one idea per beat, in order (M7.5a).
+   */
+  beats?: string[];
 }
 export interface GateInstruction {
   gate: "script" | "storyboard" | "final";
