@@ -1,0 +1,84 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://cinewright.invalid/benchmark/0/brief.schema.json",
+  "title": "Brief",
+  "description": "A tier B benchmark brief (M8.2): what a person would ask for, with its deliverables and home pack. Neutral: no pack id, token name, colour or font in the text (AGENTS.md \u00a72.3).",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "id",
+    "genre",
+    "target_seconds",
+    "deliverables",
+    "pack",
+    "brief",
+    "narrator",
+    "author",
+    "reviewed_by"
+  ],
+  "properties": {
+    "id": {
+      "type": "string",
+      "pattern": "^[a-z][a-z0-9_]*$"
+    },
+    "genre": {
+      "enum": [
+        "explainer",
+        "ad"
+      ]
+    },
+    "target_seconds": {
+      "enum": [
+        15,
+        30,
+        60
+      ]
+    },
+    "deliverables": {
+      "type": "array",
+      "minItems": 1,
+      "items": {
+        "enum": [
+          "landscape_web",
+          "vertical_social"
+        ]
+      }
+    },
+    "pack": {
+      "type": "string",
+      "pattern": "^[a-z][a-z0-9_]*$"
+    },
+    "brief": {
+      "type": "string",
+      "minLength": 40,
+      "maxLength": 2000
+    },
+    "narrator": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "language",
+        "description"
+      ],
+      "properties": {
+        "language": {
+          "type": "string"
+        },
+        "description": {
+          "type": "string"
+        }
+      }
+    },
+    "notes": {
+      "type": "string"
+    },
+    "author": {
+      "type": "string",
+      "minLength": 1
+    },
+    "reviewed_by": {
+      "type": "string",
+      "minLength": 1
+    }
+  }
+}

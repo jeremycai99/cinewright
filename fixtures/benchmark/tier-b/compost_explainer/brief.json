@@ -1,0 +1,17 @@
+{
+  "id": "compost_explainer",
+  "genre": "explainer",
+  "target_seconds": 30,
+  "deliverables": [
+    "vertical_social",
+    "landscape_web"
+  ],
+  "pack": "playful",
+  "brief": "A short, upbeat explainer for people new to gardening on how a home compost pile turns kitchen scraps into soil. Cover the four things it needs: green scraps, brown material such as dry leaves, air, and a little moisture; tiny organisms do the rest. End by noting that turning the pile now and then speeds it up.",
+  "narrator": {
+    "language": "en",
+    "description": "A bright, friendly adult voice"
+  },
+  "author": "An agent session (Claude Code), given only AGENTS.md \u00a74.1 and the coverage matrix (decision 10)",
+  "reviewed_by": "pending: maintainer neutrality review"
+}

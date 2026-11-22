@@ -1,0 +1,28 @@
+{
+  "briefs": [
+    {
+      "id": "tides_explainer",
+      "genre": "explainer",
+      "target_seconds": 60,
+      "pack": "neutral"
+    },
+    {
+      "id": "compost_explainer",
+      "genre": "explainer",
+      "target_seconds": 30,
+      "pack": "playful"
+    },
+    {
+      "id": "library_hours_ad",
+      "genre": "ad",
+      "target_seconds": 15,
+      "pack": "playful"
+    },
+    {
+      "id": "bike_repair_ad",
+      "genre": "ad",
+      "target_seconds": 30,
+      "pack": "neutral"
+    }
+  ]
+}
