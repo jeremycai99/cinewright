@@ -32,12 +32,12 @@ def pack_ids(root: Path) -> list[str]:
     return sorted(p.parent.name for p in (root / "packs").glob("*/pack.json"))
 
 
-def load(root: Path) -> list[dict[str, Any]]:
-    """The briefs in `index.json` order."""
-    index = json.loads((root / TIER_B / "index.json").read_text())
+def load(root: Path, tier_b: Path = TIER_B) -> list[dict[str, Any]]:
+    """The briefs in `index.json` order (default the benchmark suite's)."""
+    index = json.loads((root / tier_b / "index.json").read_text())
     out: list[dict[str, Any]] = []
     for entry in cast(list[dict[str, Any]], index["briefs"]):
-        path = root / TIER_B / str(entry["id"]) / "brief.json"
+        path = root / tier_b / str(entry["id"]) / "brief.json"
         out.append(cast(dict[str, Any], json.loads(path.read_text())))
     return out
 
@@ -111,10 +111,17 @@ def check(root: Path) -> tuple[list[str], str]:
     return errors, matrix(briefs)
 
 
-def init_project(root: Path, brief_id: str, to: Path, cli: list[str], pack: str | None) -> int:
+def init_project(
+    root: Path,
+    brief_id: str,
+    to: Path,
+    cli: list[str],
+    pack: str | None,
+    tier_b: Path = TIER_B,
+) -> int:
     """`cinewright init` with the brief's deliverables and pack, then one user patch setting the
     brief, the narrator and the Auto preset. Returns the CLI's exit code."""
-    brief = json.loads((root / TIER_B / brief_id / "brief.json").read_text())
+    brief = json.loads((root / tier_b / brief_id / "brief.json").read_text())
     profiles = cast(list[str], brief["deliverables"])
     args = [*cli, "init", str(to), "--id", brief_id, "--pack", pack or str(brief["pack"])]
     for profile in profiles:

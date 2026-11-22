@@ -59,6 +59,12 @@ def test_flags_personal_fixture_references(tmp_path: Path) -> None:
     ]
 
 
+def test_only_the_suite_resolver_may_name_the_personal_fixtures(tmp_path: Path) -> None:
+    write(tmp_path, "eval/src/cinewright_eval/suites.py", f"P = '{PERSONAL}'\n")
+    write(tmp_path, "eval/src/cinewright_eval/tier_a.py", f"P = '{PERSONAL}/x'\n")
+    assert [v.path for v in find_violations(tmp_path)] == ["eval/src/cinewright_eval/tier_a.py"]
+
+
 def test_ignores_personal_path_in_comments(tmp_path: Path) -> None:
     write(
         tmp_path,

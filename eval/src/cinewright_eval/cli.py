@@ -15,6 +15,7 @@ from cinewright_eval.briefs import check as check_briefs
 from cinewright_eval.briefs import init_project
 from cinewright_eval.cas_export import ExportError, export
 from cinewright_eval.snapshot import SnapshotError, snapshot
+from cinewright_eval.suites import SuiteError, refuse_personal
 from cinewright_eval.tier_a import TierAOptions, run_tier_a
 from cinewright_eval.tier_b import TierBOptions, run_tier_b
 from cinewright_eval.tier_b import compare as compare_tier_b
@@ -33,6 +34,7 @@ def main(argv: list[str] | None = None) -> int:
     tier.add_argument("--runner-class", default="linux-amd64")
     tier.add_argument("--out", type=Path, default=Path("tier-a-report"))
     tier.add_argument("--update-expected", action="store_true")
+    tier.add_argument("--suite", choices=["benchmark", "personal"], default="benchmark")
     tier.add_argument(
         "--cache", type=Path, default=None, help="render caches (default: <root>/.tier-a-cache)"
     )
@@ -49,6 +51,7 @@ def main(argv: list[str] | None = None) -> int:
     rec.add_argument("--pins", required=True, type=Path, help="JSON of the pinned versions (D36)")
     rec.add_argument("--floor", type=int, default=2)
     rec.add_argument("--out", required=True, type=Path)
+    rec.add_argument("--suite", choices=["benchmark", "personal"], default="benchmark")
     chk = base_sub.add_parser("check", help="runs against a baseline's thresholds")
     chk.add_argument("runs", nargs="+", type=Path)
     chk.add_argument("--against", required=True, type=Path)
@@ -68,6 +71,7 @@ def main(argv: list[str] | None = None) -> int:
     snap.add_argument("--root", type=Path, default=Path.cwd())
     tb = sub.add_parser("tier-b", help="briefs through live agents and providers (M8.3b)")
     tb.add_argument("--mode", choices=["nightly", "release"], default="release")
+    tb.add_argument("--suite", choices=["benchmark", "personal"], default="benchmark")
     tb.add_argument("--brief", action="append", default=[], help="only this brief id")
     tb.add_argument("--runs", type=int, default=None, help="home-pack runs per brief")
     tb.add_argument("--cap-usd", type=float, default=3.0, help="each run's budget cap")
@@ -94,6 +98,7 @@ def main(argv: list[str] | None = None) -> int:
                 cap_usd=args.cap_usd,
                 month_cap_usd=args.month_cap_usd,
                 parallel=args.parallel,
+                suite=args.suite,
             )
         )
     if args.command == "compare":
@@ -122,6 +127,12 @@ def main(argv: list[str] | None = None) -> int:
         print(folder)
         return 0
     if args.command == "baseline":
+        if args.action == "record":
+            try:
+                refuse_personal(args.suite, "record a baseline")
+            except SuiteError as error:
+                print(f"cinewright-eval baseline: {error}", file=sys.stderr)
+                return 2
         runs = load_runs(args.runs)
         if args.action == "record":
             doc = record(runs, json.loads(args.pins.read_text()), args.floor)
@@ -144,6 +155,7 @@ def main(argv: list[str] | None = None) -> int:
                 runner_class=args.runner_class,
                 fixtures=args.fixture,
                 update_expected=args.update_expected,
+                suite=args.suite,
             )
         )
     try:

@@ -3,6 +3,9 @@ import os
 import sys
 from pathlib import Path
 
+import pytest
+
+from cinewright_eval.cli import main
 from cinewright_eval.tier_b import TierBOptions, compare, run_tier_b
 
 ROOT = Path(__file__).resolve().parents[2]
@@ -107,3 +110,44 @@ def test_compare_fails_on_one_regressed_category_even_if_the_average_rises() -> 
     }
     assert compare(report_doc, baseline) == ["genre=explainer: vision legibility 3.2 < 3.5"]
     assert compare({"by_category": {}}, baseline)[0] == "genre=explainer: not run"
+
+
+def test_the_personal_suite_never_gates(tmp_path: Path) -> None:
+    from cinewright_eval.suites import SuiteError, refuse_personal, suite_root
+
+    root = tmp_path / "repo"
+    (root / "packs" / "neutral").mkdir(parents=True)
+    (root / "packs" / "neutral" / "pack.json").write_text("{}")
+    (root / "packs" / "playful").mkdir(parents=True)
+    (root / "packs" / "playful" / "pack.json").write_text("{}")
+    briefs = root / suite_root("personal") / "tier-b"
+    src = ROOT / "fixtures" / "benchmark" / "tier-b" / "bike_repair_ad"
+    (briefs / "mine").mkdir(parents=True)
+    brief = json.loads((src / "brief.json").read_text())
+    (briefs / "mine" / "brief.json").write_text(json.dumps({**brief, "id": "mine"}))
+    (briefs / "index.json").write_text(json.dumps({"briefs": [{"id": "mine"}]}))
+    env = {"STUB_TIER_B": json.dumps({"mine": "paused"})}
+    opts = options(tmp_path, mode="release", month_cap_usd=100, cap_usd=1, env=env)
+    opts.root = root
+    opts.suite = "personal"
+    # Every run pauses, which fails a benchmark brief; the personal suite still exits 0.
+    assert run_tier_b(opts) == 0
+    assert report(tmp_path)["suite"] == "personal, not gating"
+    with pytest.raises(SuiteError, match="cannot record a baseline"):
+        refuse_personal("personal", "record a baseline")
+    assert (
+        main(
+            [
+                "baseline",
+                "record",
+                "x.json",
+                "--pins",
+                "p.json",
+                "--out",
+                "o.json",
+                "--suite",
+                "personal",
+            ]
+        )
+        == 2
+    )

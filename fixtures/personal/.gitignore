@@ -1,0 +1,8 @@
+# Personal fixtures keep their media and caches out of git (M8.4).
+*.mp4
+*.mov
+*.wav
+*.mp3
+*.png
+*.jpg
+**/.cinewright/

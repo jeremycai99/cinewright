@@ -25,6 +25,7 @@ from pathlib import Path
 from typing import Any, cast
 
 from cinewright_eval.briefs import PROFILES, init_project, load, pack_ids
+from cinewright_eval.suites import gating, suite_root
 
 Json = dict[str, Any]
 
@@ -44,6 +45,7 @@ class TierBOptions:
     month_cap_usd: float = 25.0
     parallel: int = 2
     env: dict[str, str] | None = None
+    suite: str = "benchmark"
 
 
 @dataclass
@@ -107,7 +109,8 @@ def _run(opts: TierBOptions, plan: Planned, folder: Path) -> Json:
         "escalated": 0,
         "hashes": {},
     }
-    if init_project(opts.root, str(brief["id"]), project, opts.cli, plan.pack) != 0:
+    tier_b = suite_root(opts.suite) / "tier-b"
+    if init_project(opts.root, str(brief["id"]), project, opts.cli, plan.pack, tier_b) != 0:
         result["error"] = "init"
         return result
     p = ["--project", str(project)]
@@ -226,7 +229,8 @@ def run_tier_b(opts: TierBOptions) -> int:
     """Run the briefs; write `tier-b.json`. Exit 0 on a clean (or nightly) run, 1 when release mode
     has a failing or skipped brief, 2 when every run failed on the provider (not evaluated)."""
     packs = pack_ids(opts.root)
-    briefs = [b for b in load(opts.root) if not opts.briefs or b["id"] in opts.briefs]
+    tier_b = suite_root(opts.suite) / "tier-b"
+    briefs = [b for b in load(opts.root, tier_b) if not opts.briefs or b["id"] in opts.briefs]
     planned = plan_runs(opts, briefs, packs)
     spent = 0.0
     skipped: list[str] = []
@@ -260,6 +264,7 @@ def run_tier_b(opts: TierBOptions) -> int:
     all_runs = [r for rs in results.values() for r in rs]
     report: Json = {
         "mode": opts.mode,
+        "suite": opts.suite if gating(opts.suite) else f"{opts.suite}, not gating",
         "briefs": summary["briefs"],
         "by_category": summary["by_category"],
         "skipped": skipped,
@@ -270,6 +275,9 @@ def run_tier_b(opts: TierBOptions) -> int:
     if all_runs and all(r.get("error") == "provider_error" for r in all_runs):
         print("cinewright-eval tier-b: every run failed on the provider: not evaluated")
         return 2
+    if not gating(opts.suite):
+        print(f"cinewright-eval tier-b: {opts.suite}, not gating")
+        return 0
     if opts.mode == "nightly":
         return 0
     failing = [b["id"] for b in summary["briefs"] if b["deterministic_pass_rate"] != 1]
