@@ -1,5 +1,5 @@
 import type { RoleDefinition } from "@cinewright/agents";
-import type { InlinedIr } from "@cinewright/core";
+import { type InlinedIr, sha256Hash } from "@cinewright/core";
 import { Ajv2020, type ValidateFunction } from "ajv/dist/2020.js";
 import type { Task } from "../runtime/types.js";
 import { envelopeSchema } from "./context.js";
@@ -27,10 +27,12 @@ export function validateOutput(
   task: Task,
   semantic?: SemanticCheck,
 ): OutputError[] {
-  const key = `${role.id}@${role.version}`;
+  // Keyed by the schema itself: some roles' schemas differ per task (the Shot Builder's, M7.5c).
+  const schema = envelopeSchema(role);
+  const key = sha256Hash(schema);
   let validate = compiled.get(key);
   if (!validate) {
-    validate = ajv.compile(envelopeSchema(role));
+    validate = ajv.compile(schema);
     compiled.set(key, validate);
   }
   if (!validate(envelope))

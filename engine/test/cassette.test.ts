@@ -90,6 +90,15 @@ describe("cassettes (M7.3, Review Focus 5)", () => {
     expect(offline.calls).toBe(0);
   });
 
+  it("records only misses: an existing cassette answers in record mode with no provider call", async () => {
+    const dir = tmp();
+    await withCassettes(inner(true), { dir, mode: "record" }).call(generate(request()), signal);
+    const again = inner(true);
+    const recorder = withCassettes(again, { dir, mode: "record" });
+    expect(await recorder.call(generate(request()), signal)).toEqual({ ok: true, result: RESULT });
+    expect(again.calls).toBe(0);
+  });
+
   it("names the hash on a replay miss", async () => {
     const dir = tmp();
     const player = withCassettes(inner(false), { dir, mode: "replay" });

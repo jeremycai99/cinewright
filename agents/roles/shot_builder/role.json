@@ -1,0 +1,27 @@
+{
+  "id": "shot_builder",
+  "version": "1",
+  "tier": "mid",
+  "reads": [
+    "shot.type",
+    "shot.framing",
+    "shot.layout",
+    "scene.intent",
+    "scene.lines",
+    "line.text",
+    "line.on_screen_text",
+    "layer.component",
+    "pack.rules",
+    "pack.layouts",
+    "catalog"
+  ],
+  "writes": {
+    "kinds": ["layer"],
+    "paths": ["/props/*", "/timing", "/layout/*", "/style/overrides/*"]
+  },
+  "per": "shot",
+  "token_budget": 30000,
+  "max_output_tokens": 4000,
+  "repairs": 2,
+  "effort": "medium"
+}

@@ -99,6 +99,12 @@ export function buildContextPack(
           id,
           description: t.description,
           aspects: Object.keys(t.variants),
+          regions: Object.fromEntries(
+            Object.entries(t.variants).map(([aspect, v]) => [
+              aspect,
+              Object.keys((v as { regions?: Record<string, unknown> }).regions ?? {}),
+            ]),
+          ),
         })),
       );
     else if (read === "packs")

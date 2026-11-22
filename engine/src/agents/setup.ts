@@ -10,7 +10,7 @@ import { loadTemplate } from "../reconcile/data.js";
 import type { TaskExecutor } from "../run.js";
 import { cassetteOptions, withCassettes } from "./cassette.js";
 import { agentExecutor, llmCall } from "./executor.js";
-import { ROLE_SUGGEST, ROLE_TO_PATCH, roleChecks } from "./roles/index.js";
+import { ROLE_SUGGEST, ROLE_TO_PATCH, roleChecks, roleOutputs } from "./roles/index.js";
 
 /** Every pack in the search path, first folder first, with its description (the Producer reads it). */
 export function installedPacks(dirs: readonly string[]): { id: string; description: string }[] {
@@ -61,6 +61,7 @@ export function v01Agents(options: {
       packs.map((p) => p.id),
       options.catalog,
     ),
+    ...(options.catalog ? { outputFor: roleOutputs(options.catalog) } : {}),
     llm: llmCall(pool, options.llm),
     plugin: options.llm.manifest.id,
     extras: (task, store) => {

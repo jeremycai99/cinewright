@@ -1,5 +1,5 @@
 import type { RoleDefinition } from "@cinewright/agents";
-import type { Store } from "@cinewright/core";
+import type { InlinedIr, Store } from "@cinewright/core";
 import type { PluginResponse } from "@cinewright/plugin-sdk";
 import { PluginCallError, type PluginPool } from "../plugins/pool.js";
 import type { FoundPlugin } from "../plugins/registry.js";
@@ -8,6 +8,9 @@ import type { Task } from "../runtime/types.js";
 import type { ContextExtras } from "./context.js";
 import { type LlmCall, runAgentTask, type ToPatch } from "./runner.js";
 import type { SemanticCheck } from "./validate.js";
+
+/** A role's output schema for one task, built from the IR. */
+export type OutputFor = (ir: InlinedIr, task: Task) => Record<string, unknown>;
 
 /** `llm.generate` on a plugin through a pool, as an `LlmCall`; typed errors stay responses. */
 export function llmCall(pool: PluginPool, plugin: FoundPlugin): LlmCall {
@@ -30,6 +33,11 @@ export function agentExecutor(options: {
   roles: ReadonlyMap<string, RoleDefinition>;
   toPatch: Readonly<Record<string, ToPatch>>;
   checks?: Readonly<Record<string, SemanticCheck>>;
+  /**
+   * Per role, the output schema for one task when it depends on the IR (M7.5c: the Shot
+   * Builder's is a union over the components its shot chose). Default: `output.schema.json`.
+   */
+  outputFor?: Readonly<Record<string, OutputFor>>;
   /** Per role, ops it may only suggest (`AgentDeps.suggest`). */
   suggest?: Readonly<Record<string, ToPatch>>;
   llm: LlmCall;
@@ -50,10 +58,12 @@ export function agentExecutor(options: {
         },
       };
     const check = task.role ? options.checks?.[task.role] : undefined;
+    const outputFor = task.role ? options.outputFor?.[task.role] : undefined;
+    const roleForTask = outputFor ? { ...role, output: outputFor(store.ir(), task) } : role;
     return runAgentTask(task, {
       store,
       llm: options.llm,
-      role,
+      role: roleForTask,
       toPatch,
       run,
       extras: typeof options.extras === "function" ? options.extras(task, store) : options.extras,

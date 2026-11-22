@@ -134,6 +134,12 @@ export function inScope(
 ): EntityRef[] {
   if (scope === null || scope.kind === "project") return all.filter((e) => e.kind === kind);
   if (scope.kind === kind) return [scope];
+  // Lines are not under scenes: a scene (or a shot in it) reads the lines its `lines` names.
+  const scene = scope.kind === "scene" ? scope : scope.parents.find((p) => p.kind === "scene");
+  if (kind === "line" && scene) {
+    const ids = new Set(unwrap(scene.node.lines) as string[] | undefined);
+    return all.filter((e) => e.kind === "line" && ids.has(e.id));
+  }
   const above = scope.parents.find((p) => p.kind === kind);
   if (above) return [above];
   return all.filter((e) => e.kind === kind && e.parents.some((p) => p.id === scope.id));

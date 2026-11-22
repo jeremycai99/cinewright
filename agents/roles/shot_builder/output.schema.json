@@ -1,0 +1,7 @@
+{
+  "description": "Placeholder: the engine builds each task's schema from the shot's layer stubs and the catalog (engine/src/agents/schema/layers.ts).",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["layers"],
+  "properties": { "layers": { "type": "array", "items": { "type": "object" } } }
+}

@@ -175,24 +175,27 @@ describe("the v0.1 agents with a scripted model (M7.5a)", () => {
     expect(first.ir().plan?.value?.target_seconds).toBe(14);
     expect(first.ir().script.beats.value?.[0]?.lines.value).toHaveLength(3);
     decisionsCite(first);
-    expect(readdirSync(cassettes)).toHaveLength(2);
+    expect(readdirSync(cassettes)).toHaveLength(2); // the Producer and the Writer
 
     const second = await project("neutral");
     expect(await toScriptGate(second, "neutral", llm, "replay", cassettes)).toEqual(GATE);
     expect(stateHash(second.ir())).toBe(stateHash(first.ir()));
 
-    // Approving the script gate lets the run go on: the Director plans the scenes, and the run
-    // stops at P5, whose Shot Builder has no role yet (M7.5c).
+    // Approving the script gate lets the run go on: the Director plans the scenes, the Shot
+    // Builder fills each shot's layer stubs, the Editor times the scene, and the run pauses at
+    // the storyboard gate (the jobs are stubbed).
     await approveGate(first, loadTemplate("explainer"), "script", { author: { kind: "user" } });
     const next = await toScriptGate(first, "neutral", llm, "record", cassettes);
-    expect(next, JSON.stringify(next)).toMatchObject({
-      status: "failed",
-      error: { code: "agent.no_role" },
+    expect(next, JSON.stringify(next)).toEqual({
+      status: "paused",
+      pause: { kind: "gate", id: "gate:storyboard" },
     });
     const scene = first.ir().sequences.value?.[0]?.scenes.value?.[0];
     expect(scene?.shots.value?.map((s) => s.id)).toEqual(["s01.sh01", "s01.sh02"]);
-    // Scene timing is the Editor's (P6).
-    expect(scene?.duration.state).toBe("open");
+    expect(scene?.duration.value).toEqual({ target: 16 * 30, flex: 0.25, sync: "voiceover" });
+    const layer = scene?.shots.value?.[1]?.layers.value?.[0];
+    expect(layer?.props?.text?.value).toBe("More heat than power");
+    expect(layer?.timing?.value?.enter.line).toBe("b01.l03");
 
     // Replay never reaches the model: with the cassettes gone the Producer fails on a miss.
     const third = await project("neutral");
@@ -208,7 +211,7 @@ const recorded = (packId: string) =>
 
 describe.each(["neutral", "playful"])("the development brief under %s (M7.5a)", (packId) => {
   it.skipIf(!RECORD && !recorded(packId))(
-    "runs the Producer and Writer to the script gate and reproduces the recorded state",
+    "runs the agents to the script gate, and past it to the storyboard gate once recorded, reproducing the recorded states",
     async () => {
       const store = await project(packId);
       const llm = await findPlugins("llm", [join(ROOT, "plugins")]);
@@ -225,10 +228,44 @@ describe.each(["neutral", "playful"])("the development brief under %s (M7.5a)", 
       expect(ir.plan?.value?.summary).toBeTruthy();
       expect((ir.script.beats.value ?? []).length).toBeGreaterThan(0);
       decisionsCite(store);
-      const state = join(CASSETTES, packId, "state.json");
-      if (RECORD) writeFileSync(state, `${JSON.stringify({ g1: stateHash(ir) }, null, 2)}\n`);
-      else
-        expect(stateHash(ir)).toBe((JSON.parse(readFileSync(state, "utf8")) as { g1: string }).g1);
+      const file = join(CASSETTES, packId, "state.json");
+      const saved = (existsSync(file) ? JSON.parse(readFileSync(file, "utf8")) : {}) as {
+        g1?: string;
+        g2?: string;
+      };
+      if (RECORD) saved.g1 = stateHash(ir);
+      else expect(stateHash(ir)).toBe(saved.g1);
+
+      // Past the script gate (M7.5c): the Director, Shot Builder and Editor to the storyboard
+      // gate, the jobs stubbed. Recorded once G2 is in state.json; record mode adds it, calling
+      // the provider only for requests not yet recorded.
+      if (RECORD || saved.g2) {
+        await approveGate(store, loadTemplate("explainer"), "script", { author: { kind: "user" } });
+        const next = await toScriptGate(
+          store,
+          packId,
+          llm,
+          RECORD ? "record" : "replay",
+          join(CASSETTES, packId),
+          RECORD ? process.env : {},
+        );
+        expect(next, JSON.stringify(next)).toEqual({
+          status: "paused",
+          pause: { kind: "gate", id: "gate:storyboard" },
+        });
+        const scenes = store.ir().sequences.value?.flatMap((q) => q.scenes.value ?? []) ?? [];
+        expect(scenes.length).toBeGreaterThan(0);
+        for (const scene of scenes) {
+          expect(scene.duration.state).toBe("agent");
+          for (const shot of scene.shots.value ?? [])
+            for (const layer of shot.layers.value ?? [])
+              expect(Object.keys(layer.props ?? {}).length).toBeGreaterThan(0);
+        }
+        decisionsCite(store);
+        if (RECORD) saved.g2 = stateHash(store.ir());
+        else expect(stateHash(store.ir())).toBe(saved.g2);
+      }
+      if (RECORD) writeFileSync(file, `${JSON.stringify(saved, null, 2)}\n`);
     },
     600_000,
   );

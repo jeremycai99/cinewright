@@ -1,7 +1,7 @@
 import { loadRoles, type RoleDefinition } from "@cinewright/agents";
 import type { Catalog, Pack, Store } from "@cinewright/core";
 import { Ajv2020 } from "ajv/dist/2020.js";
-import { ROLE_TO_PATCH, roleChecks } from "../agents/roles/index.js";
+import { ROLE_TO_PATCH, roleChecks, roleOutputs } from "../agents/roles/index.js";
 import type { ToPatch } from "../agents/runner.js";
 import { installedPacks } from "../agents/setup.js";
 import type { SemanticCheck } from "../agents/validate.js";
@@ -94,5 +94,11 @@ export async function submitForRole(
     options.catalog,
   );
   const check = checks[role.id];
-  return submitHumanTask(store, task, output, { role, toPatch, ...(check ? { check } : {}) });
+  const outputFor = options.catalog ? roleOutputs(options.catalog)[role.id] : undefined;
+  const typed = outputFor ? { ...role, output: outputFor(store.ir(), task) } : role;
+  return submitHumanTask(store, task, output, {
+    role: typed,
+    toPatch,
+    ...(check ? { check } : {}),
+  });
 }

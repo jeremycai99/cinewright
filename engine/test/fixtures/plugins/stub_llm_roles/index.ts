@@ -1,4 +1,4 @@
-// A scripted LLM for the engine's tests (M7.5a–b): answers as the Producer, Writer or Director, chosen by
+// A scripted LLM for the engine's tests (M7.5a–b): answers as the Producer, Writer, Director, Shot Builder or Editor, chosen by
 // the system prompt, with outputs that pass their checks. Every call is counted in `CALLS`.
 import type { GenerateRequest } from "../../../../../plugins/sdk-ts/src/kinds/llm.js";
 import type {
@@ -74,6 +74,45 @@ const DIRECTOR = {
   ],
 };
 
+const EDITOR = {
+  output: {
+    scenes: [{ id: "s01", duration: { target_seconds: 16, flex: 0.25, sync: "voiceover" } }],
+  },
+  decisions: [
+    {
+      about: ["s01"],
+      choice: "time the scene to its narration",
+      citations: ["craft_rule:rhythm.hold_to_read"],
+    },
+  ],
+};
+
+/** The Shot Builder's answer for the shot its context names. */
+function shotBuilder(text: string) {
+  const shot = /"id":"(s\d+\.sh\d+)"/.exec(text)?.[1] ?? "s01.sh01";
+  const line = shot === "s01.sh01" ? "b01.l01" : "b01.l03";
+  return {
+    output: {
+      layers: [
+        {
+          id: `${shot}.l1`,
+          component: "kinetic_title",
+          props: { text: shot === "s01.sh01" ? "Heat is moved" : "More heat than power" },
+          timing: { enter: { line, point: "start", offset: 0 } },
+          layout: { landscape: { region: "title" } },
+        },
+      ],
+    },
+    decisions: [
+      {
+        about: [`${shot}.l1`],
+        choice: "title the claim",
+        citations: ["craft_rule:hierarchy.supports_line"],
+      },
+    ],
+  };
+}
+
 export function createPlugin(): Plugin {
   return {
     async init() {},
@@ -84,11 +123,19 @@ export function createPlugin(): Plugin {
       if (request.method === "llm.estimate") return { ok: true, result: { usd_max: 0 } };
       const p = request.params as GenerateRequest;
       CALLS.count += 1;
+      const said = p.messages
+        .flatMap((m) => m.content)
+        .map((c) => (c.type === "text" ? c.text : ""))
+        .join("\n");
       const output = p.system.includes("You are the Producer")
         ? PRODUCER
         : p.system.includes("You are the Director")
           ? DIRECTOR
-          : WRITER;
+          : p.system.includes("You are the Shot Builder")
+            ? shotBuilder(said)
+            : p.system.includes("You are the Editor")
+              ? EDITOR
+              : WRITER;
       return {
         ok: true,
         result: {
