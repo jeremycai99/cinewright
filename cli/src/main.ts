@@ -9,6 +9,7 @@ import {
 } from "./commands/compile.js";
 import { COMPONENTS_USAGE, components } from "./commands/components.js";
 import { COMPOSE_USAGE, compose } from "./commands/compose.js";
+import { DOCTOR_USAGE, doctor } from "./commands/doctor.js";
 import { EXPORT_USAGE, exportCommand } from "./commands/export.js";
 import { INIT_USAGE, init } from "./commands/init.js";
 import { LOG_USAGE, log } from "./commands/log.js";
@@ -49,6 +50,7 @@ const COMMANDS: Record<string, (argv: string[], io: Io) => Promise<number>> = {
   export: exportCommand,
   log,
   assets,
+  doctor,
 };
 const USAGE = [
   `cinewright ${VERSION}`,
@@ -73,6 +75,7 @@ const USAGE = [
   EXPORT_USAGE,
   LOG_USAGE,
   ASSETS_USAGE,
+  DOCTOR_USAGE,
 ].join("\n");
 
 /** Run one CLI invocation and return its exit code (cli/README.md). */

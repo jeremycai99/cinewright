@@ -37,7 +37,10 @@ cinewright tasks submit <id> --file <output.json> [--project <dir>]
 cinewright export --to <dir> [--deliverable <id>]... [--image <ref>] [--plugins <dir>]... [--project <dir>] [--json]
 cinewright log [--decisions | --patches | --events | --spend | --findings] [--entity <id>] [--run <id>] [--limit <n>] [--project <dir>] [--json]
 cinewright assets prune [--dry-run] [--project <dir>] [--json]
+cinewright doctor [--image <ref>] [--plugins <dir>]... [--json]
 ```
+
+`doctor` (M8.5) checks this machine: Docker reachable, the render and audio images present at the digests locked in `container/image.lock.json` and `container/audio/image.lock.json` (or `--image`, `CINEWRIGHT_IMAGE` and `CINEWRIGHT_AUDIO_IMAGE`), the Node version against `.node-version`, Python, each installed plugin's secrets by name (never their values), and the CAS remote in `CINEWRIGHT_CAS_REMOTE`. It exits 0 when a keyless Manual render can work and 3 otherwise; each failing check names what is missing and how to fix it. Missing keys and an unreachable remote are reported as warnings: only agents and tier A fixtures need them. `docs/SETUP.md` is the setup guide.
 
 `init` writes a budget cap (D17): `--budget <usd>`, else the engine's default, `default_budget_usd` in `engine/settings.json` ($5). `--workflow <id>` sets `settings.workflow` to a template in `engine/templates/` (`explainer`, `ad`). `--deliverable` takes a delivery profile name from `registry/profiles/` (`landscape_web`, `vertical_social`; see `registry/README.md`) or a path to a profile file: anything with a `/` or ending in `.json`. An unknown name exits 2 and lists the names. `--pack` chooses the style pack (default `neutral`): `init` sets `style.pack` and pins the pack's version and content hash in `packs`, so a later change to the pack never silently changes the project. When a pack changes on disk, compiling fails with `pack.pin_mismatch` until `cinewright pack pin <id>` records the new pin as a new revision. Packs are found in each folder of `CINEWRIGHT_PACK_PATH` (separated like `PATH`), then in the repository's `packs/`.
 

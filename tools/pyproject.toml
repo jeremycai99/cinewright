@@ -17,6 +17,7 @@ cinewright-render-in-container = "cinewright_tools.container:main"
 cinewright-check-in-container = "cinewright_tools.container:check_main"
 cinewright-check-specimens = "cinewright_tools.specimens:main"
 cinewright-check-image-lock = "cinewright_tools.image_lock:main"
+cinewright-setup-doc = "cinewright_tools.setup_doc:main"
 
 [build-system]
 requires = ["uv_build==0.13.8"]

@@ -4,6 +4,8 @@ An open-source, agent-driven production framework for professional video: multi-
 
 **Status:** v0.1 in progress. M0 (repository, CI and the render container) and M1 (IR v0) are done. M2 (style system v0: pack format, the neutral and playful packs, the component library) is done. M2.5 (fixes from the 2026-11-16 audit, `docs/plans/roadmap-audit-2026-11-16.md`) comes next, then M3 (HyperFrames backend). See `docs/HANDOFF.md`.
 
+To set it up on a new machine and render a first video, follow `docs/SETUP.md` (CI runs it on a bare runner).
+
 ## Where things are
 
 | Path | What it holds |

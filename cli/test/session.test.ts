@@ -66,6 +66,7 @@ describe("the command list (M8.1)", () => {
       "tasks",
       "log",
       "assets",
+      "doctor",
     ])
       expect(
         fromHelp.some((l) => l.startsWith(`cinewright ${command} `)),
@@ -142,5 +143,30 @@ describe("status, log, assets and export (M8.1)", () => {
     expect(valid("export", json)).toEqual([]);
     expect(json.status).toBe("blocked");
     expect((await run(["export", "--project", dir], ENV)).code).toBe(EXIT.usage);
+  });
+});
+
+describe("doctor (M8.5)", () => {
+  it("prints a report that matches its schema, names missing keys by name, and exits 0 or 3 by ok", async () => {
+    const r = await run(["doctor", "--json"], { CINEWRIGHT_CAS_REMOTE: "file:///nowhere/x/{hex}" });
+    const report = JSON.parse(r.stdout) as {
+      ok: boolean;
+      checks: { id: string; ok: boolean; required: boolean; detail: string }[];
+    };
+    expect(valid("doctor", report)).toEqual([]);
+    expect(r.code).toBe(report.ok ? EXIT.ok : EXIT.invalid);
+    const llm = report.checks.find((c) => c.id === "plugin.llm_anthropic");
+    expect(llm).toMatchObject({ ok: false, required: false });
+    expect(llm?.detail).toContain("ANTHROPIC_API_KEY");
+    expect(report.checks.find((c) => c.id === "cas_remote")).toMatchObject({ ok: false });
+    for (const id of ["docker", "image.render", "image.audio", "node"])
+      expect(report.checks.find((c) => c.id === id)?.required, id).toBe(true);
+  });
+
+  it("names an image it cannot find with the command that pulls it", async () => {
+    const r = await run(["doctor"], { CINEWRIGHT_IMAGE: "cinewright-render:never-built" });
+    expect(r.code).toBe(EXIT.invalid);
+    expect(r.stdout).toMatch(/FAIL image\.render: .*never-built/);
+    expect(r.stdout).toContain("docker pull --platform linux/amd64 cinewright-render:never-built");
   });
 });

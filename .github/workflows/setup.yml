@@ -1,0 +1,83 @@
+name: setup
+
+# Clean machine (M8.5, Review Focus 4): a bare ubuntu-24.04 runner runs docs/SETUP.md exactly as
+# written (cinewright-setup-doc), so the guide cannot drift. The workflow adds only what the
+# guide's prerequisites ask for (Node at .node-version, uv; Docker and git come with the runner)
+# and the ghcr.io login a private repository needs. No secret is set: the keyed step is skipped,
+# and the tier A step is skipped until the fixtures land (A.2).
+
+on:
+  pull_request:
+    paths:
+      - docs/SETUP.md
+      - docs/setup/**
+      - cli/**
+      - core/src/**
+      - core/schema/**
+      - engine/**
+      - plugins/**
+      - packs/**
+      - components/**
+      - container/**
+      - registry/**
+      - tools/**
+      - eval/**
+      - .node-version
+      - .python-version
+      - package.json
+      - pnpm-lock.yaml
+      - pnpm-workspace.yaml
+      - pyproject.toml
+      - uv.lock
+      - tsconfig.base.json
+      - .github/workflows/setup.yml
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  packages: read
+
+concurrency:
+  group: setup-${{ github.ref }}
+  cancel-in-progress: ${{ github.event_name == 'pull_request' }}
+
+jobs:
+  setup:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 90
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      - name: "Prerequisite: Node at .node-version"
+        uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7.1.0
+        with:
+          node-version-file: .node-version
+      - name: "Prerequisite: uv"
+        uses: astral-sh/setup-uv@68559e99cc807c1eb7e9238fd43a15bba460eec2 # v10.3.3
+        with:
+          version-file: pyproject.toml
+      - name: Log in to ghcr.io (the images are private while the repository is)
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: echo "$GH_TOKEN" | docker login ghcr.io --username "$GITHUB_ACTOR" --password-stdin
+      - name: Run docs/SETUP.md
+        env:
+          WORK: ${{ runner.temp }}/work
+          CINEWRIGHT_CAS_REMOTE: ${{ vars.CINEWRIGHT_CAS_REMOTE }}
+        run: |
+          mkdir -p "$WORK"
+          skip=(--skip keyed)
+          if [ ! -f fixtures/benchmark/tier-a/index.json ]; then
+            skip+=(--skip fixture)
+            echo "Tier A has no fixtures yet (A.2): the fixture step is skipped." >> "$GITHUB_STEP_SUMMARY"
+          fi
+          uv run --locked cinewright-setup-doc "${skip[@]}"
+      - uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
+        if: always()
+        with:
+          name: setup-export
+          path: ${{ runner.temp }}/work/hello-export
+          if-no-files-found: ignore

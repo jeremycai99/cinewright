@@ -206,3 +206,11 @@ export {
 export { pendingTasks, submitForRole, submitHumanTask } from "./tasks/queue.js";
 
 export const VERSION = "0.0.0";
+export {
+  type DoctorCheck,
+  type DoctorOptions,
+  type DoctorProbes,
+  type DoctorReport,
+  doctor,
+  systemProbes,
+} from "./doctor.js";
