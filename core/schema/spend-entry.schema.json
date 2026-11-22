@@ -1,0 +1,34 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://cinewright.invalid/ir/0/spend-entry.schema.json",
+  "title": "SpendEntry",
+  "description": "One paid provider call in `log/spend.jsonl` (M7.7, D17): append-only and tracked with the other logs, so spend survives deleting `.cinewright/runs/`. `prev` is the previous entry's `hash` and `hash` is the hash of this entry without it, so a rewritten line fails to load. Ids and amounts only: no prompt, output or secret.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["seq", "at", "run", "task", "key", "plugin", "unit", "units", "usd", "prev", "hash"],
+  "properties": {
+    "seq": { "type": "integer", "minimum": 1 },
+    "at": { "type": "string", "minLength": 1 },
+    "run": { "type": "string", "pattern": "^[A-Za-z0-9_.-]{1,128}$" },
+    "task": { "type": "string", "minLength": 1, "maxLength": 256 },
+    "key": { "type": "string", "minLength": 1, "maxLength": 256 },
+    "plugin": { "type": "string", "pattern": "^[a-z][a-z0-9_]*$" },
+    "model": {
+      "description": "The model id the plugin reports, when it reports one.",
+      "type": "string",
+      "maxLength": 128
+    },
+    "unit": {
+      "description": "The plugin's cost unit (`token`, `character`, ...).",
+      "type": "string",
+      "pattern": "^[a-z_]+$"
+    },
+    "units": { "type": "number", "minimum": 0 },
+    "usd": { "type": "number", "minimum": 0 },
+    "prev": {
+      "description": "The previous entry's hash; null for the first.",
+      "anyOf": [{ "$ref": "common.schema.json#/$defs/hash" }, { "type": "null" }]
+    },
+    "hash": { "$ref": "common.schema.json#/$defs/hash" }
+  }
+}

@@ -19,8 +19,10 @@ export const EXIT = {
   provider: 9,
   /** `cinewright render` finished, and a critic reported an error finding (M6.1a). */
   findings: 10,
-  /** A workflow run paused: at a gate, for a human task, or at the budget cap (M7.1a). */
+  /** A workflow run paused at a gate or for a human task (M7.1a). */
   paused: 11,
+  /** A workflow run paused at the budget cap; the pause names spent, reserved, needed and cap (M7.7). */
+  budget: 12,
 } as const;
 
 export type ExitCode = (typeof EXIT)[keyof typeof EXIT];

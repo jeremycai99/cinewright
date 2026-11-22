@@ -11,5 +11,15 @@
     "backoff_ms": 1000,
     "backoff_factor": 2,
     "render_pool": 4
+  },
+  "budget": {
+    "fix_reserve_fraction": 0.25,
+    "unpriced_task_usd": 0.25,
+    "task_units": {
+      "llm": 30000,
+      "tts": 1000,
+      "music": 1,
+      "default": 1
+    }
   }
 }

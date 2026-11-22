@@ -38,7 +38,12 @@ export async function plan(argv: string[], io: Io): Promise<number> {
   if (outcome.status === "paused") {
     if (values.json) printJson(io, { status: "paused", run, pause: outcome.pause });
     else io.stdout(`paused at ${outcome.pause.kind} ${outcome.pause.id} (run ${run})\n`);
-    return EXIT.paused;
+    const a = outcome.pause.amounts;
+    if (a && !values.json)
+      io.stdout(
+        `spent $${a.spent.toFixed(2)}, reserved $${a.reserved.toFixed(2)}, needed $${a.needed.toFixed(2)}, cap $${a.cap.toFixed(2)}; raise it with cinewright review budget --cap <usd>\n`,
+      );
+    return outcome.pause.kind === "budget" ? EXIT.budget : EXIT.paused;
   }
   if (values.json) printJson(io, { status: "done", run });
   else io.stdout(`done (run ${run})\n`);

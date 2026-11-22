@@ -89,4 +89,16 @@ describe("cinewright review and tasks (M7.6)", () => {
     );
     expect((await run(["tasks", "show", "nope", ...p], ENV)).code).toBe(EXIT.usage);
   });
+
+  it("review budget shows spent, the cap and the estimate, and --cap raises the cap (M7.7)", async () => {
+    const dir = await project();
+    const p = ["--project", dir];
+    const before = await json(["review", "budget", ...p]);
+    expect(before).toMatchObject({ spent_usd: 0, cap_usd: 5 });
+    expect(before.estimate.total_usd).toBeGreaterThanOrEqual(0);
+    const after = await json(["review", "budget", "--cap", "12.5", ...p]);
+    expect(after.cap_usd).toBe(12.5);
+    expect((await json(["review", "script", ...p])).cost.cap_usd).toBe(12.5);
+    expect((await run(["review", "budget", "--cap", "-1", ...p], ENV)).code).toBe(EXIT.usage);
+  });
 });

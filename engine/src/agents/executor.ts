@@ -30,6 +30,8 @@ export function agentExecutor(options: {
   checks?: Readonly<Record<string, SemanticCheck>>;
   llm: LlmCall;
   extras: ContextExtras;
+  /** The LLM plugin's id, for the spend log (M7.7). */
+  plugin?: string;
 }): TaskExecutor {
   return async (task, store, run) => {
     const role = task.role ? options.roles.get(task.role) : undefined;
@@ -51,6 +53,7 @@ export function agentExecutor(options: {
       run,
       extras: options.extras,
       ...(check ? { check } : {}),
+      ...(options.plugin ? { plugin: options.plugin } : {}),
     });
   };
 }

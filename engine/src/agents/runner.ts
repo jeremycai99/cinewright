@@ -6,6 +6,7 @@ import type {
   LlmContent,
   PluginResponse,
 } from "@cinewright/plugin-sdk";
+import type { SpendItem } from "../cost/ledger.js";
 import type { Task, TaskResult } from "../runtime/types.js";
 import { resolveCitations } from "./citations.js";
 import {
@@ -41,6 +42,8 @@ export interface AgentDeps {
   extras: ContextExtras;
   check?: SemanticCheck;
   signal?: AbortSignal;
+  /** The LLM plugin's id, for the spend log (M7.7); default `llm`. */
+  plugin?: string;
 }
 
 interface Envelope {
@@ -105,7 +108,14 @@ export function decisionsFor(
  * task is `blocked` until the next gate.
  */
 export async function runAgentTask(task: Task, deps: AgentDeps): Promise<TaskResult> {
+  const spend: SpendItem[] = [];
+  const result = await runTask(task, deps, spend);
+  return spend.length > 0 ? { ...result, spend } : result;
+}
+
+async function runTask(task: Task, deps: AgentDeps, spend: SpendItem[]): Promise<TaskResult> {
   const { store, role } = deps;
+  const plugin = deps.plugin ?? "llm";
   const craftRules = loadCraftRules();
   let cost = 0;
   let conflicts = 0;
@@ -140,14 +150,29 @@ export async function runAgentTask(task: Task, deps: AgentDeps): Promise<TaskRes
       ...(role.effort ? { effort: role.effort } : {}),
     };
     const response = await deps.llm(request, deps.signal);
-    if (!response.ok)
+    if (!response.ok) {
+      // A failed call costs what the provider reported, or nothing (M7.7).
+      const charged = (response.error.data as { cost_usd?: unknown } | undefined)?.cost_usd;
+      if (typeof charged === "number" && charged > 0) {
+        cost += charged;
+        spend.push({ plugin, unit: "token", units: 0, usd: charged });
+      }
       return {
         status: "failed",
         error: { ...response.error },
         ...(cost > 0 ? { cost_usd: cost } : {}),
       };
+    }
     const result = response.result as GenerateResult;
     cost += result.cost_usd;
+    if (result.cost_usd > 0)
+      spend.push({
+        plugin,
+        model: result.model,
+        unit: "token",
+        units: result.usage.input_tokens + result.usage.output_tokens,
+        usd: result.cost_usd,
+      });
     const envelope = result.output as Envelope;
     const ir = store.ir();
     let errors: OutputError[] = validateOutput(role, envelope, ir, task, deps.check);

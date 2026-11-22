@@ -28,6 +28,15 @@ export {
 export { type OutputError, type SemanticCheck, validateOutput } from "./agents/validate.js";
 export { WavError, type WavInfo, wavInfo } from "./audio/wav.js";
 export {
+  type Estimate,
+  estimateRun,
+  isPaid,
+  projectEstimate,
+  taskEstimate,
+} from "./cost/estimate.js";
+export { readSpend, recordSpend, type SpendItem, SpendLogError, spent } from "./cost/ledger.js";
+export { Budget, type BudgetAmounts, type Reservation } from "./cost/reserve.js";
+export {
   CritiqueError,
   type CritiqueOptions,
   type CritiqueReport,
@@ -45,7 +54,7 @@ export {
   rejectGate,
 } from "./gates/decide.js";
 export { type GateField, gateFields } from "./gates/locks.js";
-export { buildPacket, type GatePacket, SPEND_LOG, validatePacket } from "./gates/packet.js";
+export { buildPacket, type GatePacket, validatePacket } from "./gates/packet.js";
 export {
   chooseVariant,
   requestVariants,
@@ -108,6 +117,7 @@ export { type LedgerLine, RunLedger } from "./runtime/ledger.js";
 export { LoopRuntime } from "./runtime/loop.js";
 export { validateEvent, validateLedgerLine, validateTask } from "./runtime/schemas.js";
 export type {
+  Pause,
   PauseKind,
   RunContext,
   RunOutcome,
