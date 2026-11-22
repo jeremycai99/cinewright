@@ -146,6 +146,11 @@ def test_allows_them_in_the_llm_plugin_docs_comments_and_locks(tmp_path: Path) -
     write(tmp_path, "pnpm-lock.yaml", f"  {VENDOR}:\n")
     write(
         tmp_path,
+        "engine/test/agents/cassettes/b/x.json",
+        f'{{"response": {{"model": "{MODEL}"}}}}\n',
+    )
+    write(
+        tmp_path,
         "plugins/llm-anthropic/package.json",
         f'{{"dependencies": {{"{VENDOR}": "1.0.0"}}}}\n',
     )

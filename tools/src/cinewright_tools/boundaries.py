@@ -21,7 +21,7 @@ Four rules:
 - ``vendor-sdk``: code or a JSON manifest outside ``plugins/llm-anthropic/`` imports or depends
   on a vendor LLM SDK (``@anthropic-ai/*``, Python ``anthropic``).
 
-Docs, plans and comments are never scanned; lock files are not source.
+Docs, plans and comments are never scanned; lock files and recorded cassettes are not source.
 A Python file that cannot be read or parsed is reported as ``unparseable``.
 
 Known limitation: the TS/JS scanner does not recognise regular-expression literals, so a
@@ -276,7 +276,9 @@ def _check_js(path: Path, rel: str) -> list[Violation]:
 
 
 def _check_json(path: Path, rel: str) -> list[Violation]:
-    if rel.startswith(LLM_PLUGIN_PREFIX):
+    # Recorded cassettes hold the provider's responses, including the model id it reported:
+    # data, like a lock file, not a place the code names a model.
+    if rel.startswith(LLM_PLUGIN_PREFIX) or "/cassettes/" in rel:
         return []
     try:
         lines = path.read_text(encoding="utf-8").splitlines()
