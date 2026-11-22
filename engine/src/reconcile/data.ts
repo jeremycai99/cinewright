@@ -14,7 +14,7 @@ export type StepKindName =
 
 export interface TemplatePhase {
   id: string;
-  kind: "agent" | "jobs" | "gate";
+  kind: "agent" | "jobs" | "gate" | "fix";
   role?: string;
   gate?: "script" | "storyboard" | "final";
   steps?: StepKindName[];
@@ -55,6 +55,8 @@ export interface EngineSettings {
    * Estimates (M7.7): the fix reserve as a fraction of production, the estimate for a paid plugin
    * with no published price, and the units a task may use per plugin kind (`default` otherwise).
    */
+  /** Fix-loop bounds (M6.3): attempts per owner, fix rounds per shot, QA rounds per run. */
+  fix: { attempts_per_owner: number; rounds_per_shot: number; qa_rounds: number };
   /** The Writer's length check (M7.5a): narration pace and the allowed miss of the plan's target. */
   script: { pace_wpm: number; flex: number };
   budget: {

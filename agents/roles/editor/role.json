@@ -8,9 +8,13 @@
     "scene.shots",
     "scene.transition_out",
     "line.text",
-    "pack.rules"
+    "pack.rules",
+    "findings"
   ],
-  "writes": { "kinds": ["scene", "shot"], "paths": ["/duration", "/transition_out", "/anchors"] },
+  "writes": {
+    "kinds": ["scene", "shot"],
+    "paths": ["/duration", "/transition_out", "/anchors"]
+  },
   "per": "project",
   "token_budget": 30000,
   "max_output_tokens": 6000,

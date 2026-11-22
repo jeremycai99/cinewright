@@ -13,7 +13,8 @@
     "layer.component",
     "pack.rules",
     "pack.layouts",
-    "catalog"
+    "catalog",
+    "findings"
   ],
   "writes": {
     "kinds": ["layer"],

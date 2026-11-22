@@ -2,7 +2,14 @@
   "id": "writer",
   "version": "1",
   "tier": "frontier",
-  "reads": ["project.brief", "project.plan", "project.cast", "project.deliverables", "pack.rules"],
+  "reads": [
+    "project.brief",
+    "project.plan",
+    "project.cast",
+    "project.deliverables",
+    "pack.rules",
+    "findings"
+  ],
   "writes": {
     "kinds": ["script", "beat", "line"],
     "paths": ["/beats", "/summary", "/lines", "/text", "/speaker", "/direction", "/on_screen_text"]

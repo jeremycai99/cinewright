@@ -69,6 +69,7 @@ export function agentExecutor(options: {
       extras: typeof options.extras === "function" ? options.extras(task, store) : options.extras,
       ...(check ? { check } : {}),
       ...(options.plugin ? { plugin: options.plugin } : {}),
+      ...(task.propose ? { mode: "propose" as const } : {}),
       ...(task.role && options.suggest?.[task.role] ? { suggest: options.suggest[task.role] } : {}),
     });
   };

@@ -58,6 +58,20 @@
     "pinned": {
       "type": "string",
       "minLength": 1
+    },
+    "finding": {
+      "description": "A fix task's finding (M6.3a).",
+      "type": "string",
+      "pattern": "^f_[0-9a-f]{12}$"
+    },
+    "via": {
+      "type": "string"
+    },
+    "fixer": {
+      "type": "string"
+    },
+    "propose": {
+      "type": "boolean"
     }
   }
 }

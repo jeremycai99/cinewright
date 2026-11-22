@@ -138,7 +138,8 @@ export interface IrDocuments {
   asset?: Asset;
   cast?: CastMember;
   delivery_profile?: DeliveryProfile;
-  finding?: CriticFinding;
+  finding_entry?: FindingEntry;
+  finding?: CriticFinding1;
   layer?: Layer;
   snapshot?: Snapshot;
   touched?: Touched;
@@ -394,7 +395,42 @@ export interface EncodingSettings {
   audio_bitrate_kbps: number;
 }
 /**
- * One finding of a critic (M6.1): derived data, not an IR entity. `entity` and `pointer` are the entity path; `frames` is on the project timeline; `evidence` holds numbers and references, never prose. `signature` is the SHA-256 of the JCS of { rule, entity, pointer, deliverable, key }, where `key` stays the same while the defect persists; `id` is "f_" and its first 12 hex digits.
+ * One line of `log/findings.jsonl` (M6.3a): a finding raised, a fix attempted, a finding resolved, escalated to a gate or waived by a user. Append-only and tracked with the other logs, so attempt counts and signature history survive deleting `.cinewright/runs/`. `prev` is the previous entry's `hash`; `hash` is this entry's without it.
+ */
+export interface FindingEntry {
+  seq: number;
+  at: string;
+  kind: "raised" | "attempt" | "resolved" | "escalated" | "waived";
+  finding: string;
+  revision?: number;
+  run?: string;
+  doc?: CriticFinding;
+  /**
+   * The owner a fix went to, on `attempt`.
+   */
+  owner?: string;
+  via?: string;
+  /**
+   * The fix task's key, on `attempt`.
+   */
+  task?: string;
+  /**
+   * Why it escalated, on `escalated`.
+   */
+  reason?: string;
+  gate?: string;
+  /**
+   * The user's note, on `waived`.
+   */
+  note?: string;
+  /**
+   * The previous entry's hash; null for the first.
+   */
+  prev: Hash | null;
+  hash: Hash;
+}
+/**
+ * The finding itself, on `raised`.
  */
 export interface CriticFinding {
   id: string;
@@ -435,6 +471,26 @@ export interface EvidenceRect {
   y: number;
   width: number;
   height: number;
+}
+/**
+ * One finding of a critic (M6.1): derived data, not an IR entity. `entity` and `pointer` are the entity path; `frames` is on the project timeline; `evidence` holds numbers and references, never prose. `signature` is the SHA-256 of the JCS of { rule, entity, pointer, deliverable, key }, where `key` stays the same while the defect persists; `id` is "f_" and its first 12 hex digits.
+ */
+export interface CriticFinding1 {
+  id: string;
+  signature: string;
+  rule: string;
+  severity: "error" | "warning";
+  entity: string;
+  pointer?: string;
+  message: string;
+  data: {};
+  critic: {
+    id: string;
+    version: string;
+  };
+  deliverable?: Id;
+  frames?: FindingFrames;
+  evidence: Evidence;
 }
 /**
  * One element of a shot (D31): a component with props, token references, motion presets and anchor-relative timing, per aspect class.

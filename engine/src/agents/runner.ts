@@ -44,6 +44,8 @@ export interface AgentDeps {
   signal?: AbortSignal;
   /** The LLM plugin's id, for the spend log (M7.7); default `llm`. */
   plugin?: string;
+  /** `propose` submits the patch as a suggestion, never applied (a routed `suggest`, M6.3a). */
+  mode?: "apply" | "propose";
   /**
    * Ops the role may only suggest (M7.5a): stored as a pending patch after the main patch
    * applies, such as the Producer's pack choice when the user set the pack.
@@ -212,7 +214,7 @@ async function runTask(task: Task, deps: AgentDeps, spend: SpendItem[]): Promise
         {
           base_revision: base,
           author: { kind: "agent", role: role.id },
-          mode: "apply",
+          mode: deps.mode ?? "apply",
           reason: `${role.id}: ${task.id}`,
           ops,
           decisions,

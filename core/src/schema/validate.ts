@@ -29,7 +29,8 @@ export type DocumentKind =
   | "asset"
   | "timing_table"
   | "critic_finding"
-  | "spend_entry";
+  | "spend_entry"
+  | "finding_entry";
 
 export const ROOT_FILES: Readonly<Record<DocumentKind, string>> = {
   project: "project.schema.json",
@@ -41,6 +42,7 @@ export const ROOT_FILES: Readonly<Record<DocumentKind, string>> = {
   timing_table: "timing.schema.json",
   critic_finding: "finding.schema.json",
   spend_entry: "spend-entry.schema.json",
+  finding_entry: "finding-entry.schema.json",
 };
 
 const SCHEMA_BASE = "https://cinewright.invalid/ir/0/";

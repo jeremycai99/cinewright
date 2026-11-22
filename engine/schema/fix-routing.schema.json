@@ -1,0 +1,51 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://cinewright.invalid/engine/0/fix-routing.schema.json",
+  "title": "FixRouting",
+  "description": "The fix routing table (M6.3a): for each rule or rule prefix (`x.*`), owners in order. `via` is a deterministic fixer, the owning role, a pipeline job, a suggestion (propose mode), or a person.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["version", "rules"],
+  "properties": {
+    "version": {
+      "type": "string"
+    },
+    "description": {
+      "type": "string"
+    },
+    "rules": {
+      "type": "object",
+      "propertyNames": {
+        "pattern": "^[a-z][a-z0-9_]*\\.([a-z][a-z0-9_]*|\\*)$"
+      },
+      "additionalProperties": {
+        "type": "array",
+        "minItems": 1,
+        "items": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["owner", "via"],
+          "properties": {
+            "owner": {
+              "enum": [
+                "shot_builder",
+                "editor",
+                "writer",
+                "director",
+                "narration",
+                "mixer",
+                "render",
+                "assembly",
+                "human"
+              ]
+            },
+            "via": {
+              "type": "string",
+              "pattern": "^(role|suggest|human|fixer:[a-z][a-z0-9_]*|job:[a-z][a-z0-9_]*)$"
+            }
+          }
+        }
+      }
+    }
+  }
+}

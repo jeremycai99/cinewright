@@ -4,6 +4,7 @@ import { join } from "node:path";
 import { loadCraftRules, loadRoles } from "@cinewright/agents";
 import type { Catalog, Pack } from "@cinewright/core";
 import { loadRubric, type VisionOptions } from "../critics/vision.js";
+import { FindingsLedger } from "../fix/ledger.js";
 import { instructionsFor } from "../gates/decide.js";
 import { PluginPool } from "../plugins/pool.js";
 import type { FoundPlugin } from "../plugins/registry.js";
@@ -68,8 +69,12 @@ export function v01Agents(options: {
     extras: (task, store) => {
       const template = loadTemplate(store.ir().settings.workflow?.value ?? "explainer");
       const notes = task.role ? instructionsFor(store, template, task.role) : [];
+      const finding = task.finding
+        ? new FindingsLedger(store.dir).open().filter((f) => f.id === task.finding)
+        : [];
       return {
         pack: options.pack,
+        ...(finding.length > 0 ? { findings: finding } : {}),
         ...(options.catalog ? { catalog: options.catalog } : {}),
         packs,
         ...(notes.length > 0 ? { instructions: notes } : {}),

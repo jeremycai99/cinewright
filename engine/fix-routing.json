@@ -1,0 +1,362 @@
+{
+  "version": "1",
+  "description": "Who fixes each finding (M6.3a), in order: V0_1_PLAN \u00a7Critique and fix loop, plus captions.missing_line \u2192 Director, layout.density \u2192 Shot Builder, timing.uncovered \u2192 Director, clearance.* \u2192 human (blocks export). A rule matches exactly, else its prefix (`captions.*`).",
+  "rules": {
+    "layout.overflow": [
+      {
+        "owner": "shot_builder",
+        "via": "role"
+      },
+      {
+        "owner": "director",
+        "via": "suggest"
+      },
+      {
+        "owner": "human",
+        "via": "human"
+      }
+    ],
+    "layout.collision": [
+      {
+        "owner": "shot_builder",
+        "via": "role"
+      },
+      {
+        "owner": "director",
+        "via": "suggest"
+      },
+      {
+        "owner": "human",
+        "via": "human"
+      }
+    ],
+    "layout.safe_area": [
+      {
+        "owner": "shot_builder",
+        "via": "role"
+      },
+      {
+        "owner": "director",
+        "via": "suggest"
+      },
+      {
+        "owner": "human",
+        "via": "human"
+      }
+    ],
+    "layout.min_text_size": [
+      {
+        "owner": "shot_builder",
+        "via": "role"
+      },
+      {
+        "owner": "director",
+        "via": "suggest"
+      },
+      {
+        "owner": "human",
+        "via": "human"
+      }
+    ],
+    "layout.density": [
+      {
+        "owner": "shot_builder",
+        "via": "role"
+      },
+      {
+        "owner": "writer",
+        "via": "suggest"
+      },
+      {
+        "owner": "human",
+        "via": "human"
+      }
+    ],
+    "layout.check": [
+      {
+        "owner": "render",
+        "via": "fixer:rerender"
+      },
+      {
+        "owner": "human",
+        "via": "human"
+      }
+    ],
+    "contrast.text": [
+      {
+        "owner": "shot_builder",
+        "via": "fixer:contrast_role"
+      },
+      {
+        "owner": "shot_builder",
+        "via": "role"
+      },
+      {
+        "owner": "human",
+        "via": "human"
+      }
+    ],
+    "contrast.pack_pair": [
+      {
+        "owner": "human",
+        "via": "human"
+      }
+    ],
+    "timing.short_hold": [
+      {
+        "owner": "editor",
+        "via": "role"
+      },
+      {
+        "owner": "writer",
+        "via": "suggest"
+      },
+      {
+        "owner": "human",
+        "via": "human"
+      }
+    ],
+    "timing.overrun": [
+      {
+        "owner": "editor",
+        "via": "role"
+      },
+      {
+        "owner": "writer",
+        "via": "suggest"
+      },
+      {
+        "owner": "human",
+        "via": "human"
+      }
+    ],
+    "timing.uncovered": [
+      {
+        "owner": "director",
+        "via": "role"
+      },
+      {
+        "owner": "human",
+        "via": "human"
+      }
+    ],
+    "stt.mismatch": [
+      {
+        "owner": "narration",
+        "via": "fixer:retake"
+      },
+      {
+        "owner": "writer",
+        "via": "suggest"
+      },
+      {
+        "owner": "human",
+        "via": "human"
+      }
+    ],
+    "stt.no_transcript": [
+      {
+        "owner": "human",
+        "via": "human"
+      }
+    ],
+    "audio.loudness": [
+      {
+        "owner": "mixer",
+        "via": "fixer:mix_headroom"
+      },
+      {
+        "owner": "human",
+        "via": "human"
+      }
+    ],
+    "audio.true_peak": [
+      {
+        "owner": "mixer",
+        "via": "fixer:mix_headroom"
+      },
+      {
+        "owner": "human",
+        "via": "human"
+      }
+    ],
+    "audio.clipping": [
+      {
+        "owner": "mixer",
+        "via": "fixer:mix_headroom"
+      },
+      {
+        "owner": "human",
+        "via": "human"
+      }
+    ],
+    "audio.silence": [
+      {
+        "owner": "editor",
+        "via": "role"
+      },
+      {
+        "owner": "human",
+        "via": "human"
+      }
+    ],
+    "video.blank": [
+      {
+        "owner": "render",
+        "via": "fixer:rerender"
+      },
+      {
+        "owner": "shot_builder",
+        "via": "role"
+      },
+      {
+        "owner": "human",
+        "via": "human"
+      }
+    ],
+    "video.frozen": [
+      {
+        "owner": "render",
+        "via": "fixer:rerender"
+      },
+      {
+        "owner": "shot_builder",
+        "via": "role"
+      },
+      {
+        "owner": "human",
+        "via": "human"
+      }
+    ],
+    "spec.ffprobe": [
+      {
+        "owner": "assembly",
+        "via": "job:assemble"
+      },
+      {
+        "owner": "human",
+        "via": "human"
+      }
+    ],
+    "clearance.*": [
+      {
+        "owner": "human",
+        "via": "human"
+      }
+    ],
+    "captions.missing_line": [
+      {
+        "owner": "director",
+        "via": "role"
+      },
+      {
+        "owner": "human",
+        "via": "human"
+      }
+    ],
+    "captions.line_too_long": [
+      {
+        "owner": "writer",
+        "via": "suggest"
+      },
+      {
+        "owner": "human",
+        "via": "human"
+      }
+    ],
+    "captions.*": [
+      {
+        "owner": "editor",
+        "via": "role"
+      },
+      {
+        "owner": "human",
+        "via": "human"
+      }
+    ],
+    "vision.hierarchy": [
+      {
+        "owner": "shot_builder",
+        "via": "role"
+      },
+      {
+        "owner": "director",
+        "via": "suggest"
+      },
+      {
+        "owner": "human",
+        "via": "human"
+      }
+    ],
+    "vision.composition": [
+      {
+        "owner": "shot_builder",
+        "via": "role"
+      },
+      {
+        "owner": "director",
+        "via": "suggest"
+      },
+      {
+        "owner": "human",
+        "via": "human"
+      }
+    ],
+    "vision.legibility": [
+      {
+        "owner": "shot_builder",
+        "via": "role"
+      },
+      {
+        "owner": "director",
+        "via": "suggest"
+      },
+      {
+        "owner": "human",
+        "via": "human"
+      }
+    ],
+    "vision.pack_conformance": [
+      {
+        "owner": "shot_builder",
+        "via": "role"
+      },
+      {
+        "owner": "director",
+        "via": "suggest"
+      },
+      {
+        "owner": "human",
+        "via": "human"
+      }
+    ],
+    "vision.rhythm": [
+      {
+        "owner": "editor",
+        "via": "role"
+      },
+      {
+        "owner": "director",
+        "via": "suggest"
+      },
+      {
+        "owner": "human",
+        "via": "human"
+      }
+    ],
+    "vision.continuity": [
+      {
+        "owner": "editor",
+        "via": "role"
+      },
+      {
+        "owner": "director",
+        "via": "role"
+      },
+      {
+        "owner": "human",
+        "via": "human"
+      }
+    ]
+  }
+}

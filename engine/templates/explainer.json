@@ -134,11 +134,16 @@
       "needs": ["P12"]
     },
     {
+      "id": "P11",
+      "kind": "fix",
+      "needs": ["P10"]
+    },
+    {
       "id": "G3",
       "kind": "gate",
       "gate": "final",
       "locks": ["*"],
-      "needs": ["P10"],
+      "needs": ["P11"],
       "owner": "director"
     }
   ]
