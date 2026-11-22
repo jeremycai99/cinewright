@@ -105,7 +105,7 @@ Off the path but needed for the gate: M4.5b, M4.1c, A.1, M5.4a, M5.2, M6.1a, M6.
 
 **From the gate to the exit — 9 PRs in sequence:** M7.1a → M7.1b → M7.4 → M7.5a → M7.5b → M7.5c → M6.3a → M6.3b → M8.3b → exit. M7.3 and M7.2 → M7.7 run beside M7.1b and M7.4 and must land before M7.5a (the first task that spends money).
 
-Off the path: M7.6, M6.2, M8.1, M8.2, M8.4, M8.5, M4.3b. The longest non-code lead is M8.2: eight briefs written and reviewed by someone other than the maintainer. Start it at the alpha gate.
+Off the path: M7.6, M6.2, M8.1, M8.2, M8.4, M8.5, M4.3b. The longest non-code lead is M8.2: four briefs for the v0.1 gate (decision 11), written and reviewed by someone other than the maintainer. Start it at the alpha gate.
 
 ## 5. Maintainer decisions
 
@@ -123,7 +123,7 @@ Numbers continue the roadmap audit's §7. Decisions 1 and 3–8 are settled; 2 i
 | 19 *new* | Typed role output instead of raw ops; `plan` and `render` as the run entry points (H1, H2) | Yes to both. | M7 plan approval |
 | 20 *new* | Spend and findings ledgers tracked in `log/` (H3) | Yes. | M7.7, M6.3a |
 | 10 | Who writes the benchmark briefs | Not the maintainer; a contributor or an agent session, reviewed for neutrality. One brief is already needed for A.2. | A.2, then M8.2 |
-| 11 | Monthly evaluation budget and tier B cadence | Set after one measured brief; nightly 1 run with local media, release 3 runs plus pack-swap. | M8.3b Step 1 |
+| 11 | Monthly evaluation budget and tier B cadence | **Decided 2026-11-21:** reduced v0.1 scope, 4 briefs × 2 runs plus 4 pack-swap runs (12), local media only, no nightly; the full matrix moves to v0.2 (`m8-cli-benchmark.md`). | Decided |
 | 13 | Split v0.3; migrations first in v0.2 | Yes to both. | v0.1 exit |
 | 14 | Paid raters and their budget (D20) | Needed before the first human study. | v0.2 |
 
@@ -147,7 +147,7 @@ No other decision is changed by these plans.
 | Agents do not reliably produce a film that passes every deterministic check | The largest unknown. The exit gate needs 24 of 24 Auto runs clean, and nothing with a live model has been run yet. | Stub agents first; one development brief by cassette through M7.5; the fix loop before tier B; M8.3b Step 4 budgets time for what the first release run finds. |
 | Cassette churn | Any prompt, schema or context change is a miss for that role, and re-recording costs money and review time. | The request hash names the role; record per role, not per run; keep the development brief small. |
 | Audio or assembly repeatability | Two spikes can stop the path (M4.0b, M5.1). | Both are scheduled first in their milestones, with a stated fallback (restricted SIMD flags; Annex B concatenation). |
-| Tier B cost | Unmeasured. | Decision 11 after one measured brief; hard caps in the harness and in every run (M7.7). |
+| Tier B cost | Estimated at $12–20 of LLM spend for the reduced v0.1 scope (12 runs; decision 11, 2026-11-21); the agent recordings for the development brief cost $0.38. | Task 4 Step 1 measures one brief; hard caps in the harness and in every run (M7.7). |
 | HyperFrames and provider churn | The backend is pre-1.0 and bumped only at milestone starts; one LLM and one paid audio vendor. | The bump policy; re-verify steps in every provider task; v0.2 adds a second LLM plugin. |
 | One LLM plugin | Invariant 6 is satisfied by the interface but untested by a second implementation. | The stub and cassette plugins exercise the interface in v0.1; an OpenAI-compatible plugin in v0.2. |
 | Schema growth without migrations | v0.1 adds only optional fields; that cannot continue. | Migrations are the first v0.2 item (decision 13). |
