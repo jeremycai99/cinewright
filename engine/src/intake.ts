@@ -97,7 +97,7 @@ export function intake(
   const roles = (ir.settings.roles?.value ?? {}) as Record<string, string>;
   // Replaying cassettes calls no provider, so an installed LLM needs no key then (M7.5a).
   const llms =
-    env.CINEWRIGHT_CASSETTE_MODE === "replay" ? installed.llm : usable(installed.llm, env);
+    env.CINEWRIGHT_CASSETTE_MODE === "replay" ? (installed.llm ?? []) : usable(installed.llm, env);
   if (preset.agents && llms.length === 0) {
     const needed = new Set(
       template.phases
