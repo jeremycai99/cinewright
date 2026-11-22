@@ -58,7 +58,6 @@ const DIRECTOR = {
             intent: "A heat pump moves heat rather than making it",
             mood: ["calm"],
             lines: ["b01.l01", "b01.l02", "b01.l03"],
-            duration: { target_seconds: 14, flex: 0.2, sync: "voiceover" },
             transition_out: { type: "cut" },
             shots: [shot("s01.sh01", "b01.l01"), shot("s01.sh02", "b01.l03")],
           },

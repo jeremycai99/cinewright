@@ -114,7 +114,6 @@ const plan = (overrides: (o: DirectorOutput) => void = () => {}): DirectorOutput
             intent: "Heat is moved",
             mood: ["calm"],
             lines: ["b01.l01", "b01.l02"],
-            duration: { target_seconds: 4, flex: 0.2, sync: "voiceover" },
             transition_out: { type: "cut" },
             shots: [shot("s01.sh01", "b01.l01"), shot("s01.sh02", "b01.l02")],
           },
@@ -123,7 +122,6 @@ const plan = (overrides: (o: DirectorOutput) => void = () => {}): DirectorOutput
             intent: "Why it is efficient",
             mood: ["calm"],
             lines: ["b02.l01"],
-            duration: { target_seconds: 2, flex: 0.2, sync: "voiceover" },
             transition_out: { type: "cross_dissolve", duration_frames: 12 },
             sound: { sfx: ["whoosh"] },
             shots: [shot("s02.sh01", "b02.l01")],
@@ -229,16 +227,16 @@ describe("the Director (M7.5b)", () => {
     );
   });
 
-  it("writes sequences with frame durations and layer stubs, applied within the role's scope", async () => {
+  it("writes sequences with layer stubs and leaves scene timing to the Editor, within the role's scope", async () => {
     const store = await project();
     const ops = directorToPatch(DIRECTOR as never, plan(), store.ir(), task);
     expect(ops).toHaveLength(1);
     const value = (
       ops[0] as {
-        value: { scenes: { duration: { target: number }; shots: { layers: unknown[] }[] }[] };
+        value: { scenes: { duration?: unknown; shots: { layers: unknown[] }[] }[] };
       }
     ).value;
-    expect(value.scenes[0]?.duration.target).toBe(120);
+    expect(value.scenes[0]?.duration).toBeUndefined();
     expect(value.scenes[0]?.shots[0]?.layers).toEqual([
       { id: "s01.sh01.l1", component: "kinetic_title" },
     ]);

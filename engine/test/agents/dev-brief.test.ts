@@ -191,7 +191,8 @@ describe("the v0.1 agents with a scripted model (M7.5a)", () => {
     });
     const scene = first.ir().sequences.value?.[0]?.scenes.value?.[0];
     expect(scene?.shots.value?.map((s) => s.id)).toEqual(["s01.sh01", "s01.sh02"]);
-    expect(scene?.duration.value?.target).toBe(14 * 30);
+    // Scene timing is the Editor's (P6).
+    expect(scene?.duration.state).toBe("open");
 
     // Replay never reaches the model: with the cassettes gone the Producer fails on a miss.
     const third = await project("neutral");

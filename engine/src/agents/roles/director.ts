@@ -1,4 +1,4 @@
-import { type Catalog, type InlinedIr, isEntityId, type Pack, projectFps } from "@cinewright/core";
+import { type Catalog, type InlinedIr, isEntityId, type Pack } from "@cinewright/core";
 import { loadEngineSettings } from "../../reconcile/data.js";
 import { entities } from "../../reconcile/requirements.js";
 import type { Op, ToPatch } from "../runner.js";
@@ -23,7 +23,6 @@ export interface DirectorOutput {
       intent: string;
       mood: string[];
       lines: string[];
-      duration: { target_seconds: number; flex: number; sync: "voiceover" | "music" | "fixed" };
       transition_out: { type: string; duration_frames?: number };
       sound?: { sfx: string[] };
       shots: {
@@ -38,19 +37,14 @@ export interface DirectorOutput {
   }[];
 }
 
-const fpsOf = (ir: InlinedIr) => {
-  const r = projectFps(ir) as { num: number; den: number };
-  return r.num / r.den;
-};
-
 /**
  * The scene plan (M7.5b): the sequences the Director wrote before are removed, then each
- * sequence is inserted with its scenes and shots. Durations become frames at the project rate;
- * each chosen component becomes a layer stub (id and component) for the Shot Builder to fill.
+ * sequence is inserted with its scenes and shots. Scene timing is left open for the Editor (P6,
+ * which requires it); each chosen component becomes a layer stub (id and component) for the
+ * Shot Builder to fill.
  */
 export const directorToPatch: ToPatch = (_role, output, ir) => {
   const out = output as DirectorOutput;
-  const fps = fpsOf(ir);
   const ops: Op[] = (ir.sequences.value ?? []).map((s) => ({ op: "remove", entity: s.id }));
   for (const seq of out.sequences)
     ops.push({
@@ -67,11 +61,6 @@ export const directorToPatch: ToPatch = (_role, output, ir) => {
           intent: scene.intent,
           mood: scene.mood,
           lines: scene.lines,
-          duration: {
-            target: Math.round(scene.duration.target_seconds * fps),
-            flex: scene.duration.flex,
-            sync: scene.duration.sync,
-          },
           transition_out: {
             type: scene.transition_out.type,
             ...(scene.transition_out.duration_frames === undefined

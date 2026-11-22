@@ -42,7 +42,7 @@
             "items": {
               "type": "object",
               "additionalProperties": false,
-              "required": ["id", "intent", "mood", "lines", "duration", "transition_out", "shots"],
+              "required": ["id", "intent", "mood", "lines", "transition_out", "shots"],
               "properties": {
                 "id": {
                   "type": "string",
@@ -68,26 +68,6 @@
                   "maxItems": 12,
                   "items": {
                     "type": "string"
-                  }
-                },
-                "duration": {
-                  "type": "object",
-                  "additionalProperties": false,
-                  "required": ["target_seconds", "flex", "sync"],
-                  "properties": {
-                    "target_seconds": {
-                      "type": "number",
-                      "minimum": 0.5,
-                      "maximum": 120
-                    },
-                    "flex": {
-                      "type": "number",
-                      "minimum": 0,
-                      "maximum": 1
-                    },
-                    "sync": {
-                      "enum": ["voiceover", "music", "fixed"]
-                    }
                   }
                 },
                 "transition_out": {
