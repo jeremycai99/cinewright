@@ -3,7 +3,7 @@ import { entities } from "../../reconcile/requirements.js";
 import type { Op, ToPatch } from "../runner.js";
 import { shotStubs } from "../schema/layers.js";
 import type { OutputError, SemanticCheck } from "../validate.js";
-import { type Anchor, anchorOrder } from "./timing.js";
+import { type Anchor, anchorOrder, scenes } from "./timing.js";
 
 /** The Shot Builder's typed output for one shot (`engine/src/agents/schema/layers.ts`). */
 export interface ShotBuilderOutput {
@@ -59,9 +59,30 @@ function shotContext(ir: InlinedIr, shotId: string) {
   return { lines, layout };
 }
 
+const describe = (a: Anchor): string =>
+  `${a.line} ${a.point}${a.offset ? ` ${a.offset > 0 ? "+" : ""}${a.offset}` : ""}`;
+
+/**
+ * Where a shot's layers may sit: from the shot's start anchor (the scene's start for the first
+ * shot) up to the next shot's start anchor (the scene's end for the last), as orders over the
+ * scene's lines, with a description for the model.
+ */
+function shotWindow(ir: InlinedIr, shotId: string, lines: readonly string[]) {
+  const scene = scenes(ir).find((s) => s.shots.some((sh) => sh.id === shotId));
+  const shots = scene?.shots ?? [];
+  const i = shots.findIndex((sh) => sh.id === shotId);
+  const start = shots[i]?.start;
+  const next = shots[i + 1]?.start;
+  const from = start ? (anchorOrder(lines, start) ?? -Infinity) : -Infinity;
+  const to = next ? (anchorOrder(lines, next) ?? Infinity) : Infinity;
+  const text = `${shotId} runs from ${start ? describe(start) : "the scene's start"} to ${next ? describe(next) : "the scene's end"}`;
+  return { from, to, text };
+}
+
 /**
  * The Shot Builder's checks (P5, M7.5c): every layer stub filled exactly once; regions the shot's
- * layout template has; timing anchors on the scene's own lines, an exit after its entry; style
+ * layout template has; timing anchors on the scene's own lines and inside the shot (from its start
+ * anchor to the next shot's), an exit after its entry; style
  * overrides that name tokens the pack has, by token reference. Props are checked by the schema.
  * Compile errors surface when the shot renders (P7) and go back through the fix loop (M6.3).
  */
@@ -73,6 +94,7 @@ export function shotBuilderCheck(pack: Pack, _catalog: Catalog): SemanticCheck {
       errors.push({ pointer, rule, message });
     const shotId = task.entities[0] as string;
     const { lines, layout } = shotContext(ir, shotId);
+    const window = shotWindow(ir, shotId, lines);
     const stubs = shotStubs(ir, task);
     const count = new Map<string, number>();
     out.layers.forEach((layer, i) => {
@@ -97,6 +119,12 @@ export function shotBuilderCheck(pack: Pack, _catalog: Catalog): SemanticCheck {
           "shot_builder.anchor_outside_scene",
           `${layer.timing.enter.line} is not a line of this shot's scene`,
         );
+      else if (enter < window.from || enter >= window.to)
+        err(
+          `${at}/timing/enter`,
+          "shot_builder.anchor_outside_shot",
+          `${layer.id} enters at ${describe(layer.timing.enter)}, outside its shot: ${window.text}`,
+        );
       if (layer.timing.exit) {
         const exit = anchorOrder(lines, layer.timing.exit);
         if (exit === null)
@@ -104,6 +132,12 @@ export function shotBuilderCheck(pack: Pack, _catalog: Catalog): SemanticCheck {
             `${at}/timing/exit`,
             "shot_builder.anchor_outside_scene",
             `${layer.timing.exit.line} is not a line of this shot's scene`,
+          );
+        else if (exit > window.to)
+          err(
+            `${at}/timing/exit`,
+            "shot_builder.anchor_outside_shot",
+            `${layer.id} exits at ${describe(layer.timing.exit)}, outside its shot: ${window.text}`,
           );
         else if (enter !== null && exit <= enter)
           err(

@@ -319,6 +319,8 @@ export function visionCriticVersion(role: RoleDefinition, rubric: Rubric): strin
 /** What the vision critic needs to run inside the critique step (M6.2). */
 export interface VisionOptions {
   llm: LlmCall;
+  /** The LLM plugin's id, for the spend log (M7.7). */
+  plugin?: string;
   rubric: Rubric;
   role: RoleDefinition;
   pack: Pack;

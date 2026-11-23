@@ -161,7 +161,7 @@ Stored-form mapping of the spec's scene example (`core/test/fixtures/schema/sequ
 
 ### TimingTable (`timing.schema.json`)
 
-Derived data, not an entity (M3.1a): `fps`, and `lines` keyed by script line id, each `{ start, end, words: [{ start, end }] }` in frames on its sequence's timeline. Narration writes it from takes (M4.2); until then a fixture or `--timing <file>` supplies it. `resolveAnchor` turns an anchor into a frame (`timing.unknown_line`, `timing.unknown_word`). `shotSpan` gives a shot's frames: from `anchors.start` to `anchors.end`, or after its `duration`, or to the next shot's start in the sequence (`timing.unknown_span` when none applies). `layerTiming` gives a layer's entrance and end relative to its shot, the whole shot when it has no timing (`timing.outside_shot` when it leaves the shot).
+Derived data, not an entity (M3.1a): `fps`, and `lines` keyed by script line id, each `{ start, end, words: [{ start, end }] }` in frames on its sequence's timeline. Narration writes it from takes (M4.2); until then a fixture or `--timing <file>` supplies it. `resolveAnchor` turns an anchor into a frame (`timing.unknown_line`, `timing.unknown_word`). `shotSpan` gives a shot's frames: from `anchors.start` to `anchors.end`, or after its `duration`, or to the next shot's start in the sequence (`timing.unknown_span` when none applies). `layerTiming` gives a layer's entrance and end relative to its shot, the whole shot when it has no timing; an exit after the shot's end ends the layer at the cut (exits are written before the takes exist), and `timing.outside_shot` is raised when the layer enters before the shot starts or not before it ends.
 
 ### DeliveryProfile (`delivery-profile.schema.json`)
 

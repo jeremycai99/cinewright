@@ -114,6 +114,7 @@ export function v01Vision(options: {
   return {
     vision: {
       llm: llmCall(pool, options.llm),
+      plugin: options.llm.manifest.id,
       rubric: loadRubric(),
       role,
       pack: options.pack,

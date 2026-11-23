@@ -2,12 +2,14 @@ import { existsSync, readdirSync, readFileSync, writeFileSync } from "node:fs";
 import { join } from "node:path";
 import { RUNS_DIR, runDir, type Store, sha256Hash, stateHash } from "@cinewright/core";
 import { estimateRun, taskEstimate } from "./cost/estimate.js";
-import { recordSpend, spent } from "./cost/ledger.js";
+import { recordSpend, type SpendItem, spent } from "./cost/ledger.js";
+import { meterLlm } from "./cost/meter.js";
 import { Budget } from "./cost/reserve.js";
 import { fixBounds } from "./fix/bounds.js";
 import { FIXERS } from "./fix/fixers.js";
 import { FindingsLedger, syncFindings } from "./fix/ledger.js";
 import { fixTasks } from "./fix/orchestrate.js";
+import { fixOutcome } from "./fix/outcome.js";
 import { loadRouting } from "./fix/route.js";
 import { approveGate, type GateName, gatePassed } from "./gates/decide.js";
 import { intake } from "./intake.js";
@@ -106,7 +108,8 @@ const pipelineFailure = (error: PipelineError): TaskResult => ({
  * invocation, so the many step tasks of one stage cost one pipeline call, and every unchanged
  * step inside it is a cache hit. Pipeline calls never overlap: two would both narrate the same
  * lines. (Rendering shots in parallel needs per-step dispatch; until then the scheduler's render
- * pool bounds tasks, and the pipeline renders inside one call.)
+ * pool bounds tasks, and the pipeline renders inside one call.) The vision critic's paid calls go
+ * on the result of the task whose call ran the pipeline, so each reaches the spend log once.
  */
 function jobExecutor(options: WorkflowOptions): TaskExecutor {
   const done = new Map<string, Promise<RenderReport>>();
@@ -115,11 +118,19 @@ function jobExecutor(options: WorkflowOptions): TaskExecutor {
     const stage = STAGE_OF[task.step as StepKind] ?? "critique";
     const key = `${stage}@${stateHash(store.ir())}`;
     let report = done.get(key);
+    const spend: SpendItem[] = [];
     if (!report) {
+      const vision = options.render.vision;
+      const render: RenderOptions = vision
+        ? {
+            ...options.render,
+            vision: { ...vision, llm: meterLlm(vision.llm, vision.plugin ?? "llm", spend) },
+          }
+        : options.render;
       report = (async () => {
         const release = await one.acquire(new AbortController().signal);
         try {
-          return await runRender(store, { ...options.render, until: stage });
+          return await runRender(store, { ...render, until: stage });
         } finally {
           release();
         }
@@ -128,9 +139,15 @@ function jobExecutor(options: WorkflowOptions): TaskExecutor {
     }
     try {
       const r = await report;
-      return { status: "done", revision: r.revision, output: r };
+      return {
+        status: "done",
+        revision: r.revision,
+        output: r,
+        ...(spend.length > 0 ? { spend } : {}),
+      };
     } catch (error) {
-      if (error instanceof PipelineError) return pipelineFailure(error);
+      if (error instanceof PipelineError)
+        return { ...pipelineFailure(error), ...(spend.length > 0 ? { spend } : {}) };
       throw error;
     }
   };
@@ -374,7 +391,7 @@ export async function runWorkflow(
           task.key,
           store.revision(),
         );
-      const result = await execute(task);
+      const result = fixOutcome(task, await execute(task));
       // A critique's findings update the ledger: new ones raised, fixed ones resolved.
       if (task.kind === "job" && task.step === "critique" && result.output)
         await syncReport(findings, result.output as RenderReport, store.revision(), run);

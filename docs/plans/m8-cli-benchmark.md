@@ -139,6 +139,21 @@ PR order: Tasks 1, 2 and 3 in any order (Task 2's brief writing starts at the al
 - `cinewright-eval compare <report> --against <baseline>`: per category, the deterministic pass rate and each criterion's mean against the baseline threshold; exit 1 on any category regression.
 
 - [ ] **Step 1: Measure one brief.** A single capped live run of one 30-second brief, recorded in the PR: tokens and cost per role, provider costs, wall time. This sets decision 11's figure and the per-run cap.
+  - **First measurement, 2026-11-23** (`bike_repair_ad`, 30 s, neutral, `render --approve-final --vision`, local media providers, cap $3; four attempts, each fixing what stopped the last, recording cassettes that later attempts replayed). Not yet a complete run: the fourth attempt rendered, assembled and critiqued every shot, then ended in the fix loop. Cost of that attempt by role (the vision critic's from the replayed cassettes, since its spend was not logged then):
+
+    | Role | Model | Calls | USD |
+    | --- | --- | --- | --- |
+    | producer | Opus | 1 | 0.03 |
+    | writer | Opus | 1 | 0.05 |
+    | director | Opus | 2 | 0.19 |
+    | shot builder | Sonnet | 13 | 0.26 |
+    | editor | Sonnet | 5 | 0.10 |
+    | vision critic | Opus | 17 | 0.84 |
+    | fix loop | Sonnet, Opus | 44 | 1.27 |
+    | **total (incomplete)** | | 83 | **2.73** |
+
+    Wall time 19 minutes on an Apple-silicon Mac (amd64 images under emulation). No paid media provider. A complete run is likely $3 or more: above the $3 per-run cap and about twice the $1–1.5 decision 11 assumed, so 12 release runs come to $35–45 against the $25 month cap. The fix loop is most of it: 18 fix tasks for warnings (`audio.silence`, `compose.no_match` with no music library, vision warnings), 20 escalations. Total live spend for the measurement: $2.35.
+  - **What it found, fixed in the same PR:** the brief's narrator had no voice binding, so narration had no provider (`briefs init` binds Kokoro's `af_heart`); a Shot Builder layer could be anchored past its shot (a new check, `shot_builder.anchor_outside_shot`, names the shot's window); a layer's exit a few frames past its shot's end failed the render (the cut now ends it); caption sidecars kept a cue on one line over the limit (they now break lines as the burn-in does); the vision critic's calls reached no spend log (now metered); a fix agent's unusable answer ended the run as an internal error (it now spends the attempt); an agent task's failure printed a stack trace (now exit 3 or 9).
 - [ ] **Step 2: Write the failing tests** with a stub CLI.
   - A run that paused at a human task or needed a patch counts `manual_edits > 0` and fails the brief.
   - Pass rates and vision statistics are computed per brief and per category; one failing category fails `compare` even when the average rises.
