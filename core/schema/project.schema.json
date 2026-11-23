@@ -465,6 +465,12 @@
               "minimum": 0,
               "maximum": 10
             },
+            "warning_attempts_per_owner": {
+              "description": "Attempts per owner for a warning, which never blocks export.",
+              "type": "integer",
+              "minimum": 0,
+              "maximum": 10
+            },
             "rounds_per_shot": {
               "type": "integer",
               "minimum": 0,

@@ -15,6 +15,8 @@ export interface FixRouting {
 /** The fix policy (M6.3): engineering defaults in `engine/settings.json`, project policy in M6.3b. */
 export interface FixPolicy {
   attempts_per_owner: number;
+  /** Attempts per owner for a warning, which never blocks export (the tier B measured run). */
+  warning_attempts_per_owner: number;
 }
 
 const read = (path: string) => JSON.parse(readFileSync(new URL(path, import.meta.url), "utf8"));
@@ -42,8 +44,8 @@ export function ownersOf(rule: string, routing: FixRouting): Owner[] {
 
 /**
  * Who fixes a finding next (M6.3a): the first owner in its row that has had fewer than
- * `attempts_per_owner` attempts (counted in its ledger history, so a restart changes nothing).
- * A person, or every owner used up, escalates.
+ * `attempts_per_owner` attempts (`warning_attempts_per_owner` for a warning), counted in its
+ * ledger history, so a restart changes nothing. A person, or every owner used up, escalates.
  */
 export function route(
   finding: CriticFinding,
@@ -51,12 +53,14 @@ export function route(
   routing: FixRouting,
   policy: FixPolicy,
 ): Owner | { escalate: string } {
+  const limit =
+    finding.severity === "warning" ? policy.warning_attempts_per_owner : policy.attempts_per_owner;
   for (const o of ownersOf(finding.rule, routing)) {
     if (o.via === "human") return { escalate: "human" };
     const tried = history.filter(
       (e) => e.kind === "attempt" && e.owner === o.owner && e.via === o.via,
     ).length;
-    if (tried < policy.attempts_per_owner) return o;
+    if (tried < limit) return o;
   }
   return { escalate: "attempts" };
 }
