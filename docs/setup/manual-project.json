@@ -1,0 +1,103 @@
+{
+  "base_revision": 0,
+  "author": { "kind": "user" },
+  "mode": "apply",
+  "reason": "a two-scene project written by hand (docs/SETUP.md)",
+  "ops": [
+    {
+      "op": "insert",
+      "entity": "hello",
+      "path": "/cast",
+      "value": {
+        "id": "narrator",
+        "role": "narrator",
+        "display_name": "Narrator",
+        "voice": {
+          "description": { "language": "en" },
+          "bindings": { "tts_kokoro": { "voice": "af_heart" } }
+        },
+        "performance": { "baseline": "steady and clear" },
+        "on_screen": false
+      }
+    },
+    {
+      "op": "insert",
+      "entity": "script",
+      "path": "/beats",
+      "value": {
+        "id": "b01",
+        "summary": "A greeting, then what comes next",
+        "lines": [
+          { "id": "b01.l01", "text": "This video was set up from scratch.", "speaker": "narrator" },
+          { "id": "b01.l02", "text": "Every step came from the guide.", "speaker": "narrator" }
+        ]
+      }
+    },
+    {
+      "op": "insert",
+      "entity": "hello",
+      "path": "/sequences",
+      "value": {
+        "id": "seq_main",
+        "title": "Main",
+        "scenes": [
+          {
+            "id": "s01",
+            "intent": "Say what this is",
+            "lines": ["b01.l01"],
+            "transition_out": { "type": "cross_dissolve", "to": "s02", "duration": 12 },
+            "shots": [
+              {
+                "id": "s01.sh01",
+                "type": "motion_graphics",
+                "framing": "full_frame",
+                "layout": {
+                  "landscape": { "template": "title" },
+                  "portrait": { "template": "title" }
+                },
+                "layers": [
+                  {
+                    "id": "s01.sh01.title",
+                    "component": "kinetic_title",
+                    "props": { "text": "From scratch" },
+                    "layout": {
+                      "landscape": { "region": "title" },
+                      "portrait": { "region": "title" }
+                    }
+                  }
+                ]
+              }
+            ]
+          },
+          {
+            "id": "s02",
+            "intent": "Say where it came from",
+            "lines": ["b01.l02"],
+            "shots": [
+              {
+                "id": "s02.sh01",
+                "type": "motion_graphics",
+                "framing": "full_frame",
+                "layout": {
+                  "landscape": { "template": "title" },
+                  "portrait": { "template": "title" }
+                },
+                "layers": [
+                  {
+                    "id": "s02.sh01.title",
+                    "component": "kinetic_title",
+                    "props": { "text": "Every step" },
+                    "layout": {
+                      "landscape": { "region": "title" },
+                      "portrait": { "region": "title" }
+                    }
+                  }
+                ]
+              }
+            ]
+          }
+        ]
+      }
+    }
+  ]
+}

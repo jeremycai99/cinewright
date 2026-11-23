@@ -181,3 +181,17 @@ describe.skipIf(!ENABLED)("renderShot at its memory limit (Review Focus 5)", () 
     SLOW,
   );
 });
+
+describe.skipIf(!ENABLED)("resolveRenderer in the image (M8.5, G10)", () => {
+  it("gives the RendererInfo the repository files give, so render keys do not move", async () => {
+    const runner = new URL("../../../container/render-runner/", import.meta.url).pathname;
+    const fromImage = await resolveRenderer(IMAGE, { runnerDir: "/nowhere" }).catch(() => null);
+    const fromRepo = await resolveRenderer(IMAGE, { runnerDir: runner });
+    expect(fromRepo.settings).toEqual(
+      JSON.parse(readFileSync(join(runner, "render-settings.json"), "utf8")),
+    );
+    // An image published before M8.5 reports no settings; the follow-up that republishes it
+    // makes this branch the only one.
+    if (fromImage) expect(fromImage).toEqual(fromRepo);
+  });
+});

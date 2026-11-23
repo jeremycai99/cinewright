@@ -65,3 +65,12 @@ export async function reportVersions(): Promise<Record<string, string>> {
     found.filter((entry): entry is [string, string] => entry[1] !== undefined),
   );
 }
+
+/** `render-job --versions` (M8.5): the versions plus the render settings file as `settings`, so a
+ * caller can key renders from the image alone (G10). */
+export async function versionsReport(settingsPath: string): Promise<Record<string, unknown>> {
+  return {
+    ...(await reportVersions()),
+    settings: JSON.parse(await readFile(settingsPath, "utf8")),
+  };
+}

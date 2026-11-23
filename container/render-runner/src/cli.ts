@@ -6,7 +6,7 @@ import { type BoxesArgs, boxes } from "./boxes.js";
 import { type CheckArgs, check } from "./check.js";
 import { EXIT, type Format, type RenderArgs, render } from "./render.js";
 import { FRAME_RATES, type FrameRate, loadSettings } from "./settings.js";
-import { reportVersions } from "./versions.js";
+import { versionsReport } from "./versions.js";
 
 export type { Format, RenderArgs };
 
@@ -131,7 +131,7 @@ export async function main(argv: readonly string[]): Promise<number> {
     return EXIT.input;
   }
   if ("versions" in parsed) {
-    console.log(JSON.stringify(await reportVersions()));
+    console.log(JSON.stringify(await versionsReport(SETTINGS_PATH)));
     return EXIT.ok;
   }
   if ("check" in parsed) return check(parsed);

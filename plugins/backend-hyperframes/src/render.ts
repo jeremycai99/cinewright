@@ -14,6 +14,7 @@ import {
 import {
   DEFAULT_LIMITS,
   dockerRunArgs,
+  IMAGE_PLATFORM,
   oomKilled,
   type RunLimits,
   removeContainer,
@@ -60,25 +61,51 @@ export interface Rendered {
 
 const RUNNER = fileURLToPath(new URL("../../../container/render-runner/", import.meta.url));
 
+/** Runs `docker` with the given arguments and resolves to its stdout. */
+export type DockerExec = (args: string[]) => Promise<string>;
+
+const dockerExec: DockerExec = async (args) =>
+  (await promisify(execFile)("docker", args, { maxBuffer: 1 << 20 })).stdout;
+
 /**
  * The renderer side of render key v1 for an image reference: the image's content digest (so a
  * re-tagged image never reuses a stale render), the HyperFrames version and the render settings.
+ * Both come from `render-job --versions` in the image (M8.5, G10), so an installed CLI needs no
+ * repository folder. An image published before `--versions` reported `settings` falls back to
+ * `container/render-runner/` when it exists; the values are the same, so render keys do not move.
  */
-export async function resolveRenderer(image: string): Promise<RendererInfo> {
-  const { stdout } = await promisify(execFile)("docker", [
-    "image",
-    "inspect",
-    "--format",
-    "{{.Id}}",
-    image,
-  ]);
-  const manifest = JSON.parse(readFileSync(join(RUNNER, "package.json"), "utf8")) as {
+export async function resolveRenderer(
+  image: string,
+  options: { exec?: DockerExec; runnerDir?: string } = {},
+): Promise<RendererInfo> {
+  const exec = options.exec ?? dockerExec;
+  const runner = options.runnerDir ?? RUNNER;
+  const id = (await exec(["image", "inspect", "--format", "{{.Id}}", image])).trim();
+  const report = JSON.parse(
+    await exec([
+      "run",
+      "--rm",
+      "--network",
+      "none",
+      "--platform",
+      IMAGE_PLATFORM,
+      image,
+      "--versions",
+    ]),
+  ) as { hyperframes?: string; settings?: unknown };
+  if (report.settings !== undefined && report.hyperframes)
+    return { image: id, hyperframes: report.hyperframes, settings: report.settings };
+  if (!existsSync(join(runner, "render-settings.json")))
+    throw new Error(
+      `the render image ${image} reports no render settings in --versions: pull a newer image (container/image.lock.json)`,
+    );
+  const manifest = JSON.parse(readFileSync(join(runner, "package.json"), "utf8")) as {
     dependencies: Record<string, string>;
   };
   return {
-    image: stdout.trim(),
+    image: id,
     hyperframes: manifest.dependencies.hyperframes ?? "unknown",
-    settings: JSON.parse(readFileSync(join(RUNNER, "render-settings.json"), "utf8")),
+    settings: JSON.parse(readFileSync(join(runner, "render-settings.json"), "utf8")),
   };
 }
 

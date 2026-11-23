@@ -1,0 +1,33 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://cinewright.invalid/cli/0/doctor.schema.json",
+  "description": "`cinewright doctor --json` output (M8.5).",
+  "title": "DoctorOutput",
+  "type": "object",
+  "required": ["ok", "checks"],
+  "additionalProperties": false,
+  "properties": {
+    "ok": {
+      "type": "boolean",
+      "description": "Every required check passed: a keyless Manual render can work here."
+    },
+    "checks": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["id", "ok", "required", "detail"],
+        "additionalProperties": false,
+        "properties": {
+          "id": {
+            "type": "string",
+            "pattern": "^(docker|node|python|cas_remote|image\\.[a-z_]+|plugin\\.[a-z0-9_]+)$"
+          },
+          "ok": { "type": "boolean" },
+          "required": { "type": "boolean" },
+          "detail": { "type": "string" },
+          "fix": { "type": "string" }
+        }
+      }
+    }
+  }
+}
