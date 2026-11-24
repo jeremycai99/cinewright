@@ -158,7 +158,7 @@ async function runTask(task: Task, deps: AgentDeps, spend: SpendItem[]): Promise
   let lastErrors: OutputError[] = [];
   for (let attempt = 0; attempt <= role.repairs; attempt += 1) {
     const request: GenerateRequest = {
-      tier: role.tier,
+      tier: task.finding && role.fix_tier ? role.fix_tier : role.tier,
       system: pack.system,
       messages,
       schema: pack.schema,

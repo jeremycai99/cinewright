@@ -7,6 +7,8 @@ export interface RoleConfig {
   id: string;
   version: string;
   tier: "frontier" | "mid";
+  /** The tier for its fix tasks (the tier B measured run); its `tier` when absent. */
+  fix_tier?: "frontier" | "mid";
   reads: string[];
   writes: { kinds: string[]; paths: string[] };
   per: "project" | "sequence" | "shot";

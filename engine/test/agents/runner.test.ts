@@ -352,6 +352,24 @@ describe("the agent runner (M7.4)", () => {
   });
 });
 
+describe("the fix tier (the tier B measured run)", () => {
+  it("runs a fix task on the role's fix_tier, and its ordinary tasks on its tier", async () => {
+    // In the second measured run (2026-11-24) the Director's fix tasks on the frontier tier cost
+    // $1.54 of the fix loop's $2.49; the user chose to keep the Director in the loop on mid.
+    const store = await project();
+    const role = { ...FRAMER, tier: "frontier" as const, fix_tier: "mid" as const };
+    const { llm, requests } = stubLlm([envelope("wide"), envelope("close")]);
+    await runAgentTask(task(), { ...deps(store, llm), role });
+    const fix = { ...task(), id: "fix:f_1:1", finding: "f_1" };
+    await runAgentTask(fix, { ...deps(store, llm), role });
+    expect(requests.map((r) => r.tier)).toEqual(["frontier", "mid"]);
+    const director = JSON.parse(
+      readFileSync(join(ROOT, "agents/roles/director/role.json"), "utf8"),
+    ) as { tier: string; fix_tier?: string };
+    expect(director).toMatchObject({ tier: "frontier", fix_tier: "mid" });
+  });
+});
+
 describe("agentExecutor (M7.4)", () => {
   it("runs a task's role, and fails a role it has no definition for", async () => {
     const { agentExecutor } = await import("../../src/agents/executor.js");

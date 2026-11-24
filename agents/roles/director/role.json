@@ -2,6 +2,7 @@
   "id": "director",
   "version": "1",
   "tier": "frontier",
+  "fix_tier": "mid",
   "reads": [
     "script.beats",
     "project.plan",
