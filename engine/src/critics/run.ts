@@ -218,7 +218,7 @@ export async function critique(
     const t0 = Date.now();
     const vision = await visionCritique({
       deliverable,
-      shots: shotViews(ir, renders),
+      shots: shotViews(ir, renders, timing),
       ...options.vision,
     });
     options.record?.({

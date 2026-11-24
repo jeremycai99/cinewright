@@ -7,7 +7,9 @@ import {
   type Pack,
   sha256Bytes,
   sha256Hash,
+  type Span,
   sign,
+  type TimingTable,
 } from "@cinewright/core";
 import type { GenerateRequest, GenerateResult } from "@cinewright/plugin-sdk";
 import { Ajv2020, type ValidateFunction } from "ajv/dist/2020.js";
@@ -41,7 +43,12 @@ export interface ShotView {
   shot: string;
   scene: string;
   intent: string;
+  /** The lines spoken during the shot, each with its frames in the shot; the scene's, untimed. */
   lines: string[];
+  /** The scene's lines in order, for the scene-level judgement. */
+  scene_lines: string[];
+  /** Set when `lines` are the shot's own, timed. */
+  timed?: true;
   stills: { file: string; sha256: string; frame: number }[];
   /** Each on-screen text and where it sits, as text. */
   boxes: string;
@@ -284,7 +291,9 @@ export async function visionCritique(options: {
     const text = [
       `Shot ${shot.shot} of scene ${shot.scene}, deliverable ${options.deliverable}.`,
       `Intent: ${shot.intent}`,
-      `Lines:\n${shot.lines.join("\n")}`,
+      shot.timed
+        ? `Lines spoken during this shot (frames counted from its first frame, as the stills are):\n${shot.lines.join("\n") || "(none)"}`
+        : `Lines:\n${shot.lines.join("\n")}`,
       `Text boxes:\n${shot.boxes}`,
       `Pack rules:\n${packRules}`,
       `Craft rules:\n${crafts}`,
@@ -300,7 +309,7 @@ export async function visionCritique(options: {
     const text = [
       `Scene ${scene}, deliverable ${options.deliverable}: its shots in order (${mine.map((s) => s.shot).join(", ")}), one still each.`,
       `Intent: ${mine[0]?.intent ?? ""}`,
-      `Lines:\n${[...new Set(mine.flatMap((s) => s.lines))].join("\n")}`,
+      `Lines:\n${(mine[0]?.scene_lines ?? []).join("\n")}`,
       `Pack rules:\n${packRules}`,
       `Craft rules:\n${crafts}`,
     ].join("\n\n");
@@ -332,9 +341,15 @@ export interface VisionOptions {
 /**
  * Each rendered shot as the vision critic sees it (M6.2): the keyframe stills and text boxes from
  * `check/check.json` in its render's cache entry (M3.5, M6.1a), its scene's intent and lines.
- * A shot with no check document is left out.
+ * With the solved timing, each shot gets only the lines spoken during it, with their frames
+ * counted from the shot's first frame as the stills are (the tier B measured run: a shot given
+ * its whole scene's lines left the critic guessing). A shot with no check document is left out.
  */
-export function shotViews(ir: InlinedIr, renders: Readonly<Record<string, string>>): ShotView[] {
+export function shotViews(
+  ir: InlinedIr,
+  renders: Readonly<Record<string, string>>,
+  timing?: { table: TimingTable; shots: Readonly<Record<string, Span>> },
+): ShotView[] {
   const lineText = new Map<string, string>();
   for (const b of ir.script.beats.value ?? [])
     for (const l of b.lines.value ?? []) lineText.set(l.id, String(l.text.value ?? ""));
@@ -359,11 +374,15 @@ export function shotViews(ir: InlinedIr, renders: Readonly<Record<string, string
             }[];
           }[];
         };
+        const text = (l: string) => lineText.get(l) ?? l;
+        const sceneLines = (scene.lines.value ?? []).map(text);
         out.push({
           shot: shot.id,
           scene: scene.id,
           intent: String(scene.intent.value ?? ""),
-          lines: (scene.lines.value ?? []).map((l) => lineText.get(l) ?? l),
+          lines: timing ? spoken(scene.lines.value ?? [], shot.id, timing, text) : sceneLines,
+          scene_lines: sceneLines,
+          ...(timing?.shots[shot.id] ? { timed: true as const } : {}),
           stills: doc.samples.map((s) => {
             const path = join(dir as string, s.still);
             return { file: path, sha256: sha256Bytes(readFileSync(path)), frame: s.frame };
@@ -380,5 +399,25 @@ export function shotViews(ir: InlinedIr, renders: Readonly<Record<string, string
             .join("\n"),
         });
       }
+  return out;
+}
+
+/** The lines spoken during a shot, each as `text (frames a–b)` in the shot's own frames. */
+function spoken(
+  lines: readonly string[],
+  shot: string,
+  timing: { table: TimingTable; shots: Readonly<Record<string, Span>> },
+  text: (id: string) => string,
+): string[] {
+  const span = timing.shots[shot];
+  if (!span) return lines.map(text);
+  const out: string[] = [];
+  for (const id of lines) {
+    const t = timing.table.lines[id];
+    if (!t || t.start >= span.end || t.end <= span.start) continue;
+    const from = Math.max(t.start, span.start) - span.start;
+    const to = Math.min(t.end, span.end) - span.start;
+    out.push(`${text(id)} (frames ${from}–${to})`);
+  }
   return out;
 }

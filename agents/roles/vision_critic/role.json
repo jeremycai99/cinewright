@@ -1,6 +1,6 @@
 {
   "id": "vision_critic",
-  "version": "1",
+  "version": "2",
   "tier": "frontier",
   "reads": ["shot.type", "scene.intent", "line.text", "pack.rules"],
   "writes": { "kinds": [], "paths": [] },

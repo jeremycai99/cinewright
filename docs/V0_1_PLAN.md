@@ -297,7 +297,7 @@ Any agent role can be set to `human`. Its task then waits in the task queue (`ci
 | Editor | Agent + timing solver | Shot list, timing anchors, music analysis, pack transition and pacing rules | Proposed holds and transition choices; the solver writes final frame durations and the assembly plan | Frontier |
 | Render, mix, assemble | Jobs | Resolved IR, CAS | Shot files, transition segments, mix, captions, deliverables | — |
 | Deterministic critics | Jobs | Renders, DOM snapshots, audio, ffprobe, registry | Findings | — |
-| Vision critic | Agent, pinned model | Brief, resolved pack, craft rubric, keyframes, transition strips | Findings with scores | Frontier |
+| Vision critic | Agent, pinned model | Brief, resolved pack, craft rubric, keyframes, transition strips; per shot, the lines spoken during it with their frames | Findings with scores | Frontier |
 
 Layers are timed against narration anchors, not absolute frames, so a re-timed scene needs a recompile and re-render but no new Shot Builder call.
 
