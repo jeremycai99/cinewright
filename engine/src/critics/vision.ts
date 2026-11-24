@@ -5,9 +5,9 @@ import {
   type CriticFinding,
   type InlinedIr,
   type Pack,
+  type Span,
   sha256Bytes,
   sha256Hash,
-  type Span,
   sign,
   type TimingTable,
 } from "@cinewright/core";
