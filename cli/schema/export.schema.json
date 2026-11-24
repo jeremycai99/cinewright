@@ -18,6 +18,11 @@
     "deliverables": {
       "type": "object"
     },
+    "pause": {
+      "description": "The latest run's pause, when export refused because that run is unfinished.",
+      "type": "object",
+      "required": ["kind", "id"]
+    },
     "findings": {
       "type": "array",
       "items": {

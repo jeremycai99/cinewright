@@ -97,7 +97,7 @@ test -s "$WORK/hello-export/web.mp4"
 ls "$WORK/hello-export"
 ```
 
-`render` narrates the lines, times the scenes, renders each shot, mixes, assembles and runs the deterministic checks; a second `render` with no edit is all cache hits. `export` copies the MP4, its caption sidecars and its provenance manifest, and refuses (exit 10) while an error finding is open.
+`render` narrates the lines, times the scenes, renders each shot, mixes, assembles and runs the deterministic checks; a second `render` with no edit is all cache hits. `export` copies the MP4, its caption sidecars and its provenance manifest, and refuses while an error finding is open (exit 10) or the last run is paused (exit 5).
 
 ## With a key: agents write the video
 

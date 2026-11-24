@@ -34,7 +34,7 @@ export interface ProjectStatus {
 }
 
 /** The newest run folder and its outcome, if any run has started. */
-function latestRun(dir: string): ProjectStatus["run"] {
+export function latestRun(dir: string): ProjectStatus["run"] {
   const root = join(dir, RUNS_DIR);
   if (!existsSync(root)) return undefined;
   const id = readdirSync(root).sort().at(-1);

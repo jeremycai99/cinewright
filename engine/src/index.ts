@@ -198,6 +198,7 @@ export {
 } from "./scheduler/scheduler.js";
 export {
   exportBlockers,
+  latestRun,
   type ProjectStatus,
   projectStatus,
   pruneTakes,

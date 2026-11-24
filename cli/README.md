@@ -64,7 +64,7 @@ The budget (M7.7, D17): every paid provider call is appended to `log/spend.jsonl
 
 `status` (M1, M8.1) prints the revision (a patch's `base_revision`), state hash and pending ids, then the latest run and its pause, what waits for a person (human tasks and gates), the open findings (errors, warnings, escalated) and the cost: spent, the estimate to complete and the cap. With `--json` the first three fields are unchanged from M1 (`cli/schema/status.schema.json`).
 
-`export --to <dir>` (M8.1) writes each deliverable's MP4, caption sidecars and provenance manifest, the same bytes `render --out` writes, re-making anything stale first. It writes nothing and exits 10, naming each finding, while an error finding is open or escalated without a user's waiver, or a licence or consent is missing (`cli/schema/export.schema.json`).
+`export --to <dir>` (M8.1) writes each deliverable's MP4, caption sidecars and provenance manifest, the same bytes `render --out` writes, re-making anything stale first. It writes nothing and exits 10, naming each finding, while an error finding is open or escalated without a user's waiver, or a licence or consent is missing (`cli/schema/export.schema.json`). It also writes nothing and exits 5, naming the pause, while the latest run is paused (at the budget cap, a gate or a human task), since that run's unfinished work would render half-built.
 
 `log` (M8.1) prints one log, newest last: `--patches` (default), `--decisions` (each with the entities its ops touch, so `--entity <shot>` finds a shot's decisions and their citations), `--events` (a run's; `--run`, default the latest), `--spend` (sums to `status`'s spent) or `--findings`. `--limit <n>` keeps the newest (`cli/schema/log.schema.json`).
 

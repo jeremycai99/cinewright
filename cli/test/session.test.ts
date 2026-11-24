@@ -144,6 +144,35 @@ describe("status, log, assets and export (M8.1)", () => {
     expect(json.status).toBe("blocked");
     expect((await run(["export", "--project", dir], ENV)).code).toBe(EXIT.usage);
   });
+
+  it("export refuses after a run paused, naming the pause, and writes nothing (the tier B measured run)", async () => {
+    // In the second measured run (2026-11-24) render paused at the cap with Shot Builder tasks
+    // pending; export then rendered the half-built shots and failed with a compile error.
+    const { mkdirSync } = await import("node:fs");
+    const { runDir } = await import("@cinewright/core");
+    const dir = await project();
+    const id = "run_20261124T042501Z";
+    mkdirSync(runDir(dir, id), { recursive: true });
+    const pause = { kind: "budget", id: "shot_builder:s01.sh01", amounts: {} };
+    writeFileSync(
+      join(runDir(dir, id), "outcome.json"),
+      JSON.stringify({ status: "paused", pause }),
+    );
+    const out = join(tempDir(), "out");
+    const r = await run(["export", "--to", out, "--project", dir], ENV);
+    expect(r.code).toBe(EXIT.blocked);
+    expect(r.stderr).toContain(`run ${id} paused at budget shot_builder:s01.sh01`);
+    expect(existsSync(out) ? readdirSync(out) : []).toEqual([]);
+    const json = JSON.parse(
+      (await run(["export", "--to", out, "--project", dir, "--json"], ENV)).stdout,
+    );
+    expect(valid("export", json)).toEqual([]);
+    expect(json).toMatchObject({
+      status: "blocked",
+      run: id,
+      pause: { kind: "budget", id: "shot_builder:s01.sh01" },
+    });
+  });
 });
 
 describe("doctor (M8.5)", () => {
