@@ -124,9 +124,10 @@ export function buildContextPack(
         }),
       );
     else if (read === "findings") {
-      // A fix task (M6.3a) sees its own finding; otherwise the findings on its entities.
+      // A fix task (M6.3a) sees its own findings; otherwise the findings on its entities.
+      const own = new Set(task.findings ?? (task.finding ? [task.finding] : []));
       const mine = task.finding
-        ? (extras.findings ?? []).filter((f) => f.id === task.finding)
+        ? (extras.findings ?? []).filter((f) => own.has(f.id))
         : (extras.findings ?? []).filter(
             (f) => task.entities.includes(f.entity) || f.entity.startsWith(`${task.entities[0]}.`),
           );

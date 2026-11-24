@@ -364,4 +364,48 @@ describe("fix tasks (M6.3a)", () => {
     expect(fix?.phase).toBe("P11");
     expect(tasks.find((t) => t.id === "gate:final")?.needs).toContain(fixes[0]?.id);
   });
+
+  it("gives one owner one task for all of a shot's findings, which counts as one round (the tier B measured run)", async () => {
+    // In the measured runs one defect (an accent on a filler word) came back as three findings
+    // under three rules, each its own fix task; a shot's findings now go to its owner together.
+    const store = await project();
+    const ir = store.ir();
+    const overflow = found("layout.overflow", "s01.sh01.l1");
+    const hierarchy = found("vision.hierarchy", "s01.sh01");
+    const composition = found("vision.composition", "s01.sh01");
+    const hold = found("timing.short_hold", "s01");
+    const silence = found("audio.silence", "s01");
+    const open = [overflow, hierarchy, composition, hold, silence];
+    const { tasks, escalations } = fixTasks(open, [], ir, ROUTING, POLICY);
+    expect(escalations).toEqual([]);
+    expect(tasks.map((t) => [t.id, t.role, t.entities, t.findings])).toEqual([
+      [
+        `fix:${overflow.id}:1`,
+        "shot_builder",
+        ["s01.sh01"],
+        [overflow.id, hierarchy.id, composition.id],
+      ],
+      [`fix:${hold.id}:1`, "editor", ["demo"], [hold.id, silence.id]],
+    ]);
+    expect(tasks[0]?.finding).toBe(overflow.id);
+    // One task's attempts are one round for the shot, not three.
+    const raised = open.map(
+      (f) => ({ kind: "raised", finding: f.id, doc: f }) as never as FindingEntry,
+    );
+    const tried = [overflow, hierarchy, composition].map(
+      (f) =>
+        ({
+          kind: "attempt",
+          finding: f.id,
+          owner: "shot_builder",
+          via: "role",
+          task: tasks[0]?.key,
+          revision: 1,
+        }) as never as FindingEntry,
+    );
+    const next = fixTasks(open.slice(0, 3), [...raised, ...tried], ir, ROUTING, POLICY);
+    expect(next.escalations).toEqual([]);
+    expect(next.tasks).toHaveLength(1);
+    expect(next.tasks[0]?.key).not.toBe(tasks[0]?.key);
+  });
 });

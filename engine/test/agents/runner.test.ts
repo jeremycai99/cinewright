@@ -184,6 +184,20 @@ describe("the context pack (M7.4)", () => {
       /at section pack\.rules/,
     );
   });
+
+  it("shows a fix task every finding it took on, and no other (the tier B measured run)", async () => {
+    const store = await project();
+    const f = (id: string, rule: string) =>
+      ({ id, rule, severity: "warning", entity: "s01.sh01", message: rule, data: {} }) as never;
+    const findings = [f("f_1", "vision.hierarchy"), f("f_2", "vision.composition"), f("f_3", "x")];
+    const role = { ...FRAMER, reads: [...FRAMER.reads, "findings"] };
+    const fix = { ...task(), id: "fix:f_1:1", finding: "f_1", findings: ["f_1", "f_2"] };
+    const pack = buildContextPack(store.ir(), role, fix, { pack: PACK, findings });
+    const text = pack.sections.find((s) => s.id === "findings")?.text ?? "";
+    expect(text).toContain('"f_1"');
+    expect(text).toContain('"f_2"');
+    expect(text).not.toContain('"f_3"');
+  });
 });
 
 describe("the agent runner (M7.4)", () => {

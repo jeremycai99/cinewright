@@ -69,9 +69,9 @@ export function v01Agents(options: {
     extras: (task, store) => {
       const template = loadTemplate(store.ir().settings.workflow?.value ?? "explainer");
       const notes = task.role ? instructionsFor(store, template, task.role) : [];
-      const finding = task.finding
-        ? new FindingsLedger(store.dir).open().filter((f) => f.id === task.finding)
-        : [];
+      const mine = new Set(task.findings ?? (task.finding ? [task.finding] : []));
+      const finding =
+        mine.size > 0 ? new FindingsLedger(store.dir).open().filter((f) => mine.has(f.id)) : [];
       return {
         pack: options.pack,
         ...(finding.length > 0 ? { findings: finding } : {}),

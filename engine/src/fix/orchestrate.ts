@@ -15,8 +15,10 @@ export const FIX_PHASE = "P11";
  * The fix tasks for the open findings (M6.3a, the critic orchestrator, D37): each finding goes to
  * the owner `route` picks. A role owner gets an agent task (a human one when the role is human),
  * scoped to the finding's shot for the Shot Builder and to the project otherwise; `suggest`
- * submits its patch in propose mode; a fixer or a job is a job task. Each key includes the finding
- * and the attempt number, so a new attempt is new work. A finding past its bounds (M6.3b: rounds
+ * submits its patch in propose mode; a fixer or a job is a job task. An agent owner gets one task
+ * for all the findings it owns in one scope (the tier B measured run: one defect often comes back
+ * under several rules). Each key includes the findings and their attempt numbers, so a new
+ * attempt is new work. A finding past its bounds (M6.3b: rounds
  * per shot, QA rounds, oscillation) or with no owner left escalates. Under the Manual preset every
  * fix is a suggestion, never a patch.
  */
@@ -35,6 +37,7 @@ export function fixTasks(
   for (const e of entries)
     if (e.kind === "raised" && e.doc) docs.set(e.finding, e.doc as CriticFinding);
   for (const f of open) docs.set(f.id, f);
+  const groups = new Map<string, { task: Task; attempts: [string, number][] }>();
   for (const finding of open) {
     const history = entries.filter((e) => e.finding === finding.id);
     if (history.at(-1)?.kind === "escalated") continue;
@@ -69,14 +72,24 @@ export function fixTasks(
         escalations.push({ finding: finding.id, reason: "no_shot" });
         continue;
       }
-      tasks.push({
+      const scope = shot ?? ir.id;
+      const group = groups.get(`${next.owner}|${next.via}|${scope}`);
+      if (group) {
+        group.task.findings?.push(finding.id);
+        group.attempts.push([finding.id, attempt]);
+        continue;
+      }
+      const task: Task = {
         ...base,
+        findings: [finding.id],
         kind: roles[next.owner] === "human" ? "human" : "agent",
         role: next.owner,
-        entities: [shot ?? ir.id],
+        entities: [scope],
         paid: true,
         ...(next.via === "suggest" || options.manual ? { propose: true } : {}),
-      });
+      };
+      groups.set(`${next.owner}|${next.via}|${scope}`, { task, attempts: [[finding.id, attempt]] });
+      tasks.push(task);
     } else {
       tasks.push({
         ...base,
@@ -89,5 +102,8 @@ export function fixTasks(
       });
     }
   }
+  for (const { task, attempts } of groups.values())
+    if (attempts.length > 1)
+      task.key = sha256Hash({ findings: attempts, owner: task.role, via: task.via }).slice(7, 23);
   return { tasks, escalations };
 }

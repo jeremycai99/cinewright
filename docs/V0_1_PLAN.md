@@ -408,7 +408,7 @@ sequenceDiagram
 
 ### Critique and fix loop
 
-Each finding carries type, severity (`error` or `warning`; "blocking" in this plan means `error`), entity path, frame range, evidence and a signature (type + path + the part of the evidence that persists with the defect; `core/src/findings.ts`, M6.1a). The critic orchestrator dedupes findings, assigns the first owner below, and runs a deterministic fixer first where one exists.
+Each finding carries type, severity (`error` or `warning`; "blocking" in this plan means `error`), entity path, frame range, evidence and a signature (type + path + the part of the evidence that persists with the defect; `core/src/findings.ts`, M6.1a). The critic orchestrator dedupes findings, assigns the first owner below, and runs a deterministic fixer first where one exists. An agent owner gets one task for all the findings it owns on one shot (or, above shot level, in the project), since one defect often comes back under several rules; that task is one fix round for the shot.
 
 | Finding | First owner | Then |
 | --- | --- | --- |
