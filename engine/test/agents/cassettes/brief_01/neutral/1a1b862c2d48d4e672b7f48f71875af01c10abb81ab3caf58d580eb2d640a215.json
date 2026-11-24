@@ -1,0 +1,101 @@
+{
+  "request_hash": "sha256:1a1b862c2d48d4e672b7f48f71875af01c10abb81ab3caf58d580eb2d640a215",
+  "response": {
+    "output": {
+      "output": {
+        "layers": [
+          {
+            "id": "s06.sh01.l1",
+            "component": "kinetic_title",
+            "props": {
+              "text": "Moving heat takes less energy than making it",
+              "subtitle": "More heat out than electricity in",
+              "emphasis": [
+                0,
+                1
+              ]
+            },
+            "timing": {
+              "enter": {
+                "line": "b06.l02",
+                "point": "start",
+                "offset": 0
+              },
+              "exit": {
+                "line": "b06.l02",
+                "point": "end",
+                "offset": 0
+              }
+            },
+            "layout": {
+              "landscape": {
+                "region": "title"
+              }
+            }
+          }
+        ]
+      },
+      "decisions": [
+        {
+          "about": [
+            "s06.sh01.l1/props/text"
+          ],
+          "choice": "Headline uses the wording of line b06.l02, the claim of the key idea, so the screen shows the spoken claim and nothing more.",
+          "citations": [
+            "line:b06.l02",
+            "craft_rule:hierarchy.supports_line",
+            "craft_rule:legibility.read_time"
+          ]
+        },
+        {
+          "about": [
+            "s06.sh01.l1/props/subtitle"
+          ],
+          "choice": "Subtitle takes the on-screen text of b06.l03 as a short supporting payoff.",
+          "citations": [
+            "line:b06.l03",
+            "craft_rule:hierarchy.supports_line"
+          ]
+        },
+        {
+          "about": [
+            "s06.sh01.l1/props/emphasis"
+          ],
+          "choice": "Accent the first two words, 'Moving heat', as the focal point using a single accent.",
+          "citations": [
+            "craft_rule:hierarchy.one_focus",
+            "pack_rule:neutral/color.one_accent"
+          ]
+        },
+        {
+          "about": [
+            "s06.sh01.l1/timing"
+          ],
+          "choice": "Enter as b06.l02 starts, when the claim is spoken, and exit at the end of b06.l02, keeping both anchors inside the shot, which ends at the start of b06.l03.",
+          "citations": [
+            "line:b06.l02",
+            "craft_rule:rhythm.hold_to_read",
+            "pack_rule:neutral/density.hold_time"
+          ]
+        },
+        {
+          "about": [
+            "s06.sh01.l1/layout"
+          ],
+          "choice": "Place the title in the title region of the centred title template for landscape; no style overrides, leaving style to the pack.",
+          "citations": [
+            "pack_rule:neutral/layout.safe_area",
+            "craft_rule:continuity.same_thing_same_look"
+          ]
+        }
+      ]
+    },
+    "model": "claude-sonnet-5-5",
+    "usage": {
+      "input_tokens": 7249,
+      "output_tokens": 708
+    },
+    "cost_usd": 0.021578,
+    "stop": "end"
+  }
+}

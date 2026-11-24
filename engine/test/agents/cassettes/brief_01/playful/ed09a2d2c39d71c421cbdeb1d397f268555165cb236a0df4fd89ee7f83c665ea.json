@@ -1,0 +1,164 @@
+{
+  "request_hash": "sha256:ed09a2d2c39d71c421cbdeb1d397f268555165cb236a0df4fd89ee7f83c665ea",
+  "response": {
+    "output": {
+      "output": {
+        "scenes": [
+          {
+            "id": "s01",
+            "duration": {
+              "target_seconds": 17.5,
+              "flex": 0.15,
+              "sync": "voiceover"
+            },
+            "transition_out": {
+              "type": "wipe",
+              "duration_frames": 15
+            }
+          },
+          {
+            "id": "s02",
+            "duration": {
+              "target_seconds": 13.5,
+              "flex": 0.15,
+              "sync": "voiceover"
+            },
+            "transition_out": {
+              "type": "wipe",
+              "duration_frames": 15
+            }
+          },
+          {
+            "id": "s03",
+            "duration": {
+              "target_seconds": 9,
+              "flex": 0.15,
+              "sync": "voiceover"
+            },
+            "transition_out": {
+              "type": "wipe",
+              "duration_frames": 15
+            }
+          },
+          {
+            "id": "s04",
+            "duration": {
+              "target_seconds": 8,
+              "flex": 0.15,
+              "sync": "voiceover"
+            },
+            "transition_out": {
+              "type": "wipe",
+              "duration_frames": 15
+            }
+          },
+          {
+            "id": "s05",
+            "duration": {
+              "target_seconds": 10,
+              "flex": 0.15,
+              "sync": "voiceover"
+            },
+            "transition_out": {
+              "type": "cut"
+            }
+          },
+          {
+            "id": "s06",
+            "duration": {
+              "target_seconds": 22.5,
+              "flex": 0.15,
+              "sync": "voiceover"
+            },
+            "transition_out": {
+              "type": "cut"
+            }
+          }
+        ],
+        "shots": [
+          {
+            "id": "s05.sh03",
+            "anchors": {
+              "start": {
+                "line": "b05.l03",
+                "point": "start",
+                "offset": 15
+              }
+            }
+          },
+          {
+            "id": "s06.sh02",
+            "anchors": {
+              "start": {
+                "line": "b06.l02",
+                "point": "start",
+                "offset": 10
+              }
+            }
+          }
+        ]
+      },
+      "decisions": [
+        {
+          "about": [
+            "s01/duration",
+            "s02/duration",
+            "s06/duration"
+          ],
+          "choice": "Raised the targets to match the estimated spoken lengths (about 17.6 s, 13.3 s and 22.6 s) so the narration no longer overruns.",
+          "citations": [
+            "line:b01.l01",
+            "line:b02.l01",
+            "line:b06.l02",
+            "craft_rule:rhythm.hold_to_read"
+          ]
+        },
+        {
+          "about": [
+            "s05.sh03/anchors/start"
+          ],
+          "choice": "Moved the start of s05.sh03 15 frames into its line so 'Nothing is burned.' holds past the 1.8 s minimum.",
+          "citations": [
+            "line:b05.l02",
+            "line:b05.l03",
+            "craft_rule:rhythm.hold_to_read"
+          ]
+        },
+        {
+          "about": [
+            "s06.sh02/anchors/start"
+          ],
+          "choice": "Moved the start of s06.sh02 10 frames into its line so 'That difference matters.' holds past the 1.8 s minimum, with the cut still landing right at the start of the next sense unit.",
+          "citations": [
+            "line:b06.l01",
+            "line:b06.l02",
+            "craft_rule:rhythm.hold_to_read",
+            "craft_rule:rhythm.cut_on_sense"
+          ]
+        },
+        {
+          "about": [
+            "s01/transition_out",
+            "s02/transition_out",
+            "s03/transition_out",
+            "s04/transition_out",
+            "s05/transition_out",
+            "s06/transition_out"
+          ],
+          "choice": "Left all transitions unchanged since none needs to carry new meaning.",
+          "citations": [
+            "craft_rule:continuity.transitions_mean",
+            "pack_rule:playful/transition.wipe_by_default"
+          ]
+        }
+      ]
+    },
+    "model": "claude-sonnet-5-5",
+    "usage": {
+      "input_tokens": 9697,
+      "output_tokens": 1778
+    },
+    "cost_usd": 0.037174,
+    "stop": "end"
+  }
+}

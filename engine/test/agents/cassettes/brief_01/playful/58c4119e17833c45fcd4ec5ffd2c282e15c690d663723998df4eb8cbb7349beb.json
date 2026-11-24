@@ -1,0 +1,101 @@
+{
+  "request_hash": "sha256:58c4119e17833c45fcd4ec5ffd2c282e15c690d663723998df4eb8cbb7349beb",
+  "response": {
+    "output": {
+      "output": {
+        "layers": [
+          {
+            "id": "s06.sh01.l1",
+            "component": "kinetic_title",
+            "props": {
+              "text": "That difference matters",
+              "emphasis": [
+                1
+              ]
+            },
+            "timing": {
+              "enter": {
+                "line": "b06.l01",
+                "point": "start",
+                "offset": 6
+              },
+              "exit": {
+                "line": "b06.l01",
+                "point": "end",
+                "offset": 0
+              }
+            },
+            "layout": {
+              "landscape": {
+                "region": "title"
+              }
+            }
+          }
+        ]
+      },
+      "decisions": [
+        {
+          "about": [
+            "s06.sh01.l1/props/text"
+          ],
+          "choice": "The shot runs only from b06.l01 start to b06.l02 start, so the headline uses the words of b06.l01, 'That difference matters', which restates its claim in three short words. The b06.l02 on-screen text is left for the next shot.",
+          "citations": [
+            "line:b06.l01",
+            "craft_rule:hierarchy.supports_line",
+            "craft_rule:legibility.read_time",
+            "pack_rule:playful/type.short_lines"
+          ]
+        },
+        {
+          "about": [
+            "s06.sh01.l1/props/emphasis"
+          ],
+          "choice": "Accented 'difference' (word 1) as the single focal word.",
+          "citations": [
+            "line:b06.l01",
+            "craft_rule:hierarchy.one_focus",
+            "pack_rule:playful/color.one_focus"
+          ]
+        },
+        {
+          "about": [
+            "s06.sh01.l1/timing"
+          ],
+          "choice": "Enters 6 frames after b06.l01 starts and exits at its end, so both anchors fall inside the shot and the short title holds for most of the line.",
+          "citations": [
+            "line:b06.l01",
+            "craft_rule:rhythm.hold_to_read",
+            "pack_rule:playful/density.fewer_items"
+          ]
+        },
+        {
+          "about": [
+            "s06.sh01.l1/layout"
+          ],
+          "choice": "Placed the headline in the centred 'title' region of the title layout for landscape, with no subtitle.",
+          "citations": [
+            "pack_rule:playful/layout.centred_focus",
+            "craft_rule:hierarchy.one_focus"
+          ]
+        },
+        {
+          "about": [
+            "s06.sh01.l1/style"
+          ],
+          "choice": "No style overrides; the pack handles type and colour.",
+          "citations": [
+            "pack_rule:playful/type.big_and_round",
+            "craft_rule:contrast.meaning"
+          ]
+        }
+      ]
+    },
+    "model": "claude-sonnet-5-5",
+    "usage": {
+      "input_tokens": 7206,
+      "output_tokens": 1110
+    },
+    "cost_usd": 0.025512,
+    "stop": "end"
+  }
+}

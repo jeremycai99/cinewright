@@ -1,0 +1,81 @@
+{
+  "request_hash": "sha256:ea065ae32e11aec7f6f95446e7e010bcb5dbd0f5139fff294b229e795de25137",
+  "response": {
+    "output": {
+      "output": {
+        "layers": [
+          {
+            "id": "s06.sh03.l1",
+            "component": "end_card",
+            "props": {
+              "headline": "More heat out than electricity in"
+            },
+            "timing": {
+              "enter": {
+                "line": "b06.l04",
+                "point": "start",
+                "offset": 0
+              }
+            },
+            "layout": {
+              "landscape": {
+                "region": "main"
+              }
+            }
+          }
+        ]
+      },
+      "decisions": [
+        {
+          "about": [
+            "s06.sh03.l1/props"
+          ],
+          "choice": "Use the on-screen text of b06.l03 as the headline, with no subline, CTA or logo, so the card carries the takeaway in few words and shows no second claim.",
+          "citations": [
+            "line:b06.l03",
+            "craft_rule:hierarchy.supports_line",
+            "craft_rule:legibility.read_time",
+            "pack_rule:neutral/density.one_idea"
+          ]
+        },
+        {
+          "about": [
+            "s06.sh03.l1/timing/enter"
+          ],
+          "choice": "Enter at the start of b06.l04, the first line of this shot, since the shot runs from b06.l04 start to the scene's end. No exit is given, so the card holds to the end of the shot, long enough to read.",
+          "citations": [
+            "line:b06.l04",
+            "craft_rule:rhythm.hold_to_read",
+            "pack_rule:neutral/density.hold_time"
+          ]
+        },
+        {
+          "about": [
+            "s06.sh03.l1/layout"
+          ],
+          "choice": "Place the headline in the end_card template's centred main region as the single focal point, leaving the footer empty.",
+          "citations": [
+            "craft_rule:hierarchy.one_focus",
+            "pack_rule:neutral/layout.breathing_room"
+          ]
+        },
+        {
+          "about": [
+            "s06.sh03.l1/style"
+          ],
+          "choice": "Leave style to the pack, with no token overrides.",
+          "citations": [
+            "craft_rule:contrast.meaning"
+          ]
+        }
+      ]
+    },
+    "model": "claude-sonnet-5-5",
+    "usage": {
+      "input_tokens": 7084,
+      "output_tokens": 556
+    },
+    "cost_usd": 0.019728,
+    "stop": "end"
+  }
+}

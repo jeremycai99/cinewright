@@ -1,0 +1,169 @@
+{
+  "request_hash": "sha256:3828b55618080564afb5787d69322594217031f5a90e7a19bae60c544d4f80ac",
+  "response": {
+    "output": {
+      "output": {
+        "scenes": [
+          {
+            "id": "s01",
+            "duration": {
+              "target_seconds": 14,
+              "flex": 0.15,
+              "sync": "voiceover"
+            },
+            "transition_out": {
+              "type": "cross_dissolve",
+              "duration_frames": 12
+            }
+          },
+          {
+            "id": "s02",
+            "duration": {
+              "target_seconds": 10,
+              "flex": 0.15,
+              "sync": "voiceover"
+            },
+            "transition_out": {
+              "type": "wipe",
+              "duration_frames": 12
+            }
+          },
+          {
+            "id": "s03",
+            "duration": {
+              "target_seconds": 9,
+              "flex": 0.15,
+              "sync": "voiceover"
+            },
+            "transition_out": {
+              "type": "wipe",
+              "duration_frames": 12
+            }
+          },
+          {
+            "id": "s04",
+            "duration": {
+              "target_seconds": 8,
+              "flex": 0.15,
+              "sync": "voiceover"
+            },
+            "transition_out": {
+              "type": "cross_dissolve",
+              "duration_frames": 12
+            }
+          },
+          {
+            "id": "s05",
+            "duration": {
+              "target_seconds": 8,
+              "flex": 0.15,
+              "sync": "voiceover"
+            },
+            "transition_out": {
+              "type": "cross_dissolve",
+              "duration_frames": 12
+            }
+          },
+          {
+            "id": "s06",
+            "duration": {
+              "target_seconds": 14,
+              "flex": 0.15,
+              "sync": "voiceover"
+            },
+            "transition_out": {
+              "type": "cut"
+            }
+          }
+        ],
+        "shots": [
+          {
+            "id": "s02.sh02",
+            "anchors": {
+              "start": {
+                "line": "b02.l03",
+                "point": "start",
+                "offset": 0
+              }
+            }
+          },
+          {
+            "id": "s05.sh02",
+            "anchors": {
+              "start": {
+                "line": "b05.l03",
+                "point": "start",
+                "offset": 0
+              }
+            }
+          }
+        ]
+      },
+      "decisions": [
+        {
+          "about": [
+            "s01",
+            "s02",
+            "s03",
+            "s04",
+            "s05",
+            "s06"
+          ],
+          "choice": "Set voiceover-synced targets sized to each scene's narration with 15% flex so the engine can fit spoken length.",
+          "citations": [
+            "line:b01.l01",
+            "line:b02.l01",
+            "line:b03.l01",
+            "line:b04.l01",
+            "line:b05.l01",
+            "line:b06.l03"
+          ]
+        },
+        {
+          "about": [
+            "s02.sh02"
+          ],
+          "choice": "Moved the start of the step-list shot to b02.l03 so it begins when its bullet enters, rather than showing an empty body from b02.l02 and leaving the previous title for a shorter hold.",
+          "citations": [
+            "craft_rule:rhythm.hold_to_read",
+            "craft_rule:rhythm.cut_on_sense",
+            "line:b02.l03"
+          ]
+        },
+        {
+          "about": [
+            "s05.sh02"
+          ],
+          "choice": "Kept the second title's start on b05.l03 so the cut falls on the sense unit 'outside to inside' and the first title holds across two lines.",
+          "citations": [
+            "craft_rule:rhythm.cut_on_sense",
+            "line:b05.l03"
+          ]
+        },
+        {
+          "about": [
+            "s01/transition_out",
+            "s02/transition_out",
+            "s03/transition_out",
+            "s04/transition_out",
+            "s05/transition_out",
+            "s06/transition_out"
+          ],
+          "choice": "Left all transitions unchanged: dissolves between ideas, wipes for step progression, and a final cut.",
+          "citations": [
+            "craft_rule:continuity.transitions_mean",
+            "pack_rule:neutral/transition.wipe_for_sequence",
+            "pack_rule:neutral/transition.dissolve_between_ideas"
+          ]
+        }
+      ]
+    },
+    "model": "claude-sonnet-5-5",
+    "usage": {
+      "input_tokens": 6780,
+      "output_tokens": 1020
+    },
+    "cost_usd": 0.02376,
+    "stop": "end"
+  }
+}

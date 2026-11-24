@@ -1,0 +1,110 @@
+{
+  "request_hash": "sha256:b04a5a8ab34b4c087d95dc62222659f2bdd6cce57ddb9001abab5eb07c655940",
+  "response": {
+    "output": {
+      "output": {
+        "layers": [
+          {
+            "id": "s01.sh01.l1",
+            "component": "kinetic_title",
+            "props": {
+              "text": "One option worth understanding",
+              "subtitle": "Replacing a gas furnace",
+              "emphasis": [
+                1
+              ]
+            },
+            "timing": {
+              "enter": {
+                "line": "b01.l01",
+                "point": "start",
+                "offset": 10
+              },
+              "exit": {
+                "line": "b01.l02",
+                "point": "start",
+                "offset": 0
+              }
+            },
+            "layout": {
+              "landscape": {
+                "region": "title"
+              }
+            }
+          }
+        ]
+      },
+      "decisions": [
+        {
+          "about": [
+            "s01.sh01.l1/props/text"
+          ],
+          "choice": "Use 'One option worth understanding', taken from line 1, the only line this shot covers, as a short headline that restates its claim without adding another.",
+          "citations": [
+            "line:b01.l01",
+            "craft_rule:hierarchy.supports_line",
+            "craft_rule:legibility.read_time",
+            "pack_rule:playful/type.short_lines"
+          ]
+        },
+        {
+          "about": [
+            "s01.sh01.l1/props/subtitle"
+          ],
+          "choice": "Use 'Replacing a gas furnace' from line 1 as the subtitle to give context for the headline.",
+          "citations": [
+            "line:b01.l01",
+            "craft_rule:hierarchy.supports_line"
+          ]
+        },
+        {
+          "about": [
+            "s01.sh01.l1/props/emphasis"
+          ],
+          "choice": "Accent the word 'option' (index 1) as the single focal accent.",
+          "citations": [
+            "line:b01.l01",
+            "pack_rule:playful/color.one_focus"
+          ]
+        },
+        {
+          "about": [
+            "s01.sh01.l1/timing"
+          ],
+          "choice": "Enter shortly after line 1 starts and exit at the start of line 2, which is where the shot ends. Both anchors sit inside the shot, and the title stays up for nearly the whole line.",
+          "citations": [
+            "line:b01.l01",
+            "craft_rule:rhythm.hold_to_read",
+            "pack_rule:playful/density.fewer_items"
+          ]
+        },
+        {
+          "about": [
+            "s01.sh01.l1/layout"
+          ],
+          "choice": "Place the layer in the 'title' region of the title template for landscape. It is the only layer and so the focal point.",
+          "citations": [
+            "craft_rule:hierarchy.one_focus",
+            "pack_rule:playful/layout.centred_focus"
+          ]
+        },
+        {
+          "about": [
+            "s01.sh01.l1/style"
+          ],
+          "choice": "Leave style to the pack, with no token overrides.",
+          "citations": [
+            "craft_rule:contrast.meaning"
+          ]
+        }
+      ]
+    },
+    "model": "claude-sonnet-5-5",
+    "usage": {
+      "input_tokens": 7190,
+      "output_tokens": 1148
+    },
+    "cost_usd": 0.02586,
+    "stop": "end"
+  }
+}

@@ -1,0 +1,92 @@
+{
+  "request_hash": "sha256:1ee5843fcf3db9e73eace6407345addf83f1c71920393f5822aa006c47221103",
+  "response": {
+    "output": {
+      "output": {
+        "layers": [
+          {
+            "id": "s05.sh01.l1",
+            "component": "kinetic_title",
+            "props": {
+              "text": "Moves heat",
+              "emphasis": [
+                0
+              ]
+            },
+            "timing": {
+              "enter": {
+                "line": "b05.l01",
+                "point": "start",
+                "offset": 0
+              },
+              "exit": {
+                "line": "b05.l03",
+                "point": "start",
+                "offset": 0
+              }
+            },
+            "layout": {
+              "landscape": {
+                "region": "title"
+              }
+            }
+          }
+        ]
+      },
+      "decisions": [
+        {
+          "about": [
+            "s05.sh01.l1/props"
+          ],
+          "choice": "Use the line's on-screen text 'Moves heat' as the headline and accent word 0 ('Moves'), with no subtitle, so the words state only the spoken claim.",
+          "citations": [
+            "line:b05.l01",
+            "craft_rule:hierarchy.supports_line",
+            "craft_rule:legibility.read_time",
+            "pack_rule:neutral/color.one_accent"
+          ]
+        },
+        {
+          "about": [
+            "s05.sh01.l1/timing"
+          ],
+          "choice": "Enter as b05.l01 starts and exit at the start of b05.l03, the point where the shot ends, so the title stays up through the claim and the 'not burning fuel' line and the exit stays inside the shot.",
+          "citations": [
+            "line:b05.l01",
+            "line:b05.l03",
+            "craft_rule:rhythm.hold_to_read",
+            "pack_rule:neutral/density.hold_time"
+          ]
+        },
+        {
+          "about": [
+            "s05.sh01.l1/layout"
+          ],
+          "choice": "Place the title in the 'title' region of the title template for landscape, leaving the subtitle region empty.",
+          "citations": [
+            "pack_rule:neutral/layout.breathing_room",
+            "pack_rule:neutral/density.one_idea",
+            "craft_rule:hierarchy.one_focus"
+          ]
+        },
+        {
+          "about": [
+            "s05.sh01.l1/style"
+          ],
+          "choice": "No style overrides; the pack handles accent and weight.",
+          "citations": [
+            "craft_rule:contrast.meaning",
+            "pack_rule:neutral/type.weight_for_emphasis"
+          ]
+        }
+      ]
+    },
+    "model": "claude-sonnet-5-5",
+    "usage": {
+      "input_tokens": 7097,
+      "output_tokens": 635
+    },
+    "cost_usd": 0.020544,
+    "stop": "end"
+  }
+}

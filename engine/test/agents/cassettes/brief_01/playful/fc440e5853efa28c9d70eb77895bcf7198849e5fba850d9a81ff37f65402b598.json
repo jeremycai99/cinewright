@@ -1,0 +1,149 @@
+{
+  "request_hash": "sha256:fc440e5853efa28c9d70eb77895bcf7198849e5fba850d9a81ff37f65402b598",
+  "response": {
+    "output": {
+      "output": {
+        "scenes": [
+          {
+            "id": "s01",
+            "duration": {
+              "target_seconds": 16,
+              "flex": 0.15,
+              "sync": "voiceover"
+            }
+          },
+          {
+            "id": "s02",
+            "duration": {
+              "target_seconds": 12.5,
+              "flex": 0.15,
+              "sync": "voiceover"
+            }
+          },
+          {
+            "id": "s03",
+            "duration": {
+              "target_seconds": 8.5,
+              "flex": 0.15,
+              "sync": "voiceover"
+            }
+          },
+          {
+            "id": "s04",
+            "duration": {
+              "target_seconds": 8,
+              "flex": 0.15,
+              "sync": "voiceover"
+            }
+          },
+          {
+            "id": "s05",
+            "duration": {
+              "target_seconds": 10.5,
+              "flex": 0.15,
+              "sync": "voiceover"
+            }
+          },
+          {
+            "id": "s06",
+            "duration": {
+              "target_seconds": 22,
+              "flex": 0.15,
+              "sync": "voiceover"
+            }
+          }
+        ],
+        "shots": [
+          {
+            "id": "s05.sh03",
+            "anchors": {
+              "start": {
+                "line": "b05.l03",
+                "point": "start",
+                "offset": 15
+              }
+            }
+          },
+          {
+            "id": "s06.sh02",
+            "anchors": {
+              "start": {
+                "line": "b06.l02",
+                "point": "start",
+                "offset": 10
+              }
+            }
+          }
+        ]
+      },
+      "decisions": [
+        {
+          "about": [
+            "s01/duration",
+            "s02/duration",
+            "s03/duration",
+            "s04/duration",
+            "s05/duration",
+            "s06/duration"
+          ],
+          "choice": "Set each scene's target from roughly 2.5 spoken words per second of its narration, with a 15% flex, synced to the voiceover so the narration sets the pace.",
+          "citations": [
+            "line:b01.l01",
+            "line:b02.l01",
+            "line:b03.l01",
+            "line:b04.l01",
+            "line:b05.l01",
+            "line:b06.l02",
+            "craft_rule:rhythm.hold_to_read"
+          ]
+        },
+        {
+          "about": [
+            "s05.sh03/anchors/start"
+          ],
+          "choice": "Start s05.sh03 15 frames into b05.l03 so the short 'Nothing is burned.' shot (s05.sh02) holds about 1.9 s, above the 1.8 s minimum, with the cut still falling at the opening of the sentence about moving heat.",
+          "citations": [
+            "line:b05.l02",
+            "line:b05.l03",
+            "craft_rule:rhythm.hold_to_read",
+            "craft_rule:rhythm.cut_on_sense"
+          ]
+        },
+        {
+          "about": [
+            "s06.sh02/anchors/start"
+          ],
+          "choice": "Start s06.sh02 10 frames into b06.l02 so the 'That difference matters' shot (s06.sh01) holds about 2 s, above the 1.8 s minimum, with the cut still at the start of the next sentence.",
+          "citations": [
+            "line:b06.l01",
+            "line:b06.l02",
+            "craft_rule:rhythm.hold_to_read",
+            "craft_rule:rhythm.cut_on_sense"
+          ]
+        },
+        {
+          "about": [
+            "s01/transition_out",
+            "s02/transition_out",
+            "s03/transition_out",
+            "s04/transition_out",
+            "s05/transition_out",
+            "s06/transition_out"
+          ],
+          "choice": "Left all transitions unchanged, as no transition carries meaning that needs changing.",
+          "citations": [
+            "craft_rule:continuity.transitions_mean",
+            "pack_rule:playful/transition.wipe_by_default"
+          ]
+        }
+      ]
+    },
+    "model": "claude-sonnet-5-5",
+    "usage": {
+      "input_tokens": 9503,
+      "output_tokens": 1766
+    },
+    "cost_usd": 0.036666,
+    "stop": "end"
+  }
+}
