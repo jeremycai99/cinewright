@@ -1,0 +1,99 @@
+{
+  "request_hash": "sha256:f27f1b4061d66ddf53e5a8aa9acec5e5102760bc875f2f4e2f70091d958c5e19",
+  "response": {
+    "output": {
+      "output": {
+        "layers": [
+          {
+            "id": "s03.sh01.l1",
+            "component": "kinetic_title",
+            "props": {
+              "text": "The compressor",
+              "emphasis": [
+                1
+              ]
+            },
+            "timing": {
+              "enter": {
+                "line": "b03.l01",
+                "point": "start",
+                "offset": 0
+              },
+              "exit": {
+                "line": "b03.l01",
+                "point": "end",
+                "offset": 0
+              }
+            },
+            "layout": {
+              "landscape": {
+                "region": "title"
+              }
+            }
+          }
+        ]
+      },
+      "decisions": [
+        {
+          "about": [
+            "s03.sh01.l1/props/text"
+          ],
+          "choice": "Use 'The compressor', taken from line b03.l01's text and matching the framing 'Centred heading: the compressor'. It introduces the next step without adding a second claim, since this shot only covers b03.l01.",
+          "citations": [
+            "line:b03.l01",
+            "craft_rule:hierarchy.supports_line",
+            "craft_rule:legibility.read_time",
+            "pack_rule:playful/type.short_lines"
+          ]
+        },
+        {
+          "about": [
+            "s03.sh01.l1/props/emphasis"
+          ],
+          "choice": "Accent word 1, 'compressor', as the single focal word.",
+          "citations": [
+            "craft_rule:hierarchy.one_focus",
+            "pack_rule:playful/color.one_focus"
+          ]
+        },
+        {
+          "about": [
+            "s03.sh01.l1/timing"
+          ],
+          "choice": "Enter at the start of b03.l01 and exit at its end, staying inside the shot, which runs from b03.l01 start to b03.l02 start. The title stays up for the whole spoken line.",
+          "citations": [
+            "line:b03.l01",
+            "craft_rule:rhythm.hold_to_read",
+            "pack_rule:playful/density.fewer_items"
+          ]
+        },
+        {
+          "about": [
+            "s03.sh01.l1/layout"
+          ],
+          "choice": "Place the headline in the 'title' region of the title template, centred as the single focus. The subtitle region is unused.",
+          "citations": [
+            "pack_rule:playful/layout.centred_focus",
+            "craft_rule:continuity.same_thing_same_look"
+          ]
+        },
+        {
+          "about": [
+            "s03.sh01.l1/style"
+          ],
+          "choice": "No style overrides, leaving styling to the pack.",
+          "citations": [
+            "pack_rule:playful/type.big_and_round"
+          ]
+        }
+      ]
+    },
+    "model": "claude-sonnet-5-5",
+    "usage": {
+      "input_tokens": 7019,
+      "output_tokens": 689
+    },
+    "cost_usd": 0.020928,
+    "stop": "end"
+  }
+}

@@ -1,0 +1,182 @@
+{
+  "request_hash": "sha256:ed9e53ed2900f13f0514cb0a74ef3b4369a6a0430318620bee4569c541db3abc",
+  "response": {
+    "output": {
+      "output": {
+        "scenes": [
+          {
+            "id": "s01",
+            "duration": {
+              "target_seconds": 14,
+              "flex": 0.15,
+              "sync": "voiceover"
+            },
+            "transition_out": {
+              "type": "cross_dissolve",
+              "duration_frames": 12
+            }
+          },
+          {
+            "id": "s02",
+            "duration": {
+              "target_seconds": 11,
+              "flex": 0.15,
+              "sync": "voiceover"
+            },
+            "transition_out": {
+              "type": "wipe",
+              "duration_frames": 12
+            }
+          },
+          {
+            "id": "s03",
+            "duration": {
+              "target_seconds": 10,
+              "flex": 0.15,
+              "sync": "voiceover"
+            },
+            "transition_out": {
+              "type": "wipe",
+              "duration_frames": 12
+            }
+          },
+          {
+            "id": "s04",
+            "duration": {
+              "target_seconds": 9,
+              "flex": 0.15,
+              "sync": "voiceover"
+            },
+            "transition_out": {
+              "type": "cross_dissolve",
+              "duration_frames": 12
+            }
+          },
+          {
+            "id": "s05",
+            "duration": {
+              "target_seconds": 9,
+              "flex": 0.15,
+              "sync": "voiceover"
+            },
+            "transition_out": {
+              "type": "cross_dissolve",
+              "duration_frames": 12
+            }
+          },
+          {
+            "id": "s06",
+            "duration": {
+              "target_seconds": 16,
+              "flex": 0.15,
+              "sync": "voiceover"
+            },
+            "transition_out": {
+              "type": "cut"
+            }
+          }
+        ],
+        "shots": [
+          {
+            "id": "s01.sh02",
+            "anchors": {
+              "start": {
+                "line": "b01.l02",
+                "point": "start",
+                "offset": 0
+              }
+            }
+          },
+          {
+            "id": "s02.sh02",
+            "anchors": {
+              "start": {
+                "line": "b02.l02",
+                "point": "start",
+                "offset": 0
+              }
+            }
+          },
+          {
+            "id": "s06.sh02",
+            "anchors": {
+              "start": {
+                "line": "b06.l03",
+                "point": "start",
+                "offset": 0
+              }
+            }
+          }
+        ]
+      },
+      "decisions": [
+        {
+          "about": [
+            "s01",
+            "s02",
+            "s03",
+            "s04",
+            "s05",
+            "s06"
+          ],
+          "choice": "Set voiceover-synced targets sized to each scene's spoken line count, with modest flex so the solver can fit the narration.",
+          "citations": [
+            "line:b01.l01",
+            "line:b02.l01",
+            "line:b03.l01",
+            "line:b04.l01",
+            "line:b05.l01",
+            "line:b06.l03",
+            "craft_rule:rhythm.hold_to_read"
+          ]
+        },
+        {
+          "about": [
+            "s02.sh02/anchors/start"
+          ],
+          "choice": "Move the step-list shot start from b02.l03 to b02.l02 so the first shot is not over a line too briefly and the list appears on the sense unit about cold air still holding heat.",
+          "citations": [
+            "line:b02.l02",
+            "craft_rule:rhythm.cut_on_sense",
+            "craft_rule:rhythm.hold_to_read"
+          ]
+        },
+        {
+          "about": [
+            "s01.sh02/anchors/start",
+            "s06.sh02/anchors/start"
+          ],
+          "choice": "Keep these start anchors on their own sense-unit lines; they cut at line starts, so no change in position was needed.",
+          "citations": [
+            "line:b01.l02",
+            "line:b06.l03",
+            "craft_rule:rhythm.cut_on_sense"
+          ]
+        },
+        {
+          "about": [
+            "s01/transition_out",
+            "s02/transition_out",
+            "s03/transition_out",
+            "s04/transition_out",
+            "s05/transition_out",
+            "s06/transition_out"
+          ],
+          "choice": "Leave all transitions unchanged: dissolves between ideas, wipes for the step sequence, and a final cut.",
+          "citations": [
+            "craft_rule:continuity.transitions_mean",
+            "pack_rule:neutral/transition.wipe_for_sequence",
+            "pack_rule:neutral/transition.dissolve_between_ideas"
+          ]
+        }
+      ]
+    },
+    "model": "claude-sonnet-5-5",
+    "usage": {
+      "input_tokens": 6780,
+      "output_tokens": 1104
+    },
+    "cost_usd": 0.0246,
+    "stop": "end"
+  }
+}

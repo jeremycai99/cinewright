@@ -1,0 +1,147 @@
+{
+  "request_hash": "sha256:18f7c3f3760f7694be41dd87d1bccf394daa4bb67517ba6b390b421abdd4befc",
+  "response": {
+    "output": {
+      "output": {
+        "scenes": [
+          {
+            "id": "s01",
+            "duration": {
+              "target_seconds": 16,
+              "flex": 0.15,
+              "sync": "voiceover"
+            }
+          },
+          {
+            "id": "s02",
+            "duration": {
+              "target_seconds": 12.5,
+              "flex": 0.15,
+              "sync": "voiceover"
+            }
+          },
+          {
+            "id": "s03",
+            "duration": {
+              "target_seconds": 8.5,
+              "flex": 0.15,
+              "sync": "voiceover"
+            }
+          },
+          {
+            "id": "s04",
+            "duration": {
+              "target_seconds": 8,
+              "flex": 0.15,
+              "sync": "voiceover"
+            }
+          },
+          {
+            "id": "s05",
+            "duration": {
+              "target_seconds": 10.5,
+              "flex": 0.15,
+              "sync": "voiceover"
+            }
+          },
+          {
+            "id": "s06",
+            "duration": {
+              "target_seconds": 22,
+              "flex": 0.15,
+              "sync": "voiceover"
+            }
+          }
+        ],
+        "shots": [
+          {
+            "id": "s05.sh03",
+            "anchors": {
+              "start": {
+                "line": "b05.l03",
+                "point": "start",
+                "offset": 0
+              }
+            }
+          },
+          {
+            "id": "s06.sh02",
+            "anchors": {
+              "start": {
+                "line": "b06.l02",
+                "point": "start",
+                "offset": 0
+              }
+            }
+          }
+        ]
+      },
+      "decisions": [
+        {
+          "about": [
+            "s01/duration",
+            "s02/duration",
+            "s03/duration",
+            "s04/duration",
+            "s05/duration",
+            "s06/duration"
+          ],
+          "choice": "Set each scene's target from roughly 2.5 spoken words per second of its narration, with a 15% flex, synced to the voiceover so the narration sets the pace.",
+          "citations": [
+            "line:b01.l01",
+            "line:b02.l01",
+            "line:b03.l01",
+            "line:b04.l01",
+            "line:b05.l01",
+            "line:b06.l02",
+            "craft_rule:rhythm.hold_to_read"
+          ]
+        },
+        {
+          "about": [
+            "s05.sh03/anchors/start"
+          ],
+          "choice": "Moved the start from 33 frames into b05.l03 to the line's start, so the cut falls on the sentence and the shot is up when its title enters.",
+          "citations": [
+            "line:b05.l03",
+            "craft_rule:rhythm.cut_on_sense"
+          ]
+        },
+        {
+          "about": [
+            "s06.sh02/anchors/start"
+          ],
+          "choice": "Moved the start from 20 frames into b06.l02 to the line's start, so the cut falls on the sentence boundary and matches the title's entry; the preceding short title still holds long enough to read.",
+          "citations": [
+            "line:b06.l01",
+            "line:b06.l02",
+            "craft_rule:rhythm.cut_on_sense",
+            "craft_rule:rhythm.hold_to_read"
+          ]
+        },
+        {
+          "about": [
+            "s01/transition_out",
+            "s02/transition_out",
+            "s03/transition_out",
+            "s04/transition_out",
+            "s05/transition_out",
+            "s06/transition_out"
+          ],
+          "choice": "Left all transitions unchanged, as no transition carries meaning that needs changing.",
+          "citations": [
+            "craft_rule:continuity.transitions_mean",
+            "pack_rule:playful/transition.wipe_by_default"
+          ]
+        }
+      ]
+    },
+    "model": "claude-sonnet-5-5",
+    "usage": {
+      "input_tokens": 8464,
+      "output_tokens": 2111
+    },
+    "cost_usd": 0.038038,
+    "stop": "end"
+  }
+}

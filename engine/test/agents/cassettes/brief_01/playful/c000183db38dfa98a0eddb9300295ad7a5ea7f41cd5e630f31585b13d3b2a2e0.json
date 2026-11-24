@@ -1,0 +1,99 @@
+{
+  "request_hash": "sha256:c000183db38dfa98a0eddb9300295ad7a5ea7f41cd5e630f31585b13d3b2a2e0",
+  "response": {
+    "output": {
+      "output": {
+        "layers": [
+          {
+            "id": "s05.sh02.l1",
+            "component": "kinetic_title",
+            "props": {
+              "text": "Nothing is burned.",
+              "emphasis": [
+                2
+              ]
+            },
+            "timing": {
+              "enter": {
+                "line": "b05.l02",
+                "point": "start",
+                "offset": 0
+              },
+              "exit": {
+                "line": "b05.l03",
+                "point": "start",
+                "offset": 0
+              }
+            },
+            "layout": {
+              "landscape": {
+                "region": "title"
+              }
+            }
+          }
+        ]
+      },
+      "decisions": [
+        {
+          "about": [
+            "s05.sh02.l1/props/text"
+          ],
+          "choice": "The shot covers only line b05.l02, so the headline is that line's own words, 'Nothing is burned.' It is short enough to read while heard.",
+          "citations": [
+            "line:b05.l02",
+            "craft_rule:hierarchy.supports_line",
+            "craft_rule:legibility.read_time",
+            "pack_rule:playful/type.short_lines"
+          ]
+        },
+        {
+          "about": [
+            "s05.sh02.l1/props/emphasis"
+          ],
+          "choice": "Accent 'burned' (index 2) as the single focus word.",
+          "citations": [
+            "craft_rule:hierarchy.one_focus",
+            "pack_rule:playful/color.one_focus"
+          ]
+        },
+        {
+          "about": [
+            "s05.sh02.l1/timing"
+          ],
+          "choice": "Enter at the start of b05.l02 and exit at the start of b05.l03, the shot's end, so both anchors lie inside the shot and the text holds for the whole line.",
+          "citations": [
+            "line:b05.l02",
+            "craft_rule:rhythm.hold_to_read",
+            "pack_rule:playful/density.fewer_items"
+          ]
+        },
+        {
+          "about": [
+            "s05.sh02.l1/layout"
+          ],
+          "choice": "Place the title in the 'title' region of the centred title template in landscape.",
+          "citations": [
+            "pack_rule:playful/layout.centred_focus",
+            "craft_rule:continuity.same_thing_same_look"
+          ]
+        },
+        {
+          "about": [
+            "s05.sh02.l1/style"
+          ],
+          "choice": "Leave style to the pack with no token overrides.",
+          "citations": [
+            "pack_rule:playful/type.big_and_round"
+          ]
+        }
+      ]
+    },
+    "model": "claude-sonnet-5-5",
+    "usage": {
+      "input_tokens": 7078,
+      "output_tokens": 919
+    },
+    "cost_usd": 0.023346,
+    "stop": "end"
+  }
+}

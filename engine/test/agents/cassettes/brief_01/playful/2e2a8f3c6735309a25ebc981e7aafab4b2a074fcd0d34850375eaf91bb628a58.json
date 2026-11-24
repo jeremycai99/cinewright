@@ -1,0 +1,92 @@
+{
+  "request_hash": "sha256:2e2a8f3c6735309a25ebc981e7aafab4b2a074fcd0d34850375eaf91bb628a58",
+  "response": {
+    "output": {
+      "output": {
+        "layers": [
+          {
+            "id": "s02.sh01.l1",
+            "component": "kinetic_title",
+            "props": {
+              "text": "The refrigerant",
+              "emphasis": [
+                1
+              ]
+            },
+            "timing": {
+              "enter": {
+                "line": "b02.l01",
+                "point": "start",
+                "offset": 30
+              },
+              "exit": {
+                "line": "b02.l02",
+                "point": "end",
+                "offset": 0
+              }
+            },
+            "layout": {
+              "landscape": {
+                "region": "title"
+              }
+            }
+          }
+        ]
+      },
+      "decisions": [
+        {
+          "about": [
+            "s02.sh01.l1/props/text"
+          ],
+          "choice": "The shot covers only b02.l01 and b02.l02, and neither has on-screen text. The headline 'The refrigerant' is taken from b02.l01's wording and names the subject without making a second claim. It is short enough to read while the line is heard.",
+          "citations": [
+            "line:b02.l01",
+            "craft_rule:hierarchy.supports_line",
+            "craft_rule:legibility.read_time",
+            "pack_rule:playful/type.short_lines"
+          ]
+        },
+        {
+          "about": [
+            "s02.sh01.l1/props/emphasis"
+          ],
+          "choice": "Accented only 'refrigerant' (index 1) so it is the single focal point. No subtitle, to keep the frame sparse.",
+          "citations": [
+            "craft_rule:hierarchy.one_focus",
+            "pack_rule:playful/color.one_focus",
+            "pack_rule:playful/density.fewer_items"
+          ]
+        },
+        {
+          "about": [
+            "s02.sh01.l1/timing"
+          ],
+          "choice": "Enters shortly after the start of b02.l01 and exits at the end of b02.l02. Both anchors fall inside the shot, which ends where b02.l03 starts, and the title is held for most of the shot.",
+          "citations": [
+            "line:b02.l01",
+            "line:b02.l02",
+            "craft_rule:rhythm.hold_to_read",
+            "pack_rule:playful/density.fewer_items"
+          ]
+        },
+        {
+          "about": [
+            "s02.sh01.l1/layout"
+          ],
+          "choice": "Placed the headline in the 'title' region of the title template, which is centred.",
+          "citations": [
+            "pack_rule:playful/layout.centred_focus",
+            "craft_rule:continuity.same_thing_same_look"
+          ]
+        }
+      ]
+    },
+    "model": "claude-sonnet-5-5",
+    "usage": {
+      "input_tokens": 7115,
+      "output_tokens": 1130
+    },
+    "cost_usd": 0.02553,
+    "stop": "end"
+  }
+}

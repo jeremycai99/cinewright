@@ -1,0 +1,94 @@
+{
+  "request_hash": "sha256:745074ca34c2e90df4ba0a53928e1c553280e1657cc7dc869051c8e71a2c0566",
+  "response": {
+    "output": {
+      "output": {
+        "layers": [
+          {
+            "id": "s04.sh02.l1",
+            "component": "bullet_reveal",
+            "props": {
+              "items": [
+                "Refrigerant moves indoors",
+                "Heat released indoors",
+                "Heat warms the rooms"
+              ]
+            },
+            "timing": {
+              "enter": {
+                "line": "b04.l02",
+                "point": "start",
+                "offset": 0
+              },
+              "exit": {
+                "line": "b04.l03",
+                "point": "end",
+                "offset": 15
+              }
+            },
+            "layout": {
+              "landscape": {
+                "region": "body"
+              }
+            }
+          }
+        ]
+      },
+      "decisions": [
+        {
+          "about": [
+            "s04.sh02.l1/props/items"
+          ],
+          "choice": "Three short items drawn from the three lines' wording, using line b04.l02's on-screen text for the second, so the list shows only what is narrated and stays within a small bullet count.",
+          "citations": [
+            "line:b04.l01",
+            "line:b04.l02",
+            "line:b04.l03",
+            "craft_rule:hierarchy.supports_line",
+            "craft_rule:legibility.read_time",
+            "pack_rule:playful/density.fewer_items",
+            "pack_rule:playful/type.short_lines"
+          ]
+        },
+        {
+          "about": [
+            "s04.sh02.l1/timing"
+          ],
+          "choice": "Enter at the start of b04.l02, where the shot begins, so the list appears as the narration reaches the heat release; exit 15 frames after b04.l03 ends so the last item can be read.",
+          "citations": [
+            "craft_rule:rhythm.hold_to_read",
+            "line:b04.l02",
+            "line:b04.l03",
+            "pack_rule:playful/motion.lively_but_brief"
+          ]
+        },
+        {
+          "about": [
+            "s04.sh02.l1/layout"
+          ],
+          "choice": "Place the list in the body region of title_body as the single focal component of the shot, with no title layer.",
+          "citations": [
+            "craft_rule:hierarchy.one_focus",
+            "pack_rule:playful/layout.centred_focus"
+          ]
+        },
+        {
+          "about": [
+            "s04.sh02.l1/style"
+          ],
+          "choice": "No style overrides; the pack's styling handles the look.",
+          "citations": [
+            "craft_rule:contrast.meaning"
+          ]
+        }
+      ]
+    },
+    "model": "claude-sonnet-5-5",
+    "usage": {
+      "input_tokens": 6802,
+      "output_tokens": 640
+    },
+    "cost_usd": 0.020004,
+    "stop": "end"
+  }
+}
