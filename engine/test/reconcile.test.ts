@@ -230,3 +230,88 @@ describe("reconcile (M7.1b)", () => {
     expect(ad.phases.map((p) => p.id)).not.toContain("P6");
   });
 });
+
+describe("re-deriving after a fix (the tier B measured run)", () => {
+  // Two lines; the Director wrote two filled shots as an agent, the second starting at line 2.
+  const SCRIPT2 = {
+    ...SCRIPT,
+    value: {
+      ...SCRIPT.value,
+      lines: [
+        { id: "b01.l01", text: "Every team hits the same wall.", speaker: "narrator" },
+        { id: "b01.l02", text: "Builds slow down.", speaker: "narrator" },
+      ],
+    },
+  };
+  const SEQ2 = (() => {
+    const s = SEQUENCE([true, true]);
+    const scene = s.value.scenes[0] as Record<string, unknown>;
+    scene.lines = ["b01.l01", "b01.l02"];
+    const shots = scene.shots as Record<string, unknown>[];
+    (shots[1] as Record<string, unknown>).anchors = {
+      start: { line: "b01.l02", offset: 0, point: "start" },
+    };
+    return s;
+  })();
+  const DIRECTOR = { kind: "agent", role: "director" } as const;
+  /** What reconcile derives with these recorded keys; every agent output here is agent-filled. */
+  const derived = (store: Store, recorded: Map<string, string>) =>
+    reconcile(store.ir(), loadTemplate("explainer"), loadPreset("guided"), {
+      plan: planRender(store.ir()),
+      recorded,
+    }).tasks.filter((t) => t.kind === "agent");
+  /** Each task's current key: a stale recorded key makes reconcile derive it. */
+  const keysNow = (store: Store, ids: string[]) =>
+    new Map(
+      derived(store, new Map(ids.map((id) => [id, "stale"])))
+        .filter((t) => ids.includes(t.id))
+        .map((t) => [t.id, t.key]),
+    );
+
+  it("re-runs the Shot Builders on both sides of a shot start that moved, and no other", async () => {
+    // In the third measured run (2026-11-24) an Editor fix moved s03.sh02's start one line later;
+    // its Shot Builder never re-ran, and the render failed on a layer left before the shot.
+    const store = await project([PLAN]);
+    await apply(store, [SCRIPT2, SEQ2], DIRECTOR);
+    const builders = ["shot_builder:s01.sh01", "shot_builder:s01.sh02"];
+    const recorded = keysNow(store, builders);
+    expect([...recorded.keys()]).toEqual(builders);
+    expect(derived(store, recorded).map((t) => t.id)).toEqual([]);
+    await apply(store, [
+      {
+        op: "set",
+        entity: "s01.sh02",
+        path: "/anchors",
+        value: { start: { line: "b01.l02", offset: 10, point: "start" } },
+      },
+    ]);
+    expect(derived(store, recorded).map((t) => t.id)).toEqual(builders);
+  });
+
+  it("does not re-run the Editor for a change to a layer or to the shot starts it writes", async () => {
+    // In the same run the Editor re-ran after each layer fix and after its own patch, undoing its
+    // own fix and redoing it.
+    const store = await project([PLAN]);
+    await apply(store, [SCRIPT2, SEQ2], DIRECTOR);
+    const recorded = keysNow(store, ["editor"]);
+    expect(recorded.has("editor")).toBe(true);
+    await apply(
+      store,
+      [
+        { op: "set", entity: "s01.sh01.title", path: "/props/text", value: "U" },
+        {
+          op: "set",
+          entity: "s01.sh02",
+          path: "/anchors",
+          value: { start: { line: "b01.l02", offset: 10, point: "start" } },
+        },
+      ],
+      { kind: "agent", role: "shot_builder" },
+    );
+    expect(derived(store, recorded).map((t) => t.id)).not.toContain("editor");
+    await apply(store, [
+      { op: "set", entity: "b01.l02", path: "/text", value: "Builds slow to a crawl." },
+    ]);
+    expect(derived(store, recorded).map((t) => t.id)).toContain("editor");
+  });
+});

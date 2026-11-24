@@ -96,6 +96,21 @@ export function wrapper(
   return w && typeof w === "object" ? (w as { state?: string; value?: unknown }) : undefined;
 }
 
+/**
+ * A field's state; for a map field (layer props, layouts), its entries': `locked` or `user` if any
+ * entry is, `agent` when every entry is (the tier B measured run: a Shot Builder's props were never
+ * re-derived because the map itself has no state).
+ */
+export function stateOf(entity: EntityRef, field: string): string | undefined {
+  const w = wrapper(entity, field);
+  if (w === undefined) return undefined;
+  if (typeof w.state === "string") return w.state;
+  const states = Object.values(w as Record<string, { state?: string }>).map((e) => e?.state);
+  if (states.includes("locked")) return "locked";
+  if (states.includes("user")) return "user";
+  return states.length > 0 && states.every((s) => s === "agent") ? "agent" : undefined;
+}
+
 /** A field that still needs filling: absent, in state `open`, or a map with no filled entry. */
 export const unfilled = (entity: EntityRef, field: string) => {
   const w = wrapper(entity, field);
