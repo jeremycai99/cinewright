@@ -1,4 +1,4 @@
-import { existsSync, readFileSync } from "node:fs";
+import { existsSync, readFileSync, rmSync } from "node:fs";
 import { fileURLToPath } from "node:url";
 import Anthropic from "@anthropic-ai/sdk";
 import { requestHash, withCassettes } from "@cinewright/engine";
@@ -90,6 +90,9 @@ describe("the Anthropic plugin under cassettes (M7.3)", () => {
       },
     ];
     const dir = fileURLToPath(new URL("../.cassette-scratch/", import.meta.url));
+    // Start empty, so "generate" is a live (faked) call: a cassette left by an earlier run would
+    // answer it at no cost and differ from the golden's `cost_usd`.
+    rmSync(dir, { recursive: true, force: true });
     const plugin = withCassettes(createPlugin({ client: fake.client }), { dir, mode: "record" });
     const report = await runConformance(
       { manifest: MANIFEST, plugin, dir: "." } as never,
