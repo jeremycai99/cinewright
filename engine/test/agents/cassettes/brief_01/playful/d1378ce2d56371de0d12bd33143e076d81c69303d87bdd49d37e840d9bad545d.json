@@ -1,0 +1,101 @@
+{
+  "request_hash": "sha256:d1378ce2d56371de0d12bd33143e076d81c69303d87bdd49d37e840d9bad545d",
+  "response": {
+    "output": {
+      "output": {
+        "layers": [
+          {
+            "id": "s06.sh02.l1",
+            "component": "kinetic_title",
+            "props": {
+              "text": "More heat out than electricity in",
+              "emphasis": [
+                0,
+                1
+              ]
+            },
+            "timing": {
+              "enter": {
+                "line": "b06.l02",
+                "point": "start",
+                "offset": 12
+              },
+              "exit": {
+                "line": "b06.l03",
+                "point": "start",
+                "offset": -5
+              }
+            },
+            "layout": {
+              "landscape": {
+                "region": "title"
+              }
+            }
+          }
+        ]
+      },
+      "decisions": [
+        {
+          "about": [
+            "s06.sh02.l1/props/text"
+          ],
+          "choice": "Used the on-screen text of line b06.l02 verbatim; it is short and states the line's claim without adding a second one.",
+          "citations": [
+            "line:b06.l02",
+            "craft_rule:hierarchy.supports_line",
+            "craft_rule:legibility.read_time",
+            "pack_rule:playful/type.short_lines"
+          ]
+        },
+        {
+          "about": [
+            "s06.sh02.l1/props/emphasis"
+          ],
+          "choice": "Accented words 0 and 1 ('More heat') to match the framing note; no subtitle so the title is the single focus.",
+          "citations": [
+            "craft_rule:hierarchy.one_focus",
+            "pack_rule:playful/color.one_focus"
+          ]
+        },
+        {
+          "about": [
+            "s06.sh02.l1/timing"
+          ],
+          "choice": "Enter 12 frames after b06.l02 starts, just inside the shot (which begins at +10), as the narration reaches the claim; exit 5 frames before b06.l03 starts, the shot end, so it holds as long as the shot allows.",
+          "citations": [
+            "line:b06.l02",
+            "line:b06.l03",
+            "craft_rule:rhythm.hold_to_read",
+            "pack_rule:playful/density.fewer_items"
+          ]
+        },
+        {
+          "about": [
+            "s06.sh02.l1/layout"
+          ],
+          "choice": "Placed the title in the landscape 'title' region of the title template, centred as the framing asks.",
+          "citations": [
+            "pack_rule:playful/layout.centred_focus",
+            "craft_rule:continuity.same_thing_same_look"
+          ]
+        },
+        {
+          "about": [
+            "s06.sh02.l1/style"
+          ],
+          "choice": "No style overrides; the pack handles styling.",
+          "citations": [
+            "craft_rule:contrast.meaning"
+          ]
+        }
+      ]
+    },
+    "model": "claude-sonnet-5-5",
+    "usage": {
+      "input_tokens": 7072,
+      "output_tokens": 698
+    },
+    "cost_usd": 0.021124,
+    "stop": "end"
+  }
+}

@@ -165,7 +165,19 @@ PR order: Tasks 1, 2 and 3 in any order (Task 2's brief writing starts at the al
     | fix loop | Sonnet, Opus | 48 | 2.49 |
 
     Every one of the 19 findings was a warning, so none blocked export; the fix loop resolved 2 and escalated 15. Its four Director tasks (suggestions and role fixes for shot-level vision warnings, on Opus) cost $1.54, about $0.40 each, and two of them gave no usable answer after their repairs; the Shot Builder's four cost $0.10 in all. A complete run is likely $5 or more, three to four times decision 11's estimate. What would bring it down is a maintainer choice: keep vision warnings out of the fix loop (report them at the final gate), drop the Director from their routing, or run the vision critic on Sonnet.
-  - **Found by the second measurement, not yet fixed:** after the cap paused a run with a Shot Builder task pending, the render jobs ran on that shot's half-built layer (`compile.missing_prop`, `compile.unknown_region`), and `export` reported that compile error (exit 3) instead of the pause.
+  - **Found by the second measurement:** after the cap paused a run with a Shot Builder task pending, the render jobs ran on that shot's half-built layer (`compile.missing_prop`, `compile.unknown_region`), and `export` reported that compile error (exit 3) instead of the pause. Fixed in PR M8.3e: `export` refuses while the latest run is paused, naming the pause (exit 5).
+  - **Fix loop changes after the second measurement** (maintainer's choice, 2026-11-24: keep the Director in the routing): the Director's fix tasks run on Sonnet (`fix_tier`, PR M8.3d), one owner gets one task for all its findings on a shot, and the vision critic sees each shot's own lines with their frames. A third run (2026-11-24, $0.60 live) failed to render: an Editor fix moved `s03.sh02`'s start, its Shot Builder never re-ran, and the Editor re-ran after every layer fix and moved the start back and forth. Fixed in PR M8.3f (a Shot Builder re-runs when its shot's window moves; map fields have a state; the Editor reads `shot.type`, not `scene.shots`).
+  - **Third measurement, 2026-11-24 to 25: complete** (same brief and command, PRs M8.3c–f, a fresh project capped at $6, raised to $7 by the maintainer). It exported a 28.7-second 1080p30 film with captions and no error finding; 17 warnings stayed escalated. $3.06 live; $6.02 recorded, since the cap counts replayed calls (the critic re-critiques unchanged shots, and those replays count again). Recorded cost by role:
+
+    | Role | Model | Calls | USD |
+    | --- | --- | --- | --- |
+    | producer / writer / director | Opus | 4 | 0.25 |
+    | shot builder / editor | Sonnet | 26 | 0.51 |
+    | vision critic | Opus | 103 | 4.79 |
+    | fix loop (every owner on Sonnet) | Sonnet | 19 | 0.47 |
+
+    The fix loop now costs a fifth of what it did ($0.47 against $2.49); the vision critic is 80% of the run. Two maintainer steps were needed. The Director's fix for two hierarchy warnings was a suggestion (one shot per skill, the close split in two), and the maintainer approved it. Raising the cap needed `/budget` unlocked first. The result is much better on screen: each skill is named on its own shot, and the accent sits on the skill's object.
+  - **Found by the third measurement, not yet fixed:** `--approve-final` approves and locks the final gate while a fix suggestion is pending, so the suggestion can no longer be approved (it conflicts with the lock); the maintainer's approval had to be applied as a user patch after an `unlock`. That patch made the whole sequence user-owned, so a later Editor fix became a suggestion too. `status` counts "0 gates" while the run waits on a pending suggestion. The cap counts replays, so a resumed run can reach the cap with little live spend.
 - [ ] **Step 2: Write the failing tests** with a stub CLI.
   - A run that paused at a human task or needed a patch counts `manual_edits > 0` and fails the brief.
   - Pass rates and vision statistics are computed per brief and per category; one failing category fails `compare` even when the average rises.

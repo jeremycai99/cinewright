@@ -77,7 +77,7 @@
       "role": "editor",
       "per": "project",
       "requires": ["scene.duration"],
-      "reads": ["scene.intent", "scene.lines", "scene.shots", "line.text"],
+      "reads": ["scene.intent", "scene.lines", "shot.type", "line.text"],
       "paid": true,
       "needs": ["P5", "P6m"]
     },

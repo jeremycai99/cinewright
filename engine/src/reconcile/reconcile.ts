@@ -1,4 +1,11 @@
-import { type Finding, finding, type InlinedIr, sha256Hash, stateHash } from "@cinewright/core";
+import {
+  type Finding,
+  finding,
+  type InlinedIr,
+  sha256Hash,
+  shotsInOrder,
+  stateHash,
+} from "@cinewright/core";
 import { gateFields } from "../gates/locks.js";
 import type { PlannedStep } from "../pipeline/plan.js";
 import type { Task } from "../runtime/types.js";
@@ -8,6 +15,7 @@ import {
   entities,
   inScope,
   splitPattern,
+  stateOf,
   unfilled,
   unwrap,
   wrapper,
@@ -31,7 +39,8 @@ const short = (value: unknown) => sha256Hash(value).slice(7);
  * the pipeline plan and the recorded task keys.
  * - An agent phase yields a task per `per` entity while a field it requires is open, or when its
  *   key (role, template, what it reads, pack pin, catalog) differs from the recorded one and its
- *   outputs are still agent-filled. Outputs that are `user` or `locked` are never re-derived: the
+ *   outputs are still agent-filled. A per-shot role's key also covers its shot's window (its start
+ *   and the next shot's), so a moved shot start re-runs the roles on both sides of it. Outputs that are `user` or `locked` are never re-derived: the
  *   change is a `reconcile.locked_upstream` warning instead. A human role's task has kind `human`.
  * - A jobs phase yields the pipeline steps of its kinds.
  * - A gate yields a task when the preset pauses there; its key covers the locks it names.
@@ -54,6 +63,7 @@ export function reconcile(
     ...new Set(phase.needs.flatMap((id) => produced.get(id) ?? [])),
   ];
 
+  let windows: Map<string, unknown> | undefined;
   for (const phase of template.phases) {
     const mine: string[] = [];
     const needs = needsOf(phase);
@@ -96,6 +106,7 @@ export function reconcile(
         mine.push(step.id);
       }
     } else if (preset.agents && phase.role) {
+      windows ??= shotWindows(ir);
       const role = phase.role;
       const scopes: (EntityRef | null)[] =
         !phase.per || phase.per === "project" ? [null] : all.filter((e) => e.kind === phase.per);
@@ -114,18 +125,19 @@ export function reconcile(
           reads,
           pack,
           catalog: inputs.catalogHash ?? null,
+          ...(phase.per === "shot" && scope ? { window: windows.get(scope.id) ?? null } : {}),
         });
         const id = scope === null ? role : `${role}:${scope.id}`;
         const open = outputs.some((o) => unfilled(o.entity, o.field));
         const recorded = inputs.recorded.get(id);
         const changed = recorded !== undefined && recorded !== key;
-        const states = outputs.map((o) => wrapper(o.entity, o.field)?.state);
+        const states = outputs.map((o) => stateOf(o.entity, o.field));
         let derive = open;
         if (!open && changed && !preset.open_only.includes(role)) {
           if (states.every((s) => s === "agent")) derive = true;
           else {
             const held = outputs.find((o) => {
-              const s = wrapper(o.entity, o.field)?.state;
+              const s = stateOf(o.entity, o.field);
               return s === "user" || s === "locked";
             });
             findings.push(
@@ -133,7 +145,7 @@ export function reconcile(
                 "reconcile.locked_upstream",
                 "warning",
                 held?.entity.id ?? id,
-                `${id}: its inputs changed, but ${held ? `${held.entity.id}/${held.field}` : "its output"} is ${held ? wrapper(held.entity, held.field)?.state : "held"}; shown at the next gate`,
+                `${id}: its inputs changed, but ${held ? `${held.entity.id}/${held.field}` : "its output"} is ${held ? stateOf(held.entity, held.field) : "held"}; shown at the next gate`,
                 { task: id },
                 held ? `/${held.field}` : undefined,
               ),
@@ -157,4 +169,17 @@ export function reconcile(
     produced.set(phase.id, mine.length > 0 ? mine : needs);
   }
   return { tasks, findings };
+}
+
+/** Each shot's window as anchors: its start and the next shot's in the same sequence. */
+function shotWindows(ir: InlinedIr): Map<string, unknown> {
+  const order = shotsInOrder(ir);
+  const start = (i: number) =>
+    (unwrap(order[i]?.shot.anchors) as { start?: unknown } | undefined)?.start ?? null;
+  return new Map(
+    order.map((s, i) => [
+      s.shot.id,
+      [start(i), order[i + 1]?.sequence === s.sequence ? start(i + 1) : null],
+    ]),
+  );
 }
