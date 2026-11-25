@@ -1,5 +1,5 @@
 import { resolve } from "node:path";
-import { exportBlockers, type RenderReport, runWorkflow } from "@cinewright/engine";
+import { exportBlockers, latestRun, type RenderReport, runWorkflow } from "@cinewright/engine";
 import { parse, UsageError } from "../args.js";
 import { EXIT } from "../exit-codes.js";
 import { type Io, now, printJson } from "../io.js";
@@ -12,7 +12,8 @@ export const EXPORT_USAGE =
  * `cinewright export` (M8.1): copy each deliverable's MP4, caption sidecars and provenance manifest
  * to `--to`, the same bytes `render --out` writes, from the render caches (anything stale is
  * re-made first). It refuses, writing nothing, while an error finding is open or escalated without
- * a user's waiver, or a licence or consent is missing (exit 10, naming each).
+ * a user's waiver, or a licence or consent is missing (exit 10, naming each); and while the latest
+ * run is paused, since its unfinished work would render half-built (exit 5, naming the pause).
  */
 export async function exportCommand(argv: string[], io: Io): Promise<number> {
   const { values } = parse(argv, {
@@ -39,6 +40,14 @@ export async function exportCommand(argv: string[], io: Io): Promise<number> {
       );
     io.stderr("cinewright export: fix, or waive with cinewright review waive <finding> --note\n");
     return EXIT.findings;
+  }
+  const last = latestRun(setup.store.dir);
+  if (last?.pause) {
+    if (values.json) printJson(io, { status: "blocked", run: last.id, pause: last.pause });
+    io.stderr(
+      `cinewright export: run ${last.id} paused at ${last.pause.kind} ${last.pause.id}; finish it first (cinewright status shows why)\n`,
+    );
+    return EXIT.blocked;
   }
   const { run, outcome } = await runWorkflow(setup.store, {
     render: { ...setup.options, until: "assemble", out: to },
