@@ -53,7 +53,8 @@ export function cassetteOptions(env: Readonly<Record<string, string | undefined>
  * An LLM plugin wrapped with cassettes (M7.3, AGENTS.md §4.3). `replay` answers `llm.generate`
  * from `<dir>/<hex>.json` and never calls the provider; a miss is `invalid_request` naming the
  * hash (`data.reason: "cassette_miss"`). `record` answers from an existing cassette too, and calls
- * the provider only on a miss, writing each successful response. `off` passes everything through. Other methods always pass through.
+ * the provider only on a miss, writing each successful response. A served answer reports
+ * `cost_usd: 0`: a replay is not spend. `off` passes everything through. Other methods always pass through.
  */
 export function withCassettes(
   plugin: Plugin,
@@ -70,10 +71,12 @@ export function withCassettes(
       const hash = requestHash(request.params as GenerateRequest);
       const file = fileOf(hash);
       // Both modes serve a recorded answer; record mode calls the provider only on a miss, so
-      // extending a recording never re-spends on (or changes) the calls already recorded.
+      // extending a recording never re-spends on (or changes) the calls already recorded. A
+      // served answer costs nothing, so the spend log and the cap count only live calls; the
+      // cassette keeps what the call cost when it was recorded.
       if (existsSync(file)) {
         const cassette = JSON.parse(readFileSync(file, "utf8")) as Cassette;
-        return { ok: true, result: cassette.response };
+        return { ok: true, result: { ...(cassette.response as object), cost_usd: 0 } };
       }
       if (options.mode === "replay")
         return {

@@ -83,9 +83,11 @@ describe("cassettes (M7.3, Review Focus 5)", () => {
     expect(saved).toEqual({ request_hash: requestHash(request()), response: RESULT });
     const offline = inner(false);
     const player = withCassettes(offline, { dir, mode: "replay" });
+    // A replay costs nothing, so neither the spend log nor the cap counts it (the tier B
+    // measured run: $3.66 live was counted as $6.02); the cassette keeps the recorded cost.
     expect(await player.call(generate(request("moved.png")), signal)).toEqual({
       ok: true,
-      result: RESULT,
+      result: { ...RESULT, cost_usd: 0 },
     });
     expect(offline.calls).toBe(0);
   });
@@ -95,7 +97,10 @@ describe("cassettes (M7.3, Review Focus 5)", () => {
     await withCassettes(inner(true), { dir, mode: "record" }).call(generate(request()), signal);
     const again = inner(true);
     const recorder = withCassettes(again, { dir, mode: "record" });
-    expect(await recorder.call(generate(request()), signal)).toEqual({ ok: true, result: RESULT });
+    expect(await recorder.call(generate(request()), signal)).toEqual({
+      ok: true,
+      result: { ...RESULT, cost_usd: 0 },
+    });
     expect(again.calls).toBe(0);
   });
 
