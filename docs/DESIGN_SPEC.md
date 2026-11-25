@@ -501,8 +501,8 @@ AGENTS.md    contributor and coding-agent rules (universality, invariants, tests
 ### Roadmap
 
 1. **v0.1 Foundation** — IR + cascade + authorship, HyperFrames backend and compositor, single narrator, one music provider plus a library, mixer, captions, neutral default plus one contrasting pack, deterministic and vision critics with a fix loop, the v0.1 agent subset under the Guided preset, cost estimate and budget cap (D17), CLI (D38, D39). *Gate: every v0.1 benchmark brief renders end to end and passes all deterministic checks (see `V0_1_PLAN.md`).*
-2. **v0.2 Cast and sound** — full cast bible, multi-voice dialogue, takes, Composer agent, more music and SFX providers, stems. *Gate: 4-character dialogue brief passes audio checks.*
-3. **v0.3 Pre-production** — image-based storyboard frames and the animatic gate, Studio alpha, style-pack derivation from references, 6 curated packs, Blender backend (Cycles in GPU containers, 3D component library, character rigs), estimates that include storyboard and animatic costs.
+2. **v0.2 Cast and sound** — schema versioning and migrations first (decision 13), then full cast bible, multi-voice dialogue, takes, Composer agent, more music and SFX providers, stems. *Gate: 4-character dialogue brief passes audio checks.*
+3. **v0.3 in two releases** (decision 13). **v0.3a Pre-production** — image-based storyboard frames and the animatic gate, Studio alpha, style-pack derivation from references, 6 curated packs, estimates that include storyboard and animatic costs. **v0.3b 3D** — Blender backend (Cycles in GPU containers, 3D component library, character rigs).
 4. **v0.4 Footage and characters** — video-gen and image-gen plugins, character sheets, lip sync, render-guided generation, capability routing across generative providers, monthly model benchmark, continuity and clearance critics.
 5. **v0.5 Interchange and scale** — OTIO/FCPXML export, SDK, MCP server, distributed render, localization.
 6. **v1.0** — frozen IR v1 and plugin contracts, registry, full benchmark with human ratings.
@@ -573,7 +573,7 @@ D1–D24 were approved on 2026-11-12. D25–D41 came out of the implementation-r
 
 ## Open questions
 
-- [ ] Confirm the working name Cinewright and pick the GitHub org and npm scope
+- [x] Confirm the working name Cinewright and pick the GitHub org and npm scope: Cinewright, `jeremycai99/cinewright`, `@cinewright` (decision 15, 2026-11-25)
 - [ ] Who authors the benchmark briefs (8 for v0.1, growing to the full AGENTS.md §4.1 suite by v1.0), and the budget for paid raters
 - [x] Repository host, CI provider and container registry for the CPU render image: GitHub, GitHub Actions and GHCR (2026-11-13)
 - [ ] CI provider for GPU render tests (v0.3)

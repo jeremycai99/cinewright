@@ -32,11 +32,11 @@ The full table is in the spec's decision log.
 
 Needed during M0 (see `V0_1_PLAN.md` M0.0):
 
-- The GitHub repository `jeremycai99/cinewright` exists (private, created 2026-11-13). Rulesets need the repository public or a paid plan. The maintainer chose to keep it private for now, so M0.3's required checks are not enforced by GitHub; apply `.github/rulesets/main.json` when that changes.
+- The GitHub repository `jeremycai99/cinewright` (created 2026-11-13) is public (decision 9, 2026-11-25). The images go public and `.github/rulesets/main.json` is applied after the history scan (`docs/plans/alpha-gate.md` Task 0); until then M0.3's required checks are not enforced by GitHub.
 
 Not blocking M0–M1:
 
-- Confirm the name Cinewright, then pick the GitHub org and npm scope. The npm and PyPI names were free as of 2026-11-12. Packages use a provisional scope until then.
+- Name: Cinewright, at `jeremycai99/cinewright`, npm scope `@cinewright` (decision 15, 2026-11-25). The maintainer creates the npm organisation; the GitHub organisation `cinewright` belongs to an unrelated project.
 - Who authors the first benchmark briefs; budget for paid raters.
 - CI provider for GPU render tests (v0.3).
 - Open issues 7–8 in `V0_1_PLAN.md` §Open issues. Issue 5, byte-identical output, was resolved by the M0.2 spike; issue 6, the GSAP licence, by the M2 plan (core components use WAAPI).

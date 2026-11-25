@@ -21,7 +21,7 @@ Scope comes from the decision log in `DESIGN_SPEC.md`, including D25–D41 from 
 - The same briefs pass under both v0.1 packs, and switching packs needs no code or prompt change (D39).
 - `cinewright` CLI runs a brief from init to export on a clean machine using only the documented setup, including a local-only run (Kokoro, library music, no stock).
 
-**Status (2026-11-22):** checked once after M8.5 and not yet passed. Every milestone task through M8.5 has merged; what remains needs maintainer decisions (9, 13, 15) and the tier B release spend. Item by item: `docs/plans/m8-cli-benchmark.md` §Result.
+**Status (2026-11-22):** checked once after M8.5 and not yet passed. Every milestone task through M8.5 has merged; what remains needs maintainer decisions (9, 13, 15) and the tier B release spend. Decisions 9, 13 and 15 were settled and decision 11 revised to 8 runs on 2026-11-25. Item by item: `docs/plans/m8-cli-benchmark.md` §Result.
 
 ## Milestones
 
