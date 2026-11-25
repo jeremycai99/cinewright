@@ -22,7 +22,12 @@ const ROOT = fileURLToPath(new URL("../../", import.meta.url));
 const PACK = loadPack("neutral", [join(ROOT, "packs")]);
 const OPTIONS = { sessionId: "t", now: () => "2026-11-21T00:00:00Z" };
 const ROUTING = loadRouting();
-const BOUNDS = { attempts_per_owner: 2, rounds_per_shot: 3, qa_rounds: 3 };
+const BOUNDS = {
+  attempts_per_owner: 2,
+  warning_attempts_per_owner: 1,
+  rounds_per_shot: 3,
+  qa_rounds: 3,
+};
 const dirs: string[] = [];
 afterEach(() => {
   for (const d of dirs.splice(0)) rmSync(d, { recursive: true, force: true });

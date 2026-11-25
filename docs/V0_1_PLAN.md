@@ -427,7 +427,7 @@ Each finding carries type, severity (`error` or `warning`; "blocking" in this pl
 
 **Bounds.** These are project policy; the defaults are engineering limits, not taste.
 
-- 2 attempts per finding per owner before it moves to the next owner.
+- 2 attempts per finding per owner before it moves to the next owner; 1 for a warning, which never blocks export (`warning_attempts_per_owner`; the tier B measured run found second attempts at warnings fixed nothing).
 - 3 fix rounds per shot.
 - 3 QA rounds per run; fix spending is capped by the fix reserve in the estimate.
 - Oscillation: a finding signature that reappears after being resolved stops the loop for that entity and escalates.

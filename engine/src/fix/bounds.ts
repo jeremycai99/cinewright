@@ -5,6 +5,7 @@ import { entities } from "../reconcile/requirements.js";
 /** The fix loop's bounds (M6.3b): project policy (`policies.fix`) over the engine's defaults. */
 export interface FixBounds {
   attempts_per_owner: number;
+  warning_attempts_per_owner: number;
   rounds_per_shot: number;
   qa_rounds: number;
 }

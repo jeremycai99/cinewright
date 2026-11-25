@@ -1327,6 +1327,14 @@ class FixPolicy(BaseModel):
         extra="forbid",
     )
     attempts_per_owner: Annotated[int | None, Field(ge=0, le=10)] = None
+    warning_attempts_per_owner: Annotated[
+        int | None,
+        Field(
+            description="Attempts per owner for a warning, which never blocks export.",
+            ge=0,
+            le=10,
+        ),
+    ] = None
     rounds_per_shot: Annotated[int | None, Field(ge=0, le=20)] = None
     qa_rounds: Annotated[int | None, Field(ge=0, le=20)] = None
 

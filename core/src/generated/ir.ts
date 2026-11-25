@@ -998,6 +998,10 @@ export interface Policies {
  */
 export interface FixPolicy {
   attempts_per_owner?: number;
+  /**
+   * Attempts per owner for a warning, which never blocks export.
+   */
+  warning_attempts_per_owner?: number;
   rounds_per_shot?: number;
   qa_rounds?: number;
 }

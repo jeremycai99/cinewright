@@ -16,14 +16,19 @@ import { FIXERS } from "../src/fix/fixers.js";
 import { FindingsLedger, FindingsLogError, syncFindings } from "../src/fix/ledger.js";
 import { FIX_PHASE, fixTasks } from "../src/fix/orchestrate.js";
 import { loadRouting, ownersOf, route } from "../src/fix/route.js";
-import { loadPreset, loadTemplate } from "../src/reconcile/data.js";
+import { loadEngineSettings, loadPreset, loadTemplate } from "../src/reconcile/data.js";
 import { reconcile } from "../src/reconcile/reconcile.js";
 
 const ROOT = fileURLToPath(new URL("../../", import.meta.url));
 const PACK = loadPack("neutral", [join(ROOT, "packs")]);
 const OPTIONS = { sessionId: "t", now: () => "2026-11-21T00:00:00Z" };
 const ROUTING = loadRouting();
-const POLICY = { attempts_per_owner: 2, rounds_per_shot: 3, qa_rounds: 3 };
+const POLICY = {
+  attempts_per_owner: 2,
+  warning_attempts_per_owner: 1,
+  rounds_per_shot: 3,
+  qa_rounds: 3,
+};
 const dirs: string[] = [];
 afterEach(() => {
   for (const d of dirs.splice(0)) rmSync(d, { recursive: true, force: true });
@@ -236,6 +241,25 @@ describe("routing (M6.3a, Review Focus 2)", () => {
     expect(route(f, again.history(f.id), ROUTING, POLICY)).toEqual({
       owner: "writer",
       via: "suggest",
+    });
+  });
+
+  it("gives a warning one attempt per owner by default, an error two (the tier B measured run)", () => {
+    // In the measured run (2026-11-23) second attempts at warnings, which never block export,
+    // were most of the fix loop's spend; none resolved a finding the first attempt had not.
+    const warn = { ...found("audio.silence", "s01"), severity: "warning" as const };
+    const tried = [
+      { kind: "attempt", finding: warn.id, owner: "editor", via: "role" },
+    ] as never as FindingEntry[];
+    expect(route(warn, [], ROUTING, POLICY)).toEqual({ owner: "editor", via: "role" });
+    expect(route(warn, tried, ROUTING, POLICY)).toEqual({ escalate: "human" });
+    expect(route(found("audio.silence", "s01"), tried, ROUTING, POLICY)).toEqual({
+      owner: "editor",
+      via: "role",
+    });
+    expect(loadEngineSettings().fix).toMatchObject({
+      attempts_per_owner: 2,
+      warning_attempts_per_owner: 1,
     });
   });
 });
