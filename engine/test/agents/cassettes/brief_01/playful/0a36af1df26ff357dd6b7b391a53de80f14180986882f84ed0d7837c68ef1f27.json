@@ -1,0 +1,102 @@
+{
+  "request_hash": "sha256:0a36af1df26ff357dd6b7b391a53de80f14180986882f84ed0d7837c68ef1f27",
+  "response": {
+    "output": {
+      "output": {
+        "layers": [
+          {
+            "id": "s06.sh01.l1",
+            "component": "kinetic_title",
+            "props": {
+              "text": "More heat out than electricity in",
+              "emphasis": [
+                1,
+                4
+              ]
+            },
+            "timing": {
+              "enter": {
+                "line": "b06.l02",
+                "point": "start",
+                "offset": 0
+              },
+              "exit": {
+                "line": "b06.l02",
+                "point": "start",
+                "offset": 10
+              }
+            },
+            "layout": {
+              "landscape": {
+                "region": "title"
+              }
+            }
+          }
+        ]
+      },
+      "decisions": [
+        {
+          "about": [
+            "s06.sh01.l1/props/text"
+          ],
+          "choice": "Used the line's on-screen text 'More heat out than electricity in' as the headline, restating the claim of b06.l02 without a second claim and short enough to read.",
+          "citations": [
+            "line:b06.l02",
+            "craft_rule:hierarchy.supports_line",
+            "craft_rule:legibility.read_time",
+            "pack_rule:playful/type.short_lines"
+          ]
+        },
+        {
+          "about": [
+            "s06.sh01.l1/props/emphasis"
+          ],
+          "choice": "Accented 'heat' (word 1) and 'electricity' (word 4) so the contrast between output and input carries the focus.",
+          "citations": [
+            "line:b06.l02",
+            "craft_rule:hierarchy.one_focus",
+            "pack_rule:playful/color.one_focus"
+          ]
+        },
+        {
+          "about": [
+            "s06.sh01.l1/timing"
+          ],
+          "choice": "Enters at the start of b06.l02 as the claim begins and exits at b06.l02 start +10, the last frame the shot covers, so the anchors stay inside the shot.",
+          "citations": [
+            "line:b06.l02",
+            "craft_rule:rhythm.hold_to_read",
+            "pack_rule:playful/density.fewer_items"
+          ]
+        },
+        {
+          "about": [
+            "s06.sh01.l1/layout"
+          ],
+          "choice": "Placed the headline in the centred 'title' region of the title template for landscape, with no subtitle to keep one focus.",
+          "citations": [
+            "pack_rule:playful/layout.centred_focus",
+            "craft_rule:hierarchy.one_focus"
+          ]
+        },
+        {
+          "about": [
+            "s06.sh01.l1/style"
+          ],
+          "choice": "No style overrides; the pack handles type and colour.",
+          "citations": [
+            "pack_rule:playful/type.big_and_round",
+            "craft_rule:contrast.meaning"
+          ]
+        }
+      ]
+    },
+    "model": "claude-sonnet-5-5",
+    "usage": {
+      "input_tokens": 7124,
+      "output_tokens": 715
+    },
+    "cost_usd": 0.021398,
+    "stop": "end"
+  }
+}

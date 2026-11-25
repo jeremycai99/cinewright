@@ -1,0 +1,101 @@
+{
+  "request_hash": "sha256:a758c32e7abc7ed2b9c9a5866adcc247e1d4e8c75efec1c80af8d7bbd30bfad4",
+  "response": {
+    "output": {
+      "output": {
+        "layers": [
+          {
+            "id": "s05.sh03.l1",
+            "component": "kinetic_title",
+            "props": {
+              "text": "Moves heat. Burns no fuel.",
+              "emphasis": [
+                0,
+                1
+              ]
+            },
+            "timing": {
+              "enter": {
+                "line": "b05.l03",
+                "point": "start",
+                "offset": 15
+              },
+              "exit": {
+                "line": "b05.l03",
+                "point": "end",
+                "offset": 15
+              }
+            },
+            "layout": {
+              "landscape": {
+                "region": "title"
+              }
+            }
+          }
+        ]
+      },
+      "decisions": [
+        {
+          "about": [
+            "s05.sh03.l1/props/text"
+          ],
+          "choice": "Use the line's on-screen text 'Moves heat. Burns no fuel.' as the headline; it is short and states the claim of b05.l03 without adding another.",
+          "citations": [
+            "line:b05.l03",
+            "craft_rule:hierarchy.supports_line",
+            "craft_rule:legibility.read_time",
+            "pack_rule:playful/type.short_lines"
+          ]
+        },
+        {
+          "about": [
+            "s05.sh03.l1/props/emphasis"
+          ],
+          "choice": "Accent 'Moves' and 'heat' (indices 0 and 1) so the positive claim is the focal point and the negation stays in the base colour.",
+          "citations": [
+            "craft_rule:hierarchy.one_focus",
+            "pack_rule:playful/color.one_focus"
+          ]
+        },
+        {
+          "about": [
+            "s05.sh03.l1/timing"
+          ],
+          "choice": "Enter 15 frames after the start of b05.l03, where the shot begins, so the words build as the narration makes the claim; exit 15 frames after the line's end, still inside the shot, to leave a hold for reading.",
+          "citations": [
+            "line:b05.l03",
+            "craft_rule:rhythm.hold_to_read",
+            "pack_rule:playful/motion.word_by_word",
+            "pack_rule:playful/density.fewer_items"
+          ]
+        },
+        {
+          "about": [
+            "s05.sh03.l1/layout"
+          ],
+          "choice": "Place the title in the 'title' region of the title template, centred, with no subtitle, as the single focal component.",
+          "citations": [
+            "pack_rule:playful/layout.centred_focus",
+            "craft_rule:hierarchy.one_focus"
+          ]
+        },
+        {
+          "about": [
+            "s05.sh03.l1/style"
+          ],
+          "choice": "No style overrides; leave styling to the pack.",
+          "citations": [
+            "pack_rule:playful/type.big_and_round"
+          ]
+        }
+      ]
+    },
+    "model": "claude-sonnet-5-5",
+    "usage": {
+      "input_tokens": 7024,
+      "output_tokens": 733
+    },
+    "cost_usd": 0.021378,
+    "stop": "end"
+  }
+}
