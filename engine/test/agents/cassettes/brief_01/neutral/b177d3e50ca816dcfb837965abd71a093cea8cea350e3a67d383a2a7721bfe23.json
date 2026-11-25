@@ -1,0 +1,108 @@
+{
+  "request_hash": "sha256:b177d3e50ca816dcfb837965abd71a093cea8cea350e3a67d383a2a7721bfe23",
+  "response": {
+    "output": {
+      "output": {
+        "layers": [
+          {
+            "id": "s01.sh01.l1",
+            "component": "kinetic_title",
+            "props": {
+              "text": "Replacing a gas furnace?",
+              "emphasis": [
+                3
+              ]
+            },
+            "timing": {
+              "enter": {
+                "line": "b01.l01",
+                "point": "start",
+                "offset": 0
+              },
+              "exit": {
+                "line": "b01.l02",
+                "point": "start",
+                "offset": 0
+              }
+            },
+            "layout": {
+              "landscape": {
+                "region": "title"
+              }
+            }
+          }
+        ]
+      },
+      "decisions": [
+        {
+          "about": [
+            "s01.sh01.l1/props/text"
+          ],
+          "choice": "Use a shortened question taken from the wording of line b01.l01, 'Replacing a gas furnace?', as the headline. It repeats the spoken claim and is short enough to read while the line is heard.",
+          "citations": [
+            "line:b01.l01",
+            "craft_rule:hierarchy.supports_line",
+            "craft_rule:legibility.read_time"
+          ]
+        },
+        {
+          "about": [
+            "s01.sh01.l1/props/subtitle"
+          ],
+          "choice": "Add no subtitle. The shot only spans line b01.l01, and the heat pump wording belongs to later shots, so one idea stays on screen.",
+          "citations": [
+            "pack_rule:neutral/density.one_idea",
+            "craft_rule:hierarchy.supports_line"
+          ]
+        },
+        {
+          "about": [
+            "s01.sh01.l1/props/emphasis"
+          ],
+          "choice": "Accent only the last word, 'furnace?' (index 3), so the headline is the single focal point.",
+          "citations": [
+            "craft_rule:hierarchy.one_focus",
+            "pack_rule:neutral/color.one_accent"
+          ]
+        },
+        {
+          "about": [
+            "s01.sh01.l1/timing"
+          ],
+          "choice": "Enter at the start of b01.l01 and exit at the start of b01.l02, which is where the shot ends. Both anchors sit inside the shot, and the title stays up for the whole spoken question.",
+          "citations": [
+            "line:b01.l01",
+            "craft_rule:rhythm.hold_to_read",
+            "pack_rule:neutral/density.hold_time"
+          ]
+        },
+        {
+          "about": [
+            "s01.sh01.l1/layout"
+          ],
+          "choice": "Place the layer in the title region of the title template, centred as the framing calls for.",
+          "citations": [
+            "pack_rule:neutral/layout.safe_area",
+            "craft_rule:continuity.same_thing_same_look"
+          ]
+        },
+        {
+          "about": [
+            "s01.sh01.l1/style"
+          ],
+          "choice": "Add no style overrides and leave styling to the pack.",
+          "citations": [
+            "pack_rule:neutral/type.hierarchy"
+          ]
+        }
+      ]
+    },
+    "model": "claude-sonnet-5-5",
+    "usage": {
+      "input_tokens": 7480,
+      "output_tokens": 1206
+    },
+    "cost_usd": 0.02702,
+    "stop": "end"
+  }
+}

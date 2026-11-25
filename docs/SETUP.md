@@ -103,13 +103,13 @@ ls "$WORK/hello-export"
 
 The agents need an LLM plugin with its key. v0.1 ships one, `llm_anthropic`, which reads `ANTHROPIC_API_KEY`. Set it in your shell or secret manager, never in a file in the repository. `ELEVENLABS_API_KEY` is optional and adds a paid voice provider; without it narration stays on Kokoro.
 
-This step costs money (about $1 to $1.50 for a 30-second brief; the cap below stops it at $3). CI never runs it: it has no key.
+This step costs money: about $2 to $3 for a 30-second brief (measured 2026-11-23, without `--vision`'s critic it is about $0.85 less), more for this 60-second one; the cap below pauses the run at $5. CI never runs it: it has no key.
 
 <!-- setup: keyed -->
 ```bash
 : "${ANTHROPIC_API_KEY:?set ANTHROPIC_API_KEY to run the agents}"
 uv run --locked cinewright-eval briefs init tides_explainer --to "$WORK/tides"
-cinewright review budget --cap 3 --project "$WORK/tides"
+cinewright review budget --cap 5 --project "$WORK/tides"
 cinewright render --approve-final --project "$WORK/tides"
 cinewright export --to "$WORK/tides-export" --project "$WORK/tides"
 cinewright status --project "$WORK/tides"

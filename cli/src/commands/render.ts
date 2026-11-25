@@ -107,20 +107,17 @@ export function reportFailure(
     step?: string;
     findings?: { severity: string; rule: string; entity: string; message: string }[];
   };
-  const kind = data.kind;
-  if (!kind) throw new Error(`${outcome.task}: ${outcome.error.code}: ${outcome.error.message}`);
+  // A job failure carries its kind; an agent task's does not: its own unusable answer is invalid
+  // (3), anything from the LLM plugin, a cassette miss included, is a provider failure (9).
+  const agent = data.kind === undefined;
+  const kind = data.kind ?? (outcome.error.code.startsWith("agent.") ? "invalid" : "provider");
+  const step = agent ? outcome.task : data.step;
+  const message = agent ? `${outcome.error.code}: ${outcome.error.message}` : outcome.error.message;
   const code = kind === "invalid" ? EXIT.invalid : kind === "render" ? EXIT.render : EXIT.provider;
   const findings = data.findings ?? [];
-  if (json)
-    printJson(io, {
-      status: "error",
-      kind,
-      step: data.step,
-      message: outcome.error.message,
-      findings,
-    });
+  if (json) printJson(io, { status: "error", kind, step, message, findings });
   else {
-    io.stderr(`cinewright ${command}: ${data.step}: ${outcome.error.message}\n`);
+    io.stderr(`cinewright ${command}: ${step}: ${message}\n`);
     for (const f of findings) io.stderr(`  ${f.severity} ${f.rule} ${f.entity}: ${f.message}\n`);
   }
   return code;

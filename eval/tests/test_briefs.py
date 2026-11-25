@@ -59,6 +59,10 @@ def test_briefs_init_makes_a_project_whose_brief_and_pack_are_the_users(tmp_path
     assert doc["style"]["pack"] == {"state": "user", "value": "playful"}
     assert doc["autonomy"] == {"state": "user", "value": "auto"}
     assert sorted(d["id"] for d in doc["deliverables"]["value"]) == ["landscape", "portrait"]
+    # Tier B runs local media providers only (decision 11): the narrator is bound to a Kokoro voice,
+    # or narration has no usable provider and every run fails at its first line.
+    narrator = doc["cast"]["value"][0]["voice"]
+    assert narrator["bindings"]["tts_kokoro"] == {"state": "user", "value": {"voice": "af_heart"}}
     shown = subprocess.run(
         ["node", str(CLI), "status", "--project", str(to), "--json"],
         capture_output=True,

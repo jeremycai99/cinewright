@@ -125,6 +125,21 @@ describe("exportCaptions", () => {
     expect(existsSync(portrait.files.srt)).toBe(true);
   });
 
+  it("breaks each cue into the profile's lines, as the burn-in draws it (the tier B measured run)", async () => {
+    // 70 characters: one cue (it fits two landscape lines of 42), written as two lines, so the
+    // caption critic's line rule passes on the sidecar.
+    const text = "Every Saturday morning, there's a free community bike repair workshop.";
+    const store = await reference([{ op: "set", entity: "b01.l01", path: "/text", value: text }]);
+    const r = exportCaptions(store.dir, store.ir(), "web_landscape", solved(timing()));
+    for (const file of [r.files.srt, r.files.vtt]) {
+      const body = readFileSync(file, "utf8");
+      expect(body).toContain(
+        "Every Saturday morning, there's a free\ncommunity bike repair workshop.",
+      );
+      expect(Math.max(...body.split("\n").map((l) => [...l].length))).toBeLessThanOrEqual(42);
+    }
+  });
+
   it("writes valid empty files when nothing is spoken", async () => {
     const store = await reference();
     const r = exportCaptions(

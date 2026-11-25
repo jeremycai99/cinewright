@@ -1,0 +1,101 @@
+{
+  "request_hash": "sha256:60c2b9ea41a1a8721ba3e59c8ac0d3004ede585bc9657800683f8cba0eb65c6d",
+  "response": {
+    "output": {
+      "output": {
+        "layers": [
+          {
+            "id": "s01.sh02.l1",
+            "component": "kinetic_title",
+            "props": {
+              "text": "Heat from outdoor air",
+              "emphasis": [
+                2,
+                3
+              ]
+            },
+            "timing": {
+              "enter": {
+                "line": "b01.l02",
+                "point": "end",
+                "offset": 0
+              },
+              "exit": {
+                "line": "b01.l03",
+                "point": "start",
+                "offset": -1
+              }
+            },
+            "layout": {
+              "landscape": {
+                "region": "title"
+              }
+            }
+          }
+        ]
+      },
+      "decisions": [
+        {
+          "about": [
+            "s01.sh02.l1/props/text"
+          ],
+          "choice": "Use the on-screen text 'Heat from outdoor air' as the headline; it is short and states the claim of the lines without adding a second one.",
+          "citations": [
+            "line:b01.l03",
+            "craft_rule:hierarchy.supports_line",
+            "craft_rule:legibility.read_time",
+            "pack_rule:playful/type.short_lines"
+          ]
+        },
+        {
+          "about": [
+            "s01.sh02.l1/props/emphasis"
+          ],
+          "choice": "Accent 'outdoor air' (indices 2 and 3) as the single focus of the title.",
+          "citations": [
+            "craft_rule:hierarchy.one_focus",
+            "pack_rule:playful/color.one_focus"
+          ]
+        },
+        {
+          "about": [
+            "s01.sh02.l1/timing"
+          ],
+          "choice": "The shot runs from b01.l02 start to b01.l03 start, so the title enters as b01.l02 ends, when the narration is about to give the heat source, and exits one frame before b01.l03 starts, staying inside the shot.",
+          "citations": [
+            "line:b01.l02",
+            "line:b01.l03",
+            "craft_rule:rhythm.hold_to_read",
+            "pack_rule:playful/density.fewer_items"
+          ]
+        },
+        {
+          "about": [
+            "s01.sh02.l1/layout/landscape/region"
+          ],
+          "choice": "Place the headline in the centred 'title' region of the title layout, with no subtitle.",
+          "citations": [
+            "pack_rule:playful/layout.centred_focus",
+            "craft_rule:continuity.same_thing_same_look"
+          ]
+        },
+        {
+          "about": [
+            "s01.sh02.l1/style"
+          ],
+          "choice": "No style overrides; the pack styling applies.",
+          "citations": [
+            "craft_rule:contrast.meaning"
+          ]
+        }
+      ]
+    },
+    "model": "claude-sonnet-5-5",
+    "usage": {
+      "input_tokens": 7100,
+      "output_tokens": 696
+    },
+    "cost_usd": 0.02116,
+    "stop": "end"
+  }
+}

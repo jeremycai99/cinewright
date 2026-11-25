@@ -79,8 +79,10 @@ export function shotSpan(ir: InlinedIr, shotId: string, table: TimingTable): Spa
 
 /**
  * A layer's entrance and end in frames relative to its shot's start (M3.1a): `timing.enter` and
- * `timing.exit` when set, otherwise the whole shot. Throws `timing.outside_shot` when either falls
- * outside the shot.
+ * `timing.exit` when set, otherwise the whole shot. An exit after the shot's end ends the layer at
+ * the cut: exit anchors are written before the takes exist, real takes can move a line's end past
+ * the next shot's start, and nothing of a shot shows after its end. Throws `timing.outside_shot`
+ * when the layer enters before the shot starts, or does not enter before it ends.
  */
 export function layerTiming(
   ir: InlinedIr,
@@ -94,11 +96,12 @@ export function layerTiming(
     const length = span.end - span.start;
     const timing = layer.timing?.value;
     const enter = timing ? resolveAnchor(timing.enter, table, layerId) - span.start : 0;
-    const end = timing?.exit ? resolveAnchor(timing.exit, table, layerId) - span.start : length;
-    if (enter < 0 || end > length || end <= enter) {
+    const exit = timing?.exit ? resolveAnchor(timing.exit, table, layerId) - span.start : length;
+    const end = Math.min(exit, length);
+    if (enter < 0 || end <= enter) {
       throw new TimingError(
         "timing.outside_shot",
-        `the layer runs from ${enter} to ${end}, outside its shot's 0 to ${length}`,
+        `the layer runs from ${enter} to ${exit}, outside its shot's 0 to ${length}`,
         layerId,
       );
     }

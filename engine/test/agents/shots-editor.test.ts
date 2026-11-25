@@ -271,6 +271,33 @@ describe("the Shot Builder (M7.5c)", () => {
     expect(rules({ layers: [] })).toEqual(["shot_builder.layer_missing"]);
   });
 
+  it("keeps each layer inside its own shot: from its start anchor to the next shot's start", async () => {
+    // s01.sh01 starts at b01.l01 and s01.sh02 at b01.l03. In the tier B measured run (2026-11-22)
+    // a layer of a scene's first shot held to the scene's last line, and the render refused it.
+    const store = await project();
+    const check = shotBuilderCheck(PACK, CATALOG);
+    const errors = (shot: string, timing: unknown) =>
+      check(build(shot, { timing } as never), store.ir(), shotTask(shot));
+    const at = (line: string, point: "start" | "end") => ({ line, point, offset: 0 });
+    // Up to the next shot's start is inside.
+    expect(
+      errors("s01.sh01", { enter: at("b01.l01", "start"), exit: at("b01.l03", "start") }),
+    ).toEqual([]);
+    const late = errors("s01.sh01", { enter: at("b01.l01", "start"), exit: at("b01.l03", "end") });
+    expect(late.map((e) => e.rule)).toEqual(["shot_builder.anchor_outside_shot"]);
+    expect(late[0]?.message).toContain("s01.sh01 runs from b01.l01 start to b01.l03 start");
+    expect(errors("s01.sh01", { enter: at("b01.l03", "start") }).map((e) => e.rule)).toEqual([
+      "shot_builder.anchor_outside_shot",
+    ]);
+    // The last shot runs to the scene's end; nothing before its start.
+    expect(
+      errors("s01.sh02", { enter: at("b01.l03", "start"), exit: at("b01.l03", "end") }),
+    ).toEqual([]);
+    const early = errors("s01.sh02", { enter: at("b01.l01", "start") });
+    expect(early.map((e) => e.rule)).toEqual(["shot_builder.anchor_outside_shot"]);
+    expect(early[0]?.message).toContain("s01.sh02 runs from b01.l03 start to the scene's end");
+  });
+
   it("cannot write another shot's layers: the store refuses it", async () => {
     const store = await project();
     const r = await store.apply(

@@ -1,0 +1,99 @@
+{
+  "request_hash": "sha256:b03e5bfff482184171f4dade7248ef92e5f7cfe5c399716935844056a2cb3b58",
+  "response": {
+    "output": {
+      "output": {
+        "layers": [
+          {
+            "id": "s04.sh01.l1",
+            "component": "kinetic_title",
+            "props": {
+              "text": "Moves indoors",
+              "emphasis": [
+                1
+              ]
+            },
+            "timing": {
+              "enter": {
+                "line": "b04.l01",
+                "point": "start",
+                "offset": 0
+              },
+              "exit": {
+                "line": "b04.l01",
+                "point": "end",
+                "offset": 0
+              }
+            },
+            "layout": {
+              "landscape": {
+                "region": "title"
+              }
+            }
+          }
+        ]
+      },
+      "decisions": [
+        {
+          "about": [
+            "s04.sh01.l1/props/text"
+          ],
+          "choice": "Take the headline 'Moves indoors' from the wording of b04.l01, the only line this shot covers. It is short and restates the spoken claim without adding another.",
+          "citations": [
+            "line:b04.l01",
+            "craft_rule:hierarchy.supports_line",
+            "craft_rule:legibility.read_time",
+            "pack_rule:playful/type.short_lines"
+          ]
+        },
+        {
+          "about": [
+            "s04.sh01.l1/props/emphasis"
+          ],
+          "choice": "Accent only word 1, 'indoors', so the chapter title has one focus on the new place.",
+          "citations": [
+            "craft_rule:hierarchy.one_focus",
+            "pack_rule:playful/color.one_focus"
+          ]
+        },
+        {
+          "about": [
+            "s04.sh01.l1/timing"
+          ],
+          "choice": "Both anchors sit on b04.l01, because the shot runs from b04.l01 start to b04.l02 start. The title enters as the line starts and stays up until it ends, which is long enough to read two short words.",
+          "citations": [
+            "line:b04.l01",
+            "craft_rule:rhythm.hold_to_read",
+            "pack_rule:playful/density.fewer_items"
+          ]
+        },
+        {
+          "about": [
+            "s04.sh01.l1/layout"
+          ],
+          "choice": "Place the title in the 'title' region of the title template, centred, with no subtitle.",
+          "citations": [
+            "pack_rule:playful/layout.centred_focus",
+            "craft_rule:continuity.same_thing_same_look"
+          ]
+        },
+        {
+          "about": [
+            "s04.sh01.l1/style"
+          ],
+          "choice": "No style overrides, leaving styling to the pack.",
+          "citations": [
+            "craft_rule:contrast.meaning"
+          ]
+        }
+      ]
+    },
+    "model": "claude-sonnet-5-5",
+    "usage": {
+      "input_tokens": 7035,
+      "output_tokens": 1074
+    },
+    "cost_usd": 0.02481,
+    "stop": "end"
+  }
+}

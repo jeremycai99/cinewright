@@ -25,6 +25,10 @@ TOKEN = re.compile(
 )
 HEX = re.compile(r"#[0-9a-fA-F]{3,8}\b")
 FONTS = ("Helvetica", "Arial", "Inter", "Roboto", "Futura", "Garamond", "Georgia", "Montserrat")
+#: The Kokoro voice the narrator is bound to, per brief language. Tier B runs local media providers
+#: only (decision 11), no agent role binds voices in v0.1, and Kokoro has no default voice: without
+#: a binding narration has no usable provider. English only in v0.1.
+KOKORO_VOICES = {"en": "af_heart"}
 
 
 def pack_ids(root: Path) -> list[str]:
@@ -120,7 +124,8 @@ def init_project(
     tier_b: Path = TIER_B,
 ) -> int:
     """`cinewright init` with the brief's deliverables and pack, then one user patch setting the
-    brief, the narrator and the Auto preset. Returns the CLI's exit code."""
+    brief, the narrator (bound to a Kokoro voice) and the Auto preset. Returns the CLI's exit
+    code."""
     brief = json.loads((root / tier_b / brief_id / "brief.json").read_text())
     profiles = cast(list[str], brief["deliverables"])
     args = [*cli, "init", str(to), "--id", brief_id, "--pack", pack or str(brief["pack"])]
@@ -147,7 +152,14 @@ def init_project(
                     "id": "narrator",
                     "role": "narrator",
                     "display_name": "Narrator",
-                    "voice": {"description": {"language": narrator["language"]}},
+                    "voice": {
+                        "description": {"language": narrator["language"]},
+                        "bindings": (
+                            {"tts_kokoro": {"voice": KOKORO_VOICES[narrator["language"]]}}
+                            if narrator["language"] in KOKORO_VOICES
+                            else {}
+                        ),
+                    },
                     "performance": {"baseline": narrator["description"]},
                     "on_screen": False,
                 },

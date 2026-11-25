@@ -1,0 +1,171 @@
+{
+  "request_hash": "sha256:905243601cdc2e3d94d4f6d29c97af1acae631c846b187f1fdd025ca4a9e1cb6",
+  "response": {
+    "output": {
+      "output": {
+        "scenes": [
+          {
+            "id": "s01",
+            "duration": {
+              "target_seconds": 15,
+              "flex": 0.15,
+              "sync": "voiceover"
+            },
+            "transition_out": {
+              "type": "wipe",
+              "duration_frames": 15
+            }
+          },
+          {
+            "id": "s02",
+            "duration": {
+              "target_seconds": 11,
+              "flex": 0.15,
+              "sync": "voiceover"
+            },
+            "transition_out": {
+              "type": "wipe",
+              "duration_frames": 15
+            }
+          },
+          {
+            "id": "s03",
+            "duration": {
+              "target_seconds": 9,
+              "flex": 0.15,
+              "sync": "voiceover"
+            },
+            "transition_out": {
+              "type": "wipe",
+              "duration_frames": 15
+            }
+          },
+          {
+            "id": "s04",
+            "duration": {
+              "target_seconds": 8,
+              "flex": 0.15,
+              "sync": "voiceover"
+            },
+            "transition_out": {
+              "type": "wipe",
+              "duration_frames": 15
+            }
+          },
+          {
+            "id": "s05",
+            "duration": {
+              "target_seconds": 10,
+              "flex": 0.15,
+              "sync": "voiceover"
+            },
+            "transition_out": {
+              "type": "cut"
+            }
+          },
+          {
+            "id": "s06",
+            "duration": {
+              "target_seconds": 19,
+              "flex": 0.15,
+              "sync": "voiceover"
+            },
+            "transition_out": {
+              "type": "cut"
+            }
+          }
+        ],
+        "shots": [
+          {
+            "id": "s01.sh02",
+            "anchors": {
+              "start": {
+                "line": "b01.l02",
+                "point": "start",
+                "offset": 0
+              }
+            }
+          },
+          {
+            "id": "s03.sh02",
+            "anchors": {
+              "start": {
+                "line": "b03.l02",
+                "point": "start",
+                "offset": 0
+              }
+            }
+          },
+          {
+            "id": "s04.sh02",
+            "anchors": {
+              "start": {
+                "line": "b04.l02",
+                "point": "start",
+                "offset": 0
+              }
+            }
+          }
+        ]
+      },
+      "decisions": [
+        {
+          "about": [
+            "s01",
+            "s02",
+            "s03",
+            "s04",
+            "s05",
+            "s06"
+          ],
+          "choice": "Set voiceover-synced targets sized to each scene's narration at a natural pace, with 15% flex so the solver can fit the spoken length.",
+          "citations": [
+            "line:b01.l01",
+            "line:b02.l01",
+            "line:b03.l01",
+            "line:b04.l01",
+            "line:b05.l01",
+            "line:b06.l02",
+            "craft_rule:rhythm.hold_to_read"
+          ]
+        },
+        {
+          "about": [
+            "s01.sh02/anchors/start",
+            "s03.sh02/anchors/start",
+            "s04.sh02/anchors/start"
+          ],
+          "choice": "Keep start anchors on the lines' own starts so shots begin on sense-unit boundaries and short one-line shots hold for their full line.",
+          "citations": [
+            "craft_rule:rhythm.cut_on_sense",
+            "line:b01.l02",
+            "line:b03.l02",
+            "line:b04.l02"
+          ]
+        },
+        {
+          "about": [
+            "s01/transition_out",
+            "s02/transition_out",
+            "s03/transition_out",
+            "s04/transition_out",
+            "s05/transition_out",
+            "s06/transition_out"
+          ],
+          "choice": "Leave the existing transitions unchanged since none needs to carry new meaning.",
+          "citations": [
+            "craft_rule:continuity.transitions_mean",
+            "pack_rule:playful/transition.wipe_by_default"
+          ]
+        }
+      ]
+    },
+    "model": "claude-sonnet-5-5",
+    "usage": {
+      "input_tokens": 8464,
+      "output_tokens": 946
+    },
+    "cost_usd": 0.026388,
+    "stop": "end"
+  }
+}

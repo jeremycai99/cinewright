@@ -181,6 +181,27 @@ describe("layerTiming", () => {
     );
   });
 
+  it("ends a layer at the cut when its exit falls after the shot's end", () => {
+    // Exit anchors are written before the takes exist (P5); real takes can move a line's end past
+    // the next shot's start by a few frames. Nothing of a shot shows after its end, so the cut
+    // ends the layer (the tier B measured run, 2026-11-22). Entering outside the shot stays an error.
+    const short = irWith([
+      {
+        id: "a",
+        start: anchor("b01.l01", "start"),
+        duration: 30,
+        layers: [
+          { id: "a.t", enter: anchor("b01.l01", "start"), exit: anchor("b01.l02", "end") },
+          { id: "a.late", enter: anchor("b01.l02", "end") },
+        ],
+      },
+    ]);
+    expect(layerTiming(short, "a.t", table)).toEqual({ enter: 0, end: 30 });
+    expect(() => layerTiming(short, "a.late", table)).toThrow(
+      expect.objectContaining({ rule: "timing.outside_shot", entity: "a.late" }),
+    );
+  });
+
   it("names the layer when its anchor's word no longer exists", () => {
     const bad = irWith([
       {

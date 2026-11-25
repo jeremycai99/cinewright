@@ -1,6 +1,7 @@
 import { existsSync, writeFileSync } from "node:fs";
 import { join } from "node:path";
 import { describe, expect, it } from "vitest";
+import { reportFailure } from "../src/commands/render.js";
 import { EXIT } from "../src/exit-codes.js";
 import { run } from "./run.js";
 import { PROFILES, tempDir } from "./tree.js";
@@ -160,4 +161,57 @@ describe.skipIf(!CONTAINERS)("cinewright render with critics (M6.1a)", () => {
     expect(existsSync(json.deliverables.web.critique.file)).toBe(true);
     expect((await run([...base, "--no-critics"], RENDER_ENV)).code).toBe(EXIT.ok);
   }, 3_600_000);
+});
+
+describe("reportFailure for an agent task (the tier B measured run)", () => {
+  const io = () => {
+    const out = { stdout: "", stderr: "" };
+    return {
+      out,
+      io: {
+        stdout: (t: string) => (out.stdout += t),
+        stderr: (t: string) => (out.stderr += t),
+        env: {},
+        cwd: "/",
+      },
+    };
+  };
+  it("names the task and exits 9 for an LLM failure, a cassette miss included, never internal", () => {
+    const { out, io: sink } = io();
+    const code = reportFailure(
+      sink,
+      "render",
+      {
+        status: "failed",
+        task: "fix:f_1:1",
+        error: { code: "invalid_request", message: "no cassette for request sha256:ab" },
+      },
+      true,
+    );
+    expect(code).toBe(EXIT.provider);
+    expect(JSON.parse(out.stdout)).toEqual({
+      status: "error",
+      kind: "provider",
+      step: "fix:f_1:1",
+      message: "invalid_request: no cassette for request sha256:ab",
+      findings: [],
+    });
+  });
+  it("exits 3 when the agent's own answer could not be used", () => {
+    const { out, io: sink } = io();
+    const code = reportFailure(
+      sink,
+      "render",
+      {
+        status: "failed",
+        task: "writer",
+        error: { code: "agent.invalid_output", message: "no valid output after 2 repairs" },
+      },
+      false,
+    );
+    expect(code).toBe(EXIT.invalid);
+    expect(out.stderr).toContain(
+      "cinewright render: writer: agent.invalid_output: no valid output",
+    );
+  });
 });

@@ -31,7 +31,7 @@ Compiling the same inputs twice writes byte-identical folders. `inputs` lists ev
 | `compile.unknown_component` | The layer's component is not in the catalog. |
 | `compile.unknown_span` | The shot has no end anchor, no duration and no next shot. |
 | `compile.unsafe_value` | A token value holds `<`, `>`, `{`, `}`, `;`, a backslash or a double quote. |
-| `timing.unknown_line`, `timing.unknown_word`, `timing.empty_span`, `timing.outside_shot` | The timing table does not cover an anchor, or a span is empty or leaves its shot. |
+| `timing.unknown_line`, `timing.unknown_word`, `timing.empty_span`, `timing.outside_shot` | The timing table does not cover an anchor, a span is empty, or a layer enters outside its shot (an exit past the shot's end is cut there). |
 | `compile.unknown_deliverable`, `compile.unknown_shot` | The ids do not exist. |
 
 ## `renderShot` (M3.2a, M3.2b)

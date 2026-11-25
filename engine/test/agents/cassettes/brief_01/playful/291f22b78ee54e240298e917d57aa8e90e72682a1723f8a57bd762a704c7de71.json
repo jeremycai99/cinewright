@@ -1,0 +1,102 @@
+{
+  "request_hash": "sha256:291f22b78ee54e240298e917d57aa8e90e72682a1723f8a57bd762a704c7de71",
+  "response": {
+    "output": {
+      "output": {
+        "layers": [
+          {
+            "id": "s05.sh01.l1",
+            "component": "kinetic_title",
+            "props": {
+              "text": "Notice what is not happening here.",
+              "emphasis": [
+                3,
+                4
+              ]
+            },
+            "timing": {
+              "enter": {
+                "line": "b05.l01",
+                "point": "start",
+                "offset": 0
+              },
+              "exit": {
+                "line": "b05.l02",
+                "point": "start",
+                "offset": 0
+              }
+            },
+            "layout": {
+              "landscape": {
+                "region": "title"
+              }
+            }
+          }
+        ]
+      },
+      "decisions": [
+        {
+          "about": [
+            "s05.sh01.l1/props/text"
+          ],
+          "choice": "Use the words of b05.l01 as the centred prompt, since this shot covers only that line and its on-screen text is open.",
+          "citations": [
+            "line:b05.l01",
+            "craft_rule:hierarchy.supports_line",
+            "craft_rule:legibility.read_time",
+            "pack_rule:playful/type.short_lines"
+          ]
+        },
+        {
+          "about": [
+            "s05.sh01.l1/props/emphasis"
+          ],
+          "choice": "Accent 'not happening' (words 3 and 4 are 'not' and 'happening' in 'Notice what is not happening here.') as the single emphasis.",
+          "citations": [
+            "line:b05.l01",
+            "craft_rule:hierarchy.one_focus",
+            "pack_rule:playful/color.one_focus"
+          ]
+        },
+        {
+          "about": [
+            "s05.sh01.l1/timing"
+          ],
+          "choice": "Enter at the start of b05.l01 and exit at the start of b05.l02, the shot's end, so the prompt is held through the pause.",
+          "citations": [
+            "line:b05.l01",
+            "line:b05.l02",
+            "craft_rule:rhythm.hold_to_read",
+            "pack_rule:playful/density.fewer_items"
+          ]
+        },
+        {
+          "about": [
+            "s05.sh01.l1/layout"
+          ],
+          "choice": "Place the prompt in the title region of the title template, centred.",
+          "citations": [
+            "pack_rule:playful/layout.centred_focus",
+            "craft_rule:continuity.same_thing_same_look"
+          ]
+        },
+        {
+          "about": [
+            "s05.sh01.l1/style"
+          ],
+          "choice": "Leave style to the pack with no token overrides.",
+          "citations": [
+            "craft_rule:contrast.meaning"
+          ]
+        }
+      ]
+    },
+    "model": "claude-sonnet-5-5",
+    "usage": {
+      "input_tokens": 7186,
+      "output_tokens": 1094
+    },
+    "cost_usd": 0.025312,
+    "stop": "end"
+  }
+}

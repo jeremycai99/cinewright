@@ -1,6 +1,7 @@
 import { randomUUID } from "node:crypto";
 import { existsSync, mkdirSync, writeFileSync } from "node:fs";
 import { join } from "node:path";
+import { breakCaption } from "@cinewright/components";
 import {
   CAPTIONS_CACHE_DIR,
   commitCacheDir,
@@ -13,7 +14,7 @@ import type { Plugin, PluginError, PluginRequest, PluginResponse } from "@cinewr
 import { timelineCues } from "./cues.js";
 import { CaptionError, toSrt, toVtt } from "./format.js";
 
-export const CAPTIONS_FORMAT_VERSION = "1";
+export const CAPTIONS_FORMAT_VERSION = "2";
 
 /** The captions' language: the narrator's voice language, else the first speaker's, else `und`. */
 export function captionLanguage(ir: InlinedIr): string {
@@ -66,8 +67,14 @@ export function exportCaptions(
   };
   if (existsSync(join(dir, "inputs.json")) && existsSync(files.srt))
     return { key, dir, files, language, cues: cues.length, hit: true };
-  const srt = toSrt(cues, fps);
-  const vtt = toVtt(cues, fps);
+  // Each cue's text broken into the profile's lines, as the burn-in draws it (format 2).
+  const { max_chars_per_line: chars, max_lines: lines } = profile.captions;
+  const shown = cues.map((c) => ({
+    ...c,
+    text: breakCaption(c.text, chars, lines).lines.join("\n"),
+  }));
+  const srt = toSrt(shown, fps);
+  const vtt = toVtt(shown, fps);
   const tmp = join(project, CAPTIONS_CACHE_DIR, `.tmp-${randomUUID()}`);
   mkdirSync(tmp, { recursive: true });
   writeFileSync(join(tmp, `${deliverableId}.${language}.srt`), srt);
