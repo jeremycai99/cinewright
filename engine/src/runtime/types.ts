@@ -26,6 +26,8 @@ export interface Task {
   pinned?: string;
   /** A fix task's finding (M6.3a), how it was routed, and its fixer when one runs. */
   finding?: string;
+  /** Every finding an agent fix task takes on, `finding` first (one task per owner and shot). */
+  findings?: string[];
   via?: string;
   fixer?: string;
   /** Submit the patch in propose mode: a suggestion, never applied (routing's `suggest`). */

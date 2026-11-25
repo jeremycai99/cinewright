@@ -38,6 +38,7 @@ function views(dir: string): ShotView[] {
       scene: "s01",
       intent: "Heat is moved, not made",
       lines: ["A heat pump moves heat inside."],
+      scene_lines: ["A heat pump moves heat inside."],
       stills: [{ file, sha256: sha256Bytes(Buffer.concat([PNG, Buffer.from([i])])), frame: 12 }],
       boxes: `kinetic_title "${shot === "s01.sh01" ? "Heat is moved" : "More heat"}" at 120,80 900×160`,
     };
@@ -134,7 +135,7 @@ describe("the vision critic (M6.2)", () => {
     expect(existsSync(join(dir, "work", img.file))).toBe(true);
     expect(result.scores).toHaveLength(2 * SHOT.length + SCENE.length);
     expect(result.meta).toMatchObject({ model: "stub-vision", rubric_version: "craft@1" });
-    expect(result.meta.role_version).toMatch(/^vision_critic@1\+[0-9a-f]{12}$/);
+    expect(result.meta.role_version).toMatch(/^vision_critic@2\+[0-9a-f]{12}$/);
   });
 
   it("sends back a score outside 1–5, an unknown criterion, a foreign target or a missed criterion", async () => {
@@ -261,11 +262,83 @@ describe("shot views from renders (M6.2)", () => {
         scene: "s01",
         intent: "Heat is moved",
         lines: ["Heat moves."],
+        scene_lines: ["Heat moves."],
         stills: [
           { file: join(render, "keyframes", "000013.png"), sha256: sha256Bytes(PNG), frame: 12 },
         ],
         boxes: 'frame 12: s01.sh01.l1 "Heat is moved" at 10,20 300×80',
       },
     ]);
+  });
+
+  it("gives each shot only the lines spoken during it, with their frames (the tier B measured run)", async () => {
+    // In the second measured run (2026-11-24) each shot saw its whole scene's lines, so the critic
+    // guessed which line a shot plays under; two findings rested on a wrong guess.
+    const dir = temp();
+    const { mkdirSync } = await import("node:fs");
+    const renders: Record<string, string> = {};
+    for (const shot of ["s01.sh01", "s01.sh02"]) {
+      const render = join(dir, shot);
+      mkdirSync(join(render, "check"), { recursive: true });
+      mkdirSync(join(render, "keyframes"), { recursive: true });
+      writeFileSync(join(render, "keyframes", "000001.png"), PNG);
+      writeFileSync(
+        join(render, "check", "check.json"),
+        JSON.stringify({ samples: [{ frame: 0, still: "keyframes/000001.png", boxes: [] }] }),
+      );
+      renders[shot] = render;
+    }
+    const line = (id: string, text: string) => ({ id, text: { value: text } });
+    const ir = {
+      script: {
+        beats: {
+          value: [
+            {
+              lines: {
+                value: [
+                  line("b01.l01", "There's a workshop."),
+                  line("b01.l02", "It's free."),
+                  line("b01.l03", "Come along."),
+                ],
+              },
+            },
+          ],
+        },
+      },
+      sequences: {
+        value: [
+          {
+            scenes: {
+              value: [
+                {
+                  id: "s01",
+                  intent: { value: "Invite" },
+                  lines: { value: ["b01.l01", "b01.l02", "b01.l03"] },
+                  shots: { value: [{ id: "s01.sh01" }, { id: "s01.sh02" }] },
+                },
+              ],
+            },
+          },
+        ],
+      },
+    };
+    const timing = {
+      table: {
+        fps: { num: 30, den: 1 },
+        lines: {
+          "b01.l01": { start: 10, end: 70, words: [] },
+          "b01.l02": { start: 80, end: 120, words: [] },
+          "b01.l03": { start: 130, end: 170, words: [] },
+        },
+      },
+      shots: { "s01.sh01": { start: 0, end: 80 }, "s01.sh02": { start: 80, end: 180 } },
+    };
+    const views = shotViews(ir as never, renders, timing as never);
+    expect(views.map((v) => v.lines)).toEqual([
+      ["There's a workshop. (frames 10–70)"],
+      ["It's free. (frames 0–40)", "Come along. (frames 50–90)"],
+    ]);
+    expect(views[1]?.timed).toBe(true);
+    expect(views[1]?.scene_lines).toEqual(["There's a workshop.", "It's free.", "Come along."]);
   });
 });

@@ -40,7 +40,8 @@ export function oscillating(history: readonly FindingEntry[]): boolean {
 /**
  * Whether a finding may get another fix (M6.3b). Rounds count fix attempts in the ledger, so a
  * restart or deleting `runs/` changes nothing:
- * - `shot_rounds`: its shot has had `rounds_per_shot` fix attempts, over all of its findings
+ * - `shot_rounds`: its shot has had `rounds_per_shot` fix tasks, over all of its findings (one
+ *   task that took on several findings is one round)
  *   (a fix that broke something else counts against the same shot: the regression guard);
  * - `qa_rounds`: fixes have run at `qa_rounds` revisions already;
  * - `oscillation`: it came back after it was resolved, or another finding on its entity did.
@@ -61,10 +62,14 @@ export function withinBounds(
   if (qa >= bounds.qa_rounds) return { ok: false, reason: "qa_rounds" };
   const shot = shotOf(ir, finding.entity);
   if (shot) {
-    const rounds = attempts.filter((e) => {
-      const doc = docs.get(e.finding);
-      return doc !== undefined && shotOf(ir, doc.entity) === shot;
-    }).length;
+    const rounds = new Set(
+      attempts
+        .filter((e) => {
+          const doc = docs.get(e.finding);
+          return doc !== undefined && shotOf(ir, doc.entity) === shot;
+        })
+        .map((e) => e.task ?? e),
+    ).size;
     if (rounds >= bounds.rounds_per_shot) return { ok: false, reason: "shot_rounds" };
   }
   return { ok: true };

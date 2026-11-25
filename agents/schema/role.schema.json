@@ -28,6 +28,10 @@
     "tier": {
       "enum": ["frontier", "mid"]
     },
+    "fix_tier": {
+      "description": "The tier for the role's fix tasks (M6.3a); `tier` when absent.",
+      "enum": ["frontier", "mid"]
+    },
     "reads": {
       "description": "`<entity kind>.<field>` (a slice of the IR, values with their states), or `pack.rules`, `pack.layouts` (the pack's layout templates by aspect class), `packs` (the installed packs and their descriptions), `catalog` or `findings`.",
       "type": "array",

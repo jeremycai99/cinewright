@@ -383,9 +383,9 @@ export async function runWorkflow(
     derive,
     execute: async (task) => {
       // A fix attempt counts before it runs, so a crash mid-fix still uses up the attempt.
-      if (task.finding)
+      for (const id of task.findings ?? (task.finding ? [task.finding] : []))
         await findings.attempt(
-          task.finding,
+          id,
           task.role ?? task.fixer ?? task.via ?? "job",
           task.via ?? "role",
           task.key,

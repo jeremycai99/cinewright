@@ -214,7 +214,7 @@ Implements §Multi-agent orchestration (D5, D9, D37).
 
 - **M7.1 Runtime interface** with a LangGraph implementation: workflow templates as data (explainer, ad), the IR reconciler that derives tasks from IR state, P0 intake checks (budget set, the v0.1 capability check), the run ledger and event log (their formats are defined here, as JSON Schema), gate pauses. LangGraph checkpoints are a cache. A LangGraph interrupt needs a checkpointer and restarts its node from the top on resume, so gate nodes must be idempotent.
 - **M7.2 Scheduler**: idempotency keys, per-provider concurrency and rate limits from manifests, retries with backoff, routing fallback, CPU render pool.
-- **M7.3 Provider interface for LLMs** with the Claude reference implementation (D9): structured output; frontier tier for Producer, Writer, Director, Editor and the vision critic, mid tier for Shot Builders (configuration, not code); recorded-response cassettes keyed by context-pack hash.
+- **M7.3 Provider interface for LLMs** with the Claude reference implementation (D9): structured output; frontier tier for Producer, Writer, Director, Editor and the vision critic, mid tier for Shot Builders (configuration, not code; a role's `fix_tier` sets its fix tasks' tier, mid for the Director's since the tier B measured run); recorded-response cassettes keyed by context-pack hash.
 - **M7.4 Agent runner**: context-pack builder from read scopes, output validation (schema, write scope, authorship, citations), repair loop, conflict retry, decision-log entries.
 - **M7.5 Agents (v0.1 subset)**: Producer, Writer, Director/Scene Planner, Shot Builder (typed layers, never HTML), Editor, vision critic. Prompts state craft principles only.
 - **M7.6 Gates and autonomy presets**: Auto, Guided, Directed, Manual; gate packets; approve, edit, request variants, reject with notes; human-filled roles through the task queue.
@@ -297,7 +297,7 @@ Any agent role can be set to `human`. Its task then waits in the task queue (`ci
 | Editor | Agent + timing solver | Shot list, timing anchors, music analysis, pack transition and pacing rules | Proposed holds and transition choices; the solver writes final frame durations and the assembly plan | Frontier |
 | Render, mix, assemble | Jobs | Resolved IR, CAS | Shot files, transition segments, mix, captions, deliverables | — |
 | Deterministic critics | Jobs | Renders, DOM snapshots, audio, ffprobe, registry | Findings | — |
-| Vision critic | Agent, pinned model | Brief, resolved pack, craft rubric, keyframes, transition strips | Findings with scores | Frontier |
+| Vision critic | Agent, pinned model | Brief, resolved pack, craft rubric, keyframes, transition strips; per shot, the lines spoken during it with their frames | Findings with scores | Frontier |
 
 Layers are timed against narration anchors, not absolute frames, so a re-timed scene needs a recompile and re-render but no new Shot Builder call.
 
@@ -408,7 +408,7 @@ sequenceDiagram
 
 ### Critique and fix loop
 
-Each finding carries type, severity (`error` or `warning`; "blocking" in this plan means `error`), entity path, frame range, evidence and a signature (type + path + the part of the evidence that persists with the defect; `core/src/findings.ts`, M6.1a). The critic orchestrator dedupes findings, assigns the first owner below, and runs a deterministic fixer first where one exists.
+Each finding carries type, severity (`error` or `warning`; "blocking" in this plan means `error`), entity path, frame range, evidence and a signature (type + path + the part of the evidence that persists with the defect; `core/src/findings.ts`, M6.1a). The critic orchestrator dedupes findings, assigns the first owner below, and runs a deterministic fixer first where one exists. An agent owner gets one task for all the findings it owns on one shot (or, above shot level, in the project), since one defect often comes back under several rules; that task is one fix round for the shot.
 
 | Finding | First owner | Then |
 | --- | --- | --- |
