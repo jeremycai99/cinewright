@@ -28,7 +28,8 @@ export interface ProjectStatus {
     outcome: RunOutcome["status"] | "running";
     pause?: { kind: string; id: string };
   };
-  tasks: { human: number; gates: number };
+  /** What waits for the user: human-role tasks, unapproved gates and pending proposals. */
+  tasks: { human: number; gates: number; proposals: number };
   findings: { error: number; warning: number; escalated: number };
   cost: { spent_usd: number; cap_usd: number | null; estimate_to_complete_usd: number };
 }
@@ -59,14 +60,16 @@ export function projectStatus(store: Store, llm?: FoundPlugin): ProjectStatus {
   const ledger = new FindingsLedger(store.dir);
   const open = ledger.open();
   const run = latestRun(store.dir);
+  const pending = store.pending().map((p) => p.pending_id);
   return {
     revision: store.revision(),
     state_hash: store.stateHash(),
-    pending: store.pending().map((p) => p.pending_id),
+    pending,
     ...(run ? { run } : {}),
     tasks: {
       human: tasks.filter((t) => t.kind === "human").length,
       gates: tasks.filter((t) => t.kind === "gate").length,
+      proposals: pending.length,
     },
     findings: {
       error: open.filter((f) => f.severity === "error").length,

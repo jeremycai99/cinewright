@@ -30,7 +30,8 @@ export async function status(argv: string[], io: Io): Promise<number> {
     lines.push(
       `run ${s.run.id}: ${s.run.outcome}${s.run.pause ? ` at ${s.run.pause.kind} ${s.run.pause.id}` : ""}`,
     );
-  lines.push(`waiting for you: ${s.tasks.human} tasks, ${s.tasks.gates} gates`);
+  const proposals = s.tasks.proposals === 1 ? "1 proposal" : `${s.tasks.proposals} proposals`;
+  lines.push(`waiting for you: ${s.tasks.human} tasks, ${s.tasks.gates} gates, ${proposals}`);
   lines.push(
     `findings: ${s.findings.error} errors, ${s.findings.warning} warnings, ${s.findings.escalated} escalated`,
   );

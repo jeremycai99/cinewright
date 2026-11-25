@@ -187,6 +187,31 @@ describe("runWorkflow (M7.1)", () => {
     expect(store.ir().script.beats.state).toBe("locked");
   });
 
+  it("does not auto-approve the final gate while a proposal is pending (the tier B measured run)", async () => {
+    // In the third measured run (2026-11-24) a Director fix left a suggestion pending, then
+    // --approve-final locked /sequences, and the suggestion could no longer be approved.
+    const store = await project([{ op: "set", entity: "demo", path: "/autonomy", value: "auto" }]);
+    const agents = explainerAgents();
+    const base = {
+      render: render({ plugins: INSTALLED }),
+      llm: [LLM],
+      executors: { agent: agents.execute, job: noJobs },
+      now: NOW,
+    };
+    await runWorkflow(store, base);
+    const proposed = await store.apply({
+      base_revision: store.revision(),
+      author: { kind: "user" },
+      mode: "propose",
+      reason: "a suggestion waiting for review",
+      ops: [{ op: "set", entity: "demo", path: "/autonomy", value: "guided" }],
+    } as never);
+    expect(proposed.status, JSON.stringify(proposed)).toBe("pending");
+    const held = await runWorkflow(store, { ...base, approveFinal: true });
+    expect(held.outcome).toEqual({ status: "paused", pause: { kind: "gate", id: "gate:final" } });
+    expect(store.ir().sequences.state).not.toBe("locked");
+  });
+
   it("killed once inside each agent task and restarted, ends where an uninterrupted run ends, filling each output once (Review Focus 1)", async () => {
     const run = async (killAt?: number, wipe = false) => {
       const store = await project([

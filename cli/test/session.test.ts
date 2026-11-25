@@ -97,6 +97,28 @@ describe("status, log, assets and export (M8.1)", () => {
     expect(valid("assets", prune)).toEqual([]);
   });
 
+  it("status names a pending proposal in what waits for you (the tier B measured run)", async () => {
+    const dir = await project();
+    const file = join(tempDir(), "propose.json");
+    writeFileSync(
+      file,
+      JSON.stringify({
+        base_revision: 1,
+        author: { kind: "user" },
+        mode: "propose",
+        reason: "a suggestion",
+        ops: [{ op: "set", entity: "b01.l01", path: "/text", value: "Hi there." }],
+      }),
+    );
+    const p = await run(["patch", "propose", "--file", file, "--project", dir], ENV);
+    expect(p.code, p.stderr).toBe(0);
+    const text = (await run(["status", "--project", dir], ENV)).stdout;
+    expect(text).toMatch(/^waiting for you: 0 tasks, \d+ gates, 1 proposal$/m);
+    const json = JSON.parse((await run(["status", "--project", dir, "--json"], ENV)).stdout);
+    expect(valid("status", json)).toEqual([]);
+    expect(json.tasks.proposals).toBe(1);
+  });
+
   it("log --decisions --entity lists that entity's decisions with their citations; --limit keeps the newest", async () => {
     const dir = await project();
     const p = ["--project", dir];
