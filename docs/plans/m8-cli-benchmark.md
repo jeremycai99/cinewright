@@ -200,4 +200,23 @@ If any item fails, v0.1 is not done; fix forward in the owning milestone and re-
 
 ## Result
 
-*To be filled in by Task 6.*
+**First check, 2026-11-22, on `main` at `e4bbe6b` (after M8.5): not passed.** Every M8 task has merged (M8.1 #86, M8.2 #87, M8.3b #88, M8.4 #89, M8.5 #90), and every item that needs neither live spend nor a maintainer decision passes. The gate is still open on three things only the maintainer can start: decisions 9, 13 and 15, the tier B release run (decision 11's $12–20), and the keyed local-only run. No item failed on code; none was loosened.
+
+| Gate item | Status | Evidence, or what it waits for |
+| --- | --- | --- |
+| Alpha gate passed | **Open** | A.1 (#67) and M8.3a (#71) merged, and the `tier-a` check is green, but tier A has no fixtures: A.2 waits for decisions 9 and 15 (`alpha-gate.md` Task 0). `alpha-gate.md` §Result is unfilled. |
+| Tier B: every brief in Auto, 2 runs, no manual edit | **Not run** | The harness and `render --approve-final` are merged (#88). It waits for Task 4 Step 1 (one measured brief) and then the release run: spend approval needed. |
+| 100% of tier A and tier B pass the deterministic checks | **Not run** | Waits for the tier A fixtures (A.2) and the tier B release run. The keyless Manual render in `setup.yml` passes its checks (two warnings: 1.7 s of silence in `s01`, no library bed on a runner with no library). |
+| Determinism | **Partly** | The render-smoke `smoke-a`/`smoke-b`/`smoke-compare` jobs give identical hashes on two runners for the specimens on every PR. The tier A fixture part waits for A.2; the "2 tier B runs from an empty cache" part waits for the release run. |
+| Rubric baseline `fixtures/benchmark/baselines/v0.1.json` | **Not run** | `baseline record` is merged; it needs the release run's vision scores. |
+| Guided: three gates, resume, kill in every phase | **Partly** | `engine/test/{gates,resume,runtime,cassette}.test.ts` pass (26 tests), including a kill inside each agent task. "Once more against the real providers by cassette" waits for cassettes recorded through the CLI (about $1–1.5; the `_dev/brief_01` cassettes came from stub plugins and do not replay through the real CLI). |
+| Both packs | **Partly** | No pack id (`neutral`, `playful`) in `core/src`, `engine/src`, `agents` or `components` source; `neutral` appears only as the English adjective (“provider-neutral”), and `components/test` loads the pack as a fixture. The pack-swap matrix waits for the release run; the tier A project diff waits for A.2. |
+| Clean machine | **Partly** | `setup.yml` passed on #90 and on `main` at `e4bbe6b`: images pulled by digest, `doctor` ok, a Manual project from `init` to `export` with no key. The cassette-driven Auto brief in CI waits for the same cassettes as above. The keyed local-only run is the maintainer's to record. |
+| Neutrality | **Partly** | The prompt lint (`agents/test/prompt-lint.test.ts`) and the rubric checks (`engine/test/critics/vision.test.ts`) pass; `cinewright-check-boundaries` passes (no core import of `fixtures/personal/`). The briefs' `reviewed_by` is still “pending: maintainer neutrality review”, and the five questions of `AGENTS.md` §2.3 for the release are the maintainer's to answer. |
+| Decisions 13 and 15 recorded | **Open** | `docs/DESIGN_SPEC.md` §Open questions still lists the name, organisation and npm scope; decision 13 (v0.3a/v0.3b split, migrations first in v0.2) is not recorded. External facts and `docs/HANDOFF.md` are refreshed when the gate is declared. |
+
+**To close the gate, in order:**
+1. Decisions 9 and 15 (then A.2 and the alpha gate check), and decision 13.
+2. Task 4 Step 1: one measured live brief, which sets the per-run cap; record the CLI cassettes in the same session.
+3. The tier B release run (12 runs), then `snapshot` two passing runs into tier A, record `baselines/v0.1.json`, and rerun this check.
+4. The maintainer's neutrality review of the briefs and the keyed local-only run from `docs/SETUP.md`.

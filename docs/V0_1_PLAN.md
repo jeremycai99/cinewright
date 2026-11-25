@@ -21,6 +21,8 @@ Scope comes from the decision log in `DESIGN_SPEC.md`, including D25–D41 from 
 - The same briefs pass under both v0.1 packs, and switching packs needs no code or prompt change (D39).
 - `cinewright` CLI runs a brief from init to export on a clean machine using only the documented setup, including a local-only run (Kokoro, library music, no stock).
 
+**Status (2026-11-22):** checked once after M8.5 and not yet passed. Every milestone task through M8.5 has merged; what remains needs maintainer decisions (9, 13, 15) and the tier B release spend. Item by item: `docs/plans/m8-cli-benchmark.md` §Result.
+
 ## Milestones
 
 Each task lists its acceptance criteria (AC). Milestones are ordered by dependency, with two exceptions: M6.2–M6.3 need M7.3–M7.5, and the alpha gate needs only M0–M5 and M6.1 (see §Suggested order). Tasks inside a milestone can run in parallel unless the milestone gives an order; M0 and M1 do.
