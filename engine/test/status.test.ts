@@ -70,4 +70,20 @@ describe("status and the export gate (M8.1)", () => {
     await ledger.waive(f.id, "fine");
     expect(exportBlockers(store, ["web"])).toEqual([]);
   });
+
+  it("counts a pending proposal as waiting for the user (the tier B measured run)", async () => {
+    // In the third measured run a paused run waited on a Director suggestion while status
+    // printed "waiting for you: 0 tasks, 0 gates".
+    const { store } = await narrationProject();
+    expect(projectStatus(store).tasks.proposals).toBe(0);
+    const r = await store.apply({
+      base_revision: store.revision(),
+      author: { kind: "user" },
+      mode: "propose",
+      reason: "a suggestion",
+      ops: [{ op: "set", entity: "b01.l01", path: "/text", value: "Every team hits a wall." }],
+    } as never);
+    expect(r.status).toBe("pending");
+    expect(projectStatus(store).tasks.proposals).toBe(1);
+  });
 });

@@ -156,7 +156,9 @@ function jobExecutor(options: WorkflowOptions): TaskExecutor {
 /**
  * A gate task is done when every field the gate names is locked (gates are IR state). With
  * `approveFinal` (tier B) the final gate approves itself as `gate.final` with the reason `auto`;
- * other gates wait for `cinewright review approve` (M7.6).
+ * other gates wait for `cinewright review approve` (M7.6). It never approves itself while a
+ * proposal is pending: locking first would leave the proposal unapprovable (the tier B measured
+ * run), so the gate waits until the user approves or rejects it.
  */
 async function executeGate(
   store: Store,
@@ -167,7 +169,8 @@ async function executeGate(
   const phase = template.phases.find((p) => p.id === task.phase) as TemplatePhase;
   const gate = phase.gate as GateName;
   if (gatePassed(store, template, gate)) return { status: "noop" };
-  if (gate !== "final" || !options.approveFinal) return { status: "blocked" };
+  if (gate !== "final" || !options.approveFinal || store.pending().length > 0)
+    return { status: "blocked" };
   const r = await approveGate(store, template, gate, { auto: true });
   if (r.status !== "applied")
     return { status: "failed", error: { code: "gate.approve_failed", message: JSON.stringify(r) } };
