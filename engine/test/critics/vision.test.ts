@@ -1,4 +1,4 @@
-import { existsSync, mkdtempSync, realpathSync, rmSync, writeFileSync } from "node:fs";
+import { existsSync, mkdtempSync, readdirSync, realpathSync, rmSync, writeFileSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
 import { fileURLToPath } from "node:url";
@@ -181,6 +181,68 @@ describe("the vision critic (M6.2)", () => {
     });
     expect(f?.data).toMatchObject({ suggestion: "Move it inward." });
     expect(two.findings.map((x) => x.id)).toEqual(one.findings.map((x) => x.id));
+  });
+
+  it("reuses its judgment of an unchanged shot and re-judges a changed one (M8.3k)", async () => {
+    // With cassettes off, every critique re-judged every shot, so a tier B run paid again for
+    // shots no fix had touched.
+    const dir = temp();
+    const cacheDir = join(dir, "cache");
+    const critique = (llm: ReturnType<typeof stubLlm>["llm"], shots = views(dir)) =>
+      visionCritique({
+        deliverable: "web",
+        shots,
+        llm,
+        rubric: RUBRIC,
+        role: ROLE,
+        pack: PACK,
+        craftRules: loadCraftRules(),
+        workDir: join(dir, "work"),
+        cacheDir,
+      });
+    const first = stubLlm(good("composition"));
+    const one = await critique(first.llm);
+    expect(first.requests.map(targetOf)).toEqual(["s01.sh01", "s01.sh02", "s01"]);
+    const again = stubLlm(good("composition"));
+    const two = await critique(again.llm);
+    expect(again.requests).toEqual([]);
+    expect(two).toEqual(one);
+    // A new still for the second shot: that shot and its scene (which shows it) are judged again.
+    const changed = views(dir).map((v, i) => {
+      if (i !== 1) return v;
+      const file = join(dir, "changed.png");
+      const bytes = Buffer.concat([PNG, Buffer.from([9])]);
+      writeFileSync(file, bytes);
+      return { ...v, stills: [{ file, sha256: sha256Bytes(bytes), frame: 12 }] };
+    });
+    const third = stubLlm(good("composition"));
+    const three = await critique(third.llm, changed);
+    expect(third.requests.map(targetOf)).toEqual(["s01.sh02", "s01"]);
+    expect(three.findings.map((f) => f.id)).toEqual(one.findings.map((f) => f.id));
+  });
+
+  it("ignores a saved judgment that no longer passes the schema, and judges again (M8.3k)", async () => {
+    const dir = temp();
+    const cacheDir = join(dir, "cache");
+    const critique = (llm: ReturnType<typeof stubLlm>["llm"]) =>
+      visionCritique({
+        deliverable: "web",
+        shots: views(dir),
+        llm,
+        rubric: RUBRIC,
+        role: ROLE,
+        pack: PACK,
+        craftRules: loadCraftRules(),
+        workDir: join(dir, "work"),
+        cacheDir,
+      });
+    await critique(stubLlm(good()).llm);
+    for (const f of readdirSync(cacheDir))
+      writeFileSync(join(cacheDir, f), JSON.stringify({ model: "x", output: { scores: [] } }));
+    const again = stubLlm(good());
+    const result = await critique(again.llm);
+    expect(again.requests).toHaveLength(3);
+    expect(result.scores).toHaveLength(2 * SHOT.length + SCENE.length);
   });
 
   it("is not evaluated, not failed, on a cassette miss", async () => {
