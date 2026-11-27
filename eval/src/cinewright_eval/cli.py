@@ -17,7 +17,7 @@ from cinewright_eval.cas_export import ExportError, export
 from cinewright_eval.snapshot import SnapshotError, snapshot
 from cinewright_eval.suites import SuiteError, refuse_personal
 from cinewright_eval.tier_a import TierAOptions, run_tier_a
-from cinewright_eval.tier_b import TierBOptions, run_tier_b
+from cinewright_eval.tier_b import MONTH_CAP_USD, TierBOptions, run_tier_b
 from cinewright_eval.tier_b import compare as compare_tier_b
 
 
@@ -74,8 +74,18 @@ def main(argv: list[str] | None = None) -> int:
     tb.add_argument("--suite", choices=["benchmark", "personal"], default="benchmark")
     tb.add_argument("--brief", action="append", default=[], help="only this brief id")
     tb.add_argument("--runs", type=int, default=None, help="home-pack runs per brief")
-    tb.add_argument("--cap-usd", type=float, default=3.0, help="each run's budget cap")
-    tb.add_argument("--month-cap-usd", type=float, default=25.0)
+    tb.add_argument(
+        "--cap-usd",
+        type=float,
+        default=None,
+        help="one budget cap for every run (default: by the brief's length, $4/$6/$10)",
+    )
+    tb.add_argument(
+        "--month-cap-usd",
+        type=float,
+        default=MONTH_CAP_USD,
+        help="stop starting runs past this spend (default: a release run's caps summed)",
+    )
     tb.add_argument("--parallel", type=int, default=2)
     tb.add_argument("--out", type=Path, default=Path("tier-b-report"))
     tb.add_argument("--root", type=Path, default=Path.cwd())

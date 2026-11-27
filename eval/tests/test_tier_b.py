@@ -28,27 +28,76 @@ def report(tmp_path: Path) -> dict:
     return json.loads((tmp_path / "out" / "tier-b.json").read_text())
 
 
-def test_release_runs_two_home_runs_and_one_pack_swap_per_brief(tmp_path: Path) -> None:
+def test_release_runs_one_home_run_and_one_pack_swap_per_brief(tmp_path: Path) -> None:
+    # Decision 11, revised 2026-11-25: 4 briefs x 1 home-pack run + 4 pack-swap runs = 8 runs.
     code = run_tier_b(options(tmp_path, mode="release", month_cap_usd=100, cap_usd=1))
     assert code == 0
     r = report(tmp_path)
     tides = next(b for b in r["briefs"] if b["id"] == "tides_explainer")
-    assert [run["pack"] for run in tides["runs"]] == ["neutral", "neutral", "playful"]
-    assert [run["swap"] for run in tides["runs"]] == [False, False, True]
+    assert [run["pack"] for run in tides["runs"]] == ["neutral", "playful"]
+    assert [run["swap"] for run in tides["runs"]] == [False, True]
     assert tides["deterministic_pass_rate"] == 1
     # The pack-swap run is reported under the other pack.
-    assert r["by_category"]["pack"]["playful"]["runs"] == 2 * 2 + 2
-    assert r["by_category"]["aspect"]["portrait"]["runs"] == 3 + 3
+    assert r["by_category"]["pack"]["playful"]["runs"] == 2 * 1 + 2
+    assert r["by_category"]["aspect"]["portrait"]["runs"] == 2 + 2
     assert tides["vision"]["legibility"]["mean"] > 0
-    assert r["spent_usd"] == 12 * 0.5
+    assert r["spent_usd"] == 8 * 0.5
 
 
 def test_runs_use_separate_projects_and_cassette_folders(tmp_path: Path) -> None:
     run_tier_b(options(tmp_path, mode="release", month_cap_usd=100, cap_usd=1, parallel=3))
     calls = [json.loads(line) for line in (tmp_path / "calls.jsonl").read_text().splitlines()]
     renders = [c for c in calls if c["args"][0] == "render"]
-    assert len({c["cassettes"] for c in renders}) == len(renders) == 12
-    assert len({c["args"][c["args"].index("--project") + 1] for c in renders}) == 12
+    assert len({c["cassettes"] for c in renders}) == len(renders) == 8
+    assert len({c["args"][c["args"].index("--project") + 1] for c in renders}) == 8
+
+
+def caps_by_project(tmp_path: Path) -> dict[str, float]:
+    calls = [json.loads(line) for line in (tmp_path / "calls.jsonl").read_text().splitlines()]
+    return {
+        Path(c["args"][c["args"].index("--project") + 1]).parent.name: float(
+            c["args"][c["args"].index("--cap") + 1]
+        )
+        for c in calls
+        if c["args"][:2] == ["review", "budget"]
+    }
+
+
+def test_each_run_is_capped_by_its_brief_length(tmp_path: Path) -> None:
+    # Decision 11: per-run caps follow target length (15 s $4, 30 s $6, 60 s $10).
+    run_tier_b(options(tmp_path, mode="release", month_cap_usd=100))
+    assert caps_by_project(tmp_path) == {
+        "tides_explainer-0-home": 10.0,
+        "tides_explainer-1-swap": 10.0,
+        "compost_explainer-0-home": 6.0,
+        "compost_explainer-1-swap": 6.0,
+        "library_hours_ad-0-home": 4.0,
+        "library_hours_ad-1-swap": 4.0,
+        "bike_repair_ad-0-home": 6.0,
+        "bike_repair_ad-1-swap": 6.0,
+    }
+    tides = next(b for b in report(tmp_path)["briefs"] if b["id"] == "tides_explainer")
+    assert [run["cap_usd"] for run in tides["runs"]] == [10.0, 10.0]
+
+
+def test_runs_are_admitted_against_the_month_cap_at_their_own_caps(tmp_path: Path) -> None:
+    # The tides runs ($10 each) fill a $20 month cap; every other run is skipped.
+    code = run_tier_b(options(tmp_path, mode="release", month_cap_usd=20))
+    assert code == 1
+    skipped = report(tmp_path)["skipped"]
+    assert len(skipped) == 6
+    assert {x.split("#")[0] for x in skipped} == {
+        "compost_explainer",
+        "library_hours_ad",
+        "bike_repair_ad",
+    }
+
+
+def test_the_default_month_cap_covers_the_release_run(tmp_path: Path) -> None:
+    # Decision 11: the month cap at launch covers the sum of the per-run caps ($52).
+    code = run_tier_b(options(tmp_path, mode="release"))
+    assert code == 0
+    assert report(tmp_path)["skipped"] == []
 
 
 def test_a_paused_run_counts_a_manual_edit_and_fails_the_brief(tmp_path: Path) -> None:
