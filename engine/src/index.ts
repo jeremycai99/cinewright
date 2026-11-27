@@ -70,6 +70,7 @@ export {
   REPORTS_DIR,
   SOLVER_CRITIC,
   TRANSCRIBE_CRITIC,
+  VISION_CACHE_DIR,
 } from "./critics/run.js";
 export {
   loadRubric,

@@ -22,6 +22,8 @@ import { shotViews, type VisionOptions, visionCriticVersion, visionCritique } fr
 
 /** Where critique reports live, by assembly key (M6.1a). Disposable, like every cache. */
 export const REPORTS_DIR = ".cinewright/cache/reports";
+/** The vision critic's judgments by request hash (M8.3k): disposable; deleting it re-judges. */
+export const VISION_CACHE_DIR = ".cinewright/cache/vision";
 
 /** Solver and job findings (timing, compose, narration) lifted into the report's shape. */
 export const SOLVER_CRITIC = { id: "solver", version: "0.1.0" } as const;
@@ -219,6 +221,7 @@ export async function critique(
     const vision = await visionCritique({
       deliverable,
       shots: shotViews(ir, renders, timing),
+      cacheDir: join(store.dir, VISION_CACHE_DIR),
       ...options.vision,
     });
     options.record?.({

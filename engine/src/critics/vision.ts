@@ -1,4 +1,11 @@
-import { copyFileSync, existsSync, mkdirSync, readFileSync } from "node:fs";
+import {
+  copyFileSync,
+  existsSync,
+  mkdirSync,
+  readFileSync,
+  renameSync,
+  writeFileSync,
+} from "node:fs";
 import { join } from "node:path";
 import type { CraftRule, RoleDefinition } from "@cinewright/agents";
 import {
@@ -13,6 +20,7 @@ import {
 } from "@cinewright/core";
 import type { GenerateRequest, GenerateResult } from "@cinewright/plugin-sdk";
 import { Ajv2020, type ValidateFunction } from "ajv/dist/2020.js";
+import { requestHash } from "../agents/cassette.js";
 import type { LlmCall } from "../agents/runner.js";
 
 type Json = Record<string, unknown>;
@@ -167,6 +175,11 @@ function coverage(
  * role's rounds. Findings are warnings (rule `vision.<criterion>`) signed over rule, target and
  * deliverable, so a re-worded complaint is the same finding. A cassette miss (tier A) or a
  * provider failure leaves the deliverable "not evaluated", never failed.
+ *
+ * With `cacheDir`, each usable judgment is saved under the hash of the request that asked for it
+ * (the cassette's request hash: role prompt, rubric, text, stills by content hash, schema), and an
+ * identical request later is answered from it without a call (M8.3k): a shot no fix touched is
+ * not paid for twice. A saved judgment that no longer passes the schema is judged again.
  */
 export async function visionCritique(options: {
   deliverable: string;
@@ -178,6 +191,8 @@ export async function visionCritique(options: {
   craftRules: readonly CraftRule[];
   /** Where images are copied for the plugin (its work folder). */
   workDir: string;
+  /** Where usable judgments are kept by request hash, to answer an identical request again. */
+  cacheDir?: string;
   pin?: string;
 }): Promise<VisionResult> {
   const { rubric, role } = options;
@@ -208,19 +223,38 @@ export async function visionCritique(options: {
   ): Promise<{ ok: true; out: Judged } | { ok: false; reason: string }> => {
     const schema = visionSchema(rubric, level, [target]);
     const validate = ajv.compile(schema);
+    const errorsOf = (out: Judged) =>
+      validate(out)
+        ? coverage(out, rubric, level, [target])
+        : (validate.errors ?? []).map((e) => `${e.instancePath || "/"} ${e.message ?? e.keyword}`);
     const messages: GenerateRequest["messages"] = [
       { role: "user", content: [{ type: "text", text }, ...stills.map(image)] },
     ];
+    const request = (): GenerateRequest => ({
+      tier: role.tier,
+      ...(options.pin ? { pin: options.pin } : {}),
+      system: `${role.prompt.trim()}\n\nRubric (${level} level):\n${rubricText(rubric, level)}\n\nReturn JSON with \`scores\` and \`findings\`.`,
+      messages,
+      schema,
+      max_output_tokens: role.max_output_tokens,
+      ...(role.effort ? { effort: role.effort } : {}),
+    });
+    const saved = options.cacheDir
+      ? join(options.cacheDir, `${requestHash(request()).slice("sha256:".length)}.json`)
+      : undefined;
+    if (saved && existsSync(saved)) {
+      try {
+        const hit = JSON.parse(readFileSync(saved, "utf8")) as { model: string; output: Judged };
+        if (errorsOf(hit.output).length === 0) {
+          meta.model = hit.model;
+          return { ok: true, out: hit.output };
+        }
+      } catch {
+        // An unreadable saved judgment is judged again.
+      }
+    }
     for (let attempt = 0; attempt <= role.repairs; attempt += 1) {
-      const response = await options.llm({
-        tier: role.tier,
-        ...(options.pin ? { pin: options.pin } : {}),
-        system: `${role.prompt.trim()}\n\nRubric (${level} level):\n${rubricText(rubric, level)}\n\nReturn JSON with \`scores\` and \`findings\`.`,
-        messages,
-        schema,
-        max_output_tokens: role.max_output_tokens,
-        ...(role.effort ? { effort: role.effort } : {}),
-      });
+      const response = await options.llm(request());
       if (!response.ok) {
         const data = response.error.data as { reason?: string } | undefined;
         return {
@@ -231,10 +265,16 @@ export async function visionCritique(options: {
       const result = response.result as GenerateResult;
       meta.model = result.model;
       const out = result.output as Judged;
-      const errors = validate(out)
-        ? coverage(out, rubric, level, [target])
-        : (validate.errors ?? []).map((e) => `${e.instancePath || "/"} ${e.message ?? e.keyword}`);
-      if (errors.length === 0) return { ok: true, out };
+      const errors = errorsOf(out);
+      if (errors.length === 0) {
+        if (saved && options.cacheDir) {
+          mkdirSync(options.cacheDir, { recursive: true });
+          const tmp = `${saved}.${process.pid}.tmp`;
+          writeFileSync(tmp, JSON.stringify({ model: result.model, output: out }));
+          renameSync(tmp, saved);
+        }
+        return { ok: true, out };
+      }
       messages.push(
         { role: "assistant", content: [{ type: "text", text: JSON.stringify(out) }] },
         {
