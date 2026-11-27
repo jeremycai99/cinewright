@@ -1,19 +1,20 @@
 name: tier-b
 
 # Tier B (M8.3b, D36): briefs through live agents and providers. It spends money, so it never runs
-# on a pull request or a fork; only on a maintainer trigger. Decision 11 (2026-11-21): the v0.1
-# scope is reduced and there is no nightly schedule in v0.1.
+# on a pull request or a fork; only on a maintainer trigger. Decision 11 (revised 2026-11-25): one
+# home-pack run per brief plus a pack-swap run, each capped by its brief's length, and no nightly
+# schedule in v0.1.
 on:
   workflow_dispatch:
     inputs:
       mode:
-        description: release (2 runs per brief plus a pack-swap run) or nightly (1 run)
+        description: release (1 run per brief plus a pack-swap run) or nightly (1 run)
         type: choice
         options: [release, nightly]
         default: release
       month_cap_usd:
-        description: stop starting runs past this spend
-        default: "25"
+        description: stop starting runs past this spend (a release run's caps sum to 52)
+        default: "52"
 #  schedule:
 #    - cron: "0 3 * * *"
 

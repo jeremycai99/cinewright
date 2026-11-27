@@ -6,9 +6,11 @@ critique reports. Runs of one brief execute in parallel up to a limit, each in i
 its own cassette folder and caches. Before a run starts, the month cap is checked: a run that could
 cross it is skipped and reported as skipped, never as passed.
 
-Decision 11 (reduced v0.1 scope): release mode runs 2 runs per brief in its home pack plus 1
-pack-swap run in the other pack; nightly mode runs 1 home run. A run counts as complete only with
-no manual edit (a pause for a person or a gate other than the final one fails it).
+Decision 11 (revised 2026-11-25): release mode runs 1 run per brief in its home pack plus 1
+pack-swap run in the other pack, 8 runs for the 4 briefs; nightly mode runs the home run only. Each
+run's cap follows its brief's target length (`RUN_CAPS_USD`), and the default month cap is their
+sum over a release run. A run counts as complete only with no manual edit (a pause for a person or
+a gate other than the final one fails it).
 """
 
 from __future__ import annotations
@@ -32,6 +34,12 @@ Json = dict[str, Any]
 #: Exit codes of `cinewright` that matter here (cli/src/exit-codes.ts).
 PAUSED, BUDGET, PROVIDER, FINDINGS = 11, 12, 9, 10
 
+#: Each run's budget cap by its brief's target length in seconds (decision 11). A complete 30-second
+#: run measured $3.7 live, and the vision critic, most of it, costs in proportion to length.
+RUN_CAPS_USD: dict[int, float] = {15: 4.0, 30: 6.0, 60: 10.0}
+#: The default month cap: the per-run caps summed over a release run of the 4 briefs (decision 11).
+MONTH_CAP_USD = 52.0
+
 
 @dataclass
 class TierBOptions:
@@ -41,8 +49,9 @@ class TierBOptions:
     mode: str = "release"
     briefs: list[str] = field(default_factory=lambda: list[str]())
     runs: int | None = None
-    cap_usd: float = 3.0
-    month_cap_usd: float = 25.0
+    #: One cap for every run; by default each run's cap follows its brief's length.
+    cap_usd: float | None = None
+    month_cap_usd: float = MONTH_CAP_USD
     parallel: int = 2
     env: dict[str, str] | None = None
     suite: str = "benchmark"
@@ -54,6 +63,13 @@ class Planned:
     pack: str
     index: int
     swap: bool
+
+
+def run_cap(opts: TierBOptions, brief: Json) -> float:
+    """The run's budget cap: `--cap-usd` when given, else by the brief's target length."""
+    if opts.cap_usd is not None:
+        return opts.cap_usd
+    return RUN_CAPS_USD[int(brief["target_seconds"])]
 
 
 def _stats(values: list[float]) -> Json:
@@ -108,13 +124,14 @@ def _run(opts: TierBOptions, plan: Planned, folder: Path) -> Json:
         "cost_usd": 0.0,
         "escalated": 0,
         "hashes": {},
+        "cap_usd": run_cap(opts, brief),
     }
     tier_b = suite_root(opts.suite) / "tier-b"
     if init_project(opts.root, str(brief["id"]), project, opts.cli, plan.pack, tier_b) != 0:
         result["error"] = "init"
         return result
     p = ["--project", str(project)]
-    _call(opts, ["review", "budget", "--cap", str(opts.cap_usd), *p, "--json"], env)
+    _call(opts, ["review", "budget", "--cap", str(result["cap_usd"]), *p, "--json"], env)
     code, out, stderr = _call(opts, ["render", "--approve-final", "--vision", *p, "--json"], env)
     if code in (PAUSED, BUDGET):
         result["manual_edits"] = 1
@@ -150,7 +167,7 @@ def _run(opts: TierBOptions, plan: Planned, folder: Path) -> Json:
 
 
 def plan_runs(opts: TierBOptions, briefs: list[Json], packs: list[str]) -> list[Planned]:
-    n = opts.runs if opts.runs is not None else (2 if opts.mode == "release" else 1)
+    n = opts.runs if opts.runs is not None else 1
     out: list[Planned] = []
     for b in briefs:
         home = str(b["pack"])
@@ -239,10 +256,11 @@ def run_tier_b(opts: TierBOptions) -> int:
         # Admit runs against the month cap before starting them: each may spend up to its cap.
         admitted: list[Planned] = []
         for plan in planned:
-            if spent + opts.cap_usd > opts.month_cap_usd + 1e-9:
+            cap = run_cap(opts, plan.brief)
+            if spent + cap > opts.month_cap_usd + 1e-9:
                 skipped.append(f"{plan.brief['id']}#{plan.index}{'-swap' if plan.swap else ''}")
                 continue
-            spent += opts.cap_usd
+            spent += cap
             admitted.append(plan)
         with ThreadPoolExecutor(max_workers=max(1, opts.parallel)) as pool:
             futures = [
